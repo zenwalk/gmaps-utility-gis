@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+  <head>
+    <title>HourGlass</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+
+    <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxQGj0PqsCtxKvarsoS-iqLdqZSKfxRdmoPmGl7Y9335WLC36wIGYa6o5Q" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+         document.write('<script type="text/javascript" src="../src/arcgislink'+(document.location.search.indexOf('packed')>-1?'_packed':'')+'.js"><'+'/script>');
+    </script>
+    <script type="text/javascript">
+    var gmap = null;
+    var dynaLayer = null;
+    function init(){
+      var tiled = new ArcGISTileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/ESRI_StreetMap_World_2D/MapServer');
+      GEvent.addListener(tiled, 'load', function(){
+        gmap = new GMap2(document.getElementById("map"), {
+          mapTypes: [new ArcGISMapType([tiled])]
+        });
+        gmap.setCenter(new GLatLng(40, -100), 4);
+        gmap.addControl(new GLargeMapControl());
+        gmap.addControl(new GMapTypeControl());
+        gmap.enableScrollWheelZoom();
+        dynaLayer = new ArcGISMapOverlay("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer");
+        GEvent.addListener(dynaLayer, 'load', function(){
+          GEvent.addListener(dynaLayer, 'drawstart', function(){
+            document.getElementById('drawing').style.visibility = 'visible';
+          });
+          GEvent.addListener(dynaLayer, 'drawend', function(){
+            document.getElementById('drawing').style.visibility = 'hidden';
+          });
+          gmap.addOverlay(dynaLayer);
+        });
+      });
+    }
+    
+    GEvent.addListener(ArcGISUtil, 'jsonpstart', function(){
+      document.getElementById('working').innerHTML = "working....";
+    });
+    GEvent.addListener(ArcGISUtil, 'jsonpend', function(){
+      document.getElementById('working').innerHTML = '';
+    });
+    
+    
+  </script>
+
+  </head>
+   <body onload='init()' onunload='GUnload()'>
+        <a href='../docs/examples.html'>More examples</a> | Use
+       <a href='?packed'>Packed </a> | 
+       <a href='?'> Unpacked</a> Version of the script.
+       <br/>
+       <div style="width:700px">You can handle different <code>***start</code> and <code>***start</code> event in different classes to monitor different actions,
+       or use <code>ArcGISUtil</code>'s <code>jsonpstart</code> and <code>ArcGISUtil.jsonpend</code> event to monitor all server request.
+       </div>
+        <div id="working" style="height:20px"></div>
+       <div style="position: relative">
+        <div id="map" style="position:absolute;left:0px;top:0px;width:700px; height:400px; border:1px solid #000;"></div>
+        <div id="drawing" style="visibility:hidden;position:absolute;left:300px;top:200px;width:100px; height:50px; background-color:yellow;">
+        Drawing...<br/><MARQUEE>......</<MARQUEE>
+        </div>
+      </div>
+    </body>
+ 
+</html>

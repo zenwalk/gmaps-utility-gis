@@ -1,0 +1,161 @@
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>REST Map</title>
+    <!-- script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxQGj0PqsCtxKvarsoS-iqLdqZSKfxRdmoPmGl7Y9335WLC36wIGYa6o5Q"  type="text/javascript">
+    </script  -->
+  
+    <script type="text/javascript">
+         document.write('<script type="text/javascript" src="../src/arcgislink'+(document.location.search.indexOf('packed')>-1?'_packed':'')+'.js"><'+'/script>');
+    </script>
+    <script type="text/javascript">
+      //poor man's map control
+      /**
+       * Create a simple map control
+       * @param {Node} div
+       * @param {ArcGISMapService} mapService
+       */
+      function SimpleMap(div,mapService){
+        this.img=document.createElement("img");
+        div.appendChild(this.img);
+        this.width=parseInt(div.style.width);
+        this.height=parseInt(div.style.height);
+        this.service=mapService;
+        this.setExtent(mapService.initialExtent);
+      }
+      SimpleMap.prototype = {
+        setExtent: function(extent){
+          var params = {
+            size: '' + this.width + ',' + this.height,
+            bbox: extent
+          };
+          var me=this;
+          this.service.exportMap(params, function(json){
+            if (json.href) {
+              me.extent = json.extent;
+              me.width = json.width;
+              me.height = json.height;
+              me.img.src = json.href;
+            }
+          });
+        },
+        getSpan:function(ex){
+            ex=ex||this.extent;
+            return {
+              x: ex.xmax - ex.xmin,
+              y: ex.ymax - ex.ymin
+            };
+        },
+        getCenter:function(ex){
+          ex=ex||this.extent;
+          return {
+            x: (ex.xmin + ex.xmax) / 2,
+            y: (ex.ymin + ex.ymax) / 2
+          };
+        },
+        zoomIn:function(){
+          var s=this.getSpan();
+          var c =this.getCenter();
+          this.setExtent( {
+            xmin: c.x - s.x / 4,
+            ymin: c.y - s.y / 4,
+            xmax: c.x + s.x / 4,
+            ymax: c.y + s.y / 4
+          });
+        },
+        zoomOut:function(){
+          var s=this.getSpan();
+          var c =this.getCenter();
+          this.setExtent( {
+            xmin: c.x - s.x,
+            ymin: c.y - s.y,
+            xmax: c.x + s.x,
+            ymax: c.y + s.y
+          });
+        },
+        panEast:function(){
+          var s=this.getSpan();
+          var c =this.getCenter();
+          this.setExtent( {
+            xmin: c.x -s.x/4,
+            ymin: c.y - s.y/2 ,
+            xmax: c.x + s.x*3/4 ,
+            ymax: c.y + s.y /2
+          });
+        },
+        panWest:function(){
+          var s=this.getSpan();
+          var c =this.getCenter();
+          this.setExtent( {
+            xmin: c.x -s.x*3/4,
+            ymin: c.y - s.y/2 ,
+            xmax: c.x +s.x/4 ,
+            ymax: c.y + s.y /2
+          });
+        },
+        panNorth:function(){
+          var s=this.getSpan();
+          var c =this.getCenter();
+          this.setExtent( {
+            xmin: c.x -s.x/2,
+            ymin: c.y -s.y/4 ,
+            xmax: c.x +s.x/2 ,
+            ymax: c.y + s.y *3/4
+          });
+        },
+        panSouth:function(){
+          var s=this.getSpan();
+          var c =this.getCenter();
+          this.setExtent( {
+            xmin: c.x -s.x/2,
+            ymin: c.y -s.y *3/4,
+            xmax: c.x +s.x/2 ,
+            ymax: c.y +s.y/4
+          });
+        },
+        zoomToFullExtent:function(){
+          this.setExtent(this.service.fullExtent);
+        },
+        zoomToInitialExtent:function(){
+          this.setExtent(this.service.fullExtent);
+        }
+      };
+    </script>
+    <script type="text/javascript">
+      var map;
+      
+    function init(){
+      var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer';
+      // var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_LandBase_AGO/MapServer';
+      var service = new ArcGISMapService(url, function(){
+          map = new SimpleMap(document.getElementById("map"), service);
+        
+      });
+    }
+   
+    </script>
+  </head>
+  <body onload="init()">
+   <a href='../docs/examples.html'>More examples</a> | Use
+       <a href='?packed'>Packed </a> | 
+       <a href='?'> Unpacked</a> Version of the script.
+       <br/>
+   <div style="width:700px"> This library is designed with 2 tiers: Javascript object model for ArcGIS Server REST API, 
+and extension class to GMaps API.
+If you just want a simple map interface without the rich interactive features 
+offered by GMaps API, you can use this library standalone by create a simple map control class
+to interact with DOM. The following example does not load GMaps API.</div>
+
+   <button onclick="map.zoomIn()" >Zoom In</button>
+   <button onclick="map.zoomOut()">Zoom Out</button>
+   <button onclick="map.panEast()">Pan East</button>
+   <button onclick="map.panWest()">Pan West</button>
+   <button onclick="map.panNorth()">Pan North</button>
+   <button  onclick="map.panSouth()">Pan South</button> 
+   <button  onclick="map.zoomToInitialExtent()">Initial Extent</button>
+   <button  onclick="map.zoomToFullExtent()">Full Extent</button>  
+   <div id="map" style="width:700px; height:400px; border:1px solid #000;"></div> 
+  </body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <title>Load Service</title>
+        <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxQGj0PqsCtxKvarsoS-iqLdqZSKfxRdmoPmGl7Y9335WLC36wIGYa6o5Q" type="text/javascript">
+        </script>
+        <script type="text/javascript">
+         document.write('<script type="text/javascript" src="../src/arcgislink'+(document.location.search.indexOf('packed')>-1?'_packed':'')+'.js"><'+'/script>');
+        </script>
+        <script type="text/javascript">
+        
+        function log(msg){
+            var logDiv=document.getElementById('log');
+            logDiv.innerHTML=logDiv.innerHTML+msg+'<br/>';
+        }
+            
+        function loadService(url){
+          log('Loading map service...: ' + url);
+          var service = new ArcGISMapService(url, function(){
+              log('This is the callback function for service [' + service.name + ']');
+          });
+          
+          GEvent.addListener(service, 'load', function(){
+            log('Start of load event handler for service [' + service.name+']');
+            if (service.singleFusedMapCache === true) {
+              log('Service: ['+service.name+'] IS a cached map service');
+              log('Service: ['+service.name+'] has ' + service.tileInfo.lods.length + ' levels of cache');
+            } else {
+              log('Service: ['+service.name+'] IS NOT a cached map service');
+            }
+            log('Service ['+service.name+'] spatial reference id is:' + service.getSpatialReference().wkid);
+            log('Service ['+service.name+'] has ' + service.getLayers().length + ' layers');
+            log('End of load event handler for service [' + service.name+']');
+          });
+        }
+        
+        var base = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services';
+          
+        function init(){
+          loadService(base + '/Portland/Portland_ESRI_LandBase_AGO/MapServer');
+          loadService(base+'/Demographics/ESRI_Census_USA/MapServer');
+        }
+        </script>
+    </head>
+    <body onload="init()">
+      <a href='../docs/examples.html'>More examples</a> | Use
+       <a href='?packed'>Packed </a> | 
+       <a href='?'> Unpacked</a> Version of the script.
+       <br/>
+        <div id="map" > No map will be shown in this example. See the information below for map service loading progress.
+        </div>
+        <pre id='log'></pre>
+    </body>
+</html>
