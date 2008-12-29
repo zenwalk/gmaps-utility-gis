@@ -31,9 +31,7 @@
   var zooming = false;
   var map = null;
   var mapDragEnabled = false; 
-  
-  
-  
+  var key = null;//shift|crtl|alt
   /**
    * Actually draw the box. Note the first point can be lower left cornor
    */
@@ -54,7 +52,10 @@
    */
   function onMouseDown(e) {
     e = e || window.event;
-    if (e.shiftKey && map) {
+    if (map &&
+    ((e.shiftKey && key === 'shift') ||
+    (e.altKey && key === 'alt') ||
+    (e.ctrlKey && key === 'ctrl'))) {
       mapDragEnabled = map.draggingEnabled();
       map.disableDragging();
       startLatLng = endLatLng = null;
@@ -115,21 +116,29 @@
    * class.
    */
   /**
-   * Enable drag zoom. User can zoom to a point of interest by holding shift key 
+   * @name DragBoxZoomOptions
+   * @class This class represents optional parameter passed into GMap2.enableDragBoxZoom().
+   * @property {String} [key] the combo key to use while draging the box, <code> shift | alt | ctrl </code>. Default is shift.
+   * @property {Object} [style] javascript object used for zoom box css style.  e.g. <code> {backgroundColor:'blue',opacity:0.6, filter:'alpha(opacity = 50)'} </code>
+    */
+  /**
+   * Enable drag zoom. User can zoom to a point of interest by holding a special key (shift | ctrl | alt )
    * while drag a box. 
-   * The optional opt_boxStyle is an javascript object literal of css properties.
-   * e.g. <code> {backgroundColor:'blue',opacity:0.6, filter:'alpha(opacity = 50)'} </code>
-   * @param {Object} opt_boxStyle
+   * @param {DragBoxZoomOptions} opt_dragZoomOpts
    */
-  GMap2.prototype.enableDragBoxZoom = function (opt_boxStyle) {
+  
+  GMap2.prototype.enableDragBoxZoom = function (opt_dragZoomOpts) {
     map = this;
+    var opts = opt_dragZoomOpts || {};
+    key = opts.key || 'shift';
+    key = key.toLowerCase();
     // Thanks to Mike Williams on this post:
     //http://groups.google.com/group/Google-Maps-API/browse_thread/thread/a968adb7b85fb03f/ca976136cf7af09b?#ca976136cf7af09b
     downListener = GEvent.addDomListener(map.getDragObject(), 'mousedown', onMouseDown);
     moveListener = GEvent.addListener(map, 'mousemove', onMouseMove);
     upListener = GEvent.addDomListener(map.getContainer(), 'mouseup', onMouseUp);
     boxDiv = document.createElement('div');
-    setVals(boxDiv.style, opt_boxStyle || {border: 'thin solid #FF0000'});
+    setVals(boxDiv.style, opts.style || {border: 'thin solid #FF0000'});
     boxDiv.style.position = 'absolute';
     boxDiv.style.display = 'none';
     map.getContainer().appendChild(boxDiv);

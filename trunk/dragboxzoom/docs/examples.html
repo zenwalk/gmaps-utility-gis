@@ -51,12 +51,14 @@ the zoom box is half transparent with yellow with a 3 pixel thick blue border</p
           var map = new GMap2(document.getElementById("map"));
           map.setCenter(new GLatLng(45.5, -122.7), 14);
           //...
-         map.enableDragBoxZoom({
-         backgroundColor:'#FFFF00',
-         opacity:0.5, 
-         filter:'alpha(opacity = 50)',
-         border: '3px solid #0000FF'
-         });
+          map.enableDragBoxZoom({
+            style: {
+              backgroundColor: '#FFFF00',
+              opacity: 0.5,
+              filter: 'alpha(opacity = 50)',
+              border: '3px solid #0000FF'
+            }
+          });
         }
     </pre>
 
@@ -65,7 +67,26 @@ the zoom box is half transparent with yellow with a 3 pixel thick blue border</p
 <a href="../examples/stylebox.html?packed">Packed </a> |
 </p>
 </div>
+<div><h2><span lang="en-us">Use Different Key</span></h2> 
+<p>If you do not want using the SHIFT key as you drag, you can passing one of the other two keys: ALT or CTRL.
+In the following example, you can drag zoom by hold the CTRL key</p>
 
+<pre class="prettyprint">
+        function init(){
+          var map = new GMap2(document.getElementById("map"));
+          map.setCenter(new GLatLng(45.5, -122.7), 14);
+          //...
+          map.enableDragBoxZoom({
+            key: 'ctrl'
+          });
+        }
+    </pre>
+
+<p>
+<a href="../examples/ctrlkey.html">View example </a> |
+<a href="../examples/ctrlkey.html?packed">Packed </a> |
+</p>
+</div>
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));

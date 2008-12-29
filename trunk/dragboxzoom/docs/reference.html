@@ -12,6 +12,47 @@
 This lib provides a very simple drag zoom. Holding shift key while draw a box will zoom to the desired area. Only one line of code GMap2.enableDragZoom() is needed.</p>
     <p>For a description and examples of how to use this library, check out the <a href="examples.html">how-to</a>.</p>
     
+      <h2><a name="DragBoxZoomOptions"></a>class DragBoxZoomOptions</h2>
+      <p>This class represents optional parameter passed into GMap2.enableDragBoxZoom().  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class DragBoxZoomOptions - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>key</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>the combo key to use while draging the box, <code> shift | alt | ctrl </code>. Default is shift.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>style</code></td>
+                
+                  
+                    <td><code>Object</code></td>
+                  
+                
+                <td>javascript object used for zoom box css style.  e.g. <code> {backgroundColor:'blue',opacity:0.6, filter:'alpha(opacity = 50)'} </code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
       <h2><a name="GMap2"></a>class GMap2</h2>
       <p>This is new methods added to Google Maps API's<a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GMap2'>GMap2</a>class.</p>
       
@@ -50,13 +91,13 @@ This lib provides a very simple drag zoom. Holding shift key while draw a box w
               </tr>
             
               <tr class="odd">
-                <td><code>enableDragBoxZoom(<span class="type">opt_boxStyle:Object</span>)</code></td>
+                <td><code>enableDragBoxZoom(<span class="type">opt_dragZoomOpts:DragBoxZoomOptions</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
                   
                 
-                <td>Enable drag zoom. User can zoom to a point of interest by holding shift key while drag a box. The optional opt_boxStyle is an javascript object literal of css properties.e.g. <code> {backgroundColor:'blue',opacity:0.6, filter:'alpha(opacity = 50)'} </code></td>
+                <td>Enable drag zoom. User can zoom to a point of interest by holding a special key (shift | ctrl | alt )while drag a box.</td>
               </tr>
             
           </tbody>
