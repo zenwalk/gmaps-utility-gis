@@ -109,7 +109,8 @@
    * @param {GLatLng} latlng of mouse 
    */
   function onMouseMove(latlng) {
-    if (dragging) {
+    // in FF but not IE, the box can be dragged outside of the map. do not want that.
+    if (dragging && map.getBounds().containsLatLng(latlng)) {
       if (!startLatLng) {
         startLatLng = latlng;
       }
