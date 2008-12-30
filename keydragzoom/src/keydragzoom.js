@@ -216,8 +216,7 @@
     setVals(boxDiv.style, { border: 'thin solid #FF0000'});
     setVals(boxDiv.style, opt_zoomOpts.boxStyle);
     setVals(boxDiv.style, { position: 'absolute', display: 'none'});
-    boxDiv.style.filter = "alpha(opacity=" + (boxDiv.style.opacity * 100) + ")";
-    
+    setOpacity(boxDiv);
     map.getContainer().appendChild(boxDiv);
     
     keyDownListener = GEvent.addDomListener(document, 'keydown', onKeyDown);
