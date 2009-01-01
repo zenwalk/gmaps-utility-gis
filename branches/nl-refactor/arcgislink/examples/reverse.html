@@ -1,0 +1,82 @@
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <title>Reverse Geocode</title>
+        <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxQGj0PqsCtxKvarsoS-iqLdqZSKfxRdmoPmGl7Y9335WLC36wIGYa6o5Q" type="text/javascript">
+        </script>
+        <script type="text/javascript">
+         document.write('<script type="text/javascript" src="../src/arcgislink'+(document.location.search.indexOf('packed')>-1?'_packed':'')+'.js"><'+'/script>');
+        </script>
+        <script type="text/javascript">
+          var map;
+          var geocoder;
+          var marker;
+          
+          function init() {
+            var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Locators/ESRI_Geocode_USA/GeocodeServer';
+            geocoder = new ArcGISGeocodeService(url);
+            map = new GMap2(document.getElementById("map"));
+            var center = new GLatLng(34.0575170970001, -117.195681386);
+            map.setCenter(center, 15);
+            
+            map.addControl(new GMapTypeControl());
+            map.addControl(new GLargeMapControl());
+            map.addControl(new GScaleControl());
+            map.enableDoubleClickZoom();
+            map.enableContinuousZoom();
+            map.enableScrollWheelZoom();
+            marker = new GMarker(map.getCenter(), {
+              draggable: true
+            });
+            map.addOverlay(marker);
+            GEvent.addListener(map, 'click', function(ov, latlng) {
+              reverseGeocode(latlng);
+            });
+            GEvent.addListener(marker, 'dragend', function(latlng) {
+              reverseGeocode(latlng);
+            })
+            reverseGeocode(map.getCenter());
+            
+          }
+        function reverseGeocode(latlng){
+            if (latlng){
+              var point = ArcGISUtil.fromLatLngToPoint(latlng);
+              var params = {
+                location: point,
+                distance: 100
+              }
+              geocoder.reverseGeocode(params, function(result) {
+                if (result.address) {
+                  var html = '';
+                  var attrs = result.address;
+                  for (var x in attrs) {
+                    if (attrs.hasOwnProperty(x)) {
+                      html += x +': '+ attrs[x] + '<br/>';
+                    }
+                  }
+                  var loc=ArcGISUtil.fromPointToLatLng(result.location);
+                  marker.setLatLng(loc);
+                  marker.openInfoWindowHtml(html);
+                }else{
+                  alert('can not find address for point:'+latlng.toString());
+                }
+              });
+            }
+            
+          }
+        </script>
+    </head>
+    <body onload="init()">
+       <a href='../docs/examples.html'>More examples</a> | Use
+       <a href='?packed'>Packed </a> | 
+       <a href='?'> Unpacked</a> Version of the script.
+       <br/>
+        <div>
+            Click on map or drag the marker, you should get the address of clicked point or dropped marker.
+            <br/> A window will open at matched location.
+        </div>
+        <div id="map" style="width:700px; height:400px; border:1px solid #000;">
+        </div>
+    </body>
+</html>

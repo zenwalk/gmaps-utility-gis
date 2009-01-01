@@ -1,0 +1,68 @@
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <title>ArcGISTileLayerOverlay load</title>
+        <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxQGj0PqsCtxKvarsoS-iqLdqZSKfxRdmoPmGl7Y9335WLC36wIGYa6o5Q" type="text/javascript">
+        </script>
+        <script type="text/javascript">
+         document.write('<script type="text/javascript" src="../src/arcgislink'+(document.location.search.indexOf('packed')>-1?'_packed':'')+'.js"><'+'/script>');
+        </script>
+        <script type="text/javascript">
+        var map;    
+        function init(){
+          var base = 'http://server.arcgisonline.com/ArcGIS/rest/services';
+          var type=new ArcGISMapType(base + '/ESRI_StreetMap_World_2D/MapServer');
+          GLog.write('MapType created.');
+          GEvent.addListener(type,'load', function(){
+            GLog.write('MapType loaded.');
+            map = new GMap2(document.getElementById("map"), {
+              mapTypes: [type]
+            });
+            GLog.write('GMap2 created.');
+            map.setCenter(new GLatLng(45.5, -122.7), 15);
+            map.addControl(new GMapTypeControl());
+            map.addControl(new GLargeMapControl());
+            map.addControl(new GScaleControl());
+            map.enableDoubleClickZoom();
+            map.enableContinuousZoom();
+            map.enableScrollWheelZoom();
+            map.addArcGISMap(base + "/NGS_Topo_US_2D/MapServer");
+            
+            addOverlay();
+            
+          });
+        }
+        function addOverlay(){
+          var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services';
+          url+='/Portland/Portland_ESRI_LandBase_AGO/MapServer';
+          var tilelayer=new ArcGISTileLayer(url,{opacity:0.4});
+          GEvent.addListener(tilelayer,'load', function(){
+            var tileoverlay=new ArcGISTileLayerOverlay(tilelayer);
+            map.addOverlay(tileoverlay);
+            log();
+          });
+        }
+        function removeOverlay(){
+          var ovs=map.getArcGISOverlays();
+          if (ovs.length>0)map.removeOverlay(ovs[0]);
+          log();
+        }
+        function log(){
+          GLog.write('number of ArcGISOverlays: '+map.getArcGISOverlays().length);
+        }
+        </script>
+    </head>
+    <body onload="init()">
+       <a href='../docs/examples.html'>More examples</a> | Use
+       <a href='?packed'>Packed </a> | 
+       <a href='?'> Unpacked</a> Version of the script.
+       <p> This example adds a "WGS84" based tile map as <a href="../docs/reference.html#ArcGISTileLayerOverlay">ArcGISTileLayerOverlay</a>. 
+       Note the base maps must be all in WGS84 and tile size (512)</p>
+       <button onclick="addOverlay()">addTileLayerOverlay</button>
+       <button onclick="removeOverlay()">removeTileLayerOverlay</button>
+       <br/>
+        <div id="map" style="width:700px; height:400px; border:1px solid #000;">
+        </div>
+    </body>
+</html>
