@@ -3,48 +3,47 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
         <title>Drag Zoom</title>
-        <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAsz9GgJSJgsIuZv4YEffU5xQKXZNWYqZldXeXODanVXoAUhPuexSrxsHim3KgKS3kccHq_bPwhlXTVg" type="text/javascript">
+        <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxQGj0PqsCtxKvarsoS-iqLdqZSKfxRdmoPmGl7Y9335WLC36wIGYa6o5Q" type="text/javascript">
         </script>
         <script type="text/javascript">
-         document.write('<script type="text/javascript" src="../src/keydragzoom.js"><'+'/script>');
+         document.write('<script type="text/javascript" src="../src/keydragzoom'+(document.location.search.indexOf('packed')>-1?'_packed':'')+'.js"><'+'/script>');
         </script>
         <script type="text/javascript">
         var map;    
         function init(){
           map = new GMap2(document.getElementById("map"));
           map.setCenter(new GLatLng(35.227, -80.84), 12);
+           var marker = new GMarker(map.getCenter());
+	        map.addOverlay(marker);
+          GEvent.addListener(marker, 'click', function(){
+            marker.openInfoWindowHtml('Some Content');
+          })
           map.addControl(new GMapTypeControl());
           map.addControl(new GLargeMapControl());
           map.addControl(new GScaleControl());
           map.enableDoubleClickZoom();
           map.enableContinuousZoom();
           map.enableScrollWheelZoom();
-			// simple drag zoom 
-			map.enableKeyDragZoom(
-          
-				{	key: "shift", 
-					boxStyle: {border: "5px dashed black", backgroundColor: "red", opacity: 0.5},
-					paneStyle: { backgroundColor: "gray", opacity: 0.2 },
-					borderAdjust: { width: 20, height: 20 }
-				}
-			);
-          
+          // drag zoom
+          map.enableKeyDragZoom(
+         {	key: "shift", 
+	boxStyle: {border: "5px dashed black", backgroundColor: "red", opacity: 0.5},
+	paneStyle: { backgroundColor: "gray", opacity: 0.2 },
+	borderAdjust: { width: 20, height: 20 }
+	  }
+	);
+
         }
         </script>
-
-<style>
-#map {
-width: 700px;
-height: 400px;
-border: 10px solid red;
-}
-</style>
-
     </head>
     <body onload="init()">
-       Hold your shift key while dragging a box
+       <a href='?packed'>Packed </a> | 
+       <a href='?'> Unpacked</a> Version of the script.
        
-        <div id="map"></div>
-
+       <br/>
+       Hold your shift key while drag a box
+       
+        <div id="map" style="width:700px; height:400px; border:1px solid #000;"></div>
+       
     </body>
 </html>
