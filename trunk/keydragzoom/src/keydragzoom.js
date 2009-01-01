@@ -21,6 +21,7 @@
  * limitations under the License.
  */
 (function () {
+// truck test 1
   /*jslint browser:true */
   /*global GMap2,GEvent,GLatLng,GLatLngBounds */
   
