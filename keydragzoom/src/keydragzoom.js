@@ -1,8 +1,8 @@
 /**
  * @name Key Drag Zoom
- * @version 1.0.2.gl
+ * @version 1.0.1.gl
  * @author: Nianwei Liu [nianwei at gmail dot com], contributions by Gary Little [gary at luxcentral.com]
- * @fileoverview This lib provides a very simple drag zoom. Holding a user-defined special key (shift | ctrl | alt)
+ * @fileoverview This lib provides a very simple drag zoom. Holding a user defined special key (shift | ctrl | alt)
  *  while dragging a box will zoom to the desired area. 
  *  Only one line of code GMap2.enableKeyDragZoom() is needed.
  */
@@ -21,13 +21,10 @@
  * limitations under the License.
  */
 (function () {
-
-// branche test 1
   /*jslint browser:true */
   /*global GMap2,GEvent,GLatLng,GLatLngBounds */
   
   var key = null;//shift|crtl|alt
-  var borderAdjust = null;
   
   var keyUpListener = null;
   var keyDownListener = null;
@@ -90,10 +87,10 @@
     if (map && !hotKeyDown && isHotKeyDown(e)) {
       hotKeyDown = true;
       var size = map.getSize();
-      paneDiv.style.left = 0 + 'px';
-      paneDiv.style.top = 0 + 'px';
-      paneDiv.style.width = size.width - borderAdjust.width   + 'px';
-      paneDiv.style.height = size.height - borderAdjust.height + 'px';
+      paneDiv.style.left = 0;
+      paneDiv.style.top = 0;
+      paneDiv.style.width = size.width + 'px';
+      paneDiv.style.height =  size.height + 'px';
       paneDiv.style.display = 'block';
     }
   }
@@ -112,28 +109,13 @@
    * @param {GLatLng} latlng of mouse 
    */
   function onMouseMove(latlng) {
-    if (dragging) {
-      var p = map.fromLatLngToContainerPixel(latlng);
-      var b = parseInt(boxDiv.style.borderWidth, 10);
-      var xMax = parseInt(paneDiv.style.width, 10) - 2 * b;
-      var yMax = parseInt(paneDiv.style.height, 10) - 2 * b;
-      p.x = Math.min(p.x, xMax);
-      p.y = Math.min(p.y, yMax);
-      p.x = Math.max(p.x, 0);
-      p.y = Math.max(p.y, 0);
-      latlng = map.fromContainerPixelToLatLng(p);
-
+    // in FF but not IE, the box can be dragged outside of the map. do not want that.
+    if (dragging && map.getBounds().containsLatLng(latlng)) {
       if (!startLatLng) {
         startLatLng = latlng;
       }
       endLatLng = latlng;
       drawBox();
-    }
-  }
-  function onMouseMove2(e) {
-    if (map && hotKeyDown) {
-      e = e || window.event;
-      GLog.write(e);
     }
   }
   /**
@@ -199,8 +181,7 @@
    * @property {String} [key] the modifier key to use while dragging the box, <code> shift | alt | ctrl </code>. Default is shift.
    * @property {Object} [boxStyle] the css style of the zoom box.  e.g. <code> {border: '2px dashed red'} </code>
    * @property {Object} [paneStyle] the css style of the pane which overlays the map when a drag zoom is activated. 
-   * e.g. <code> {backgroundColor: 'gray', opacity: 0.2}</code>.
-   * @property {Object} [borderAdjust] the combined thickness, in pixels, of the left & right borders (width) and of the top & bottom borders (height) of the map container.  e.g. <code> {width: 4, height: 4} </code>. This option is not required if the map container's border or borderWidth property is set with an inline style assignment; even if specified, it is ignored in these situations. 
+   * e.g. <code> {backgroundColor: 'gray', opacity: 0.2}</code>. backgroundColor should not be 'transparent' for IE.
    */
    /**
    * Enable drag zoom. User can zoom to a point of interest by holding a special key (shift | ctrl | alt )
@@ -214,20 +195,6 @@
     key = opt_zoomOpts.key || 'shift';
     key = key.toLowerCase();
     
-    borderAdjust = opt_zoomOpts.borderAdjust || {};
-    var bw = map.getContainer().style.borderWidth;
-	if ( bw !== "" ) {
-
-		bw = parseInt(bw, 10);
-		borderAdjust.width = 2 * bw;
-		borderAdjust.height = 2 * bw;
-
-	} else if ( typeof borderAdjust.width === "undefined" || typeof borderAdjust.height === "undefined" ) {
-
-		borderAdjust.width = 0;
-		borderAdjust.height = 0;
-	}
-
     paneDiv = document.createElement("div");
     paneDiv.onselectstart = function () { 
       return false; 
@@ -245,19 +212,18 @@
       setOpacity(paneDiv, 0);
     }
     map.getContainer().appendChild(paneDiv);
-    
+    map.getContainer().style.overflow = 'hidden'; // simply hide border if go outside
     boxDiv = document.createElement('div');
     setVals(boxDiv.style, { border: 'thin solid #FF0000'});
     setVals(boxDiv.style, opt_zoomOpts.boxStyle);
     setVals(boxDiv.style, { position: 'absolute', display: 'none'});
     setOpacity(boxDiv);
     map.getContainer().appendChild(boxDiv);
-
     keyDownListener = GEvent.addDomListener(document, 'keydown', onKeyDown);
     keyUpListener = GEvent.addDomListener(document, 'keyup', onKeyUp);
     mouseDownListener = GEvent.addDomListener(paneDiv, 'mousedown', onMouseDown);
     mouseMoveListener = GEvent.addListener(map, 'mousemove', onMouseMove);
-    mouseUpListener = GEvent.addDomListener(document, 'mouseup', onMouseUp);
+    mouseUpListener = GEvent.addDomListener(map.getContainer(), 'mouseup', onMouseUp);
   };
   /**
    * Disable drag zoom 
