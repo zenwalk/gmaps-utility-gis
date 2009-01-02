@@ -130,6 +130,12 @@
       drawBox();
     }
   }
+  function onMouseMove2(e) {
+    if (map && hotKeyDown) {
+      e = e || window.event;
+      GLog.write(e);
+    }
+  }
   /**
    * handle mouse up
    */
