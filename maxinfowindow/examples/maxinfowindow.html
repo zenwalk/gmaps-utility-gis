@@ -1,0 +1,38 @@
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <title>Google Maps - Max Infowindow API Example</title>
+        <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw" type="text/javascript">
+        </script>
+        <script type="text/javascript">
+            document.write('<script type="text/javascript" src="../src/maxinfowindow' + (document.location.search.indexOf('packed') > -1 ? '_packed' : '') + '.js"><' + '/script>');
+        </script>
+        <script type="text/javascript">
+            function initialize() {
+              if (GBrowserIsCompatible()) {
+                var map = new GMap2(document.getElementById("map_canvas"));
+                var pt = new GLatLng(37.4419, -122.1419);
+                map.setCenter(pt, 13);
+                GEvent.addListener(map, 'click', function(ov, latlng, ovll) {
+                  if (latlng) {
+                     var min = 'regular info:'+ latlng;
+                     var basic = 'summary info:' + latlng;
+                      var tabs = [new GInfoWindowTab('maptab0', 'content0'),
+                       new GInfoWindowTab('maptab1', 'content1'),
+                        new GInfoWindowTab('maptab2', 'content2'), 
+                        new GInfoWindowTab('maptab3', 'content3')];
+                      map.openInfoWindowMaxTabsHtml(latlng, latlng.toString(), basic, tabs, {
+                        maxTitle: "More Info"
+                      });
+                  }
+                });
+              }
+            }
+        </script>
+    </head>
+    <body onload="initialize()" onunload="GUnload()">
+        <div id="map_canvas" style="width: 100%; height: 400px; font-family: Arial, sans serif">
+        </div>
+    </body>
+</html>
