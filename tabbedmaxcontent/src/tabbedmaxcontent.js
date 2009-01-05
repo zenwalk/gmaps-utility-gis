@@ -21,7 +21,7 @@
  */
 (function () {
   /*jslint browser:true */
-  /*global GMap2,GEvent */
+  /*global GMap2,GMarker,GEvent */
   var defaultStyle = {
     tabBar: {
       background: '#F4F4F4 none repeat scroll 0 0',
