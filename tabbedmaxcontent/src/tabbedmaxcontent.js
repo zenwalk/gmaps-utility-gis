@@ -24,12 +24,8 @@
   /*global GMap2,GEvent */
   var defaultStyle = {
     tabBar: {
-      //background: '#F4F4F4 none repeat scroll 0 0',
-      //borderBottom: '1px solid #B0B0B0',
-      backgroundColor: '#F4F4F4',
-      borderStyle: 'none none solid none',
-      borderColor: '#B0B0B0',
-      borderWidth: '1px',
+      background: '#F4F4F4 none repeat scroll 0 0',
+      borderBottom: '1px solid #B0B0B0',
       padding: '6px 8px 4px',
       marginRight: '13px',
       whiteSpace: 'nowrap',
@@ -38,17 +34,17 @@
     tabLeft: {},
     tabRight: {},
     tabOn: {
-      backgroundColor: '#FFFFFF',// none repeat scroll 0 0',
+      background: '#FFFFFF none repeat scroll 0 0',
       padding: '6px 8px 4px',
-      borderColor: '#B0B0B0 #B0B0B0 #FFFFFF #B0B0B0',
-      borderStyle: 'solid',
-      borderWidth: '1px',
+      borderTop: '1px solid #B0B0B0',
+      borderLeft:  '1px solid #B0B0B0',
+      borderRight:  '1px solid #B0B0B0',
+      borderBottom: '2px solid #FFFFFF',
       color: '#000000',
       textDecoration: 'none'
     },
     tabOff: {
-      //background: '#F4F4F4 none repeat scroll 0 0',
-      backgroundColor: '#F4F4F4',
+      background: '#F4F4F4 none repeat scroll 0 0',
       padding: '6px 8px 4px',
       color: '#0000FF',
       border: 'none',
@@ -57,7 +53,8 @@
     content: {
       borderStyle: 'none solid solid solid',
       borderWidth: '1px',
-      borderColor: '#B0B0B0'
+      borderColor: '#B0B0B0',
+      borderTop:'none'
     }
   };
   /**
