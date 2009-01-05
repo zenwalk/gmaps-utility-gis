@@ -19,7 +19,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function() {
+(function () {
   /*jslint browser:true */
   /*global GMap2,GEvent */
   var defaultStyle = {
@@ -54,7 +54,7 @@
       borderStyle: 'none solid solid solid',
       borderWidth: '1px',
       borderColor: '#B0B0B0',
-      borderTop:'none'
+      borderTop: 'none'
     }
   };
   /**
@@ -67,7 +67,7 @@
       for (var x in vals) {
         if (vals.hasOwnProperty(x)) {
           if (obj[x] && typeof vals[x] === 'object') {
-             obj[x] = setVals(obj[x], vals[x]);
+            obj[x] = setVals(obj[x], vals[x]);
           } else {
             obj[x] = vals[x];
           }
@@ -141,7 +141,7 @@
     GEvent.bind(this.infoWindow_, 'maximizeend', this, this.checkResize);
     this.style_ = {};
     this.maxNode_ = null;
-    this.contentsNode_;
+    this.contentsNode_ = null;
     this.navNodes_ = [];
     this.contentNodes_ = [];
   }
@@ -153,11 +153,11 @@
    * @param {MaxInfoWindowOptions} opt_maxOptions
    * @private
    */
-  TabbedMaxContent.prototype.initialize_ = function(sumNode, tabs, opt_maxOptions) {
+  TabbedMaxContent.prototype.initialize_ = function (sumNode, tabs, opt_maxOptions) {
     this.clearTabs_();
     this.navNodes_ = [];
     this.contentNodes_ = [];
-    if (this.maxNode_){
+    if (this.maxNode_) {
       this.maxNode_.innerHTML = '';
     }
     this.maxNode_ = createEl('div', {
@@ -172,29 +172,35 @@
     createEl('div', null, sumNode, null, this.maxNode_);
     var navDiv = createEl('div', null, null, this.style_.tabBar, this.maxNode_);
     this.contentsNode_ = createEl('div', null, null, null, this.maxNode_);
+    var tabOn = false;
     if (tabs && tabs.length) {
       // left
       createEl('span', null, null, this.style_.tabLeft, navDiv);
       for (var i = 0, ct = tabs.length; i < ct; i++) {
+        tabOn = false;
+        if (i === selectedTab || tabs[i].name === selectedTab) {
+          tabOn = true;
+        }
         // note: used 2 undocumented property to avoid creating a new class.
         //http://code.google.com/p/gmaps-api-issues/issues/detail?id=712
-        this.navNodes_.push(createEl('span', null, tabs[i].name, (i === selectedTab) ? this.style_.tabOn : this.style_.tabOff, navDiv));
+        this.navNodes_.push(createEl('span', null, tabs[i].name, tabOn ? this.style_.tabOn : this.style_.tabOff, navDiv));
         var cont = createEl('div', null, tabs[i].contentElem, this.style_.content, this.contentsNode_);
-        cont.style.display = (i === selectedTab) ? 'block' : 'none';
+        cont.style.display = tabOn ? 'block' : 'none';
+        cont.name = tabs[i].name;
         this.contentNodes_.push(cont);
       }
       // right
       createEl('span', null, null, this.style_.tabRight, navDiv);
     }
-  }
+  };
   
   /**
-   * Select tab at given index
-   * @param {Number} t
+   * Select tab at given index or name
+   * @param {Number|String} t
    */
-  TabbedMaxContent.prototype.selectTab = function(t) {
+  TabbedMaxContent.prototype.selectTab = function (t) {
     for (var i = 0, ct = this.navNodes_.length; i < ct; i++) {
-      if (i === t) {
+      if (i === t || this.contentNodes_[i].name === t) {
         setVals(this.navNodes_[i].style, this.style_.tabOn);
         this.contentNodes_[i].style.display = 'block';
        /**
@@ -212,43 +218,44 @@
   };
   
   /**
-   * Adjust sizes of tab containers. 
+   * Adjust sizes of tab containers to fit in the max window. 
    * This method is automatically called on <code>
    * GInfoWindow</code>'s <code>'maximizeend'</code> event. However, in some cases such
-   * as ajax action changed summary info.
+   * as ajax action changed summary content may require an additional resize.
    */
-  TabbedMaxContent.prototype.checkResize = function() {
+  TabbedMaxContent.prototype.checkResize = function () {
     var container = this.infoWindow_.getContentContainers()[0];
     var contents = this.contentsNode_;
     var contNodes = this.contentNodes_;
-    // it appears GInfoWindow.maximizeend event is fired before DOM ready(too early).
+    // it appears GInfoWindow.maximizeend event is fired too early, 
+    // before DOM is ready.
     // as a workaround use a timeout here.
-    setTimeout(function() {
+    setTimeout(function () {
       var pos = getPosition(contents, container);
       for (var i = 0, ct = contNodes.length; i < ct; i++) {
         contNodes[i].style.width = container.style.width;
-        contNodes[i].style.height = (parseInt(container.style.height) - pos.top) + 'px';
+        contNodes[i].style.height = (parseInt(container.style.height, 10) - pos.top) + 'px';
       }
-    }, 50);
+    }, 0);
   };
   /**
    * Setup event listeners. The core API seems removed all liteners when restored to normal size
    * @private
    */
-  TabbedMaxContent.prototype.setupTabs_ = function() {
+  TabbedMaxContent.prototype.setupTabs_ = function () {
     for (var i = 0, ct = this.navNodes_.length; i < ct; i++) {
       GEvent.addDomListener(this.navNodes_[i], 'click', GEvent.callback(this, this.selectTab, i));
     }
-  }
+  };
   /**
    * Clean up listeners on tabs.
    * @private
    */
-  TabbedMaxContent.prototype.clearTabs_ = function() {
+  TabbedMaxContent.prototype.clearTabs_ = function () {
     if (this.maxNode_) {
       GEvent.clearNode(this.maxNode_);
     }
-  }
+  };
 
   /**
    * @name MaxInfoWindowOptions
@@ -260,7 +267,7 @@
    * @property {Object} [style] the object that hold a set of css style of the max content. It has the following properties:
    *     <code> tabOn, tabOff, tabBar, tabLeft, tabRight, content </code>. Each property is a css object such as 
    *     <code> {backgroundColor: 'gray', opacity: 0.2}</code>. 
-   * @property {Number} [selectedTab] Selects the tab with the given index, starting at 0, instead of the first tab (with index 0).
+   * @property {Number|String} [selectedTab] Selects the tab with the given index or name. index base is 0.
    * @property {String} [maxTitle] 	Specifies title to be shown when the infowindow is maximized. The content may be either an HTML string or an HTML DOM element. 
    */
  
@@ -281,7 +288,7 @@
    * @param {GInfoWindowTab[]} tabs
    * @param {MaxInfoWindowOptions} opt_maxOptions
    */
-  GMap2.prototype.openInfoWindowMaxTabs = function(latlng, minNode, sumNode, tabs, opt_maxOptions) {
+  GMap2.prototype.openInfoWindowMaxTabs = function (latlng, minNode, sumNode, tabs, opt_maxOptions) {
     var max = this.getInfoWindowMaxContent();
     var opts = opt_maxOptions || {};
     max.initialize_(sumNode, tabs, opts);
@@ -305,14 +312,14 @@
    * @param {GInfoWindowTab[]} tabs
    * @param {MaxInfoWindowOptions} opt_maxOptions
    */
-  GMap2.prototype.openInfoWindowMaxTabsHtml = function(latlng, html, summary, tabs, opt_maxOptions) {
+  GMap2.prototype.openInfoWindowMaxTabsHtml = function (latlng, html, summary, tabs, opt_maxOptions) {
     this.openInfoWindowMaxTabs(latlng, createEl('div', null, html), createEl('div', null, summary), tabs, opt_maxOptions);
   };
   /**
    * Returns the TabbedMaxContent for the infowindow.
    * @return {TabbedMaxContent}
    */
-  GMap2.prototype.getInfoWindowMaxContent = function() {
+  GMap2.prototype.getInfoWindowMaxContent = function () {
     this.maxContent_ = this.maxContent_ || new TabbedMaxContent(this);
     return this.maxContent_;
   };
@@ -334,7 +341,7 @@
    * @param {GInfoWindowTab[]} tabs
    * @param {MaxInfoWindowOptions} opt_maxOptions
    */
-  GMarker.prototype.openInfoWindowMaxTabsHtml = function(map, html, summary, tabs, opt_maxOptions) {
+  GMarker.prototype.openInfoWindowMaxTabsHtml = function (map, html, summary, tabs, opt_maxOptions) {
     map.openInfoWindowMaxTabs(this.getLatLng(), createEl('div', null, html), createEl('div', null, summary), tabs, opt_maxOptions);
   };
   /**
@@ -348,7 +355,7 @@
    * @param {GInfoWindowTab[]} tabs
    * @param {MaxInfoWindowOptions} opt_maxOptions
    */
-  GMarker.prototype.openInfoWindowMaxTabs = function(map, minNode, sumNode, tabs, opt_maxOptions) {
+  GMarker.prototype.openInfoWindowMaxTabs = function (map, minNode, sumNode, tabs, opt_maxOptions) {
     map.openInfoWindowMaxTabs(this.getLatLng(), minNode, sumNode, tabs, opt_maxOptions);
   };
   
