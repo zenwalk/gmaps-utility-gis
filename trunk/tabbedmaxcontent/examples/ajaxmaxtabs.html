@@ -22,35 +22,28 @@
                 var iw = map.getInfoWindow();
                 GEvent.addListener(map, 'click', function(ov, latlng, ovll) {
                   if (latlng) {
-                    var summary = '<div id="sum">Address of' + latlng + '</div>';
+                    var regular = 'LatLng:'+latlng+ '</br><a href="javascript:void(0)" onclick="javascript:map.getInfoWindow().maximize()">more info.. </a>'
+                    var summary = '<div id="sum">Address of' + latlng + '</div><a href="javascript:void(0)" onclick="javascript:map.getInfoWindow().restore()">less info.. </a>';
                     var panoDiv = document.createElement('div');
                     panoDiv.id = "pano";
                     panoDiv.style.width = "400px";
                     panoDiv.style.width = "200px";
                     var tabs = [new GInfoWindowTab('address', '<div id="address"></div>'), new GInfoWindowTab('streetview', panoDiv)];
-                    map.openInfoWindowMaxTabsHtml(latlng, latlng.toString(), summary, tabs, {
+                    map.openInfoWindowMaxTabsHtml(latlng, regular, summary, tabs, {
                       maxTitle: "More Info",
                       selectedTab: 1,
                       style: {
-                        tabBar: {
-                          backgroundColor: '#F4F4F4'
-                        },
-                        tabOn: {
-                         backgroundColor: '#E5ECF9',
-                          borderBottomColor: 'E5ECF9'
-                        },
                         tabOff: {
-                          backgroundColor: '#C3D9FF'
-                        },
-                        content: {
-                          backgroundColor: 'E5ECF9'
+                          backgroundColor: '#CCCCCC'
                         }
                       }
                     });
                     
                     var lis = GEvent.addListener(iw, 'maximizeend', function() {
                       geocoder.getLocations(latlng, function(response) {
-                        if (!response || response.Status.code != 200) {
+                        if (!response) {
+                          alert('server error');
+                        } else if (response.Status.code != 200) {
                           alert("Status Code:" + response.Status.code);
                         } else {
                           var place = response.Placemark[0];
