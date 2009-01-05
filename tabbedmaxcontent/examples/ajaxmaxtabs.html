@@ -5,11 +5,17 @@
         <title>Google Maps - Max Infowindow API Example</title>
         <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxQGj0PqsCtxKvarsoS-iqLdqZSKfxRdmoPmGl7Y9335WLC36wIGYa6o5Q" type="text/javascript">
         </script>
+        <style>
+          #address {
+            padding: 9px;
+          }
+        </style>
         <script type="text/javascript">
             document.write('<script type="text/javascript" src="../src/tabbedmaxcontent' + (document.location.search.indexOf('packed') > -1 ? '_packed' : '') + '.js"><' + '/script>');
         </script>
         <script type="text/javascript">
             var map;
+            var pano;
             function initialize() {
               if (GBrowserIsCompatible()) {
                 map = new GMap2(document.getElementById("map_canvas"));
@@ -19,27 +25,29 @@
                 var pt = new GLatLng(37.4419, -122.1419);
                 map.setCenter(pt, 16);
                 map.addControl(new GLargeMapControl());
-                var iw = map.getInfoWindow();
                 GEvent.addListener(map, 'click', function(ov, latlng, ovll) {
                   if (latlng) {
-                    var regular = 'LatLng:'+latlng+ '</br><a href="javascript:void(0)" onclick="javascript:map.getInfoWindow().maximize()">more info.. </a>'
+                    var regular = '<div>LatLng:'+latlng+ '</div><a href="javascript:void(0)" onclick="javascript:map.getInfoWindow().maximize()">more info.. </a>'
                     var summary = '<div id="sum">Address of' + latlng + '</div><a href="javascript:void(0)" onclick="javascript:map.getInfoWindow().restore()">less info.. </a>';
                     var panoDiv = document.createElement('div');
                     panoDiv.id = "pano";
-                    panoDiv.style.width = "400px";
+                    panoDiv.innerHTML= 'Street View not available.'
+                    panoDiv.style.width = "400px"; // can be anything, will be auto resized
                     panoDiv.style.width = "200px";
-                    var tabs = [new GInfoWindowTab('address', '<div id="address"></div>'), new GInfoWindowTab('streetview', panoDiv)];
+                    var tabs = [new GInfoWindowTab('address', '<div id="address"></div>'),
+                     new GInfoWindowTab('streetview', panoDiv)];
                     map.openInfoWindowMaxTabsHtml(latlng, regular, summary, tabs, {
                       maxTitle: "More Info",
-                      selectedTab: 1,
+                      selectedTab: 'streetview',// or use index 1,
                       style: {
                         tabOff: {
-                          backgroundColor: '#CCCCCC'
+                          backgroundColor: '#CCCCFF'
                         }
                       }
                     });
-                    
-                    var lis = GEvent.addListener(iw, 'maximizeend', function() {
+                    // ajax stuff
+                    GEvent.addListener(map.getInfoWindow(), 'maximizeend', function() {
+                      // reverse geocode
                       geocoder.getLocations(latlng, function(response) {
                         if (!response) {
                           alert('server error');
@@ -47,44 +55,35 @@
                           alert("Status Code:" + response.Status.code);
                         } else {
                           var place = response.Placemark[0];
-                          document.getElementById('sum').innerHTML = place.address;
+                          document.getElementById('sum').innerHTML ='Address of the clicked point: <b>' + place.address+'</b>';
                           document.getElementById('address').innerHTML = '<b>orig latlng:</b>' + response.name + '<br/>' +
-                          '<b>latlng:</b>' +
-                          place.Point.coordinates[0] +
-                          "," +
-                          place.Point.coordinates[1] +
-                          '<br>' +
-                          '<b>Status Code:</b>' +
-                          response.Status.code +
-                          '<br>' +
-                          '<b>Status Request:</b>' +
-                          response.Status.request +
-                          '<br>' +
-                          '<b>Address:</b>' +
-                          place.address +
-                          '<br>' +
-                          '<b>Accuracy:</b>' +
-                          place.AddressDetails.Accuracy +
-                          '<br>' +
-                          '<b>Country code:</b> ' +
-                          place.AddressDetails.Country.CountryNameCode;
+                          '<b>latlng:</b>' +place.Point.coordinates[0] + "," +
+                          place.Point.coordinates[1] + '<br>' +
+                          '<b>Status Code:</b>' + response.Status.code + '<br>' +
+                          '<b>Status Request:</b>' + response.Status.request +'<br>' +
+                          '<b>Address:</b>' + place.address +  '<br>' +
+                          '<b>Accuracy:</b>' + place.AddressDetails.Accuracy +'<br>' +
+                          '<b>Country code:</b> ' + place.AddressDetails.Country.CountryNameCode;
+                          map.getInfoWindowMaxContent().checkResize();
+                         
                         }
                       });
+                      // street view
                       panoClient.getNearestPanorama(latlng, function(panoData) {
-                        if (panoData.code != 200) {
-                          GLog.write('showPanoData: Server rejected with code: ' + panoData.code);
-                          return;
+                        pano = new GStreetviewPanorama(document.getElementById("pano"));
+                        GEvent.addListener(pano, 'error', function (errorCode) {
+                           if (errorCode == 603 ){
+                             document.getElementById("pano").innerHTML = 'StreetView requires flash plugin. Click <a href="http://get.adobe.com/flashplayer/" target="_blank"> here</a> to download';
+                           } 
+                        } );
+                        if (panoData.location) {
+                          pano.setLocationAndPOV(panoData.location.latlng);
+                          setTimeout(function() {
+                            pano.checkResize();
+                          }, 5);
                         }
-                        var myPano = new GStreetviewPanorama(document.getElementById("pano"));
-                        
-                        myPano.setLocationAndPOV(panoData.location.latlng);
-                        setTimeout(function() {
-                          myPano.checkResize();
-                        }, 1000);
                         
                       });
-                      
-                      
                     });
                   }
                 });
@@ -93,8 +92,12 @@
         </script>
     </head>
     <body onload="initialize()" onunload="GUnload()">
+       <a href='?packed'>Packed </a> | 
+       <a href='?'> Unpacked</a> Version of the script.
+       
+       <br/>
         <div>
-            Click on map, then maximize info window to get address and street view
+            Click on map, then maximize info window to get the address of the location, and street view
         </div>
         <div id="map_canvas" style="width: 100%; height: 600px;">
         </div>

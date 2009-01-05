@@ -135,10 +135,10 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
                 <td><code>selectedTab</code></td>
                 
                   
-                    <td><code>Number</code></td>
+                    <td><code>Number|String</code></td>
                   
                 
-                <td>Selects the tab with the given index, starting at 0, instead of the first tab (with index 0).</td>
+                <td>Selects the tab with the given index or name. index base is 0.</td>
               </tr>
             
               <tr class="odd">
@@ -179,17 +179,17 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
                     <td><code>None</code></td>
                   
                 
-                <td>Adjust sizes of tab containers. This method is automatically called on <code>GInfoWindow</code>'s <code>'maximizeend'</code> event. However, in some cases suchas ajax action changed summary info.</td>
+                <td>Adjust sizes of tab containers to fit in the max window. This method is automatically called on <code>GInfoWindow</code>'s <code>'maximizeend'</code> event. However, in some cases suchas ajax action changed summary content may require an additional resize.</td>
               </tr>
             
               <tr class="even">
-                <td><code>selectTab(<span class="type">t:Number</span>)</code></td>
+                <td><code>selectTab(<span class="type">t:Number|String</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
                   
                 
-                <td>Select tab at given index</td>
+                <td>Select tab at given index or name</td>
               </tr>
             
           </tbody>
@@ -216,7 +216,7 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
                     <td><code><span class="type">index:Number</span></code></td>
                   
                 
-                <td>This event is fired after a REST JSONP response was returned by server.</td>
+                <td>This event is fired after a tab is selected</td>
               </tr>
             
           </tbody>
