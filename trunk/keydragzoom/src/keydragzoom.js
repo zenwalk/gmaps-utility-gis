@@ -1,8 +1,8 @@
 /**
  * @name Key Drag Zoom
- * @version 1.0.1.gl
- * @author: Nianwei Liu [nianwei at gmail dot com], contributions by Gary Little [gary at luxcentral.com]
- * @fileoverview This lib provides a very simple drag zoom. Holding a user defined special key (shift | ctrl | alt)
+ * @version 1.0.3
+ * @author: Nianwei Liu [nianwei at gmail dot com] & Gary Little [gary at luxcentral dot com]
+ * @fileoverview This lib provides a very simple drag zoom. Holding a user-defined special key (shift | ctrl | alt)
  *  while dragging a box will zoom to the desired area. 
  *  Only one line of code GMap2.enableKeyDragZoom() is needed.
  */
@@ -22,9 +22,10 @@
  */
 (function () {
   /*jslint browser:true */
-  /*global GMap2,GEvent,GLatLng,GLatLngBounds */
+  /*global GMap2,GEvent,GLatLng,GLatLngBounds,GPoint */
   
   var key = null;//shift|crtl|alt
+  var callbacks = null;
   
   var keyUpListener = null;
   var keyDownListener = null;
@@ -32,6 +33,8 @@
   var mouseMoveListener = null;
   var mouseUpListener = null;
   
+  var borderWidths = null;
+  var boxBorderWidths = null;
   var boxDiv = null;
   var paneDiv = null;
   
@@ -40,9 +43,118 @@
   
   var startLatLng = null;
   var endLatLng = null;
+  var mapPosn = null;
+  var boxMaxX, boxMaxY;
   
   var map = null;
-  
+
+/**
+ * Get the widths of the borders of an element
+ *
+ * @param {Object} h  HTML element
+ * @return {Object} widths object (top, bottom left, right)
+ */
+function getBorderWidths( h ) {
+
+	var computedStyle;
+	var bw = {};
+	
+	if ( document.defaultView && document.defaultView.getComputedStyle ) {
+	
+		computedStyle = h.ownerDocument.defaultView.getComputedStyle(h, "");
+
+		if ( computedStyle ) {
+
+			bw.top = parseInt(computedStyle.borderTopWidth || 0, 10);
+			bw.bottom = parseInt(computedStyle.borderBottomWidth || 0, 10);
+			bw.left = parseInt(computedStyle.borderLeftWidth || 0, 10);
+			bw.right = parseInt(computedStyle.borderRightWidth || 0, 10);
+
+			return bw;
+		}
+
+	} else if ( document.documentElement.currentStyle ) {
+
+		if ( h.currentStyle ) {
+		
+			bw.top = parseInt(h.currentStyle["border-top-width"] || 0, 10);
+			bw.bottom = parseInt(h.currentStyle["border-bottom-width"] || 0, 10);
+			bw.left = parseInt(h.currentStyle["border-left-width"] || 0, 10);
+			bw.right = parseInt(h.currentStyle["border-right-width"] || 0, 10);
+
+			return bw;
+		}
+	} 
+
+	bw.top = parseInt(h.style["border-top-width"], 10) || 0;
+	bw.bottom = parseInt(h.style["border-bottom-width"], 10) || 0;
+	bw.left = parseInt(h.style["border-left-width"], 10) || 0;
+	bw.right = parseInt(h.style["border-right-width"], 10) || 0;
+
+	return bw;
+}
+
+/**
+ * Get position of mouse relative to document
+ * @param {Object} e  Mouse event
+ * @return {Object} left & top position
+ */
+function getMousePosition( e ) {
+
+	var posX = 0, posY = 0;
+	
+	e = e || window.event;
+	
+	if ( typeof e.pageX !== "undefined" ) {
+	
+	posX = e.pageX;
+	posY = e.pageY;
+	
+	} else if ( typeof e.clientX !== "undefined" ) {
+	
+		posX = e.clientX + 
+		  (typeof document.documentElement.scrollLeft !== "undefined" ? document.documentElement.scrollLeft : document.body.scrollLeft);
+		posY = e.clientY + 
+		  (typeof document.documentElement.scrollTop !== "undefined" ? document.documentElement.scrollTop : document.body.scrollTop);
+	}
+	return {left: posX, top: posY};  
+}
+
+/**
+ * Get position of HTML element relative to document
+ * @param {Object} h  HTML element
+ * @return {Object} left & top position
+ */
+function getElementPosition( h ) {
+
+	var posX   = h.offsetLeft;
+	var posY   = h.offsetTop;
+	var parent = h.offsetParent;
+
+	// Add offsets for all ancestors in the hierarchy
+	while ( parent !== null ) {
+	
+		// Adjust for scrolling elements which may affect the map position.
+		//
+		// See http://www.howtocreate.co.uk/tutorials/javascript/browserspecific
+		//
+		// "...make sure that every element [on a Web page] with an overflow
+		// of anything other than visible also has a position style set to
+		// something other than the default static..."
+		if( parent !== document.body && parent !== document.documentElement ) {
+		
+			posX -= parent.scrollLeft;
+			posY -= parent.scrollTop;
+		}
+
+		posX   += parent.offsetLeft;
+		posY   += parent.offsetTop;  
+		parent  = parent.offsetParent;
+	}
+
+	return {left: posX, top: posY};
+}
+
   /**
    * Draw the drag box. 
    */
@@ -70,47 +182,90 @@
     }
   }
   /**
-   * returns true if a hot key is pressed in the event
-   * @param {Object} e event
+   * Returns true if a hot key is pressed in the event
+   * @param {Event} e
    * @return {Boolean}
    */
   function isHotKeyDown(e) {
+  
+	var isHot;
+  	
     e = e || window.event;
-    return (e.shiftKey && key === 'shift') ||
-    (e.altKey && key === 'alt') ||
-    (e.ctrlKey && key === 'ctrl');
+
+  	isHot = (e.shiftKey && key === 'shift') || (e.altKey && key === 'alt') || (e.ctrlKey && key === 'ctrl');
+
+	if ( !isHot ) {
+	
+		// Need to look at keyCode for Opera because it
+		// doesn't set the shiftKey, altKey, ctrlKey properties
+		// unless a non-modifier event is being reported.
+		//
+		// See http://cross-browser.com/x/examples/shift_mode.php
+		// Also see http://unixpapa.com/js/key.html
+		switch (e.keyCode) {
+		
+			case 16:
+			  if ( key === 'shift' ) { isHot = true; }
+			  break;
+			case 17:
+			  if ( key === 'ctrl' ) { isHot = true; }
+			  break;
+			case 18:
+			  if ( key === 'alt' ) { isHot = true; }
+			  break;
+		}
+	}
+	
+    return isHot;
   }
    /**
-   * handle key down
+   * Handle key down
+   * @param {Event} e
    */
   function onKeyDown(e) {
+
     if (map && !hotKeyDown && isHotKeyDown(e)) {
       hotKeyDown = true;
       var size = map.getSize();
-      paneDiv.style.left = 0;
-      paneDiv.style.top = 0;
-      paneDiv.style.width = size.width + 'px';
-      paneDiv.style.height =  size.height + 'px';
+      paneDiv.style.left = 0 + 'px';
+      paneDiv.style.top = 0 + 'px';
+      paneDiv.style.width = size.width - (borderWidths.left + borderWidths.right) + 'px';
+      paneDiv.style.height = size.height - (borderWidths.top + borderWidths.bottom) + 'px';
       paneDiv.style.display = 'block';
+      boxMaxX = parseInt(paneDiv.style.width, 10) - (boxBorderWidths.left + boxBorderWidths.right);
+      boxMaxY = parseInt(paneDiv.style.height, 10) - (boxBorderWidths.top + boxBorderWidths.bottom);
     }
   }
   /**
-   * handle mouse down
+   * Handle mouse down
    * @param {Event} e
    */
   function onMouseDown(e) {
     if (map && hotKeyDown) {
       startLatLng = endLatLng = null;
+	  mapPosn = getElementPosition(map.getContainer());
       dragging = true;
     }
   }
   /**
-   * handle mouse move
-   * @param {GLatLng} latlng of mouse 
+   * Handle mouse move
+   * @param {Event} e
    */
-  function onMouseMove(latlng) {
-    // in FF but not IE, the box can be dragged outside of the map. do not want that.
-    if (dragging && map.getBounds().containsLatLng(latlng)) {
+  function onMouseMove(e) {
+    if (dragging) {
+    
+	  var mousePosn = getMousePosition(e);
+	  var p = new GPoint();
+	  p.x = mousePosn.left - mapPosn.left - borderWidths.left;
+	  p.y = mousePosn.top - mapPosn.top - borderWidths.top;
+    
+      p.x = Math.min(p.x, boxMaxX);
+      p.y = Math.min(p.y, boxMaxY);
+      p.x = Math.max(p.x, 0);
+      p.y = Math.max(p.y, 0);
+      
+      var latlng = map.fromContainerPixelToLatLng(p);
+
       if (!startLatLng) {
         startLatLng = latlng;
       }
@@ -119,9 +274,10 @@
     }
   }
   /**
-   * handle mouse up
+   * Handle mouse up
+   * @param {Event} e
    */
-  function onMouseUp() {
+  function onMouseUp(e) {
     if (dragging) {
       zoomBox();
       dragging = false;
@@ -130,18 +286,20 @@
   }
  
   /**
-   * handle key up
+   * Handle key up
+   * @param {Event} e
    */
   function onKeyUp(e) {
-    if (map && hotKeyDown && !isHotKeyDown(e)) {
+    if (map && hotKeyDown) {
       hotKeyDown = false;
       dragging = false;
       boxDiv.style.display = 'none';
       paneDiv.style.display = "none";
     }
   }
+
   /**
-   *  set the property of object from another object
+   * Set the property of object from another object
    * @param {Object} obj target object
    * @param {Object} vals source object
    */
@@ -156,7 +314,7 @@
     return obj;
   }
   /**
-   * Set opacity. if op is not passed in, this function just do an IE fix.
+   * Set opacity. if op is not passed in, this function just does an IE fix.
    * @param {Node} div
    * @param {Number} op (0-1)
    */
@@ -181,7 +339,8 @@
    * @property {String} [key] the modifier key to use while dragging the box, <code> shift | alt | ctrl </code>. Default is shift.
    * @property {Object} [boxStyle] the css style of the zoom box.  e.g. <code> {border: '2px dashed red'} </code>
    * @property {Object} [paneStyle] the css style of the pane which overlays the map when a drag zoom is activated. 
-   * e.g. <code> {backgroundColor: 'gray', opacity: 0.2}</code>. backgroundColor should not be 'transparent' for IE.
+   * e.g. <code> {backgroundColor: 'gray', opacity: 0.2}</code>.
+   * @property {Object} [callbacks] the callback functions for dragstart, drag, dragend [NOT YET IMPLEMENTED]
    */
    /**
    * Enable drag zoom. User can zoom to a point of interest by holding a special key (shift | ctrl | alt )
@@ -194,7 +353,10 @@
     opt_zoomOpts = opt_zoomOpts || {};
     key = opt_zoomOpts.key || 'shift';
     key = key.toLowerCase();
-    
+    callbacks = opt_zoomOpts.callbacks || {};
+
+	borderWidths = getBorderWidths(map.getContainer());
+	
     paneDiv = document.createElement("div");
     paneDiv.onselectstart = function () { 
       return false; 
@@ -212,18 +374,21 @@
       setOpacity(paneDiv, 0);
     }
     map.getContainer().appendChild(paneDiv);
-    map.getContainer().style.overflow = 'hidden'; // simply hide border if go outside
+    
     boxDiv = document.createElement('div');
     setVals(boxDiv.style, { border: 'thin solid #FF0000'});
     setVals(boxDiv.style, opt_zoomOpts.boxStyle);
     setVals(boxDiv.style, { position: 'absolute', display: 'none'});
     setOpacity(boxDiv);
     map.getContainer().appendChild(boxDiv);
+
+	boxBorderWidths = getBorderWidths(boxDiv);
+	
     keyDownListener = GEvent.addDomListener(document, 'keydown', onKeyDown);
     keyUpListener = GEvent.addDomListener(document, 'keyup', onKeyUp);
     mouseDownListener = GEvent.addDomListener(paneDiv, 'mousedown', onMouseDown);
-    mouseMoveListener = GEvent.addListener(map, 'mousemove', onMouseMove);
-    mouseUpListener = GEvent.addDomListener(map.getContainer(), 'mouseup', onMouseUp);
+    mouseMoveListener = GEvent.addDomListener(document, 'mousemove', onMouseMove);
+    mouseUpListener = GEvent.addDomListener(document, 'mouseup', onMouseUp);
   };
   /**
    * Disable drag zoom 
