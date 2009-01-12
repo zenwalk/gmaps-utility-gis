@@ -1,12 +1,4 @@
-/**
- * @name Tabbed Max Content
- * @version 1.0
- * @author: Nianwei Liu [nianwei at gmail dot com]
- * @fileoverview This lib provides a similar infowindow behavior avaiable at
- * maps.google.com. The maxContent of info window contains multiple tabs.
- */
-/*!
- *
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +10,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+/**
+ * @name Tabbed Max Content
+ * @version 1.0
+ * @author: Nianwei Liu [nianwei at gmail dot com]
+ * @fileoverview This lib provides a similar infowindow behavior avaiable at
+ * maps.google.com. The maxContent of info window contains multiple tabs.
  */
 (function () {
   /*jslint browser:true */
@@ -41,20 +40,27 @@
       borderRight:  '1px solid #B0B0B0',
       borderBottom: '2px solid #FFFFFF',
       color: '#000000',
-      textDecoration: 'none'
+      textDecoration: 'none',
+      fontWeight: 'bold'
     },
     tabOff: {
       background: '#F4F4F4 none repeat scroll 0 0',
       padding: '6px 8px 4px',
       color: '#0000FF',
       border: 'none',
-      textDecoration: 'underline'
+      textDecoration: 'underline',
+      fontWeight: 'normal'
     },
     content: {
       borderStyle: 'none solid solid solid',
       borderWidth: '1px',
       borderColor: '#B0B0B0',
-      borderTop: 'none'
+      borderTop: 'none',
+      overflow:'auto'
+    },
+    summary:{
+      overflow:'auto',
+      marginBottom:'5px'
     }
   };
   /**
@@ -89,7 +95,7 @@
     var node = content;
     if (!content || (content && typeof content === 'string')) {
       node = document.createElement(tag);
-      node.innerHTML = content || '';
+      node.innerHTML = content || ''; 
     }
     if (style) {
       setVals(node.style, style);
@@ -141,6 +147,7 @@
     GEvent.bind(this.infoWindow_, 'maximizeend', this, this.checkResize);
     this.style_ = {};
     this.maxNode_ = null;
+    this.summaryNode_ = null;
     this.contentsNode_ = null;
     this.navNodes_ = [];
     this.contentNodes_ = [];
@@ -169,7 +176,7 @@
     // even there is only one maxwindow per map. 
     this.style_ = setVals({}, defaultStyle);
     this.style_ = setVals(this.style_, opt_maxOptions.style);
-    createEl('div', null, sumNode, null, this.maxNode_);
+    this.summaryNode_ = createEl('div', null, sumNode, this.style_.summary, this.maxNode_);
     var navDiv = createEl('div', null, null, this.style_.tabBar, this.maxNode_);
     this.contentsNode_ = createEl('div', null, null, null, this.maxNode_);
     var tabOn = false;
@@ -216,6 +223,18 @@
       }
     }
   };
+  /**
+   * Get tab Container at given index or name
+   * @param {Number|String} t
+   * @return Node
+   */
+  TabbedMaxContent.prototype.getTabContainer = function (t) {
+    for (var i = 0, ct = this.contentNodes_.length; i < ct; i++) {
+      if (i === t || this.contentNodes_[i].name === t) {
+        return this.contentNodes_[i];
+      }
+    }
+  };
   
   /**
    * Adjust sizes of tab containers to fit in the max window. 
@@ -226,6 +245,7 @@
   TabbedMaxContent.prototype.checkResize = function () {
     var container = this.infoWindow_.getContentContainers()[0];
     var contents = this.contentsNode_;
+    var summary = this.summaryNode_;
     var contNodes = this.contentNodes_;
     // it appears GInfoWindow.maximizeend event is fired too early, 
     // before DOM is ready.
@@ -342,7 +362,7 @@
    * @param {MaxInfoWindowOptions} opt_maxOptions
    */
   GMarker.prototype.openInfoWindowMaxTabsHtml = function (map, html, summary, tabs, opt_maxOptions) {
-    map.openInfoWindowMaxTabs(this.getLatLng(), createEl('div', null, html), createEl('div', null, summary), tabs, opt_maxOptions);
+    map.openInfoWindowMaxTabsHtml(this.getLatLng(), html, summary, tabs, opt_maxOptions);
   };
   /**
    * Opens an info window with max content at the given point.
