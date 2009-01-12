@@ -1,13 +1,4 @@
-/**
- * @name Key Drag Zoom
- * @version 1.0.3
- * @author: Nianwei Liu [nianwei at gmail dot com] & Gary Little [gary at luxcentral dot com]
- * @fileoverview This lib provides a very simple drag zoom. Holding a user-defined special key (shift | ctrl | alt)
- *  while dragging a box will zoom to the desired area. 
- *  Only one line of code GMap2.enableKeyDragZoom() is needed.
- */
-/*!
- *
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +10,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+/**
+ * @name Key Drag Zoom
+ * @version 1.0.3
+ * @author: Nianwei Liu [nianwei at gmail dot com] & Gary Little [gary at luxcentral dot com]
+ * @fileoverview This lib provides a very simple drag zoom. Holding a user-defined special key (shift | ctrl | alt)
+ *  while dragging a box will zoom to the desired area. 
+ *  Only one line of code GMap2.enableKeyDragZoom() is needed.
  */
 (function () {
   /*jslint browser:true */
@@ -65,10 +64,11 @@ function getBorderWidths( h ) {
 
 		if ( computedStyle ) {
 
-			bw.top = parseInt(computedStyle.borderTopWidth || 0, 10);
-			bw.bottom = parseInt(computedStyle.borderBottomWidth || 0, 10);
-			bw.left = parseInt(computedStyle.borderLeftWidth || 0, 10);
-			bw.right = parseInt(computedStyle.borderRightWidth || 0, 10);
+			// The computed styles are always in pixel units (good!)
+			bw.top = parseInt(computedStyle.borderTopWidth, 10) || 0;
+			bw.bottom = parseInt(computedStyle.borderBottomWidth, 10) || 0;
+			bw.left = parseInt(computedStyle.borderLeftWidth, 10) || 0;
+			bw.right = parseInt(computedStyle.borderRightWidth, 10) || 0;
 
 			return bw;
 		}
@@ -77,10 +77,11 @@ function getBorderWidths( h ) {
 
 		if ( h.currentStyle ) {
 		
-			bw.top = parseInt(h.currentStyle["border-top-width"] || 0, 10);
-			bw.bottom = parseInt(h.currentStyle["border-bottom-width"] || 0, 10);
-			bw.left = parseInt(h.currentStyle["border-left-width"] || 0, 10);
-			bw.right = parseInt(h.currentStyle["border-right-width"] || 0, 10);
+			// The current styles may not be in pixel units so try to convert (bad!)
+			bw.top = parseInt(toPixels(h.currentStyle.borderTopWidth), 10) || 0;
+			bw.bottom = parseInt(toPixels(h.currentStyle.borderBottomWidth), 10) || 0;
+			bw.left = parseInt(toPixels(h.currentStyle.borderLeftWidth), 10) || 0;
+			bw.right = parseInt(toPixels(h.currentStyle.borderRightWidth), 10) || 0;
 
 			return bw;
 		}
@@ -92,6 +93,34 @@ function getBorderWidths( h ) {
 	bw.right = parseInt(h.style["border-right-width"], 10) || 0;
 
 	return bw;
+}
+
+// Converts 'thin', 'medium', and 'thick' to pixel widths
+// in an MSIE environment. Not called for other browsers
+// because getComputedStyle() does this automatically.
+//
+function toPixels( value ) {
+
+	var px;
+
+	switch (value) {
+	
+		case 'thin':
+			px = "2px";
+			break;
+	
+		case 'medium':
+			px = "4px";
+			break;
+	
+		case 'thick':
+			px = "6px";
+			break;
+		
+		default:
+			px = value;
+	}
+	return px;
 }
 
 /**
@@ -367,6 +396,10 @@ function getElementPosition( h ) {
     setVals(paneDiv.style, opt_zoomOpts.paneStyle);
     // stuff that can not be overwritten
     setVals(paneDiv.style, {position: 'absolute', overflow: 'hidden',  zIndex: 101, display: 'none'});
+    if ( key == 'shift' ) { // Workaround for Firefox Shift-Click problem
+    
+    	paneDiv.style.MozUserSelect = "none";
+    }
     setOpacity(paneDiv);
     // an IE fix: if background transparent, it can not capture mousedown
     if (paneDiv.style.backgroundColor === 'transparent') {
