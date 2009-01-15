@@ -575,17 +575,18 @@
         res = results[i];
         layerName = res.layerName;
         if (!ret[layerName]) {
-          var fields = [];
+          var fieldAliases = {};//[];
           for (var x in res.attributes) {
             if (res.attributes.hasOwnProperty(x)) {
-              fields.push(x);
+             // fields.push(x);
+              fieldAliases[x] = x;
             }
           }
           var set = {
             displayFieldName: res.displayFieldName,
             spatialReference: res.geometry ? res.geometry.spatialReference : null,
             geometryType: res.geometryType,
-            fieldAliases: fields,
+            fieldAliases: fieldAliases,
             features: []
           };
           ret[layerName] = set;
@@ -606,10 +607,16 @@
     var html = '<table class="ags-resultset">';
     var i, j, c, d;
     style = style || (res.features.length === 1? 'v' : 'h');
+    var fields = [];
+    for (var x in res.fieldAliases) {
+      if (res.fieldAliases.hasOwnProperty(x)) {
+        fields.push(x);
+      }
+    }
     if (style === 'h') {
       html += '<tr>';
-      for (i = 0, c = res.fieldAliases.length; i < c; i++) {
-        html += '<th class="ags-fieldname">' + res.fieldAliases[i] + '</th>';
+      for (i = 0, c = fields.length; i < c; i++) {
+        html += '<th class="ags-fieldname">' + res.fieldAliases[fields[i]] + '</th>';
       }
       html += '</tr>';
     }
@@ -620,11 +627,11 @@
       } else if (i > 0) {
         html += '<tr><td colspan="2"><hr/></td></tr>';
       }
-      for (j = 0, d = res.fieldAliases.length; j < d; j++) {
+      for (j = 0, d = fields.length; j < d; j++) {
         if (style === 'h') {
-          html += '<td class="ags-fieldvalue">' + atts[res.fieldAliases[j]] + '</td>';
+          html += '<td class="ags-fieldvalue">' + atts[fields[j]] + '</td>';
         } else {
-          html += '<tr><td class="ags-fieldname">' + res.fieldAliases[j] + '</td><td class="ags-fieldvalue">' + atts[res.fieldAliases[j]] + '</td></tr>';
+          html += '<tr><td class="ags-fieldname">' + res.fieldAliases[fields[j]] + '</td><td class="ags-fieldvalue">' + atts[fields[j]] + '</td></tr>';
         }
       }
       if (style === 'h') {
