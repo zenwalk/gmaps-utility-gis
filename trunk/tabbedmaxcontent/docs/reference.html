@@ -156,7 +156,7 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
       
     
       <h2><a name="TabbedMaxContent"></a>class TabbedMaxContent</h2>
-      <p>This class represent the max content in the info window. It has three parts:summary info; tab Navigation bar, and tabbed contents.There is no public constructor for this class. If needed, it can be accessed via <code>GMap2.getInfoWindowMaxContent()</code> AFTER <code>openInfoWindowMaxTabs*</code>is called.</p>
+      <p>This class represent the max content in the info window. It has three parts:summary info; tab Navigation bar, and tabbed contents.There is no public constructor for this class. If needed, it can be accessed via <code>GMap2.getInfoWindowMaxContent()</code></p>
       
         <h3>Methods</h3>
         <table summary="class TabbedMaxContent - Methods" width="90%">
@@ -186,7 +186,7 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
                 <td><code>getTabContainer(<span class="type">t:Number|String</span>)</code></td>
                 
                   
-                    <td><code></code></td>
+                    <td><code>Node</code></td>
                   
                 
                 <td>Get tab Container at given index or name</td>
@@ -220,13 +220,13 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
             </tr>
             
               <tr class="odd">
-                <td><code>tabselected</code></td>
+                <td><code>selecttab</code></td>
                 
                   
-                    <td><code><span class="type">index:Number</span></code></td>
+                    <td><code><span class="type">name:String</span>, <span class="type">Node:Node</span></code></td>
                   
                 
-                <td>This event is fired after a tab is selected</td>
+                <td>This event is fired after a tab is selected. Passing tab name and container node as parameters.</td>
               </tr>
             
           </tbody>

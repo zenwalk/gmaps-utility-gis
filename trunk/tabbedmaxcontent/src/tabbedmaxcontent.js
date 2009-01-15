@@ -56,11 +56,11 @@
       borderWidth: '1px',
       borderColor: '#B0B0B0',
       borderTop: 'none',
-      overflow:'auto'
+      overflow: 'auto'
     },
-    summary:{
-      overflow:'auto',
-      marginBottom:'5px'
+    summary: {
+      overflow: 'auto',
+      marginBottom: '5px'
     }
   };
   /**
@@ -135,16 +135,14 @@
  * @class This class represent the max content in the info window. It has three parts:
  * summary info; tab Navigation bar, and tabbed contents.
  * There is no public constructor for this class. If needed, it can be accessed via 
- * <code>GMap2.getInfoWindowMaxContent()</code> AFTER <code>openInfoWindowMaxTabs*</code>
- * is called.
- * @param {GMap2} map 
+ * <code>GMap2.getInfoWindowMaxContent()</code> 
+ * @param {GInfoWindow} iw 
  */
-  function TabbedMaxContent(map) {
-    this.map_ = map;
-    this.infoWindow_ = map.getInfoWindow();
-    GEvent.bind(this.infoWindow_, 'maximizeclick', this, this.setupTabs_);
-    GEvent.bind(this.infoWindow_, 'restoreclick', this, this.clearTabs_);
-    GEvent.bind(this.infoWindow_, 'maximizeend', this, this.checkResize);
+  function TabbedMaxContent(iw) {
+    this.infoWindow_ = iw;
+    GEvent.bind(iw, 'maximizeclick', this, this.setupTabs_);
+    GEvent.bind(iw, 'restoreclick', this, this.clearTabs_);
+    GEvent.bind(iw, 'maximizeend', this, this.checkResize);
     this.style_ = {};
     this.maxNode_ = null;
     this.summaryNode_ = null;
@@ -179,20 +177,19 @@
     this.summaryNode_ = createEl('div', null, sumNode, this.style_.summary, this.maxNode_);
     var navDiv = createEl('div', null, null, this.style_.tabBar, this.maxNode_);
     this.contentsNode_ = createEl('div', null, null, null, this.maxNode_);
-    var tabOn = false;
+    //var tabOn = false;
     if (tabs && tabs.length) {
       // left
       createEl('span', null, null, this.style_.tabLeft, navDiv);
       for (var i = 0, ct = tabs.length; i < ct; i++) {
-        tabOn = false;
         if (i === selectedTab || tabs[i].name === selectedTab) {
-          tabOn = true;
+          this.selectedTab_ = i;
         }
         // note: used 2 undocumented property to avoid creating a new class.
         //http://code.google.com/p/gmaps-api-issues/issues/detail?id=712
-        this.navNodes_.push(createEl('span', null, tabs[i].name, tabOn ? this.style_.tabOn : this.style_.tabOff, navDiv));
+        this.navNodes_.push(createEl('span', null, tabs[i].name, this.style_.tabOff, navDiv));
         var cont = createEl('div', null, tabs[i].contentElem, this.style_.content, this.contentsNode_);
-        cont.style.display = tabOn ? 'block' : 'none';
+        cont.style.display = 'none';
         cont.name = tabs[i].name;
         this.contentNodes_.push(cont);
       }
@@ -210,13 +207,16 @@
       if (i === t || this.contentNodes_[i].name === t) {
         setVals(this.navNodes_[i].style, this.style_.tabOn);
         this.contentNodes_[i].style.display = 'block';
+        this.selectedTab_ = i;
        /**
-       * This event is fired after a tab is selected
-       * @name TabbedMaxContent#tabselected
-       * @param {Number} index of selected tab
+       * This event is fired after a tab is selected. 
+       * Passing tab name and container node as parameters.
+       * @name TabbedMaxContent#selecttab
+       * @param {String} name of selected tab
+       * @param {Node} Node of tab container
        * @event
        */
-        GEvent.trigger(this, 'selecttab', t);
+        GEvent.trigger(this, 'selecttab', this.contentNodes_[i].name, this.contentNodes_[i]);
       } else {
         setVals(this.navNodes_[i].style, this.style_.tabOff);
         this.contentNodes_[i].style.display = 'none';
@@ -226,7 +226,7 @@
   /**
    * Get tab Container at given index or name
    * @param {Number|String} t
-   * @return Node
+   * @return {Node}
    */
   TabbedMaxContent.prototype.getTabContainer = function (t) {
     for (var i = 0, ct = this.contentNodes_.length; i < ct; i++) {
@@ -264,6 +264,9 @@
    */
   TabbedMaxContent.prototype.setupTabs_ = function () {
     for (var i = 0, ct = this.navNodes_.length; i < ct; i++) {
+      if (i === this.selectedTab_ && this.contentNodes_[i].style.display === 'none') {
+        this.selectTab(this.selectedTab_);
+      }
       GEvent.addDomListener(this.navNodes_[i], 'click', GEvent.callback(this, this.selectTab, i));
     }
   };
@@ -340,8 +343,11 @@
    * @return {TabbedMaxContent}
    */
   GMap2.prototype.getInfoWindowMaxContent = function () {
-    this.maxContent_ = this.maxContent_ || new TabbedMaxContent(this);
-    return this.maxContent_;
+    var iw = this.getInfoWindow();
+    if (!iw.maxContent_) {
+      iw.maxContent_ = new TabbedMaxContent(iw);
+    }
+    return iw.maxContent_;
   };
   
   /**
