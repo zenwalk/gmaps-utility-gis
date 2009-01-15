@@ -1402,7 +1402,7 @@
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://resources.esri.com/help/9.3/arcgisserver/apis/rest/query.html'>Query Operation</a>.
    * @property {String} [displayFieldName] display Field Name for layer
-   * @property {String[]} [fieldAliases] Field Name's Aliases
+   * @property {Object} [fieldAliases] Field Name's Aliases. key is field name, value is alias.
    * @property {String} [geometryType] esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolygon | esriGeometryPolyline
    * @property {Object} [spatialReference] spatial Reference <b>wkid info only</b>
    * @property {Features[]} [features] result as array of {@link ArcGISFeature}
