@@ -90,6 +90,49 @@ In the following example, you can drag zoom by hold the CTRL key</p>
 <a href="../examples/ctrlkey.html?packed">Packed </a> |
 </p>
 </div>
+<div><h2><span lang="en-us">Multiple Map</span></h2> 
+<p>Each map has its own drag zoom tool.</p>
+
+<pre class="prettyprint">
+        function init(){
+          var map1 = new GMap2(document.getElementById("map1"));
+          map1.enableKeyDragZoom();
+          var map2 = new GMap2(document.getElementById("map1"));
+          map2.enableKeyDragZoom();
+        }
+    </pre>
+
+<p>
+<a href="../examples/multimap.html">View example </a> |
+<a href="../examples/multimap.html?packed">Packed </a> |
+</p>
+</div>
+
+<div><h2><span lang="en-us">Events</span></h2> 
+<p>The dragzoom tool triggers different events at key moments of the drag zoom operation.</p>
+
+<pre class="prettyprint">
+       map.enableKeyDragZoom();
+          var dz = map.getDragZoomObject();
+          GEvent.addListener(dz, 'activate', function() {
+            GLog.write('DragZoom Activated');
+          });
+          GEvent.addListener(dz, 'dragstart', function() {
+            GLog.write('DragZoom Started');
+          });
+          GEvent.addListener(dz, 'drag', function() {
+            GLog.write('DragZoom Dragging...');
+          });
+        }
+    </pre>
+
+<p>
+<a href="../examples/events.html">View example </a> |
+<a href="../examples/events.html?packed">Packed </a> |
+</p>
+
+          
+</div>
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
