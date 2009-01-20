@@ -242,8 +242,8 @@
     this.hotKeyDown_ = false;
     this.dragging_ = false;
     
-    this.startLatLng_ = null;
-    this.endLatLng_ = null;
+    this.startPt_ = null;
+    this.endPt_ = null;
     this.mapPosn_ = null;
     this.boxMaxX_ = null;
     this.boxMaxY_ = null;
@@ -256,13 +256,11 @@
    * Draw the drag box. 
    */
   DragZoom.prototype.drawBox_ = function () {
-    if (this.map_ && this.startLatLng_ && this.endLatLng_) {
-      var start = this.map_.fromLatLngToContainerPixel(this.startLatLng_);
-      var end = this.map_.fromLatLngToContainerPixel(this.endLatLng_);
-      this.boxDiv_.style.left = Math.min(start.x, end.x) + 'px';
-      this.boxDiv_.style.top = Math.min(start.y, end.y) + 'px';
-      this.boxDiv_.style.width = Math.abs(start.x - end.x) + 'px';
-      this.boxDiv_.style.height = Math.abs(start.y - end.y) + 'px';
+   if (this.map_ && this.startPt_ && this.endPt_) {
+      this.boxDiv_.style.left = Math.min(this.startPt_.x, this.endPt_.x) + 'px';
+      this.boxDiv_.style.top = Math.min(this.startPt_.y, this.endPt_.y) + 'px';
+      this.boxDiv_.style.width = Math.abs(this.startPt_.x - this.endPt_.x) + 'px';
+      this.boxDiv_.style.height = Math.abs(this.startPt_.y - this.endPt_.y) + 'px';
       this.boxDiv_.style.display = 'block';
     }
   };
@@ -270,9 +268,9 @@
    * Zoom to the drag box
    */
   DragZoom.prototype.zoomBox_  = function () {
-    if (this.map_ && this.startLatLng_ && this.endLatLng_) {
-      var sw = new GLatLng(Math.min(this.startLatLng_.lat(), this.endLatLng_.lat()), Math.min(this.startLatLng_.lng(), this.endLatLng_.lng()));
-      var ne = new GLatLng(Math.max(this.startLatLng_.lat(), this.endLatLng_.lat()), Math.max(this.startLatLng_.lng(), this.endLatLng_.lng()));
+    if (this.map_ && this.startPt_ && this.endPt_) {
+      var sw = this.map_.fromContainerPixelToLatLng(new GPoint(Math.min(this.startPt_.x, this.endPt_.x), Math.max(this.startPt_.y, this.endPt_.y)));
+      var ne = this.map_.fromContainerPixelToLatLng(new GPoint(Math.max(this.startPt_.x, this.endPt_.x), Math.min(this.startPt_.y, this.endPt_.y)));
       var bnds = new GLatLngBounds(sw, ne);
       var level = this.map_.getBoundsZoomLevel(bnds);
       this.map_.setCenter(bnds.getCenter(), level);
@@ -343,7 +341,7 @@
    */
   DragZoom.prototype.onMouseDown_ = function (e) {
     if (this.map_ && this.hotKeyDown_) {
-      this.startLatLng_ = this.endLatLng_ = null;
+      this.startPt_ = this.endPt_ = null;
       this.mapPosn_ = getElementPosition(this.map_.getContainer());
       this.dragging_ = true;
       /**
@@ -368,18 +366,20 @@
       p.y = Math.min(p.y, this.boxMaxY_);
       p.x = Math.max(p.x, 0);
       p.y = Math.max(p.y, 0);
-      var latlng = this.map_.fromContainerPixelToLatLng(p);
-      if (!this.startLatLng_) {
-        this.startLatLng_ = latlng;
+      if (!this.startPt_) {
+        this.startPt_ = p; 
       }
-      this.endLatLng_ = latlng;
+      this.endPt_ = p;
       this.drawBox_();
       /**
-       * This event is repeatedly fired while the user drags the  box
+       * This event is repeatedly fired while the user drags the box. The start point and mouse point
+       * is passed as parameter of type GPoint, relative to map container.
        * @name DragZoom#drag 
+       * @param {GPoint} start
+       * @param {GPoint} end
        * @event
        */
-      GEvent.trigger(this, 'drag'); // need parameters? two GPoint?
+      GEvent.trigger(this, 'drag', this.startPt_, this.endPt_); // need parameters? two GPoint?
     }
   };
   /**
