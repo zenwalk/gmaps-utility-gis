@@ -12,6 +12,77 @@
 This lib provides a very simple drag zoom. Holding a user-defined special key (shift | ctrl | alt) while dragging a box will zoom to the desired area.  Only one line of code GMap2.enableKeyDragZoom() is needed.</p>
     <p>For a description and examples of how to use this library, check out the <a href="examples.html">how-to</a>.</p>
     
+      <h2><a name="DragZoom"></a>class DragZoom</h2>
+      <p>This class represents a drag zoom object for a map. It can be activated by holding a special key.This is no constructor for this class. Use GMap2.getDragZoomObject() to gain access to this object.</p>
+      
+        <h3>Events</h3>
+        <table summary="class DragZoom - Events" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Events</th>
+              
+                
+                  <th>Arguments</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>activate</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>This event is fired after the DragZoom tool is activated.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>deactivate</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>This event is fired while the user release the key</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>drag</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>This event is repeatedly fired while the user drags the  box</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>dragend</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>This event is fired after drag end</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>dragstart</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>This event is fired when drag started.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
       <h2><a name="GMap2"></a>class GMap2</h2>
       <p>These are new methods added to Google Maps API's<a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GMap2'>GMap2</a>class.</p>
       
@@ -50,6 +121,16 @@ This lib provides a very simple drag zoom. Holding a user-defined special key (s
               </tr>
             
               <tr class="odd">
+                <td><code>getDragZoomObject()</code></td>
+                
+                  
+                    <td><code>DragZoom</code></td>
+                  
+                
+                <td>Returns the DragZoom Object on this map instance after <code>GMap2.enableKeyDragZoom</code> is called.EventListened can be attached afterwards.</td>
+              </tr>
+            
+              <tr class="even">
                 <td><code>keyDragZoomEnabled()</code></td>
                 
                   
@@ -107,7 +188,7 @@ This lib provides a very simple drag zoom. Holding a user-defined special key (s
                     <td><code>String</code></td>
                   
                 
-                <td>the modifier key to use while dragging the box, <code> shift | alt | ctrl </code>. Default is shift.</td>
+                <td>the modifier key to use while this.dragging_ the box, <code> shift | alt | ctrl </code>. Default is shift.</td>
               </tr>
             
               <tr class="even">
@@ -117,7 +198,7 @@ This lib provides a very simple drag zoom. Holding a user-defined special key (s
                     <td><code>Object</code></td>
                   
                 
-                <td>the css style of the pane which overlays the map when a drag zoom is activated. e.g. <code> {backgroundColor: 'gray', opacity: 0.2}</code>.</td>
+                <td>the css style of the pane which overlays the this.map_ when a drag zoom is activated. e.g. <code> {backgroundColor: 'gray', opacity: 0.2}</code>.</td>
               </tr>
             
           </tbody>

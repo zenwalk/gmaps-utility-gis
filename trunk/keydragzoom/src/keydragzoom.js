@@ -169,79 +169,124 @@
   /**
    * @name KeyDragZoomOptions
    * @class This class represents the optional parameter passed into GMap2.enableDragBoxZoom().
-   * @property {String} [key] the modifier key to use while dragging the box, <code> shift | alt | ctrl </code>. Default is shift.
+   * @property {String} [key] the modifier key to use while this.dragging_ the box, <code> shift | alt | ctrl </code>. Default is shift.
    * @property {Object} [boxStyle] the css style of the zoom box.  e.g. <code> {border: '2px dashed red'} </code>
-   * @property {Object} [paneStyle] the css style of the pane which overlays the map when a drag zoom is activated. 
+   * @property {Object} [paneStyle] the css style of the pane which overlays the this.map_ when a drag zoom is activated. 
    * e.g. <code> {backgroundColor: 'gray', opacity: 0.2}</code>.
    * @property {Object} [callbacks] the callback functions for dragstart, drag, dragend [NOT YET IMPLEMENTED]
    */
   /**
-   * Object to enable drag zoom on a map
-   * @param {Object} opt_zoomOpts
+   * @name DragZoom
+   * @class This class represents a drag zoom object for a map. It can be activated by holding a special key.
+   * This is no constructor for this class. Use GMap2.getDragZoomObject() to gain access to this object.
+   * @param {GMap2} map
+   * @param {KeyDragZoomOptions} opt_zoomOpts
    */
-  function DragZoom(opt_zoomOpts) {
+  function DragZoom(map, opt_zoomOpts) {
+    this.map_ = map;
+    opt_zoomOpts = opt_zoomOpts || {};
+    this.key_ = opt_zoomOpts.key || 'shift';
+    this.key_ = this.key_.toLowerCase();
     
+    this.borderWidths_ = getBorderWidths(this.map_.getContainer());
+    
+    this.paneDiv_ = document.createElement("div");
+    this.paneDiv_.onselectstart = function () {
+      return false;
+    };
+    // default style
+    setVals(this.paneDiv_.style, {
+      backgroundColor: 'white',
+      opacity: 0.0,
+      cursor: 'crosshair'
+    });
+    // allow overwrite 
+    setVals(this.paneDiv_.style, opt_zoomOpts.paneStyle);
+    // stuff that can not be overwritten
+    setVals(this.paneDiv_.style, {
+      position: 'absolute',
+      overflow: 'hidden',
+      zIndex: 101,
+      display: 'none'
+    });
+    if (this.key_ === 'shift') { // Workaround for Firefox Shift-Click problem
+      this.paneDiv_.style.MozUserSelect = "none";
+    }
+    setOpacity(this.paneDiv_);
+    // an IE fix: if background transparent, it can not capture mousedown
+    if (this.paneDiv_.style.backgroundColor === 'transparent') {
+      this.paneDiv_.style.backgroundColor = 'white';
+      setOpacity(this.paneDiv_, 0);
+    }
+    this.map_.getContainer().appendChild(this.paneDiv_);
+    
+    this.boxDiv_ = document.createElement('div');
+    setVals(this.boxDiv_.style, {
+      border: 'thin solid #FF0000'
+    });
+    setVals(this.boxDiv_.style, opt_zoomOpts.boxStyle);
+    setVals(this.boxDiv_.style, {
+      position: 'absolute',
+      display: 'none'
+    });
+    setOpacity(this.boxDiv_);
+    this.map_.getContainer().appendChild(this.boxDiv_);
+    
+    this.boxBorderWidths_ = getBorderWidths(this.boxDiv_);
+    this.keyDownListener_ = GEvent.bindDom(document, 'keydown',  this, this.onKeyDown_);
+    this.keyUpListener_ = GEvent.bindDom(document, 'keyup', this, this.onKeyUp_);
+    this.mouseDownListener_ = GEvent.bindDom(this.paneDiv_, 'mousedown', this, this.onMouseDown_);
+    this.mouseMoveListener_ = GEvent.bindDom(document, 'mousemove', this, this.onMouseMove_);
+    this.mouseUpListener_ = GEvent.bindDom(document, 'mouseup', this, this.onMouseUp_);
+  
+    this.hotKeyDown_ = false;
+    this.dragging_ = false;
+    
+    this.startLatLng_ = null;
+    this.endLatLng_ = null;
+    this.mapPosn_ = null;
+    this.boxMaxX_ = null;
+    this.boxMaxY_ = null;
     
   }
-  var key = null;//shift|crtl|alt
-  var keyUpListener = null;
-  var keyDownListener = null;
-  var mouseDownListener = null;
-  var mouseMoveListener = null;
-  var mouseUpListener = null;
   
-  var borderWidths = null;
-  var boxBorderWidths = null;
-  var boxDiv = null;
-  var paneDiv = null;
-  
-  var hotKeyDown = false;
-  var dragging = false;
-  
-  var startLatLng = null;
-  var endLatLng = null;
-  var mapPosn = null;
-  var boxMaxX, boxMaxY;
-  
-  var map = null;
 
 
   /**
    * Draw the drag box. 
    */
-  function drawBox() {
-    if (map && startLatLng && endLatLng) {
-      var start = map.fromLatLngToContainerPixel(startLatLng);
-      var end = map.fromLatLngToContainerPixel(endLatLng);
-      boxDiv.style.left = Math.min(start.x, end.x) + 'px';
-      boxDiv.style.top = Math.min(start.y, end.y) + 'px';
-      boxDiv.style.width = Math.abs(start.x - end.x) + 'px';
-      boxDiv.style.height = Math.abs(start.y - end.y) + 'px';
-      boxDiv.style.display = 'block';
+  DragZoom.prototype.drawBox_ = function () {
+    if (this.map_ && this.startLatLng_ && this.endLatLng_) {
+      var start = this.map_.fromLatLngToContainerPixel(this.startLatLng_);
+      var end = this.map_.fromLatLngToContainerPixel(this.endLatLng_);
+      this.boxDiv_.style.left = Math.min(start.x, end.x) + 'px';
+      this.boxDiv_.style.top = Math.min(start.y, end.y) + 'px';
+      this.boxDiv_.style.width = Math.abs(start.x - end.x) + 'px';
+      this.boxDiv_.style.height = Math.abs(start.y - end.y) + 'px';
+      this.boxDiv_.style.display = 'block';
     }
-  }
+  };
   /**
    * Zoom to the drag box
    */
-  function zoomBox() {
-    if (map && startLatLng && endLatLng) {
-      var sw = new GLatLng(Math.min(startLatLng.lat(), endLatLng.lat()), Math.min(startLatLng.lng(), endLatLng.lng()));
-      var ne = new GLatLng(Math.max(startLatLng.lat(), endLatLng.lat()), Math.max(startLatLng.lng(), endLatLng.lng()));
+  DragZoom.prototype.zoomBox_  = function () {
+    if (this.map_ && this.startLatLng_ && this.endLatLng_) {
+      var sw = new GLatLng(Math.min(this.startLatLng_.lat(), this.endLatLng_.lat()), Math.min(this.startLatLng_.lng(), this.endLatLng_.lng()));
+      var ne = new GLatLng(Math.max(this.startLatLng_.lat(), this.endLatLng_.lat()), Math.max(this.startLatLng_.lng(), this.endLatLng_.lng()));
       var bnds = new GLatLngBounds(sw, ne);
-      var level = map.getBoundsZoomLevel(bnds);
-      map.setCenter(bnds.getCenter(), level);
+      var level = this.map_.getBoundsZoomLevel(bnds);
+      this.map_.setCenter(bnds.getCenter(), level);
     }
-  }
+  };
   /**
    * Returns true if a hot key is pressed in the event
    * @param {Event} e
    * @return {Boolean}
    */
-  function isHotKeyDown(e) {
-  
+  DragZoom.prototype.isHotKeyDown_ = function (e) {
     var isHot;
     e = e || window.event;
-    isHot = (e.shiftKey && key === 'shift') || (e.altKey && key === 'alt') || (e.ctrlKey && key === 'ctrl');
+    isHot = (e.shiftKey && this.key_ === 'shift') || (e.altKey && this.key_ === 'alt') || (e.ctrlKey && this.key_ === 'ctrl');
     if (!isHot) {
       // Need to look at keyCode for Opera because it
       // doesn't set the shiftKey, altKey, ctrlKey properties
@@ -251,98 +296,128 @@
       // Also see http://unixpapa.com/js/key.html
       switch (e.keyCode) {
       case 16:
-        if (key === 'shift') {
+        if (this.key_ === 'shift') {
           isHot = true;
         }
         break;
       case 17:
-        if (key === 'ctrl') {
+        if (this.key_ === 'ctrl') {
           isHot = true;
         }
         break;
       case 18:
-        if (key === 'alt') {
+        if (this.key_ === 'alt') {
           isHot = true;
         }
         break;
       }
     }
     return isHot;
-  }
+  };
    /**
    * Handle key down
    * @param {Event} e
    */
-  function onKeyDown(e) {
-    if (map && !hotKeyDown && isHotKeyDown(e)) {
-      hotKeyDown = true;
-      var size = map.getSize();
-      paneDiv.style.left = 0 + 'px';
-      paneDiv.style.top = 0 + 'px';
-      paneDiv.style.width = size.width - (borderWidths.left + borderWidths.right) + 'px';
-      paneDiv.style.height = size.height - (borderWidths.top + borderWidths.bottom) + 'px';
-      paneDiv.style.display = 'block';
-      boxMaxX = parseInt(paneDiv.style.width, 10) - (boxBorderWidths.left + boxBorderWidths.right);
-      boxMaxY = parseInt(paneDiv.style.height, 10) - (boxBorderWidths.top + boxBorderWidths.bottom);
+  DragZoom.prototype.onKeyDown_ = function (e) {
+    if (this.map_ && !this.hotKeyDown_ && this.isHotKeyDown_(e)) {
+      this.hotKeyDown_ = true;
+      var size = this.map_.getSize();
+      this.paneDiv_.style.left = 0 + 'px';
+      this.paneDiv_.style.top = 0 + 'px';
+      this.paneDiv_.style.width = size.width - (this.borderWidths_.left + this.borderWidths_.right) + 'px';
+      this.paneDiv_.style.height = size.height - (this.borderWidths_.top + this.borderWidths_.bottom) + 'px';
+      this.paneDiv_.style.display = 'block';
+      this.boxMaxX_ = parseInt(this.paneDiv_.style.width, 10) - (this.boxBorderWidths_.left + this.boxBorderWidths_.right);
+      this.boxMaxY_ = parseInt(this.paneDiv_.style.height, 10) - (this.boxBorderWidths_.top + this.boxBorderWidths_.bottom);
+     /**
+       * This event is fired after the DragZoom tool is activated. 
+       * @name DragZoom#activate
+       * @event
+       */
+      GEvent.trigger(this, 'activate');
     }
-  }
+  };
   /**
    * Handle mouse down
    * @param {Event} e
    */
-  function onMouseDown(e) {
-    if (map && hotKeyDown) {
-      startLatLng = endLatLng = null;
-      mapPosn = getElementPosition(map.getContainer());
-      dragging = true;
+  DragZoom.prototype.onMouseDown_ = function (e) {
+    if (this.map_ && this.hotKeyDown_) {
+      this.startLatLng_ = this.endLatLng_ = null;
+      this.mapPosn_ = getElementPosition(this.map_.getContainer());
+      this.dragging_ = true;
+      /**
+       * This event is fired when drag started. 
+       * @name DragZoom#dragstart
+       * @event
+       */
+      GEvent.trigger(this, 'dragstart');
     }
-  }
+  };
   /**
    * Handle mouse move
    * @param {Event} e
    */
-  function onMouseMove(e) {
-    if (dragging) {
+  DragZoom.prototype.onMouseMove_ = function (e) {
+    if (this.dragging_) {
       var mousePosn = getMousePosition(e);
       var p = new GPoint();
-      p.x = mousePosn.left - mapPosn.left - borderWidths.left;
-      p.y = mousePosn.top - mapPosn.top - borderWidths.top;
-      p.x = Math.min(p.x, boxMaxX);
-      p.y = Math.min(p.y, boxMaxY);
+      p.x = mousePosn.left - this.mapPosn_.left - this.borderWidths_.left;
+      p.y = mousePosn.top - this.mapPosn_.top - this.borderWidths_.top;
+      p.x = Math.min(p.x, this.boxMaxX_);
+      p.y = Math.min(p.y, this.boxMaxY_);
       p.x = Math.max(p.x, 0);
       p.y = Math.max(p.y, 0);
-      var latlng = map.fromContainerPixelToLatLng(p);
-      if (!startLatLng) {
-        startLatLng = latlng;
+      var latlng = this.map_.fromContainerPixelToLatLng(p);
+      if (!this.startLatLng_) {
+        this.startLatLng_ = latlng;
       }
-      endLatLng = latlng;
-      drawBox();
+      this.endLatLng_ = latlng;
+      this.drawBox_();
+      /**
+       * This event is repeatedly fired while the user drags the  box
+       * @name DragZoom#drag 
+       * @event
+       */
+      GEvent.trigger(this, 'drag'); // need parameters? two GPoint?
     }
-  }
+  };
   /**
    * Handle mouse up
    * @param {Event} e
    */
-  function onMouseUp(e) {
-    if (dragging) {
-      zoomBox();
-      dragging = false;
+  DragZoom.prototype.onMouseUp_ = function (e) {
+    if (this.dragging_) {
+      this.zoomBox_();
+      this.dragging_ = false;
     }
-    boxDiv.style.display = 'none';
-  }
+    this.boxDiv_.style.display = 'none';
+    /**
+       * This event is fired after drag end
+       * @name DragZoom#dragend 
+       * @event
+       */
+    GEvent.trigger(this, 'dragend'); // need parameters? two GPoint?
+  };
  
   /**
    * Handle key up
    * @param {Event} e
    */
-  function onKeyUp(e) {
-    if (map && hotKeyDown) {
-      hotKeyDown = false;
-      dragging = false;
-      boxDiv.style.display = 'none';
-      paneDiv.style.display = "none";
+  DragZoom.prototype.onKeyUp_ = function (e) {
+    if (this.map_ && this.hotKeyDown_) {
+      this.hotKeyDown_ = false;
+      this.dragging_ = false;
+      this.boxDiv_.style.display = 'none';
+      this.paneDiv_.style.display = "none";
+      /**
+       * This event is fired while the user release the key
+       * @name DragZoom#deactivate 
+       * @event
+       */
+      GEvent.trigger(this, 'deactivate'); // need parameters? two GPoint?
     }
-  }
+  };
 
  
   
@@ -360,77 +435,22 @@
    */
   
   GMap2.prototype.enableKeyDragZoom = function (opt_zoomOpts) {
-    map = this;
-    opt_zoomOpts = opt_zoomOpts ||
-    {};
-    key = opt_zoomOpts.key || 'shift';
-    key = key.toLowerCase();
-    
-    borderWidths = getBorderWidths(map.getContainer());
-    
-    paneDiv = document.createElement("div");
-    paneDiv.onselectstart = function () {
-      return false;
-    };
-    // default style
-    setVals(paneDiv.style, {
-      backgroundColor: 'white',
-      opacity: 0.0,
-      cursor: 'crosshair'
-    });
-    // allow overwrite 
-    setVals(paneDiv.style, opt_zoomOpts.paneStyle);
-    // stuff that can not be overwritten
-    setVals(paneDiv.style, {
-      position: 'absolute',
-      overflow: 'hidden',
-      zIndex: 101,
-      display: 'none'
-    });
-    if (key === 'shift') { // Workaround for Firefox Shift-Click problem
-      paneDiv.style.MozUserSelect = "none";
-    }
-    setOpacity(paneDiv);
-    // an IE fix: if background transparent, it can not capture mousedown
-    if (paneDiv.style.backgroundColor === 'transparent') {
-      paneDiv.style.backgroundColor = 'white';
-      setOpacity(paneDiv, 0);
-    }
-    map.getContainer().appendChild(paneDiv);
-    
-    boxDiv = document.createElement('div');
-    setVals(boxDiv.style, {
-      border: 'thin solid #FF0000'
-    });
-    setVals(boxDiv.style, opt_zoomOpts.boxStyle);
-    setVals(boxDiv.style, {
-      position: 'absolute',
-      display: 'none'
-    });
-    setOpacity(boxDiv);
-    map.getContainer().appendChild(boxDiv);
-    
-    boxBorderWidths = getBorderWidths(boxDiv);
-    
-    keyDownListener = GEvent.addDomListener(document, 'keydown', onKeyDown);
-    keyUpListener = GEvent.addDomListener(document, 'keyup', onKeyUp);
-    mouseDownListener = GEvent.addDomListener(paneDiv, 'mousedown', onMouseDown);
-    mouseMoveListener = GEvent.addDomListener(document, 'mousemove', onMouseMove);
-    mouseUpListener = GEvent.addDomListener(document, 'mouseup', onMouseUp);
+    this.dragZoom_ = new DragZoom(this, opt_zoomOpts);
   };
   /**
    * Disable drag zoom 
    */
   GMap2.prototype.disableKeyDragZoom = function () {
-    if (map) {
-      GEvent.removeListener(mouseDownListener);
-      GEvent.removeListener(mouseMoveListener);
-      GEvent.removeListener(mouseUpListener);
-      GEvent.removeListener(keyUpListener);
-      GEvent.removeListener(keyDownListener);
-      map.getContainer().removeChild(boxDiv);
-      map.getContainer().removeChild(paneDiv);
-      map = null;
+    var d = this.dragZoom_;
+    if (d) {
+      GEvent.removeListener(d.mouseDownListener_);
+      GEvent.removeListener(d.mouseMoveListener_);
+      GEvent.removeListener(d.mouseUpListener_);
+      GEvent.removeListener(d.keyUpListener_);
+      GEvent.removeListener(d.keyDownListener_);
+      this.getContainer().removeChild(d.boxDiv_);
+      this.getContainer().removeChild(d.paneDiv_);
+      this.dragZoom_ = null;
     }
   };
   /**
@@ -438,7 +458,14 @@
    * @return {Boolean}
    */
   GMap2.prototype.keyDragZoomEnabled = function () {
-    return map !== null;
+    return this.dragZoom_ !== null;
   };
-  
+  /**
+   * Returns the DragZoom Object on this map instance after <code>GMap2.enableKeyDragZoom</code> is called.
+   * EventListened can be attached afterwards. 
+   * @return {DragZoom}
+   */
+  GMap2.prototype.getDragZoomObject = function () {
+    return this.dragZoom_;
+  };
 })();
