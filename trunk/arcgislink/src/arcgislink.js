@@ -122,7 +122,7 @@
    *  create a namespace by name such as a.b.c
    * @param {String} ns
    */
-  function namespace(ns) {
+  var namespace = function (ns) {
     var i, c, n;
     var names = ns.split('.');
     n = window;
@@ -131,7 +131,7 @@
       n = n[names[i]];
     }
     return n;
-  }
+  };
   //http://code.google.com/p/gmaps-utility-library-dev/issues/detail?id=34
   //http://groups.google.com/group/Google-Maps-API/browse_thread/thread/c6c5bd8f6441a39e/f24f549218a279f5?#f24f549218a279f5
   // deal with the situation when user only loaded namespace.
@@ -305,27 +305,27 @@
  * @param {Object} start
  * @param {Object} end
  */
-  function extractString(full, start, end) {
+  var extractString = function (full, start, end) {
     var i = (start === '') ? 0 : full.indexOf(start);
     var e = end === '' ? full.length : full.indexOf(end, i + start.length);
     return full.substring(i + start.length, e);
-  }
+  };
   
   /**
    * If the object is String
    * @param {Object} o
    */
-  function isString(o) {
+  var isString = function (o) {
     return typeof o === 'string';
-  }
+  };
   
   /**
    * if the object is array
    * @param {Object} o
    */
-  function isArray(o) {
+  var isArray = function (o) {
     return o && o.splice;
-  }
+  };
   
   /**
    * Add the property of the src object to destination object if not already exists.
@@ -334,7 +334,7 @@
    * @param {Boolean} force
    * @return {Object}
    */
-  function augmentObject(src, dest, force) {
+  var augmentObject = function (src, dest, force) {
     if (src && dest) {
       var p;
       for (p in src) {
@@ -344,7 +344,7 @@
       }
     }
     return dest;
-  }
+  };
   
   /*
    * Wrapper around GEvent.trigger
@@ -352,11 +352,11 @@
    * @param {Object} evtName
    * @param {Object} args
    */
-  function triggerEvent(src, evtName, args) {
+  var triggerEvent = function (src, evtName, args) {
     if (GEvent) {
       GEvent.trigger.apply(this, arguments);
     }
-  }
+  };
   
   /**
    * Find out the index of obj in array
@@ -364,7 +364,7 @@
    * @param {Object} obj
    * @param {Boolean} ignoreCase
    */
-  function indexOf(arr, obj, ignoreCase) {
+  var indexOf = function (arr, obj, ignoreCase) {
     if (arr && obj) {
       if (arr.indexOf && !ignoreCase) {
         return arr.indexOf(obj);
@@ -377,26 +377,26 @@
       }
     }
     return -1;
-  }
+  };
   
-  function mergeArray(arr, sub) {
+  var mergeArray = function (arr, sub) {
     for (var i = 0, c = sub.length; i < c; i++) {
       arr.push(sub[i]);
     }
     return arr;
-  }
+  };
   
   /**
    * Remove element from array
    * @param {Array} arr
    * @param {Object} elm
    */
-  function removeFromArray(arr, elm) {
+  var removeFromArray = function (arr, elm) {
     var i = indexOf(arr, elm);
     if (i !== -1) {
       arr.splice(i, 1);
     }
-  }
+  };
  
 
   

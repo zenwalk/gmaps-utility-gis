@@ -68,7 +68,7 @@
    * @param {Object} obj target object
    * @param {Object} vals source object
    */
-  function setVals(obj, vals) {
+  var setVals = function (obj, vals) {
     if (obj && vals) {
       for (var x in vals) {
         if (vals.hasOwnProperty(x)) {
@@ -81,7 +81,7 @@
       }
     }
     return obj;
-  }
+  };
   /**
    * Create an element
    * @param {String} tag of element
@@ -91,7 +91,7 @@
    * @param {Node} parent if supplied, the node will be appended to the parent
    * @return {Node} the new or modified node
    */
-  function createEl(tag, attrs, content, style, parent) {
+  var createEl = function (tag, attrs, content, style, parent) {
     var node = content;
     if (!content || (content && typeof content === 'string')) {
       node = document.createElement(tag);
@@ -107,14 +107,14 @@
       parent.appendChild(node);
     }
     return node;
-  }
+  };
   
   /**
    * Get the offset position up to given parent
    * @param {Node} el
    * @param {Node} parent if null will get the DOM root.
    */
-  function getPosition(el, parent) {
+  var getPosition = function (el, parent) {
     var leftPos = 0;
     var topPos = 0;
     var par = el;
@@ -127,8 +127,7 @@
       left: leftPos,
       top: topPos
     };
-    
-  }
+  };
   
  /**
  * @name TabbedMaxContent
