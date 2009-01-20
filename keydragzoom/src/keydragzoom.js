@@ -1,4 +1,13 @@
-/*
+/**
+ * @name Key Drag Zoom
+ * @version 1.0.3
+ * @author: Nianwei Liu [nianwei at gmail dot com] & Gary Little [gary at luxcentral dot com]
+ * @fileoverview This lib provides a very simple drag zoom. Holding a user-defined special key (shift | ctrl | alt)
+ *  while dragging a box will zoom to the desired area. 
+ *  Only one line of code GMap2.enableKeyDragZoom() is needed.
+ */
+/*!
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10,14 +19,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-/**
- * @name Key Drag Zoom
- * @version 1.0.3
- * @author: Nianwei Liu [nianwei at gmail dot com] & Gary Little [gary at luxcentral dot com]
- * @fileoverview This lib provides a very simple drag zoom. Holding a user-defined special key (shift | ctrl | alt)
- *  while dragging a box will zoom to the desired area. 
- *  Only one line of code GMap2.enableKeyDragZoom() is needed.
  */
 (function () {
   /*jslint browser:true */
