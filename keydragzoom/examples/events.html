@@ -27,8 +27,8 @@
           GEvent.addListener(dz, 'dragstart', function() {
             GLog.write('DragZoom Started');
           });
-          GEvent.addListener(dz, 'drag', function() {
-            GLog.write('DragZoom Dragging...');
+          GEvent.addListener(dz, 'drag', function(start, end) {
+            GLog.write('DragZoom Dragging...'+start+end);
           });
           GEvent.addListener(dz, 'dragend', function() {
             GLog.write('DragZoom DragEnd');
@@ -49,7 +49,10 @@ height: 400px;
 
     </head>
     <body onload="init()">
-       Hold your shift key while dragging a box
+    <a href='?packed'>Packed </a> | 
+       <a href='?'> Unpacked</a> Version of the script.
+       <br/>
+          Hold your shift key while dragging a box
 
         <div id="map" ></div>
 
