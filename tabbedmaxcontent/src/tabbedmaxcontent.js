@@ -139,14 +139,15 @@
  */
   function TabbedMaxContent(iw) {
     this.infoWindow_ = iw;
-    GEvent.bind(iw, 'maximizeclick', this, this.setupTabs_);
-    GEvent.bind(iw, 'restoreclick', this, this.clearTabs_);
-    GEvent.bind(iw, 'maximizeend', this, this.checkResize);
+    GEvent.bind(iw, 'maximizeclick', this, this.onMaximizeClick_);
+    GEvent.bind(iw, 'restoreclick', this, this.onRestoreClick_);
+    GEvent.bind(iw, 'maximizeend', this, this.onMaximizeEnd_);
     this.style_ = {};
     this.maxNode_ = null;
     this.summaryNode_ = null;
-    this.contentsNode_ = null;
+    this.navsNode_ = null;
     this.navNodes_ = [];
+    this.contentsNode_ = null;
     this.contentNodes_ = [];
   }
   
@@ -158,15 +159,18 @@
    * @private
    */
   TabbedMaxContent.prototype.initialize_ = function (sumNode, tabs, opt_maxOptions) {
-    this.clearTabs_();
+    //this.onRestoreClick_();
     this.navNodes_ = [];
     this.contentNodes_ = [];
+    this.selectedTab_ = -1;
     if (this.maxNode_) {
+      GEvent.clearNode(this.maxNode_);
       this.maxNode_.innerHTML = '';
+    } else {
+      this.maxNode_ = createEl('div', {
+        id: 'maxcontent'
+      });
     }
-    this.maxNode_ = createEl('div', {
-      id: 'maxcontent'
-    });
     opt_maxOptions = opt_maxOptions || {};
     var selectedTab = opt_maxOptions.selectedTab || 0;
     // Note it is possible style can be different from one window open action to another open action.
@@ -174,52 +178,83 @@
     this.style_ = setVals({}, defaultStyle);
     this.style_ = setVals(this.style_, opt_maxOptions.style);
     this.summaryNode_ = createEl('div', null, sumNode, this.style_.summary, this.maxNode_);
-    var navDiv = createEl('div', null, null, this.style_.tabBar, this.maxNode_);
+    this.navsNode_ = createEl('div', null, null, this.style_.tabBar, this.maxNode_);
     this.contentsNode_ = createEl('div', null, null, null, this.maxNode_);
-    //var tabOn = false;
     if (tabs && tabs.length) {
       // left
-      createEl('span', null, null, this.style_.tabLeft, navDiv);
+      createEl('span', null, null, this.style_.tabLeft, this.navsNode_);
       for (var i = 0, ct = tabs.length; i < ct; i++) {
         if (i === selectedTab || tabs[i].name === selectedTab) {
           this.selectedTab_ = i;
         }
         // note: used 2 undocumented property to avoid creating a new class.
         //http://code.google.com/p/gmaps-api-issues/issues/detail?id=712
-        this.navNodes_.push(createEl('span', null, tabs[i].name, this.style_.tabOff, navDiv));
+        this.navNodes_.push(createEl('span', null, tabs[i].name, this.style_.tabOff, this.navsNode_));
         var cont = createEl('div', null, tabs[i].contentElem, this.style_.content, this.contentsNode_);
         cont.style.display = 'none';
         cont.name = tabs[i].name;
         this.contentNodes_.push(cont);
       }
       // right
-      createEl('span', null, null, this.style_.tabRight, navDiv);
+      createEl('span', null, null, this.style_.tabRight, this.navsNode_);
     }
   };
-  
+  /**
+   * Setup event listeners. The core API seems removed all liteners when restored to normal size
+   * @private
+   */
+  TabbedMaxContent.prototype.onMaximizeClick_ = function () {
+    for (var i = 0, ct = this.navNodes_.length; i < ct; i++) {
+      GEvent.addDomListener(this.navNodes_[i], 'click', GEvent.callback(this, this.selectTab, i));
+    }
+  };
+  /**
+   * Clean up listeners on tabs.
+   * @private
+   */
+  TabbedMaxContent.prototype.onRestoreClick_ = function () {
+    if (this.maxNode_) {
+      GEvent.clearNode(this.maxNode_);
+    }
+  };
+  /**
+   * Clean up listeners on tabs.
+   * @private
+   */
+  TabbedMaxContent.prototype.onMaximizeEnd_ = function () {
+    this.checkResize();
+   // move into checkResize  this.selectTab(this.selectedTab_);
+  };
   /**
    * Select tab at given index or name
    * @param {Number|String} t
    */
-  TabbedMaxContent.prototype.selectTab = function (t) {
+  TabbedMaxContent.prototype.selectTab = function(t) {
+    var trigger = false;
     for (var i = 0, ct = this.navNodes_.length; i < ct; i++) {
       if (i === t || this.contentNodes_[i].name === t) {
-        setVals(this.navNodes_[i].style, this.style_.tabOn);
-        this.contentNodes_[i].style.display = 'block';
-        this.selectedTab_ = i;
-       /**
-       * This event is fired after a tab is selected. 
+        if (this.contentNodes_[i].style.display === 'none') {
+          setVals(this.navNodes_[i].style, this.style_.tabOn);
+          this.contentNodes_[i].style.display = 'block';
+          this.selectedTab_ = i;  
+          trigger = true;
+        }
+      } else {
+        setVals(this.navNodes_[i].style, this.style_.tabOff);
+        this.contentNodes_[i].style.display = 'none';
+      }
+    }
+    // avoid excessive event if clicked on a selected tab.
+    if (trigger) {
+      /**
+       * This event is fired after a tab is selected.
        * Passing tab name and container node as parameters.
        * @name TabbedMaxContent#selecttab
        * @param {String} name of selected tab
        * @param {Node} Node of tab container
        * @event
        */
-        GEvent.trigger(this, 'selecttab', this.contentNodes_[i].name, this.contentNodes_[i]);
-      } else {
-        setVals(this.navNodes_[i].style, this.style_.tabOff);
-        this.contentNodes_[i].style.display = 'none';
-      }
+      GEvent.trigger(this, 'selecttab', this.contentNodes_[this.selectedTab_].name, this.contentNodes_[this.selectedTab_]);
     }
   };
   /**
@@ -242,6 +277,7 @@
    * as ajax action changed summary content may require an additional resize.
    */
   TabbedMaxContent.prototype.checkResize = function () {
+    var me = this;
     var container = this.infoWindow_.getContentContainers()[0];
     var contents = this.contentsNode_;
     var summary = this.summaryNode_;
@@ -255,29 +291,12 @@
         contNodes[i].style.width = container.style.width;
         contNodes[i].style.height = (parseInt(container.style.height, 10) - pos.top) + 'px';
       }
+      // this should be in onMaxmizeEnd_ but DOM is not ready at that time so move to here to avoid
+      // errors in selecttab event.
+      me.selectTab(me.selectedTab_);
     }, 0);
   };
-  /**
-   * Setup event listeners. The core API seems removed all liteners when restored to normal size
-   * @private
-   */
-  TabbedMaxContent.prototype.setupTabs_ = function () {
-    for (var i = 0, ct = this.navNodes_.length; i < ct; i++) {
-      if (i === this.selectedTab_ && this.contentNodes_[i].style.display === 'none') {
-        this.selectTab(this.selectedTab_);
-      }
-      GEvent.addDomListener(this.navNodes_[i], 'click', GEvent.callback(this, this.selectTab, i));
-    }
-  };
-  /**
-   * Clean up listeners on tabs.
-   * @private
-   */
-  TabbedMaxContent.prototype.clearTabs_ = function () {
-    if (this.maxNode_) {
-      GEvent.clearNode(this.maxNode_);
-    }
-  };
+
 
   /**
    * @name MaxInfoWindowOptions
@@ -342,11 +361,8 @@
    * @return {TabbedMaxContent}
    */
   GMap2.prototype.getInfoWindowMaxContent = function () {
-    var iw = this.getInfoWindow();
-    if (!iw.maxContent_) {
-      iw.maxContent_ = new TabbedMaxContent(iw);
-    }
-    return iw.maxContent_;
+    this.maxContent_  = this.maxContent_ || new TabbedMaxContent(this.getInfoWindow());
+    return this.maxContent_;
   };
   
   /**
@@ -383,6 +399,4 @@
   GMarker.prototype.openInfoWindowMaxTabs = function (map, minNode, sumNode, tabs, opt_maxOptions) {
     map.openInfoWindowMaxTabs(this.getLatLng(), minNode, sumNode, tabs, opt_maxOptions);
   };
-  
-  
 })();
