@@ -56,17 +56,17 @@ This lib provides a very simple drag zoom. Holding a user-defined special key (s
                     <td><code><span class="type">start:GPoint</span>, <span class="type">end:GPoint</span></code></td>
                   
                 
-                <td>This event is repeatedly fired while the user drags the  box</td>
+                <td>This event is repeatedly fired while the user drags the box. The start point and mouse pointis passed as parameter of type GPoint, relative to map container.</td>
               </tr>
             
               <tr class="even">
                 <td><code>dragend</code></td>
                 
                   
-                    <td><code>None</code></td>
+                    <td><code><span class="type">start:GPoint</span>, <span class="type">end:GPoint</span></code></td>
                   
                 
-                <td>This event is fired after drag end</td>
+                <td>This event is fired after drag end. Note that the dragend event is not fired if the hot key is released before the end of the drag operation.</td>
               </tr>
             
               <tr class="odd">
@@ -172,16 +172,6 @@ This lib provides a very simple drag zoom. Holding a user-defined special key (s
               </tr>
             
               <tr class="even">
-                <td><code>callbacks</code></td>
-                
-                  
-                    <td><code>Object</code></td>
-                  
-                
-                <td>the callback functions for dragstart, drag, dragend [NOT YET IMPLEMENTED]</td>
-              </tr>
-            
-              <tr class="odd">
                 <td><code>key</code></td>
                 
                   
@@ -191,7 +181,7 @@ This lib provides a very simple drag zoom. Holding a user-defined special key (s
                 <td>the modifier key to use while this.dragging_ the box, <code> shift | alt | ctrl </code>. Default is shift.</td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>paneStyle</code></td>
                 
                   

@@ -173,7 +173,6 @@
    * @property {Object} [boxStyle] the css style of the zoom box.  e.g. <code> {border: '2px dashed red'} </code>
    * @property {Object} [paneStyle] the css style of the pane which overlays the this.map_ when a drag zoom is activated. 
    * e.g. <code> {backgroundColor: 'gray', opacity: 0.2}</code>.
-   * @property {Object} [callbacks] the callback functions for dragstart, drag, dragend [NOT YET IMPLEMENTED]
    */
   /**
    * @name DragZoom
@@ -256,7 +255,7 @@
    * Draw the drag box. 
    */
   DragZoom.prototype.drawBox_ = function () {
-   if (this.map_ && this.startPt_ && this.endPt_) {
+    if (this.map_ && this.startPt_ && this.endPt_) {
       this.boxDiv_.style.left = Math.min(this.startPt_.x, this.endPt_.x) + 'px';
       this.boxDiv_.style.top = Math.min(this.startPt_.y, this.endPt_.y) + 'px';
       this.boxDiv_.style.width = Math.abs(this.startPt_.x - this.endPt_.x) + 'px';
@@ -336,6 +335,23 @@
     }
   };
   /**
+   * Get GPoint of mouse postion
+   * @param {Object} e
+   * @return {GPoint} point
+   * @private
+   */
+  DragZoom.prototype.getMousePoint_ = function (e) {
+    var mousePosn = getMousePosition(e);
+    var p = new GPoint();
+    p.x = mousePosn.left - this.mapPosn_.left - this.borderWidths_.left;
+    p.y = mousePosn.top - this.mapPosn_.top - this.borderWidths_.top;
+    p.x = Math.min(p.x, this.boxMaxX_);
+    p.y = Math.min(p.y, this.boxMaxY_);
+    p.x = Math.max(p.x, 0);
+    p.y = Math.max(p.y, 0);
+    return p;
+  }
+  /**
    * Handle mouse down
    * @param {Event} e
    */
@@ -344,42 +360,36 @@
       this.startPt_ = this.endPt_ = null;
       this.mapPosn_ = getElementPosition(this.map_.getContainer());
       this.dragging_ = true;
+      this.startPt_ = this.getMousePoint_(e);
       /**
        * This event is fired when drag started. 
        * @name DragZoom#dragstart
+       * @param {GPoint} start
        * @event
        */
-      GEvent.trigger(this, 'dragstart');
+      GEvent.trigger(this, 'dragstart', this.startPt_);
     }
   };
+ 
   /**
    * Handle mouse move
    * @param {Event} e
    */
   DragZoom.prototype.onMouseMove_ = function (e) {
     if (this.dragging_) {
-      var mousePosn = getMousePosition(e);
-      var p = new GPoint();
-      p.x = mousePosn.left - this.mapPosn_.left - this.borderWidths_.left;
-      p.y = mousePosn.top - this.mapPosn_.top - this.borderWidths_.top;
-      p.x = Math.min(p.x, this.boxMaxX_);
-      p.y = Math.min(p.y, this.boxMaxY_);
-      p.x = Math.max(p.x, 0);
-      p.y = Math.max(p.y, 0);
-      if (!this.startPt_) {
-        this.startPt_ = p; 
-      }
-      this.endPt_ = p;
+      this.endPt_ = this.getMousePoint_(e);
       this.drawBox_();
       /**
        * This event is repeatedly fired while the user drags the box. The start point and mouse point
        * is passed as parameter of type GPoint, relative to map container.
+       * The event listener is responsible for convert Pixel to LatLng if necessary.
        * @name DragZoom#drag 
        * @param {GPoint} start
        * @param {GPoint} end
        * @event
        */
-      GEvent.trigger(this, 'drag', this.startPt_, this.endPt_); // need parameters? two GPoint?
+      //pass GPoint instead of GLatLng to avoid repeated PixelToLatLng if not needed.
+      GEvent.trigger(this, 'drag', this.startPt_, this.endPt_); 
     }
   };
   /**
@@ -390,14 +400,17 @@
     if (this.dragging_) {
       this.zoomBox_();
       this.dragging_ = false;
-    }
-    this.boxDiv_.style.display = 'none';
-    /**
-       * This event is fired after drag end
-       * @name DragZoom#dragend 
+      this.boxDiv_.style.display = 'none';
+      /**
+       * This event is fired after drag end. 
+       * Note that the dragend event is not fired if the hot key is released before the end of the drag operation.
+       * @name DragZoom#dragend
+       * @param {GPoint} start
+       * @param {GPoint} end
        * @event
        */
-    GEvent.trigger(this, 'dragend'); // need parameters? two GPoint?
+      GEvent.trigger(this, 'dragend', this.startPt_, this.endPt_);
+    }
   };
  
   /**
@@ -415,7 +428,7 @@
        * @name DragZoom#deactivate 
        * @event
        */
-      GEvent.trigger(this, 'deactivate'); // need parameters? two GPoint?
+      GEvent.trigger(this, 'deactivate'); 
     }
   };
 
