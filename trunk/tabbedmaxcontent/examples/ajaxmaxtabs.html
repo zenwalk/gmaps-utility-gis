@@ -15,7 +15,6 @@
         </script>
         <script type="text/javascript">
             var map;
-            var pano;
             function initialize() {
               if (GBrowserIsCompatible()) {
                 map = new GMap2(document.getElementById("map_canvas"));
@@ -30,8 +29,8 @@
                     var regular = '<div>LatLng:' + latlng + '</div><a href="javascript:void(0)" onclick="javascript:map.getInfoWindow().maximize()">more info.. </a>'
                     var summary = '<div id="sum">Address of' + latlng + '</div><a href="javascript:void(0)" onclick="javascript:map.getInfoWindow().restore()">less info.. </a>';
                     var panoDiv = document.createElement('div');
-                    panoDiv.id = "pano";
-                    panoDiv.innerHTML = 'Street View not available.'
+                    //panoDiv.id = "pano";
+                    //panoDiv.innerHTML = 'Street View not available.'
                     panoDiv.style.width = "400px"; // can be anything, will be auto resized
                     panoDiv.style.width = "200px";
                     var tabs = [new GInfoWindowTab('address', '<div id="address"></div>'), new GInfoWindowTab('streetview', panoDiv)];
@@ -46,59 +45,63 @@
                     });
                   }
                 });
-                GEvent.addListener(map.getInfoWindow(), 'maximizeend', function() {
-                  // reverse geocode
+                GEvent.addListener(map.getInfoWindowMaxContent(), 'selecttab', function(name, node) {
                   var latlng = map.getInfoWindow().getPoint();
-                  geocoder.getLocations(latlng, function(response) {
-                    if (!response) {
-                      alert('server error');
-                    } else if (response.Status.code != 200) {
-                      alert("Status Code:" + response.Status.code);
-                    } else {
-                      var place = response.Placemark[0];
-                      document.getElementById('sum').innerHTML = 'Address of the clicked point: <b>' + place.address + '</b>';
-                      document.getElementById('address').innerHTML = '<b>orig latlng:</b>' + response.name + '<br/>' +
-                      '<b>latlng:</b>' +
-                      place.Point.coordinates[0] +
-                      "," +
-                      place.Point.coordinates[1] +
-                      '<br>' +
-                      '<b>Status Code:</b>' +
-                      response.Status.code +
-                      '<br>' +
-                      '<b>Status Request:</b>' +
-                      response.Status.request +
-                      '<br>' +
-                      '<b>Address:</b>' +
-                      place.address +
-                      '<br>' +
-                      '<b>Accuracy:</b>' +
-                      place.AddressDetails.Accuracy +
-                      '<br>' +
-                      '<b>Country code:</b> ' +
-                      place.AddressDetails.Country.CountryNameCode;
-                      map.getInfoWindowMaxContent().checkResize();
-                      
+                  switch (name) {
+                  case 'address':
+                    // do a quick check to avoid repeat call
+                    if (document.getElementById('address').innerHTML == '') {
+                      // reverse geocode
+                      geocoder.getLocations(latlng, function(response) {
+                        if (!response) {
+                          alert('server error');
+                        } else if (response.Status.code != 200) {
+                          alert("Status Code:" + response.Status.code);
+                        } else {
+                          var place = response.Placemark[0];
+                          document.getElementById('sum').innerHTML = 'Address of the clicked point: <b>' + place.address + '</b>';
+                          document.getElementById('address').innerHTML = '<b>orig latlng:</b>' + response.name + '<br/>' +
+                          '<b>latlng:</b>' +
+                          place.Point.coordinates[0] +
+                          "," +
+                          place.Point.coordinates[1] +
+                          '<br>' +
+                          '<b>Status Code:</b>' +
+                          response.Status.code +
+                          '<br>' +
+                          '<b>Status Request:</b>' +
+                          response.Status.request +
+                          '<br>' +
+                          '<b>Address:</b>' +
+                          place.address +
+                          '<br>' +
+                          '<b>Accuracy:</b>' +
+                          place.AddressDetails.Accuracy +
+                          '<br>' +
+                          '<b>Country code:</b> ' +
+                          place.AddressDetails.Country.CountryNameCode;
+                        }
+                      });
                     }
-                  });
-                  // street view
-                  panoClient.getNearestPanorama(latlng, function(panoData) {
-                    pano = new GStreetviewPanorama(document.getElementById("pano"));
-                    GEvent.addListener(pano, 'error', function(errorCode) {
-                      if (errorCode == 603) {
-                        document.getElementById("pano").innerHTML = 'StreetView requires flash plugin. Click <a href="http://get.adobe.com/flashplayer/" target="_blank"> here</a> to download';
-                      }
-                    });
-                    if (panoData.location) {
-                      pano.setLocationAndPOV(panoData.location.latlng);
-                      setTimeout(function() {
-                        pano.checkResize();
-                      }, 5);
+                    break;
+                  case 'streetview':
+                    if (!node.pano) {
+                      var pano = new GStreetviewPanorama(node);
+                      GEvent.addListener(pano, 'error', function(errorCode) {
+                        if (errorCode == 603) {
+                          node.innerHTML = 'StreetView requires flash plugin. Click <a href="http://get.adobe.com/flashplayer/" target="_blank"> here</a> to download';
+                        }
+                      });
+                      pano.setLocationAndPOV(latlng);
+                      // this is a quick way to avoid excessive new pano when tabs are switched back and forth.
+                      // it appears pano.setContainer() is an async operation and requires setTimeout to work correctly.
+                      // for simplicity reason, create a new pano when a new window is openned.
+                      node.pano = pano;
                     }
-                    
-                  });
+                    break;
+                  }
                 });
-                GEvent.addListener(map.getInfoWindowMaxContent(),'selecttab',function(name, container){
+                GEvent.addListener(map.getInfoWindowMaxContent(), 'selecttab', function(name, container) {
                   GLog.write(' tab :' + name + ' seleced');
                 });
               }
@@ -107,7 +110,7 @@
     </head>
     <body onload="initialize()" onunload="GUnload()">
         <a href='?packed'>Packed </a>
-        | <a href='?'> Unpacked</a>
+        | <a href='?'>Unpacked</a>
         Version of the script.
         <br/>
         <div>
