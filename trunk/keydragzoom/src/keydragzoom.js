@@ -2,9 +2,11 @@
  * @name Key Drag Zoom
  * @version 1.0.3
  * @author: Nianwei Liu [nianwei at gmail dot com] & Gary Little [gary at luxcentral dot com]
- * @fileoverview This lib provides a very simple drag zoom. Holding a user-defined special key (shift | ctrl | alt)
- *  while dragging a box will zoom to the desired area. 
- *  Only one line of code GMap2.enableKeyDragZoom() is needed.
+ * @fileoverview This library adds a drag zoom capability to a Google map.
+ *  Holding down a user-defined hot key <code>(shift | ctrl | alt)</code>
+ *  while dragging a box around an area of interest will zoom the map
+ *  to that area when the hot key is released. 
+ *  Only one line of code is needed: <code>GMap2.enableKeyDragZoom();</code>
  */
 /*!
  *
@@ -23,17 +25,17 @@
 (function () {
   /*jslint browser:true */
   /*global GMap2,GEvent,GLatLng,GLatLngBounds,GPoint */
-  //utility functions. use "var funName=function()" syntax to allow Dean packer shrink without base62 */
+  /* Utility functions use "var funName=function()" syntax to allow Dean packer shrink without base62 */
 
   /**
    * Converts 'thin', 'medium', and 'thick' to pixel widths
    * in an MSIE environment. Not called for other browsers
-   * because getComputedStyle() does this automatically.
-   * @param {String} value
+   * because getComputedStyle() returns pixel widths automatically.
+   * @param {String} widthValue
    */ 
-  var toPixels = function (value) {
+  var toPixels = function (widthValue) {
     var px;
-    switch (value) {
+    switch (widthValue) {
     case 'thin':
       px = "2px";
       break;
@@ -44,12 +46,12 @@
       px = "6px";
       break;
     default:
-      px = value;
+      px = widthValue;
     }
     return px;
   };
  /**
- * Get the widths of the borders of an element
+ * Get the widths of the borders of an HTML element.
  *
  * @param {Object} h  HTML element
  * @return {Object} widths object (top, bottom left, right)
@@ -85,7 +87,7 @@
   };
 
   /**
-   * Get position of mouse relative to document
+   * Get the position of the mouse relative to the document.
    * @param {Object} e  Mouse event
    * @return {Object} left & top position
    */
@@ -108,7 +110,7 @@
   };
 
   /**
-   * Get position of HTML element relative to document
+   * Get the position of an HTML element relative to the document.
    * @param {Object} h  HTML element
    * @return {Object} left & top position
    */
@@ -139,7 +141,7 @@
     };
   };
    /**
-   * Set the property of object from another object
+   * Set the property of object from another object.
    * @param {Object} obj target object
    * @param {Object} vals source object
    */
@@ -154,7 +156,7 @@
     return obj;
   };
   /**
-   * Set opacity. if op is not passed in, this function just does an IE fix.
+   * Set the opacity. if op is not passed in, this function just performs an MSIE fix.
    * @param {Node} div
    * @param {Number} op (0-1)
    */
@@ -168,16 +170,16 @@
   };
   /**
    * @name KeyDragZoomOptions
-   * @class This class represents the optional parameter passed into GMap2.enableDragBoxZoom().
-   * @property {String} [key] the modifier key to use while this.dragging_ the box, <code> shift | alt | ctrl </code>. Default is shift.
-   * @property {Object} [boxStyle] the css style of the zoom box.  e.g. <code> {border: '2px dashed red'} </code>
-   * @property {Object} [paneStyle] the css style of the pane which overlays the this.map_ when a drag zoom is activated. 
-   * e.g. <code> {backgroundColor: 'gray', opacity: 0.2}</code>.
+   * @class This class represents the optional parameter passed into <code>GMap2.enableDragBoxZoom</code>.
+   * @property {String} [key] the hot key to use while dragging the zoom box, <code>shift | alt | ctrl</code>. The default is <code>shift</code>.
+   * @property {Object} [boxStyle] the css style of the zoom box. E.g., <code>{border: '2px dashed red'}</code>
+   * @property {Object} [paneStyle] the css style of the pane which overlays the map when a drag zoom is activated.
+   * E.g., <code>{backgroundColor: 'gray', opacity: 0.2}</code>.
    */
   /**
    * @name DragZoom
-   * @class This class represents a drag zoom object for a map. It can be activated by holding a special key.
-   * This is no constructor for this class. Use GMap2.getDragZoomObject() to gain access to this object.
+   * @class This class represents a drag zoom object for a map. The object is activated by holding down a hot key.
+   * Use <code>GMap2.getDragZoomObject</code> to gain access to this object in order to attach event listeners.
    * @param {GMap2} map
    * @param {KeyDragZoomOptions} opt_zoomOpts
    */
@@ -245,7 +247,7 @@
   }
  
   /**
-   * Returns true if a hot key is pressed in the event
+   * Returns true if a hot key is being pressed when an event occurs.
    * @param {Event} e
    * @return {Boolean}
    */
@@ -281,7 +283,7 @@
     return isHot;
   };
    /**
-   * Handle key down
+   * Handle key down.
    * @param {Event} e
    */
   DragZoom.prototype.onKeyDown_ = function (e) {
@@ -304,7 +306,7 @@
     }
   };
   /**
-   * Get GPoint of mouse position
+   * Get the <code>GPoint</code> of the mouse position.
    * @param {Object} e
    * @return {GPoint} point
    * @private
@@ -321,7 +323,7 @@
     return p;
   };
   /**
-   * Handle mouse down
+   * Handle mouse down.
    * @param {Event} e
    */
   DragZoom.prototype.onMouseDown_ = function (e) {
@@ -341,7 +343,7 @@
   };
  
   /**
-   * Handle mouse move
+   * Handle mouse move.
    * @param {Event} e
    */
   DragZoom.prototype.onMouseMove_ = function (e) {
@@ -358,7 +360,7 @@
       this.boxDiv_.style.display = 'block';
       /**
        * This event is repeatedly fired while the user drags the box. The southwest and northeast
-       * point are passed as parameter of type <code>GPoint</code> (for performance reasons),
+       * point are passed as parameters of type <code>GPoint</code> (for performance reasons),
        * relative to map container. Note: the event listener is responsible 
        * for converting Pixel to LatLng if necessary, using
        * <code>GMap2.fromContainerPixelToLatLng</code>.
@@ -371,7 +373,7 @@
     }
   };
   /**
-   * Handle mouse up
+   * Handle mouse up.
    * @param {Event} e
    */
   DragZoom.prototype.onMouseUp_ = function (e) {
@@ -388,8 +390,8 @@
       this.dragging_ = false;
       this.boxDiv_.style.display = 'none';
       /**
-       * This event is fired after drag end. 
-       * Note that the dragend event is not fired if the hot key is released before the end of the drag operation.
+       * This event is fired when the drag operation ends. 
+       * Note that the event is not fired if the hot key is released before the drag operation ends.
        * @name DragZoom#dragend
        * @param {GLatLngBounds} newBounds
        * @event
@@ -399,7 +401,7 @@
   };
  
   /**
-   * Handle key up
+   * Handle key up.
    * @param {Event} e
    */
   DragZoom.prototype.onKeyUp_ = function (e) {
@@ -419,13 +421,13 @@
   
   /**
    * @name GMap2
-   * @class These are new methods added to Google Maps API's
+   * @class These are new methods added to the Google Maps API's
    * <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GMap2'>GMap2</a>
    * class.
    */
    /**
-   * Enable drag zoom. User can zoom to a point of interest by holding a special key (shift | ctrl | alt )
-   * while dragging a box. 
+   * Enable drag zoom. The user can zoom to an area of interest by holding down a hot key
+   * <code>(shift | ctrl | alt )</code> while dragging a box around the area. 
    * @param {KeyDragZoomOptions} opt_zoomOpts
    */
   
@@ -433,7 +435,7 @@
     this.dragZoom_ = new DragZoom(this, opt_zoomOpts);
   };
   /**
-   * Disable drag zoom 
+   * Disable drag zoom.
    */
   GMap2.prototype.disableKeyDragZoom = function () {
     var d = this.dragZoom_;
@@ -449,15 +451,16 @@
     }
   };
   /**
-   * Returns true if the drag zoom is enabled.
+   * Returns true if the drag zoom feature has been enabled.
    * @return {Boolean}
    */
   GMap2.prototype.keyDragZoomEnabled = function () {
     return this.dragZoom_ !== null;
   };
   /**
-   * Returns the DragZoom Object on this map instance after <code>GMap2.enableKeyDragZoom</code> is called.
-   * Event Listeners can be attached afterwards. 
+   * Returns the DragZoom object which is created when <code>GMap2.enableKeyDragZoom</code> is called.
+   * With this object you can use <code>GEvent.addListener</code> to attach event listeners
+   * (for the 'activate', 'deactivate', 'dragstart', 'drag', and 'dragend' events).
    * @return {DragZoom}
    */
   GMap2.prototype.getDragZoomObject = function () {
