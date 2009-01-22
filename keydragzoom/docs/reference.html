@@ -53,17 +53,17 @@ This lib provides a very simple drag zoom. Holding a user-defined special key (s
                 <td><code>drag</code></td>
                 
                   
-                    <td><code><span class="type">start:GPoint</span>, <span class="type">end:GPoint</span></code></td>
+                    <td><code><span class="type">southwestPixel:GPoint</span>, <span class="type">northeastPixel:GPoint</span></code></td>
                   
                 
-                <td>This event is repeatedly fired while the user drags the box. The start point and mouse pointis passed as parameter of type GPoint, relative to map container.</td>
+                <td>This event is repeatedly fired while the user drags the box. The south west and north eastnorth east point are passed as parameter of type <code>GPoint</code> (for performance reasons),relative to map container. Note: the event listener is responsible for converting Pixel to LatLng if necessary, using<code>GMap2.fromContainerPixelToLatLng</code>.</td>
               </tr>
             
               <tr class="even">
                 <td><code>dragend</code></td>
                 
                   
-                    <td><code><span class="type">start:GPoint</span>, <span class="type">end:GPoint</span></code></td>
+                    <td><code><span class="type">newBounds:GLatLngBounds</span></code></td>
                   
                 
                 <td>This event is fired after drag end. Note that the dragend event is not fired if the hot key is released before the end of the drag operation.</td>
