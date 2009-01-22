@@ -329,12 +329,14 @@
       this.mapPosn_ = getElementPosition(this.map_.getContainer());
       this.dragging_ = true;
       this.startPt_ = this.endPt_ = this.getMousePoint_(e);
+      var latlng = this.map_.fromContainerPixelToLatLng(this.startPt_);
       /**
        * This event is fired when drag started. 
        * @name DragZoom#dragstart
+       * @param {GLatLng} startLatLng
        * @event
        */
-      GEvent.trigger(this, 'dragstart');
+      GEvent.trigger(this, 'dragstart', latlng);
     }
   };
  
@@ -355,8 +357,8 @@
       this.boxDiv_.style.height = height + 'px';
       this.boxDiv_.style.display = 'block';
       /**
-       * This event is repeatedly fired while the user drags the box. The south west and north east
-       * north east point are passed as parameter of type <code>GPoint</code> (for performance reasons),
+       * This event is repeatedly fired while the user drags the box. The southwest and northeast
+       * point are passed as parameter of type <code>GPoint</code> (for performance reasons),
        * relative to map container. Note: the event listener is responsible 
        * for converting Pixel to LatLng if necessary, using
        * <code>GMap2.fromContainerPixelToLatLng</code>.
@@ -378,7 +380,6 @@
       var top = Math.min(this.startPt_.y, this.endPt_.y);
       var width = Math.abs(this.startPt_.x - this.endPt_.x);
       var height = Math.abs(this.startPt_.y - this.endPt_.y);
-      
       var sw = this.map_.fromContainerPixelToLatLng(new GPoint(left, top + height));
       var ne = this.map_.fromContainerPixelToLatLng(new GPoint(left + width, top));
       var bnds = new GLatLngBounds(sw, ne);
@@ -456,7 +457,7 @@
   };
   /**
    * Returns the DragZoom Object on this map instance after <code>GMap2.enableKeyDragZoom</code> is called.
-   * EventListened can be attached afterwards. 
+   * Event Listeners can be attached afterwards. 
    * @return {DragZoom}
    */
   GMap2.prototype.getDragZoomObject = function () {

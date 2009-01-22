@@ -159,7 +159,6 @@
    * @private
    */
   TabbedMaxContent.prototype.initialize_ = function (sumNode, tabs, opt_maxOptions) {
-    //this.onRestoreClick_();
     this.navNodes_ = [];
     this.contentNodes_ = [];
     this.selectedTab_ = -1;
