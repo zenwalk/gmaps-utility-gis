@@ -24,14 +24,14 @@
           GEvent.addListener(dz, 'activate', function() {
             GLog.write('DragZoom Activated');
           });
-          GEvent.addListener(dz, 'dragstart', function(start) {
-            GLog.write('DragZoom Started: ' + start);
+          GEvent.addListener(dz, 'dragstart', function() {
+            GLog.write('DragZoom Started: ');
           });
           GEvent.addListener(dz, 'drag', function(start, end) {
             GLog.write('DragZoom Dragging...'+start+end);
           });
-          GEvent.addListener(dz, 'dragend', function(start, end) {
-            GLog.write('DragZoom DragEnd :' +start+end);
+          GEvent.addListener(dz, 'dragend', function(bnds) {
+            GLog.write('DragZoom DragEnd :' +bnds);
           });
           GEvent.addListener(dz, 'deactivate', function() {
             GLog.write('DragZoom Deactivated');

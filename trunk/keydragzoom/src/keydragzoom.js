@@ -186,9 +186,7 @@
     opt_zoomOpts = opt_zoomOpts || {};
     this.key_ = opt_zoomOpts.key || 'shift';
     this.key_ = this.key_.toLowerCase();
-    
     this.borderWidths_ = getBorderWidths(this.map_.getContainer());
-    
     this.paneDiv_ = document.createElement("div");
     this.paneDiv_.onselectstart = function () {
       return false;
@@ -218,7 +216,6 @@
       setOpacity(this.paneDiv_, 0);
     }
     this.map_.getContainer().appendChild(this.paneDiv_);
-    
     this.boxDiv_ = document.createElement('div');
     setVals(this.boxDiv_.style, {
       border: 'thin solid #FF0000'
@@ -240,41 +237,13 @@
   
     this.hotKeyDown_ = false;
     this.dragging_ = false;
-    
     this.startPt_ = null;
     this.endPt_ = null;
     this.mapPosn_ = null;
     this.boxMaxX_ = null;
     this.boxMaxY_ = null;
-    
   }
-  
-
-
-  /**
-   * Draw the drag box. 
-   */
-  DragZoom.prototype.drawBox_ = function () {
-    if (this.map_ && this.startPt_ && this.endPt_) {
-      this.boxDiv_.style.left = Math.min(this.startPt_.x, this.endPt_.x) + 'px';
-      this.boxDiv_.style.top = Math.min(this.startPt_.y, this.endPt_.y) + 'px';
-      this.boxDiv_.style.width = Math.abs(this.startPt_.x - this.endPt_.x) + 'px';
-      this.boxDiv_.style.height = Math.abs(this.startPt_.y - this.endPt_.y) + 'px';
-      this.boxDiv_.style.display = 'block';
-    }
-  };
-  /**
-   * Zoom to the drag box
-   */
-  DragZoom.prototype.zoomBox_  = function () {
-    if (this.map_ && this.startPt_ && this.endPt_) {
-      var sw = this.map_.fromContainerPixelToLatLng(new GPoint(Math.min(this.startPt_.x, this.endPt_.x), Math.max(this.startPt_.y, this.endPt_.y)));
-      var ne = this.map_.fromContainerPixelToLatLng(new GPoint(Math.max(this.startPt_.x, this.endPt_.x), Math.min(this.startPt_.y, this.endPt_.y)));
-      var bnds = new GLatLngBounds(sw, ne);
-      var level = this.map_.getBoundsZoomLevel(bnds);
-      this.map_.setCenter(bnds.getCenter(), level);
-    }
-  };
+ 
   /**
    * Returns true if a hot key is pressed in the event
    * @param {Event} e
@@ -335,7 +304,7 @@
     }
   };
   /**
-   * Get GPoint of mouse postion
+   * Get GPoint of mouse position
    * @param {Object} e
    * @return {GPoint} point
    * @private
@@ -350,24 +319,22 @@
     p.x = Math.max(p.x, 0);
     p.y = Math.max(p.y, 0);
     return p;
-  }
+  };
   /**
    * Handle mouse down
    * @param {Event} e
    */
   DragZoom.prototype.onMouseDown_ = function (e) {
     if (this.map_ && this.hotKeyDown_) {
-      this.startPt_ = this.endPt_ = null;
       this.mapPosn_ = getElementPosition(this.map_.getContainer());
       this.dragging_ = true;
-      this.startPt_ = this.getMousePoint_(e);
+      this.startPt_ = this.endPt_ = this.getMousePoint_(e);
       /**
        * This event is fired when drag started. 
        * @name DragZoom#dragstart
-       * @param {GPoint} start
        * @event
        */
-      GEvent.trigger(this, 'dragstart', this.startPt_);
+      GEvent.trigger(this, 'dragstart');
     }
   };
  
@@ -378,18 +345,27 @@
   DragZoom.prototype.onMouseMove_ = function (e) {
     if (this.dragging_) {
       this.endPt_ = this.getMousePoint_(e);
-      this.drawBox_();
+      var left = Math.min(this.startPt_.x, this.endPt_.x);
+      var top = Math.min(this.startPt_.y, this.endPt_.y);
+      var width = Math.abs(this.startPt_.x - this.endPt_.x);
+      var height = Math.abs(this.startPt_.y - this.endPt_.y);
+      this.boxDiv_.style.left = left + 'px';
+      this.boxDiv_.style.top = top + 'px';
+      this.boxDiv_.style.width = width + 'px';
+      this.boxDiv_.style.height = height + 'px';
+      this.boxDiv_.style.display = 'block';
       /**
-       * This event is repeatedly fired while the user drags the box. The start point and mouse point
-       * is passed as parameter of type GPoint, relative to map container.
-       * The event listener is responsible for convert Pixel to LatLng if necessary.
+       * This event is repeatedly fired while the user drags the box. The south west and north east
+       * north east point are passed as parameter of type <code>GPoint</code> (for performance reasons),
+       * relative to map container. Note: the event listener is responsible 
+       * for converting Pixel to LatLng if necessary, using
+       * <code>GMap2.fromContainerPixelToLatLng</code>.
        * @name DragZoom#drag 
-       * @param {GPoint} start
-       * @param {GPoint} end
+       * @param {GPoint} southwestPixel
+       * @param {GPoint} northeastPixel
        * @event
        */
-      //pass GPoint instead of GLatLng to avoid repeated PixelToLatLng if not needed.
-      GEvent.trigger(this, 'drag', this.startPt_, this.endPt_); 
+      GEvent.trigger(this, 'drag', new GPoint(left, top + height), new GPoint(left + width, top)); 
     }
   };
   /**
@@ -398,18 +374,26 @@
    */
   DragZoom.prototype.onMouseUp_ = function (e) {
     if (this.dragging_) {
-      this.zoomBox_();
+      var left = Math.min(this.startPt_.x, this.endPt_.x);
+      var top = Math.min(this.startPt_.y, this.endPt_.y);
+      var width = Math.abs(this.startPt_.x - this.endPt_.x);
+      var height = Math.abs(this.startPt_.y - this.endPt_.y);
+      
+      var sw = this.map_.fromContainerPixelToLatLng(new GPoint(left, top + height));
+      var ne = this.map_.fromContainerPixelToLatLng(new GPoint(left + width, top));
+      var bnds = new GLatLngBounds(sw, ne);
+      var level = this.map_.getBoundsZoomLevel(bnds);
+      this.map_.setCenter(bnds.getCenter(), level);
       this.dragging_ = false;
       this.boxDiv_.style.display = 'none';
       /**
        * This event is fired after drag end. 
        * Note that the dragend event is not fired if the hot key is released before the end of the drag operation.
        * @name DragZoom#dragend
-       * @param {GPoint} start
-       * @param {GPoint} end
+       * @param {GLatLngBounds} newBounds
        * @event
        */
-      GEvent.trigger(this, 'dragend', this.startPt_, this.endPt_);
+      GEvent.trigger(this, 'dragend', bnds);
     }
   };
  
@@ -431,9 +415,6 @@
       GEvent.trigger(this, 'deactivate'); 
     }
   };
-
- 
-  
   
   /**
    * @name GMap2
