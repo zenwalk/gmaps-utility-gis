@@ -56,7 +56,7 @@ This lib provides a very simple drag zoom. Holding a user-defined special key (s
                     <td><code><span class="type">southwestPixel:GPoint</span>, <span class="type">northeastPixel:GPoint</span></code></td>
                   
                 
-                <td>This event is repeatedly fired while the user drags the box. The south west and north eastnorth east point are passed as parameter of type <code>GPoint</code> (for performance reasons),relative to map container. Note: the event listener is responsible for converting Pixel to LatLng if necessary, using<code>GMap2.fromContainerPixelToLatLng</code>.</td>
+                <td>This event is repeatedly fired while the user drags the box. The southwest and northeastpoint are passed as parameter of type <code>GPoint</code> (for performance reasons),relative to map container. Note: the event listener is responsible for converting Pixel to LatLng if necessary, using<code>GMap2.fromContainerPixelToLatLng</code>.</td>
               </tr>
             
               <tr class="even">
@@ -73,7 +73,7 @@ This lib provides a very simple drag zoom. Holding a user-defined special key (s
                 <td><code>dragstart</code></td>
                 
                   
-                    <td><code>None</code></td>
+                    <td><code><span class="type">startLatLng:GLatLng</span></code></td>
                   
                 
                 <td>This event is fired when drag started.</td>
@@ -127,7 +127,7 @@ This lib provides a very simple drag zoom. Holding a user-defined special key (s
                     <td><code>DragZoom</code></td>
                   
                 
-                <td>Returns the DragZoom Object on this map instance after <code>GMap2.enableKeyDragZoom</code> is called.EventListened can be attached afterwards.</td>
+                <td>Returns the DragZoom Object on this map instance after <code>GMap2.enableKeyDragZoom</code> is called.Event Listeners can be attached afterwards.</td>
               </tr>
             
               <tr class="even">
