@@ -24,8 +24,8 @@
           GEvent.addListener(dz, 'activate', function() {
             GLog.write('DragZoom Activated');
           });
-          GEvent.addListener(dz, 'dragstart', function() {
-            GLog.write('DragZoom Started: ');
+          GEvent.addListener(dz, 'dragstart', function(latlng) {
+            GLog.write('DragZoom Started: '+latlng);
           });
           GEvent.addListener(dz, 'drag', function(start, end) {
             GLog.write('DragZoom Dragging...'+start+end);
