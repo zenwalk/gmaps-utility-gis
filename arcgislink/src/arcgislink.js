@@ -2755,19 +2755,7 @@
   ArcGISMapOverlay.prototype.hasLoaded  =  function () {
     return this.mapService_.hasLoaded();
   };
-  /**
-   * Export an image with given parameters.
-   * <br/> The <code>params</code> is an instance of {@link ArcGISImageParameters}.
-   * The following properties will be set automatically if not specified:...
-   * <br/> The <code>opt_callback</code> is the callback function with argument of
-   * an instance of {@link ArcGISMapImage}. If not specified, this function returns an
-   * image URL that can be used to assign to the src property of an image element,
-   * if specified, it  returns an empty string.
-   * @private need to move to map service
-   * @param {ImageParameter} params
-   * @param {Function} opt_callback
-   * @return {String} imageUrl
-   */
+  
   /**
    * Refresh the map image in current view port.
    */
@@ -2779,7 +2767,7 @@
       this.redraw_  =  true;
       return;
     }
-    if (this.img_ !== null) {
+    if (this.img_ !== null && this.moveend_) {
       this.div_.removeChild(this.img_);
       this.img_  =  null;
     }
@@ -2809,22 +2797,32 @@
         me.refresh();
         return;
       }
+      var div = me.div_;
       if (json.href) {
-        var div  =  me.div_;
-        var img  =  document.createElement('img');
-        var bnds  =  ArcGISUtil.fromEnvelopeToLatLngBounds(json.extent);
-        var wrapWidth  =  me.map_.getCurrentMapType().getProjection().getWrapWidth(me.map_.getZoom());
-        var swpx  =  me.map_.fromLatLngToDivPixel(bnds.getSouthWest());
-        var nepx  =  me.map_.fromLatLngToDivPixel(bnds.getNorthEast());
-        
-        div.style.width  =  json.width + "px";
-        div.style.height  =  json.height + "px";
-        div.style.left  =  swpx.x % wrapWidth + "px";
-        div.style.top  =  nepx.y + "px";
-        img.src  =  json.href;
-        div.appendChild(img);
-        me.img_  =  img;
+        var bnds = ArcGISUtil.fromEnvelopeToLatLngBounds(json.extent);
+        var wrapWidth = me.map_.getCurrentMapType().getProjection().getWrapWidth(me.map_.getZoom());
+        var swpx = me.map_.fromLatLngToDivPixel(bnds.getSouthWest());
+        var nepx = me.map_.fromLatLngToDivPixel(bnds.getNorthEast());
+        div.style.width = json.width + "px";
+        div.style.height = json.height + "px";
+        div.style.left = swpx.x % wrapWidth + "px";
+        div.style.top = nepx.y + "px";
+        if (me.img_ !== null) {
+          me.img_.src = json.href;
+        } else {
+          var img = document.createElement('img');
+          img.src = json.href;
+          div.appendChild(img);
+          me.img_ = img;
+        }
+        me.moveend_ = false;
         me.setOpacity(me.opacity_);
+      } else {
+        // if no layer visible, exportMap will return empty json
+        if (me.img_ !== null ) {
+          div.removeChild(me.img_);
+          me.img_ = null;
+        }
       }
       /**
        * This event is fired after the the drawing request was returned by server.
@@ -2847,7 +2845,10 @@
     this.zoomLevel_  =  map.getZoom();
     this.div_  =  div;
     this.img_  =  null;
-    this.moveEndListener_  =  GEvent.bind(this.map_, "moveend", this, this.refresh);
+    this.moveEndListener_  =  GEvent.bind(this.map_, "moveend", this, function(){
+      this.moveend_ = true;
+      this.refresh();
+    });
     this.mapTypeChangeListener_  =  GEvent.bind(this.map_, "maptypechanged", this, this.refresh);
     this.mapTypeAddListener_  =  GEvent.bind(this.map_, "addmaptype", this, this.setupMapType_);
     this.map_.getArcGISOverlays().push(this);
