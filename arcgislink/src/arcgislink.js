@@ -2819,7 +2819,7 @@
         me.setOpacity(me.opacity_);
       } else {
         // if no layer visible, exportMap will return empty json
-        if (me.img_ !== null ) {
+        if (me.img_ !== null) {
           div.removeChild(me.img_);
           me.img_ = null;
         }
@@ -2845,7 +2845,7 @@
     this.zoomLevel_  =  map.getZoom();
     this.div_  =  div;
     this.img_  =  null;
-    this.moveEndListener_  =  GEvent.bind(this.map_, "moveend", this, function(){
+    this.moveEndListener_  =  GEvent.bind(this.map_, "moveend", this, function () {
       this.moveend_ = true;
       this.refresh();
     });
