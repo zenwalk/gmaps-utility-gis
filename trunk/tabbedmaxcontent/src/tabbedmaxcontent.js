@@ -228,7 +228,7 @@
    * Select tab at given index or name
    * @param {Number|String} t
    */
-  TabbedMaxContent.prototype.selectTab = function(t) {
+  TabbedMaxContent.prototype.selectTab = function (t) {
     var trigger = false;
     for (var i = 0, ct = this.navNodes_.length; i < ct; i++) {
       if (i === t || this.contentNodes_[i].name === t) {
