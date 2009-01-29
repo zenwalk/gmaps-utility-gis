@@ -282,8 +282,8 @@
     var summary = this.summaryNode_;
     var contNodes = this.contentNodes_;
     // it appears GInfoWindow.maximizeend event is fired too early, 
-    // before DOM is ready.
-    // as a workaround use a timeout here.
+    // before DOM is ready. As a workaround use a timeout here.
+    // See http://code.google.com/p/gmaps-api-issues/issues/detail?id=1020
     setTimeout(function () {
       var pos = getPosition(contents, container);
       for (var i = 0, ct = contNodes.length; i < ct; i++) {
@@ -339,6 +339,7 @@
     if (opts.selectedTab) {
       delete opts.selectedTab;
     }
+    minNode.style.marginTop = '5px';
     this.openInfoWindow(latlng, minNode, opts);
   };
   /**
