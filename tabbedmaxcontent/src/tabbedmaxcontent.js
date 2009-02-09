@@ -339,7 +339,9 @@
     if (opts.selectedTab) {
       delete opts.selectedTab;
     }
-    minNode.style.marginTop = '5px';
+    if (minNode.style) {
+      minNode.style.marginTop = '6px';
+    }
     this.openInfoWindow(latlng, minNode, opts);
   };
   /**
