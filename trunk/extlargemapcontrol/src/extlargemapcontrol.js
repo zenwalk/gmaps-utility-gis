@@ -21,19 +21,20 @@ function ExtLargeMapControl(opt_opts_) {
   this.imgSrc = "http://maps.google.com/mapfiles/mapcontrols3d.png";
   this.imgSmallSrc = "http://maps.google.com/mapfiles/szc3d.png";
   
-  this.divTbl = {};
-  this.divTbl.container = { "left" : 0, "top" : 0, "width" : 59};
-  this.divTbl.topArrowBtn = { "left" : 20, "top" : 0, "width" : 18, "height" : 18};
-  this.divTbl.leftArrowBtn = { "left" : 0, "top" : 20};
-  this.divTbl.rightArrowBtn = { "left" : 40, "top" : 20};
-  this.divTbl.bottomArrowBtn = { "left" : 20, "top" : 40};
-  this.divTbl.centerBtn = { "left" : 20, "top" : 20};
-  this.divTbl.zoomSlideBarContainer = { "left" : 19, "top" : 86, "width" : 22};
-  this.divTbl.zoomSliderContainer = { "left" : 0, "top" : 0, "width" : 22, "height" : 14};
-  this.divTbl.zoomSliderContainerImg = { "left" : 0, "top" : -384, "width" : 22, "height" : 14};
-  this.divTbl.zoomOutBtnContainer = { "left" : 0, "top" : 0, "width" : 59, "height" : 23};
-  this.divTbl.zoomOutBtnContainerImg = { "left" : 0, "top" : -360, "width" : 59, "height" : 23};
-
+  this.divTbl = {
+    container : { "left" : 0, "top" : 0, "width" : 59},
+    topArrowBtn : { "left" : 20, "top" : 0, "width" : 18, "height" : 18},
+    leftArrowBtn : { "left" : 0, "top" : 20},
+    rightArrowBtn : { "left" : 40, "top" : 20},
+    bottomArrowBtn : { "left" : 20, "top" : 40},
+    centerBtn : { "left" : 20, "top" : 20},
+    zoomSlideBarContainer : { "left" : 19, "top" : 86, "width" : 22},
+    zoomSliderContainer : { "left" : 0, "top" : 0, "width" : 22, "height" : 14},
+    zoomSliderContainerImg : { "left" : 0, "top" : -384, "width" : 22, "height" : 14},
+    zoomOutBtnContainer : { "left" : 0, "top" : 0, "width" : 59, "height" : 23},
+    zoomOutBtnContainerImg : { "left" : 0, "top" : -360, "width" : 59, "height" : 23}
+  };
+ 
   opt_opts_ = opt_opts_ || {};
   this.zoomInBtnTitle = opt_opts_.zoomInBtnTitle || "zoom in";
   this.zoomOutBtnTitle = opt_opts_.zoomOutBtnTitle || "zoom out";
@@ -44,12 +45,12 @@ function ExtLargeMapControl(opt_opts_) {
   this.homeBtnTitle = opt_opts_.homeBtnTitle || "home position";
   this.opt_opts_ = opt_opts_;
   
-  this.divSmallTbl = {};
-  this.divSmallTbl.container = { "left" : 0, "top" : 0, "width" : 19, "height" : 42};
-  this.divSmallTbl.zoomInBtn = { "left" : 0, "top" : 0, "width" : 19, "height" : 21};
-  this.divSmallTbl.zoomOutBtnImg = { "left" : 0, "top" : -21, "width" : 19, "height" : 21};
-  this.divSmallTbl.zoomOutBtn = { "left" : 0, "top" : 21, "width" : 19, "height" : 21};
-
+  this.divSmallTbl = {
+    container : { "left" : 0, "top" : 0, "width" : 19, "height" : 42},
+    zoomInBtn : { "left" : 0, "top" : 0, "width" : 19, "height" : 21},
+    zoomOutBtnImg : { "left" : 0, "top" : -21, "width" : 19, "height" : 21},
+    zoomOutBtn : { "left" : 0, "top" : 21, "width" : 19, "height" : 21}
+  };
 }
 
 

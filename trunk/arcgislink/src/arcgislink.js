@@ -1539,11 +1539,12 @@
       /**
        * This event is fired when the service and it's service info is loaded.
        * @name ArcGISMapService#load
+       * @param {ArcGISMapService} service
        * @event
        */
-      triggerEvent(me, "load");
+      triggerEvent(me, "load", me);
       if (opt_callback) {
-        opt_callback();
+        opt_callback(me);
       }
     }
     
@@ -2416,9 +2417,10 @@
    * This event is fired when the layer's service is loaded. 
    * Passing {@link ArcGISTileLayer} as argument
    * @name ArcGISTileLayer#load
+   * @param {ArcGISTileLayer} layer
    * @event
    */
-    GEvent.trigger(this, "load");
+    GEvent.trigger(this, "load", this);
   };
   /**
    * Gain access to the underline {@link ArcGISMapService}
@@ -2588,9 +2590,10 @@
    * This event is fired when all layer's services are loaded. 
    * Passing {@link ArcGISMapType} as argument
    * @name ArcGISMapType#load
+   * @param {ArcGISMapType} mapType
    * @event
    */
-    GEvent.trigger(this, "load");
+    GEvent.trigger(this, "load", this);
   };
   
   /**
@@ -2666,9 +2669,10 @@
    /**
    * This event is fired when the layer's service is loaded. Passing {@link ArcGISMapOverlay} as argument
    * @name ArcGISMapOverlay#load
+   * @param {ArcGISMapOverlay} overlay
    * @event
    */
-    GEvent.trigger(this, "load");
+    GEvent.trigger(this, "load", this);
   };
   /**
    * Attached this overlay to all gmaptypes. Mainly for copyrights .
