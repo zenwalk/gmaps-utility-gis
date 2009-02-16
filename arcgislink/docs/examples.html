@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <title>Examples</title>
+    <title>ArcGIS Server Link for Google Maps API: Examples</title>
     <link rel="stylesheet nofollow" type="text/css" href="http://code.google.com/css/codesite.css"/>
     <link rel="stylesheet nofollow" type="text/css" href="../../util/docs/template/local_extensions.css"/>
     <script type="text/javascript" src="http://code.google.com/js/prettify.js"></script>
@@ -10,7 +10,7 @@
   <body onload="prettyPrint()">
 <div>
 <a name="Top"></a>  
-<h1><a></a>ArcGIS Server Link for GMaps Examples</h1>
+<h1><a></a>ArcGIS Server Link for Google Maps API: Examples</h1>
 <p><b>
   <a href="concepts.html">Concepts</a>
   | <a href="reference.html">Class References</a>
@@ -21,7 +21,7 @@
 <table style='border:0px'>
   <tr>
     <td style='border:0px'>
-     Use ArcGIS Maps in GMaps<br/>
+     Map Types/Overlays:<br/>
       <ul>
 <li><a href="#Simple">One-step Add Map</a></li>
 <li><a href="#Dyna">Add as ArcGISMapOverlay</a></li>
@@ -38,9 +38,8 @@
 </ul>
     </td>
     <td style="border:0px">
-Examples using Service classes</br/>
+    Services:</br/>
    <ul>
-   <!--li><a href="#AdvClick">Advanced Map Click</a></li-->
    <li><a href="#StatePlane">State Plane Coordinate System</a></li>
    <li><a href="#Hosts">Rotating Hosts for Tiles</a></li>
    <li><a href="#Flat">&quot;Flat&quot; ArcGISSpatialReference</a></li>
@@ -51,7 +50,6 @@ Examples using Service classes</br/>
    <li><a href="#Find">Find</a></li>
    <li><a href="#Geocode">Geocode</a></li>
    <li><a href="#ReverseGeocode">ReverseGeocode</a></li>
-   <!--li><a href="#Rest">Simple Map Control</a></li-->
    </ul>
    </td>
   </tr>
@@ -61,30 +59,31 @@ Examples using Service classes</br/>
 <h2><a name="HowTo"></a>Include Scripts</h2>
 <p>
 The first step is to include <code>arcgislink.js</code> or <code>arcgislink_packed.js</code> 
-in your document header, after GMaps API is load. You can use the online version if you do not want to download the script.</p>
-    <pre class="prettyprint">
-      &lt;script src=&quot;/path/to/extargis_packed.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
-    </pre>
+in your document header, after the Google Maps API has loaded. You can use the 
+hosted release version if you do not want to download the script.</p>
+<pre class="prettyprint">
+&lt;script src=&quot;/path/to/extargis_packed.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+</pre>
 </div>
 
 <div><h2><a name="Simple"></a>Simple Add Map</h2> 
 <p>In the simplest form, you can add an ArcGIS map with the add-on method 
 <a href="reference.html#GMap2" class="code">GMap2.addArcGISMap(url)</a> to 
-the core <code>GMap2</code> class. You can optionally use a callback function to do extra things with the added result.
+the core <code>GMap2</code> class. 
+You can optionally use a callback function to do extra things with the result.
  </p>
 
 <pre class="prettyprint">
-        function init(){
-          var map = new GMap2(document.getElementById("map"));
-          map.setCenter(new GLatLng(45.5, -122.7), 14);
-          //...
-          var base = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services';
-          var tiled = base + '/Portland/Portland_ESRI_LandBase_AGO/MapServer';
-          var dyna = base + '/Demographics/ESRI_Census_USA/MapServer';
-          map.addArcGISMap(tiled);
-          map.addArcGISMap(dyna);
-        }
-    </pre>
+function init(){
+  var map = new GMap2(document.getElementById("map"));
+  map.setCenter(new GLatLng(45.5, -122.7), 14);
+  var base = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services';
+  var tiled = base + '/Portland/Portland_ESRI_LandBase_AGO/MapServer';
+  var dyna = base + '/Demographics/ESRI_Census_USA/MapServer';
+  map.addArcGISMap(tiled);
+  map.addArcGISMap(dyna);
+}
+</pre>
 
 <p>
 <a href="../examples/simpleadd.html">View example </a> |
@@ -97,21 +96,20 @@ the core <code>GMap2</code> class. You can optionally use a callback function to
 <h2><a name="Dyna"></a>Add as ArcGISMapOverlay</h2>
 <p> ArcGIS Server provides map services to generate map images on the fly, 
 also known as "dynamic map". Dynamic services are implemented as 
-<a href='reference.html#ArcGISMapOverlay'>
-  ArcGISMapOverlay</a>, a subclass of <code>GOverlay</code>, hence can be
-  added with <code>map.addOverlay()</code>. It has some similarity with
-   the <code>GGoundOverlay</code> in the core API.
-    Any map service can be added as an ArcGISMapOverlay, regardless it's tiled or not.
+<a href='reference.html#ArcGISMapOverlay'>ArcGISMapOverlay</a>,
+ a subclass of <code>GOverlay</code>, and hence can be
+  added with <code>map.addOverlay()</code>. This class is similar 
+to the <code>GGoundOverlay</code> in the core API, as it essentially draws a 
+single image over the map. Any map service can be added as an ArcGISMapOverlay, 
+regardless of whether it's tiled or not.
 
-    <pre class="prettyprint">
-    function init(){
-      var map = new GMap2(document.getElementById("map"));
-      map.setCenter(new GLatLng(40, -100), 4);
-      //..  
-      var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer';
-      map.addOverlay(new ArcGISMapOverlay(url));
-     
-    }
+<pre class="prettyprint">
+function init(){
+  var map = new GMap2(document.getElementById("map"));
+  map.setCenter(new GLatLng(40, -100), 4);
+  var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer';
+  map.addOverlay(new ArcGISMapOverlay(url));
+}
 </pre>
 
 <p>
@@ -121,23 +119,23 @@ also known as "dynamic map". Dynamic services are implemented as
 </p>
 </div>
 <div>
-<h2><a name="Mercator"></a>Add mercator tile as ArcGISMapType</h2>
+<h2><a name="Mercator"></a>Add mercator tiles as ArcGISMapType</h2>
 <p> 
 If a map service is pre-rendered as tiles, the application 
-    will have a better response time if added as
-    <a href="reference.html#ArcGISTileLayer">ArcGISTileLayer</a>.
+will have a better response time if added as
+<a href="reference.html#ArcGISTileLayer">ArcGISTileLayer</a>.
 If the map service is tiled using the same tiling scheme as Google Maps 
-(WebMercator in ArcGIS), it can be 
-added as a map type directly. The following example constructs GMap2 without loading any Google Map Types</p>
-    <pre class="prettyprint">
-       function init(){
-          var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
-          var agsType = new ArcGISMapType(url);
-         
-          var map = new GMap2(document.getElementById("map"),{mapTypes:[agsType]});
-          map.setCenter(new GLatLng(45.5, -122.7), 15);
-         //...
-        }          
+(WebMercator in ArcGIS), it can be added as a map type directly. 
+The following example constructs a new <code>GMap2</code>
+with only an ArcGIS map type and no Google map types.
+</p>
+<pre class="prettyprint">
+function init(){
+  var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
+  var agsType = new ArcGISMapType(url);
+  var map = new GMap2(document.getElementById("map"),{mapTypes:[agsType]});
+  map.setCenter(new GLatLng(45.5, -122.7), 15);
+}          
 </pre>
 
 <p>
@@ -149,21 +147,22 @@ added as a map type directly. The following example constructs GMap2 without loa
 <div>
 <h2><a name="TileLoad"></a>Load map tiles on load event</h2>
 <p> If the map service is not cached using the same tiling scheme as Google maps,
-then it can not load directly because the system does not know how to request tiles
-without knowing how the tiles are stored. The following example adds a map service 
-created in ArcGIS online scheme using on "load" event:
-    <pre class="prettyprint">
-     function init(){
-          var map = new GMap2(document.getElementById("map"));
-          map.setCenter(new GLatLng(45.5, -122.7), 15);
-          //...
-          var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_LandBase_AGO/MapServer';
-          var agsType = new ArcGISMapType(url);
-          GEvent.addListener(agsType,'load', function(){
-           map.addMapType(agsType);
-           map.setMapType(agsType);
-          });
-        }
+then it can not be loaded directly because the system does not know how to 
+request the tiles. It must instead be added asynchronously, 
+after it's received information about the scheme.
+The following example adds a map service created in 
+ArcGIS online scheme after the <code>"load"</code> event:
+<pre class="prettyprint">
+function init(){
+  var map = new GMap2(document.getElementById("map"));
+  map.setCenter(new GLatLng(45.5, -122.7), 15);
+  var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_LandBase_AGO/MapServer';
+  var agsType = new ArcGISMapType(url);
+  GEvent.addListener(agsType,'load', function(){
+    map.addMapType(agsType);
+    map.setMapType(agsType);
+  });
+}
 </pre>
 
 <p>
@@ -174,53 +173,49 @@ created in ArcGIS online scheme using on "load" event:
 </div>
 <div>
 <h2><a name="TileProjection"></a>Load map tiles without load event</h2>
-<p> If you do not want to wait until the 'load' event, and you already know how the tiles are built, you can
-passing an <a href="reference.html#ArcGISProjection">ArcGISProjection</a> in the constructor of
-<a href="reference.html#ArcGISTileLayer">ArcGISTileLayer</a>. Note, you still must make 
-sure the <a href="reference.html#ArcGISSpatialReference">ArcGISSpatialReference</a> is in the system already.
-This is useful when you have many tiled maps and they are all using same tile scheme.
+<p> If you do not want to wait until the 'load' event, and you already know how 
+the tiles are built, you can pass an 
+<a href="reference.html#ArcGISProjection">ArcGISProjection</a> to the constructor 
+of <a href="reference.html#ArcGISTileLayer">ArcGISTileLayer</a>. Note, you still 
+must make sure the 
+<a href="reference.html#ArcGISSpatialReference">ArcGISSpatialReference</a> is in 
+the system already. This is a useful technique when you have many tiled maps a
+nd they are all using the same tile scheme.
     <pre class="prettyprint">
-              var tileInfo = {
-                "rows": 512,
-                "cols": 512,
-                "dpi": 96,
-                "origin": {
-                  "x": -180,
-                  "y": 90
-                },
-                "spatialReference": {
-                  "wkid": 4326
-                },
-                "lods": [
-                  {"level" : 0, "resolution" : 0.351562499999999, "scale" : 147748799.285417}, 
-                  {"level" : 1, "resolution" : 0.17578125, "scale" : 73874399.6427087}, 
-                  {"level" : 2, "resolution" : 0.0878906250000001, "scale" : 36937199.8213544}, 
-                  {"level" : 3, "resolution" : 0.0439453125, "scale" : 18468599.9106772}, 
-                  {"level" : 4, "resolution" : 0.02197265625, "scale" : 9234299.95533859}, 
-                  {"level" : 5, "resolution" : 0.010986328125, "scale" : 4617149.97766929}, 
-                  {"level" : 6, "resolution" : 0.0054931640625, "scale" : 2308574.98883465}, 
-                  {"level" : 7, "resolution" : 0.00274658203124999, "scale" : 1154287.49441732}, 
-                  {"level" : 8, "resolution" : 0.001373291015625, "scale" : 577143.747208662}, 
-                  {"level" : 9, "resolution" : 0.0006866455078125, "scale" : 288571.873604331}, 
-                  {"level" : 10, "resolution" : 0.000343322753906249, "scale" : 144285.936802165}, 
-                  {"level" : 11, "resolution" : 0.000171661376953125, "scale" : 72142.9684010827}, 
-                  {"level" : 12, "resolution" : 8.58306884765626E-05, "scale" : 36071.4842005414}, 
-                  {"level" : 13, "resolution" : 4.29153442382813E-05, "scale" : 18035.7421002707}, 
-                  {"level" : 14, "resolution" : 2.14576721191406E-05, "scale" : 9017.87105013534}, 
-                  {"level" : 15, "resolution" : 1.07288360595703E-05, "scale" : 4508.93552506767}
-                  ]
-              };
-              var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_LandBase_AGO/MapServer';
-              var agsType = new ArcGISMapType(url,{projection: new ArcGISProjection(tileInfo)});
-              // note no load event listener.
-              var map = new GMap2(document.getElementById("map"), { mapTypes: [agsType]});
-              map.setCenter(new GLatLng(45.5, -122.7), 15);
-              map.addControl(new GMapTypeControl());
-              map.addControl(new GLargeMapControl());
-              map.addControl(new GScaleControl());
-              map.enableDoubleClickZoom();
-              map.enableContinuousZoom();
-              map.enableScrollWheelZoom();
+var tileInfo = {
+  "rows": 512,
+  "cols": 512,
+  "dpi": 96,
+  "origin": {
+     "x": -180,
+     "y": 90
+   },
+  "spatialReference": {
+     "wkid": 4326
+  },
+  "lods": [
+     {"level" : 0, "resolution" : 0.351562499999999, "scale" : 147748799.285417}, 
+     {"level" : 1, "resolution" : 0.17578125, "scale" : 73874399.6427087}, 
+     {"level" : 2, "resolution" : 0.0878906250000001, "scale" : 36937199.8213544}, 
+     {"level" : 3, "resolution" : 0.0439453125, "scale" : 18468599.9106772}, 
+     {"level" : 4, "resolution" : 0.02197265625, "scale" : 9234299.95533859}, 
+     {"level" : 5, "resolution" : 0.010986328125, "scale" : 4617149.97766929}, 
+     {"level" : 6, "resolution" : 0.0054931640625, "scale" : 2308574.98883465}, 
+     {"level" : 7, "resolution" : 0.00274658203124999, "scale" : 1154287.49441732}, 
+     {"level" : 8, "resolution" : 0.001373291015625, "scale" : 577143.747208662}, 
+     {"level" : 9, "resolution" : 0.0006866455078125, "scale" : 288571.873604331}, 
+     {"level" : 10, "resolution" : 0.000343322753906249, "scale" : 144285.936802165}, 
+     {"level" : 11, "resolution" : 0.000171661376953125, "scale" : 72142.9684010827}, 
+     {"level" : 12, "resolution" : 8.58306884765626E-05, "scale" : 36071.4842005414}, 
+     {"level" : 13, "resolution" : 4.29153442382813E-05, "scale" : 18035.7421002707}, 
+     {"level" : 14, "resolution" : 2.14576721191406E-05, "scale" : 9017.87105013534}, 
+     {"level" : 15, "resolution" : 1.07288360595703E-05, "scale" : 4508.93552506767}
+  ]};
+var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_LandBase_AGO/MapServer';
+var agsType = new ArcGISMapType(url,{projection: new ArcGISProjection(tileInfo)});
+// note no load event listener.
+var map = new GMap2(document.getElementById("map"), { mapTypes: [agsType]});
+map.setCenter(new GLatLng(45.5, -122.7), 15);
 </pre>
 
 <p>
@@ -231,19 +226,18 @@ This is useful when you have many tiled maps and they are all using same tile sc
 </div>
 <div>
 <h2><a name="TileLayerOverlay"></a>Add as GTileLayerOverlay</h2>
-<p> TileLayers can also be added as <a href="reference.html#ArcGISTileLayerOverlay">ArcGISTileLayerOverlay</a>, a subclass of <code>GTileLayerOverlay</code>
- in core API. If the tile is created with "WebMercator", it can 
-overlay on top of default google maps. If it is not in "WebMercator", it can still be able
- to added
-as ArcGISTileLayerOverlay on top of map types with same tiling scheme,
- but it won't overlay correctly with default Google maps types, so it is recommended to construct the GMap2 instance
- with custom map types: <code>new GMap2(div,{mapTypes:[]});</code>
-    <pre class="prettyprint">
-       function addTileLayerOverlay(){
-          var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
-          var tileoverlay=new ArcGISTileLayerOverlay(new ArcGISTileLayer(url,{opacity:0.4}));
-          map.addOverlay(tileoverlay);
-       }
+<p> Tile layers can also be added as 
+<a href="reference.html#ArcGISTileLayerOverlay">ArcGISTileLayerOverlay</a>, 
+a subclass of <code>GTileLayerOverlay</code> in the core API. 
+If the tile is created with "WebMercator", it can be added on top of 
+the default Google map types. If it is not in "WebMercator", it can only be
+ added as an <code>ArcGISTileLayerOverlay</code> on top of map types with 
+the same tiling scheme. In this case, it's best to initialize the map
+with only the ArcGIS map types.
+<pre class="prettyprint">
+var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
+var tileoverlay = new ArcGISTileLayerOverlay(new ArcGISTileLayer(url,{opacity:0.4}));
+map.addOverlay(tileoverlay);
 </pre>
 
 <p>
@@ -259,35 +253,35 @@ as ArcGISTileLayerOverlay on top of map types with same tiling scheme,
 
 <div>
 <h2><a name="Combined"></a>Combining Tiled and Dynamic Layer</h2>
-<p> In many situations, tile map is best used as background map and dynamic layer is added on top of it. 
-The following example loaded the default Google map types (Normal, Satellite, Hybrid), 
+<p>In many situations, it's ideal to combined a tiled map as a background,
+with a dynamic layer on top of it.
+The following example loads the default Google map types (Normal, Satellite, Hybrid), 
 then a tiled map service built on WGS84(4326) with 521x512 pixel tile size, 
 then a tiled map service built on Web-Mercator(102113) with 256x256 pixel tile size, 
-and finally a dynamic map service whose own spatial reference system was NAD83 GCS(4269)
-on top of all. As map type changes,
- the dynamic map will refresh itself to match the underline spatial reference.</p>
-    <pre class="prettyprint">
-       function init(){
-          // first init a normal map
-          var map = new GMap2(document.getElementById("map"));
-          map.setCenter(new GLatLng(45.5, -122.7), 15);
-          //...
-          // now add ArcGIS maps
-          var baseUrl = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services';
-          var wgs84Url = baseUrl + '/Portland/Portland_ESRI_LandBase_AGO/MapServer';
-          var webMercatorUrl = baseUrl + '/Portland/ESRI_LandBase_WebMercator/MapServer';
-          var dynaUrl = baseUrl + '/Demographics/ESRI_Census_USA/MapServer';
-          
-          var wgs84 = new ArcGISMapType(wgs84Url);
-          GEvent.addListener(wgs84,'load',function(){map.addMapType(wgs84);});
-          var webMercator = new ArcGISMapType(webMercatorUrl);
-          GEvent.addListener(webMercator,'load',function(){ map.addMapType(webMercator); });
+and finally, a dynamic map service whose own spatial reference system is NAD83 GCS(4269)
+on top of all. As map type changes, the dynamic map will refresh itself to match
+ the underlying spatial reference.</p>
+<pre class="prettyprint">
+function init(){
+  // first init a normal map
+  var map = new GMap2(document.getElementById("map"));
+  map.setCenter(new GLatLng(45.5, -122.7), 15);
+
+  // now add ArcGIS maps
+  var baseUrl = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services';
+  var wgs84Url = baseUrl + '/Portland/Portland_ESRI_LandBase_AGO/MapServer';
+  var webMercatorUrl = baseUrl + '/Portland/ESRI_LandBase_WebMercator/MapServer';
+  var dynaUrl = baseUrl + '/Demographics/ESRI_Census_USA/MapServer';
          
-          var dynaOverlay = new ArcGISMapOverlay(dynaUrl);
-          map.addOverlay(dynaOverlay);
-          //...
-       }   
-          </pre>
+  var wgs84 = new ArcGISMapType(wgs84Url);
+  GEvent.addListener(wgs84,'load',function(){map.addMapType(wgs84);});
+  var webMercator = new ArcGISMapType(webMercatorUrl);
+  GEvent.addListener(webMercator,'load',function(){ map.addMapType(webMercator); });
+         
+  var dynaOverlay = new ArcGISMapOverlay(dynaUrl);
+  map.addOverlay(dynaOverlay);
+}   
+</pre>
 
 <p>
 <a href="../examples/combined.html">View example </a> |
@@ -298,34 +292,36 @@ on top of all. As map type changes,
 
 <div>
 <h2><a name="ArcGISOnline"></a>ArcGISOnline Services</h2>
-<p> <a target="esri" href="http://www.arcgisonline.com">ArcGISOnline</a> is an online geo-spatial service
- provided by <a target="esri" href="http://www.esri.com">ESRI, Inc</a>. All tiled map service are based on
-  WGS84 Spatial Reference System with tile size of 512x512 </p>
- <p>Check <a target="esri" href='http://resources.esri.com/arcgisonlineservices/index.cfm?fa=Licensing'>Licensing</a> 
+<p> <a href="http://www.arcgisonline.com">ArcGISOnline</a> is an 
+online geo-spatial service provided by 
+<a href="http://www.esri.com">ESRI, Inc</a>. 
+All the tiled map services are based on WGS84 Spatial Reference System 
+with tile size of 512x512.</p>
+<p>Check <a href='http://resources.esri.com/arcgisonlineservices/index.cfm?fa=Licensing'>Licensing</a> 
  before you use these services. </p>
-<p>The following example created loaded one base map type and constructed the GMap2 instance,
- then added additional services using the <a href="reference.html#GMap2">GMap2.addArcGISMap(url)</a></p>
-    <pre class="prettyprint">
-       function init(){
-          var base = 'http://server.arcgisonline.com/ArcGIS/rest/services';
-          var type=new ArcGISMapType(base + '/ESRI_StreetMap_World_2D/MapServer');
-          GEvent.addListener(type,'load', function(){
-            var map = new GMap2(document.getElementById("map"), {mapTypes: [type]});
-            map.setCenter(new GLatLng(40,-95), 4);
-            //...
-            // now start add more services
-            map.addArcGISMap(base + "/ESRI_Imagery_World_2D/MapServer");
-            map.addArcGISMap(base + "/ESRI_ShadedRelief_World_2D/MapServer");
-            map.addArcGISMap(base + "/I3_Imagery_Prime_World_2D/MapServer");
-            map.addArcGISMap(base + "/NGS_Topo_US_2D/MapServer");
-            map.addArcGISMap(base + "/NPS_Physical_World_2D/MapServer");
-            map.addArcGISMap(base + "/Demographics/ESRI_00-08PopGrwth_US_2D/MapServer");
-            map.addArcGISMap(base + "/Demographics/ESRI_Diversity_US_2D/MapServer");
-            map.addArcGISMap(base + "/Demographics/ESRI_MedianIncome_US_2D/MapServer");
-            map.addArcGISMap(base + "/Specialty/EVC_Topo_World_2D/MapServer");
-          });
-        }
-    </pre>
+<p>The following example creates and loads one ArcGIS base map type, sets that
+as the maptype for the map, then adds additional services using the 
+<a href="reference.html#GMap2">GMap2.addArcGISMap(url)</a></p>
+<pre class="prettyprint">
+function init(){
+  var base = 'http://server.arcgisonline.com/ArcGIS/rest/services';
+  var type = new ArcGISMapType(base + '/ESRI_StreetMap_World_2D/MapServer');
+  GEvent.addListener(type,'load', function(){
+    var map = new GMap2(document.getElementById("map"), {mapTypes: [type]});
+    map.setCenter(new GLatLng(40,-95), 4);
+    // now add more services
+    map.addArcGISMap(base + "/ESRI_Imagery_World_2D/MapServer");
+    map.addArcGISMap(base + "/ESRI_ShadedRelief_World_2D/MapServer");
+    map.addArcGISMap(base + "/I3_Imagery_Prime_World_2D/MapServer");
+    map.addArcGISMap(base + "/NGS_Topo_US_2D/MapServer");
+    map.addArcGISMap(base + "/NPS_Physical_World_2D/MapServer");
+    map.addArcGISMap(base + "/Demographics/ESRI_00-08PopGrwth_US_2D/MapServer");
+    map.addArcGISMap(base + "/Demographics/ESRI_Diversity_US_2D/MapServer");
+    map.addArcGISMap(base + "/Demographics/ESRI_MedianIncome_US_2D/MapServer");
+    map.addArcGISMap(base + "/Specialty/EVC_Topo_World_2D/MapServer");
+  });
+}
+</pre>
 
 <p>
 <a href="../examples/agsonline.html">View example </a> |
@@ -335,26 +331,26 @@ on top of all. As map type changes,
 </div>
 <div>
 <h2><a name="MapClick"></a>Enable Map Click</h2>
-<p> ArcGIS Map Servcies contains a backend geospatial database. 
-If "ArcGISClick" is enabled, when the user clicks on map at any place, spatial query
-can be performed to find out what geographic feature was located at clicked location. 
-Some preliminary functions are implemented. The simplest way to use that function is via 
- the add-on method <a href="reference.html#GMap2" class="code">GMap2.enableArcGISClick()</a>.
- After that method call, the full map is clickable.</p>
+<p> ArcGIS Map Services contains a backend geospatial database
+that can answer spatial queries about geographic features located
+at a certain location. 
+The simplest way to use this feature is by calling the add-on method 
+<a href="reference.html#GMap2" class="code">GMap2.enableArcGISClick()</a>.
+That will cause an infowindow to pop up after the user clicks the map.
+</p>
  <pre class="prettyprint">
-       function init(){
-          var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_LandBase_AGO/MapServer';
-          var agsType = new ArcGISMapType([new ArcGISTileLayer(url)]);
-          GEvent.addListener(agsType,'load', function(){
-            var map = new GMap2(document.getElementById("map"), {mapTypes: [agsType]});
-            map.setCenter(new GLatLng(45.5, -122.7), 15);
-            // simply enable MapClick 
-            map.enableMapClick();
-            //...
-          });
-          
-        }
-    </pre>
+function init(){
+  var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_LandBase_AGO/MapServer';
+  var agsType = new ArcGISMapType([new ArcGISTileLayer(url)]);
+  GEvent.addListener(agsType,'load', function(){
+    var map = new GMap2(document.getElementById("map"), {mapTypes: [agsType]});
+    map.setCenter(new GLatLng(45.5, -122.7), 15);
+    // simply enable MapClick 
+    map.enableArcGISClick();
+    //...
+  });
+}
+</pre>
 
 <p>
 <a href="../examples/mapclick.html">View example </a> |
@@ -364,24 +360,28 @@ Some preliminary functions are implemented. The simplest way to use that functio
 </div>
 <div>
 <h2><a name="Generic"></a>Generic ArcGIS Viewer</h2>
-<p>The library supports virtually all types of ArcGIS Server map service, with extreme rare exceptions:
-1) The map tile is not square (not supported by GMaps API) 2) The map service is not geo-referenced. 
+<p>The library supports virtually all types of ArcGIS Server map service, 
+with rare exceptions:</p>
+<ol>
+<li>The map tile is not square (not supported by the Google Maps API API).
+<li>The map service is not geo-referenced. 
+</ol>
 You can build an "ultimate" ArcGIS server mashup using ANY map service:</p>
- <pre class="prettyprint">
-            function addMap(url){
-              map.addArcGISMap(url, function(o){
-                if (o instanceof ArcGISMapType) {
-                  map.setMapType(o);
-                  map.setBounds(o.getTileLayers()[0].getInitialBounds());
-                } else if (o instanceof ArcGISMapOverlay) {
-                  map.setBounds(o.getInitialBounds());
-                  o.setOpacity(document.getElementById("opacity").value);
-                  map.zoomIn();
-                }
-                updateTOC();
-              });
-            }
-    </pre>
+<pre class="prettyprint">
+function addMap(url){
+  map.addArcGISMap(url, function(o){
+    if (o instanceof ArcGISMapType) {
+      map.setMapType(o);
+      map.setBounds(o.getTileLayers()[0].getInitialBounds());
+    } else if (o instanceof ArcGISMapOverlay) {
+      map.setBounds(o.getInitialBounds());
+      o.setOpacity(document.getElementById("opacity").value);
+      map.zoomIn();
+    }
+    updateTOC();
+  });
+}
+</pre>
 
 <p>
 <a href="../examples/arcgis.html">View example </a> |
@@ -391,28 +391,29 @@ You can build an "ultimate" ArcGIS server mashup using ANY map service:</p>
 </div>
 <div>
 <h2><a name="Namespace"></a>Use Namespace</h2>
-<p>Using namespace can avoid potential class conflicts. The Google API loader originally introduced name space "<code>google.maps</code>" and since 
-since v2.86 you can use the namespace in <a href="http://groups.google.com/group/Google-Maps-API/browse_thread/thread/c6c5bd8f6441a39e/f24f549218a279f5">the normal loader</a>. 
-This lib will use namespace <code>google.maputils.arcgis</code>. 
-The basic rule is all class names are same without "ArcGIS" prefix.
+<p>Using namespaced libraries can avoid potential class conflicts. 
+The Google AJAX API loader originally introduced the namespace "<code>google.maps</code>" and
+since v2.86 you can also use that namespace with 
+<a href="http://groups.google.com/group/Google-Maps-API/browse_thread/thread/c6c5bd8f6441a39e/f24f549218a279f5">the normal loader</a>. 
+This library can be used in the namespace "<code>google.maputils.arcgis</code>". 
+To use any of the classes from the library with that namespace, 
+the basic rule is to replace the "ArcGIS" prefix with the namespace.
 </p>
  <pre class="prettyprint">
-             // first init a normal map
-          var map = new google.maps.Map2(document.getElementById("map"));
-          map.setCenter(new google.maps.LatLng(45.5, -122.7), 15);
-          map.addControl(new google.maps.MapTypeControl());
-          map.addControl(new google.maps.LargeMapControl());
-          map.addControl(new google.maps.ScaleControl());
-         ...
-          var wgs84Url = baseUrl + '/Portland/Portland_ESRI_LandBase_AGO/MapServer';
-          var wgs84 = new google.maputils.arcgis.MapType(wgs84Url);
-          google.maps.Event.addListener(wgs84,'load',function(s){
-            map.addMapType(wgs84);
-          });
-         ...
-          var dynaOverlay = new google.maputils.arcgis.MapOverlay(dynaUrl);
-          map.addOverlay(dynaOverlay);
-    </pre>
+// first init a normal map
+var map = new google.maps.Map2(document.getElementById("map"));
+map.setCenter(new google.maps.LatLng(45.5, -122.7), 15);
+map.addControl(new google.maps.MapTypeControl());
+map.addControl(new google.maps.LargeMapControl());
+map.addControl(new google.maps.ScaleControl());
+var wgs84Url = baseUrl + '/Portland/Portland_ESRI_LandBase_AGO/MapServer';
+var wgs84 = new google.maputils.arcgis.MapType(wgs84Url);
+google.maps.Event.addListener(wgs84,'load',function(s){
+  map.addMapType(wgs84);
+});
+var dynaOverlay = new google.maputils.arcgis.MapOverlay(dynaUrl);
+map.addOverlay(dynaOverlay);
+</pre>
 
 <p>
 <a href="../examples/namespace.html">View example </a> |
@@ -423,37 +424,43 @@ The basic rule is all class names are same without "ArcGIS" prefix.
 
 <div>
 <h2><a name="StatePlane"></a>State Plane Coordinate System</h2>
-<p> Virtually all GIS data collected by State or Local Governments in Unite States are stored in one of 
-the <a target="_blank" href="http://en.wikipedia.org/wiki/State_Plane_Coordinate_System">
-State Plane Coordinate Systems</a>. In real-world operations, map services (both tiled and dynamic) are published using the native
+<p> Virtually all GIS data collected by State or Local Governments in 
+Unite States are stored in one of the 
+<a target="_blank" href="http://en.wikipedia.org/wiki/State_Plane_Coordinate_System">
+State Plane Coordinate Systems</a>. In real-world operations, map services 
+(both tiled and dynamic) are published using the native
 coordinate system the data uses. </p>
-<p>When adding an <a href="reference.html#ArcGISTileLayer">ArcGISTileLayer</a> from an 
-tiled map service,
- the spatial reference of the map service must be loaded into the intenal 
- <a href="reference.html#ArcGISSpatialReferences">SpatialReferences</a> collections
-before it can be used. The library has 3 built-in spatial references: NAD GCS (4269), WGS84 (4326)
-and "Web Mercator" (102113). It also supports any spatial references based on 
+<p>When adding an <a href="reference.html#ArcGISTileLayer">ArcGISTileLayer</a> 
+from a tiled map service, the spatial reference of the map service must be loaded
+ into the internal 
+<a href="reference.html#ArcGISSpatialReferences">SpatialReferences</a> collections
+before it can be used. The library has 3 built-in spatial references: 
+NAD GCS (4269), WGS84 (4326) and "Web Mercator" (102113). 
+It also supports any spatial references based on 
 <a target=wiki href='http://en.wikipedia.org/wiki/Lambert_conformal_conic_projection'>
 Lambert Conformal Conic Projection</a>
 or <a target=wiki href='http://en.wikipedia.org/wiki/Transverse_Mercator_projection'>
-Transverse Mercator Projection</a>. They can be added with one lines of code either by it's Well_known_text format,
-or constructed directly with correct parameters. Please use the WKT value from <a target=esri href='http://edndoc.esri.com/arcims/9.2/elements/pcs.htm'>
+Transverse Mercator Projection</a>. They can be added either with one line of 
+code by its Well_known_text format or constructed directly with correct 
+parameters. Please use the WKT value from 
+<a target=esri href='http://edndoc.esri.com/arcims/9.2/elements/pcs.htm'>
 ESRI documentation</a>. Spatial references based on other projections can be used 
-by implementing the <a href="reference.html#ArcGISSpatialReference">ArcGISSpatialReference</a> interface </p>
-    <pre class="prettyprint">
-    ArcGISSpatialReferences.addSpatialReference(2264, 'PROJCS["NAD_1983_StatePlane_....UNIT["Foot_US",0.3048006096012192]]');
-    function init(){
-      var url = 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/GET/BaseMap/MapServer';
-      var agsLayer = new ArcGISTileLayer(url);
-      var agsType = new ArcGISMapType([agsLayer]);
-      GEvent.addListener(agsType, 'load', function(){
-        var map = new GMap2(document.getElementById("map"), { mapTypes: [agsType]});
-        //this is a add-on method to use in place of GMaps2.setCenter() without knowning the actual latlng;
-        map.setBounds(agsLayer.getInitialBounds());
-       //...
-      });
-    }
-    </pre>
+by implementing the 
+<a href="reference.html#ArcGISSpatialReference">ArcGISSpatialReference</a> 
+interface </p>
+<pre class="prettyprint">
+ArcGISSpatialReferences.addSpatialReference(2264, 'PROJCS["NAD_1983_StatePlane_....UNIT["Foot_US",0.3048006096012192]]');
+function init(){
+  var url = 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/GET/BaseMap/MapServer';
+  var agsLayer = new ArcGISTileLayer(url);
+  var agsType = new ArcGISMapType([agsLayer]);
+  GEvent.addListener(agsType, 'load', function(){
+    var map = new GMap2(document.getElementById("map"), { mapTypes: [agsType]});
+    //this is a add-on method to use in place of GMap2.setCenter() without knowning the actual latlng;
+    map.setBounds(agsLayer.getInitialBounds());
+  });
+}
+</pre>
 
 <p>
 <a href="../examples/stateplane.html">View example </a> |
@@ -463,23 +470,27 @@ by implementing the <a href="reference.html#ArcGISSpatialReference">ArcGISSpatia
 </div>
 <div>
 <h2><a name="Hosts"></a>Rotating Hosts for Tiles</h2>
-<p> Some browsers has default limitations on how many concurrent connections can be made to a give host based
-on URL name, when many tiles are been downloaded, some of them have to wait in the queue. One workaround for this issue is
-to create multiple DNS names with numbers as suffix. There is an option in the ArcGISTileLayer's constructor to allow you specify an 'host pattern',
-for example, "mt[4].google.com" means rotate hosts in mt0.google.com, mt1.google.com, mt2.google.com, mt3.google.com (4 hosts) </p>
-    <pre class="prettyprint">
-    function init(){
-      var url = 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/GET/BaseMap/MapServer';
-      var agsLayer = new ArcGISTileLayer(url, {
-        hosts: "mt[4].ci.charlotte.nc.us"
-      });
-      var agsType = new ArcGISMapType([agsLayer]);
-      GEvent.addListener(agsType, 'load', function(){
-        var map = new GMap2(document.getElementById("map"), {
-          mapTypes: [agsType]
-        });
-        ...
-    </pre>
+<p> Some browsers has default limitations on how many concurrent connections can 
+be made to a give host based on URL name, so that when many tiles are being 
+downloaded, some of them have to wait in the queue. One workaround for this 
+issue is to create multiple DNS names with numbers as suffix. 
+There is an option in the <code>ArcGISTileLayer</code> constructor to allow you 
+to specify an 'host pattern', for example, "mt[4].google.com" means 
+to rotate hosts across mt0.google.com, mt1.google.com, mt2.google.com, 
+mt3.google.com (4 hosts) </p>
+<pre class="prettyprint">
+function init(){
+  var url = 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/GET/BaseMap/MapServer';
+  var agsLayer = new ArcGISTileLayer(url, {
+    hosts: "mt[4].ci.charlotte.nc.us"
+  });
+  var agsType = new ArcGISMapType([agsLayer]);
+  GEvent.addListener(agsType, 'load', function(){
+    var map = new GMap2(document.getElementById("map"), {
+    mapTypes: [agsType]
+  });
+}
+</pre>
 
 <p>
 <a href="../examples/stateplane.html">View example </a> |
@@ -490,25 +501,26 @@ for example, "mt[4].google.com" means rotate hosts in mt0.google.com, mt1.google
 <div>
 <h2><a name="Flat"></a>Flat Spatial Reference</h2>
 <p> This library also include a simple class 
-<a href="reference.html#ArcGISFlatSpatialReference">FlatSpatialReference</a>. Strictly speaking
-this is not a true spatial reference, but can be used a workaround without implementing
-a real projection class. This class assumes latitude and longitude values are increased evenly.
-The following example works as if the spatial reference 4326 is not added as an instance of 
-<a href="reference.html#ArcGISLambertConformalConic">LambertConformalConic</a>. You can add <b>ANY</b>
- tiled maps service
+<a href="reference.html#ArcGISFlatSpatialReference">FlatSpatialReference</a>. 
+Strictly speaking, this is not a true spatial reference, but can be used as a 
+workaround without implementing a real projection class. 
+This class assumes latitude and longitude values are increased evenly.
+The following example works as if the spatial reference 4326 is not added as an 
+instance of 
+<a href="reference.html#ArcGISLambertConformalConic">LambertConformalConic</a>. 
+You can add tiled maps service
 without actually doing anything with ArcGISSpatialReference.</p>
 <pre class="prettyprint">
-    var url = 'http://.../MapServer';
-      var agsLayer = new ArcGISTileLayer(url);
-      var agsType = new ArcGISMapType([agsLayer]);
-      GEvent.addListener(agsType, 'load', function(){
-        var map = new GMap2(document.getElementById("map"), {
-          mapTypes: [agsType]
-        });
-        map.setBounds(agsLayer.getInitialBounds());
-       
-      });
-    </pre>
+var url = 'http://.../MapServer';
+var agsLayer = new ArcGISTileLayer(url);
+var agsType = new ArcGISMapType([agsLayer]);
+GEvent.addListener(agsType, 'load', function(){
+  var map = new GMap2(document.getElementById("map"), {
+    mapTypes: [agsType]
+  });
+  map.setBounds(agsLayer.getInitialBounds());
+});
+</pre>
 
 <p>
 <a href="../examples/flat.html">View example </a> |
@@ -520,18 +532,17 @@ without actually doing anything with ArcGISSpatialReference.</p>
 
 <div>
 <h2><a name="LayerDef"></a>Layer Definition</h2>
-<p> You can draw a subset of a feature layer inside a dynamic map service (<a href="reference.html#ArcGISMapOverlay">ArcGISMapOverlay</a>) by setting a SQL expression as 
-it's <code>definition</code> property. You will have to use the <a href="reference.html#ArcGISLayer">ArcGISLayer</a> class in the REST part of the libarary.</p>
- <pre class="prettyprint">
- 
-     ...
-       var service=dynaLayer.getMapService();
-       service.getLayer("Coarse Counties").definition="STATE_NAME='Kansas' and POP2007>25000";
-       service.getLayer("Detailed Counties").definition="STATE_NAME='Kansas' and POP2007>25000";
-       service.getLayer("states").definition="STATE_NAME='Kansas'";
-     ...
-
-    </pre>
+<p>You can draw a subset of a feature layer inside a dynamic map service 
+(<a href="reference.html#ArcGISMapOverlay">ArcGISMapOverlay</a>) by setting a 
+SQL expression as  its <code>definition</code> property. 
+You will have to use the <a href="reference.html#ArcGISLayer">ArcGISLayer</a> 
+class in the REST part of the libarary.</p>
+<pre class="prettyprint">
+var service = dynaLayer.getMapService();
+service.getLayer("Coarse Counties").definition="STATE_NAME='Kansas' and POP2007 &gt; 25000";
+service.getLayer("Detailed Counties").definition="STATE_NAME='Kansas' and POP2007 &gt; 25000";
+service.getLayer("states").definition="STATE_NAME='Kansas'";
+</pre>
 
 <p>
 <a href="../examples/layerdef.html">View example </a> |
@@ -541,19 +552,17 @@ it's <code>definition</code> property. You will have to use the <a href="referen
 </div>
 <div>
 <h2><a name="LayerVis"></a>Layer Visibility (TOC)</h2>
-<p> You can control visibility of a layer inside a dynamic map service(<a href="reference.html#ArcGISMapOverlay">ArcGISMapOverlay</a>)
- by assigning it's <code>visible</code> property. There are some limitations on the scale
-threshold on layers in the REST API. You will have to load the layer resource individually if you
+<p> You can control visibility of a layer inside a dynamic map service
+ (<a href="reference.html#ArcGISMapOverlay">ArcGISMapOverlay</a>)
+ by setting its <code>visible</code> property. There are some limitations on 
+the scale threshold on layers in the REST API. 
+You will have to load the layer resource individually if you
 want to do a TOC that handles scales. 
  <pre class="prettyprint">
- ..
-       var service=dynaLayer.getMapService();
-       service.getLayer("states").visible=true;
-  ...
-       dynaLayer.refresh();
-    
-
-    </pre>
+var service = dynaLayer.getMapService();
+service.getLayer("states").visible = true;
+dynaLayer.refresh();
+</pre>
 
 <p>
 <a href="../examples/layervis.html">View example </a> |
@@ -564,32 +573,29 @@ want to do a TOC that handles scales.
 
 <div>
 <h2><a name="HourGlass"></a>Show/Hide HourGlass with events</h2>
-<p>A dynamic map image may take some time to render. In many situations when a server request
-such as map rendering is running at background, you may want to let the user know about it. 
-You can display some sort of hourglass animation images or simply a
-message such as "loading...". You can accomplish this by handling
- different "<code>***start</code>" and "<code>***end</code>" events, 
- or use <code>ArcGISUtil#jsonpstart</code> and <code>ArcGISUtil#jsonpend</code> event to monitor all server requests
-       </p> 
- <pre class="prettyprint">
-        GEvent.addListener(dynaLayer, 'drawstart', function(){
-            document.getElementById('drawing').style.visibility = 'visible';
-          });
-          GEvent.addListener(dynaLayer, 'drawend', function(){
-            document.getElementById('drawing').style.visibility = 'hidden';
-          });
-    ...
-    
-    GEvent.addListener(ArcGISUtil, 'jsonpstart', function(){
-      document.getElementById('working').innerHTML = "working....";
-    });
-    GEvent.addListener(ArcGISUtil, 'jsonpend', function(){
-      document.getElementById('working').innerHTML = '';
-    });
-     &lt;div id="working" &gt; working...&lt;/div&gt;
-     &lt;div id="drawing" &gt; drawing...&lt;/div&gt;
-
-    </pre>
+<p>A dynamic map image may take some time to render. 
+When a intensive server request like map rendering is running in the 
+background, it's helpful to let the user know about it. 
+You can display some sort of hourglass animation image or simply a
+message such as "loading...". 
+You can accomplish this by handling different "<code>***start</code>" 
+and "<code>***end</code>" events, or use <code>ArcGISUtil#jsonpstart</code> 
+and <code>ArcGISUtil#jsonpend</code> event to monitor all server requests
+</p> 
+<pre class="prettyprint">
+GEvent.addListener(dynaLayer, 'drawstart', function(){
+  document.getElementById('drawing').style.visibility = 'visible';
+});
+GEvent.addListener(dynaLayer, 'drawend', function(){
+  document.getElementById('drawing').style.visibility = 'hidden';
+});
+GEvent.addListener(ArcGISUtil, 'jsonpstart', function(){
+  document.getElementById('working').innerHTML = "working....";
+});
+GEvent.addListener(ArcGISUtil, 'jsonpend', function(){
+  document.getElementById('working').innerHTML = '';
+});
+</pre>
 
 <p>
 <a href="../examples/hourglass.html">View example </a> |
@@ -599,46 +605,47 @@ message such as "loading...". You can accomplish this by handling
 </div>
 <div>
 <h2><a name="LayerQuery"></a>Layer Query</h2>
-<p>You can query a layer with SQL statement and spatial filters. The result can be displayed as GOverlays.
-You can also attach mouse events to those GOverlays such as GPolygon and making the application more interactive.
-        </p> 
- <pre class="prettyprint">
-    function initFunctionality(){
-      var layer = dyna.getMapService().getLayer(3);
-      var params = {
-        returnGeometry: true,
-        where: "STATE_NAME = 'South Carolina'",
-        outFields: ["NAME", "POP2000", "POP2007", "POP00_SQMI", "POP07_SQMI"],
-        outSR: 4326
-      };
-      layer.query(params, processResultSet);
+<p>You can query a layer with a SQL statement and spatial filters. 
+The result can be displayed as overlays, like markers or polys.
+You can also attach mouse events to those overlays to 
+make the application more interactive.
+</p> 
+<pre class="prettyprint">
+function initFunctionality(){
+  var layer = dyna.getMapService().getLayer(3);
+  var params = {
+    returnGeometry: true,
+    where: "STATE_NAME = 'South Carolina'",
+    outFields: ["NAME", "POP2000", "POP2007", "POP00_SQMI", "POP07_SQMI"],
+    outSR: 4326
+  };
+  layer.query(params, processResultSet);
+}
+
+function processResultSet(rs){
+  var fs = rs.features;
+  for (var i = 0, c = fs.length; i &lt; c; i++) {
+    var ovs = createGPolys(fs[i], rs.spatialReference);
+    for (var j = 0; j &lt; ovs.length; j++) {
+      gmap.addOverlay(ovs[j]);
     }
-    function processResultSet(rs){
-      var fs = rs.features;
-      for (var i = 0, c = fs.length; i &lt; c; i++) {
-        var ovs = createGPolys(fs[i], rs.spatialReference);
-        for (var j = 0; j &lt; ovs.length; j++) {
-          gmap.addOverlay(ovs[j]);
-        }
-      }
+  }
+}
+
+function createGPolys(feat, sr){
+  var ovs = ArcGISUtil.fromFeatureToOverlays(feat,sr, style);
+  var ov = ovs[j];
+  GEvent.addListener(ov, 'mouseover', function(){
+    for (var i = 0, ic = ovs.length; i &lt; ic; i++) {
+      ovs[i].setStrokeStyle({color: hStyle.outlineColor,weight: hStyle.outlineWeight});
+      ovs[i].setFillStyle({ color: hStyle.fillColor,opacity: hStyle.fillOpacity});
     }
-    function createGPolys(feat, sr){
-      var ovs = ArcGISUtil.fromFeatureToOverlays(feat,sr, style);
-      ...
-      var ov = ovs[j];
-        GEvent.addListener(ov, 'mouseover', function(){
-          for (var i = 0, ic = ovs.length; i &lt; ic; i++) {
-            ovs[i].setStrokeStyle({color: hStyle.outlineColor,weight: hStyle.outlineWeight});
-            ovs[i].setFillStyle({ color: hStyle.fillColor,opacity: hStyle.fillOpacity});
-          }
-          
-          var latlng = ov.getBounds().getCenter();
-          gmap.openInfoWindowHtml(latlng, html);
-        }); 
-        ...
-        return ovs;
-     }
-    </pre>
+    var latlng = ov.getBounds().getCenter();
+    gmap.openInfoWindowHtml(latlng, html);
+  }); 
+  return ovs;
+}
+</pre>
 
 <p>
 <a href="../examples/layerquery.html">View example </a> |
@@ -648,33 +655,32 @@ You can also attach mouse events to those GOverlays such as GPolygon and making 
 </div>
 <div>
 <h2><a name="Find"></a>Find</h2>
-<p>Find is an operation supported by a map service to query features based on a single String. It will search the attribute columns
-of the map layers inside the map service and return matching features</p>
- <pre class="prettyprint">
-          var params = {
-                returnGeometry: true,
-                searchText: q,
-                contains:!exact,
-                layers:['Cities','Rivers','States'],//
-                searchFields:["CITY_NAME","NAME","SYSTEM","STATE_ABBR","STATE_NAME"],
-                sr: 4326
-              };
-              service.find(params, processFindResults);
-            }
+<p>Find is an operation supported by a map service to query features based on a 
+single String. It will search the attribute columns
+of the map layers inside the map service and return matching features.</p>
+<pre class="prettyprint">
+var params = {
+  returnGeometry: true,
+  searchText: q,
+  contains:!exact,
+  layers:['Cities','Rivers','States'],
+  searchFields:["CITY_NAME","NAME","SYSTEM","STATE_ABBR","STATE_NAME"],
+  sr: 4326
+};
+service.find(params, processFindResults);
             
-            function processFindResults(rs) {
-              var fs = rs.results;
-              for (var i = 0, c = fs.length; i < c; i++) {
-                processFindResult(fs[i]);
-              }
-            }
+function processFindResults(rs) {
+  var fs = rs.results;
+  for (var i = 0, c = fs.length; i &lt; c; i++) {
+    processFindResult(fs[i]);
+  }
+}
           
-            function processFindResult(res) {
-              var ovs = ArcGISUtil.fromFeatureToOverlays(res);
-              ....
-              gmap.addOverlays(ovs);
-            }
-    </pre>
+function processFindResult(res) {
+  var ovs = ArcGISUtil.fromFeatureToOverlays(res);
+  gmap.addOverlays(ovs);
+}
+</pre>
 
 <p>
 <a href="../examples/find.html">View example </a> |
@@ -684,31 +690,34 @@ of the map layers inside the map service and return matching features</p>
 </div>
 <div>
 <h2><a name="Geocode"></a>Geocode</h2>
-<p>You can get the coordinates of a location by passing it's address or other descriptions. 
-You can use class <a href="reference.html#ArcGISGeocodeService">ArcGISGeocodeService</a>'s <code>findAddressCandidates</code> method.
- You can dynamically construct the input form based on the meta data of the GeocodeService such as 'addressFields' property.</p> 
+<p>You can get the coordinates of a location by passing itss address 
+or other descriptions. You can use 
+<a href="reference.html#ArcGISGeocodeService">ArcGISGeocodeService</a>'s 
+<code>findAddressCandidates</code> method. You can dynamically construct 
+an input form based on the meta data of the GeocodeService such as 
+'addressFields' property.</p> 
  
- <pre class="prettyprint">
-          var inputs = { };
-          var fields=geocoder.addressFields;
-          for (var i=0; i< fields.length; i++){
-             inputs[fields[i].name]=document.getElementById(fields[i].name).value;
-          }
-          geocoder.findAddressCandidates({inputs: inputs}, function(results) {
-              var markers = [];
-              if (results.candidates) {
-                for (var i = 0, c = results.candidates.length; i < c; i++) {
-                  var marker=createMarker(results.candidates[i]);
-                  map.addOverlay(marker);
-                  markers.push(marker);
-                  if (i == 0) {
-                    map.setCenter(marker.getLatLng(),15);
-                    GEvent.trigger(marker, 'click');
-                  }
-                }
-              }
-            });
-    </pre>
+<pre class="prettyprint">
+var inputs = { };
+var fields=geocoder.addressFields;
+for (var i=0; i &lt; fields.length; i++){
+  inputs[fields[i].name]=document.getElementById(fields[i].name).value;
+}
+geocoder.findAddressCandidates({inputs: inputs}, function(results) {
+  var markers = [];
+  if (results.candidates) {
+    for (var i = 0, c = results.candidates.length; i &lt; c; i++) {
+      var marker=createMarker(results.candidates[i]);
+      map.addOverlay(marker);
+      markers.push(marker);
+      if (i == 0) {
+        map.setCenter(marker.getLatLng(),15);
+        GEvent.trigger(marker, 'click');
+      }
+    }
+  }
+});
+</pre>
 
 <p>
 <a href="../examples/geocode.html">View example </a> |
@@ -719,36 +728,37 @@ You can use class <a href="reference.html#ArcGISGeocodeService">ArcGISGeocodeSer
 <div>
   <div>
 <h2><a name="ReverseGeocode"></a>Reverse Geocode</h2>
-<p>You can also find the address of a given geographic coordinates, or reverse Geocode. 
-You can use class <a href="reference.html#GeocodeService">GeocodeService</a>'s <code>reverseGeocode</code> method.</p> 
- <pre class="prettyprint">
-          function reverseGeocode(latlng){
-            if (latlng){
-              var point = ArcGISUtil.fromLatLngToPoint(latlng);
-              var params = {
-                location: point,
-                distance: 100
-              }
-              geocoder.reverseGeocode(params, function(result) {
-                if (result.address) {
-                  var html = '';
-                  var attrs = result.address;
-                  for (var x in attrs) {
-                    if (attrs.hasOwnProperty(x)) {
-                      html += x +': '+ attrs[x] + '&lt;br/&gt;';
-                    }
-                  }
-                  var loc=ArcGISUtil.fromPointToLatLng(result.location);
-                  marker.setLatLng(loc);
-                  marker.openInfoWindowHtml(html);
-                }else{
-                  alert('can not find address for point:'+latlng.toString());
-                }
-              });
-            }
-            
+<p>You can also find the address of a given geographic coordinates 
+(reverse geocode), using 
+<a href="reference.html#GeocodeService">GeocodeService</a>'s 
+<code>reverseGeocode</code> method.</p> 
+<pre class="prettyprint">
+function reverseGeocode(latlng){
+  if (latlng){
+    var point = ArcGISUtil.fromLatLngToPoint(latlng);
+    var params = {
+      location: point,
+      distance: 100
+    };
+    geocoder.reverseGeocode(params, function(result) {
+      if (result.address) {
+        var html = '';
+        var attrs = result.address;
+        for (var x in attrs) {
+          if (attrs.hasOwnProperty(x)) {
+            html += x +': '+ attrs[x] + '&lt;br/&gt;';
           }
-    </pre>
+        }
+        var loc=ArcGISUtil.fromPointToLatLng(result.location);
+        marker.setLatLng(loc);
+        marker.openInfoWindowHtml(html);
+      } else { 
+        alert('can not find address for point:'+latlng.toString());
+      }
+    });
+  }            
+}
+</pre>
 
 <p>
 <a href="../examples/reverse.html">View example </a> |
@@ -756,45 +766,6 @@ You can use class <a href="reference.html#GeocodeService">GeocodeService</a>'s <
 <a href="#Top">Back to top</a>
 </p>
 </div>
-<!--
-<div>
-<h2><a name="Rest"></a>Simple Map Control</h2>
-<p> This library is designed with 2 tiers: Javascript object model for ArcGIS Server REST API, 
-and extension class to GMaps API.
-If you just want a simple map interface without the rich interactive features 
-offered by GMaps API, you can use this library standalone by create a simple map control class
-to interact with DOM. The following example does not load GMaps API.</p>
- <pre class="prettyprint">
-        //poor man's map control
-      function SimpleMap(div,mapService){
-        this.img=document.createElement("img");
-        div.appendChild(this.img);
-        this.width=parseInt(div.style.width);
-        this.height=parseInt(div.style.height);
-        this.service=mapService;
-        this.setExtent(mapService.initialExtent);
-      }
-      SimpleMap.prototype = {
-      // functions
-      };
-      var map;
-      
-    function init(){
-      var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer';
-      var service = new ArcGISMapService(url, function(){
-          map = new SimpleMap(document.getElementById("map"), service);
-      });
-    }
-    </script>
-    </pre>
-
-<p>
-<a href="../examples/restmap.html">View example </a> |
-<a href="../examples/restmap.html?packed">Packed </a> | 
-<a href="#Top">Back to top</a>
-</p>
-</div>
--->
 
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

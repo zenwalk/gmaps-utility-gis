@@ -25,15 +25,16 @@
     }
     function addOverlay(){
       var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer';
-      var ov=new ArcGISMapOverlay(url)
-      map.addOverlay(ov);//,{opacity:0.5}
+      var ov = new ArcGISMapOverlay(url)
+      map.addOverlay(ov);
       log();
     }
     
     function removeOverlay(){
       var ovs = map.getArcGISOverlays();
-      if (ovs.length > 0) 
+      if (ovs.length > 0) {
         map.removeOverlay(ovs[0]);
+      }
       log();
     }
     

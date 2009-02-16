@@ -10,7 +10,7 @@
   <body onload="prettyPrint()">
 <div>
 <a name="Top"></a>  
-<h1>ArcGIS Server Link for GMaps Concepts</h1>
+<h1>ArcGIS Server Link for Google Maps API: Concepts</h1>
 <p><b>
   <a href="examples.html">Examples</a>
   | <a href="reference.html">Class References</a>
@@ -30,23 +30,23 @@
      </p>
  </div>
 <div>
-  <h2><a name="GMaps"></a>GMaps Extension Classes</h2> 
-<p>For developers who are familier with the core GMaps classes, 
-this library  can be considered as a collection of customized/extention 
+  <h2><a name="GMaps"></a>Google Maps API Extension Classes</h2> 
+<p>For developers who are familiar with the core Google Maps API classes, 
+this library can be considered as a collection of custom/extension 
 classes to the core API that facilitates access to ArcGIS Server. 
-You can accomplish many tasks by only using those subclasses. 
+You can accomplish many tasks by using only those subclasses. 
 Several principles are used in the design:
 </p>
 <ul>
-  <li>Use object literals in constructers as options.</li> 
+  <li>Use object literals in constructors as options.</li> 
   <li>Use callback function in methods, not in constructors</li> 
   <li>Use events to identify key steps in operations</li>
 </ul> 
- <p>The following table describes the classes in the core GMaps API and their corresponding 
+ <p>The following table describes the classes in the core Google Maps API and their corresponding 
 sub classes in this library. </p>
 <table>
   <tr>
-    <th>Core GMaps API class</th>
+    <th>Core Google Maps API Class</th>
     <th>ArcGIS Link Class</th>
   </tr>
   <tr>
@@ -106,7 +106,7 @@ use those classes by calling the <code>ArcGISTileLayer.getMapService()</code>
   <li>Operations performed on resource are methods of the resource classes.</li>
   <li>Use object literals whenever possible such as parameters and results</li> 
 </ul> 
-<p>The following is a table that describles the REST resource and their corresponding classes:</p>
+<p>The following is a table that describes the REST resource and their corresponding classes:</p>
 <table>
   <tr>
     <th>REST Resource</th>
@@ -162,26 +162,20 @@ use those classes by calling the <code>ArcGISTileLayer.getMapService()</code>
   </tr>
 </table>
 </div>
-<!--
-<p>As a side note, the REST component can be used without loading the core GMaps API. See this 
- <a href="examples.html#Rest">simple example</a>. It is also possible to built another tile library 
- such as <a href='http://openlayers.org'>Open Layers</a> adaptor using these classes. 
-</p>
--->
 <div>
 <h2><a name="Load"></a>The load Event</h2> 
 <p>ArcGIS services may be published with different spatial reference systems. 
 If they are pre-rendered as map tiles, they will use a certain "tiling scheme". 
 Some of them may use the exact same tile scheme as Google maps, some may not.
- In order to let the core GMaps API to load tiles correctly, it is necessary to get
- information about how the tiles are constructed from the server first. 
- This is an asynchrous process.
-Due to certain limitation of the core API, (See <a href=http://code.google.com/p/gmaps-api-issues/issues/detail?id=279&can=1&q=refresh&colspec=ID%20Type%20Status%20Introduced%20Fixed%20Summary%20Stars%20ApiType%20Internal>Issue 279</a>
-), some map resources may have to be loaded before they can be used.
- There are following exceptions: 
+In order to let the core Google Maps API know how to load tiles correctly, 
+it is necessary to get information about how the tiles are constructed from the server first. 
+ This is an asynchronous process. For this reason, it's often necessary to wait
+ for the "load" event before using an ArcGIS Link class.
+ It is not necessary to wait if... 
 <ul><li>The resource is added as 
 an <a href="reference.html#ArcGISMapOverlay">ArcGISMapOverlay</a>  </li>
-<li>The tiles are created with the same tile system as Google Maps, in ArcGIS's term, "cached with Web-Mercator scheme";
+<li>The tiles are created with the same tile system as Google Maps, in ArcGIS's
+terms, "cached with Web-Mercator scheme";
 </li>
 <li>You pass in an <a href="reference.html#ArcGISProjection">ArcGISProjection</a> to the constructor of 
  <a href="reference.html#ArcGISTileLayer">ArcGISTileLayer</a> so the API immediately knows how to request tiles;
@@ -189,62 +183,62 @@ an <a href="reference.html#ArcGISMapOverlay">ArcGISMapOverlay</a>  </li>
 </ul> 
 <p>Rule of thumb: when in doubt, always use 'load' event. </p>
 <pre>
-   var tileLayer=new ArcGISTileLayer(url);
-   GEvent.addListener(tileLayer,'load', function(){
-     // start use the tile Layer.
-   });
-  
+var tileLayer=new ArcGISTileLayer(url);
+GEvent.addListener(tileLayer,'load', function(){
+  // start use the tile Layer.
+});
 </pre> 
 </p>
 </div>
 <div>
 <h2><a name="SR"></a>Spatial Reference Support</h2> 
-<p>This libray provide additional spatial reference support by implementing interface
+<p>This library provides additional spatial reference support by implementing interface
  <a href="reference.html#ArcGISSpatialReference">ArcGISSpatialReference</a>, which converts between 
  Lat/Lng and map coordinates, then using an intermediate class  
  <a href="reference.html#ArcGISProjection">ArcGISProjection</a> to bridge Google's 
  coordinate system to ArcGIS's system. This library includes a few built-in spatial references:
- WGS84 (4326) and WebMercator (102113). It also has two of the most widely used projections: <b> LambertConformalConic </b>
- and <b>Transverse Mercator</b>. Spatial references based on these two projection can be used by calling 
- <code>ArcGISSpatialReferences.addSpatialReference(wkid, wkt)</code>. The developers can also implement
- additional projection class and plug it in. If the system failed to find a implemented spatial reference, it will use a special class
-  <a href="reference.html#ArcGISFlatSpatialReference">ArcGISFlatSpatialReference</a> for somewhat less accurate coordinates
-  transformation. Here is a summary of options:
+ WGS84 (4326) and WebMercator (102113). It also has two of the most widely used projections: 
+LambertConformalConic and Transverse Mercator. Spatial references based on these
+two projections can be used by calling <code>ArcGISSpatialReferences.addSpatialReference(wkid, wkt)</code>. 
+A developer can also implement their own projection class and plug it in. 
+If the system fails to find an implemented spatial reference, it will use 
+<a href="reference.html#ArcGISFlatSpatialReference">ArcGISFlatSpatialReference</a> 
+for somewhat less accurate coordinates transformation. Here is a summary of options:
   <ul>
     <li>If you use map service as <a href="reference.html#ArcGISMapOverlay">ArcGISMapOverlay</a>
      and add on top of backgrounds, no special action is necessary.
      You can simply use 
      <pre>
-       gmap.addOverlay(new ArcGISMapOverlay(url));
+gmap.addOverlay(new ArcGISMapOverlay(url));
      </pre>
      </li>
     <li> If you use a tiled map service, and you know it was created using the same coordinate system
     Google Maps uses (WebMercator in ArcGIS), no special action is necessary.
      You can simply use
       <pre>
-        gmap.addMapType(new ArcGISMapType(url));
+gmap.addMapType(new ArcGISMapType(url));
       </pre>.
        
      </li>
      <li> If you use a tiled map service, and you know it was created using ArcGIS Online tiling scheme, or
      it's real spatial reference code is 4326(WGS84) or 4269 (NAD83), you should use it after the "load" event.
      <pre>
-        var maptype=new ArcGISMapType(url);
-        GEvent.addListener(maptype, 'load', function(){
-          gmap.addMapType(maptype);
-        });
+var maptype=new ArcGISMapType(url);
+GEvent.addListener(maptype, 'load', function(){
+  gmap.addMapType(maptype);
+});
       </pre>.
      </li>
      <li> If you use a tiled map service, and you know it's spatial reference was based on Lambert Conformal Conic
-      or Transverse Mercator porjection (as most State Plane Coordinate System do), you should find it's Well-known-Text
+      or Transverse Mercator projection (as most State Plane Coordinate System do), you should find it's Well-known-Text
       value from  <a target=esri href='http://edndoc.esri.com/arcims/9.2/elements/pcs.htm'>
 ESRI documentation</a> and add it into the application, then use it after the "load" event.
      <pre>
-        ArcGISSpatialReferences.addSpatialReference(2264, 'PROJCS["NAD_1983_StatePlane_North_Carolina_FIPS_3200_Feet",......');
-        var maptype=new ArcGISMapType(url);
-        GEvent.addListener(maptype, 'load', function(){
-          gmap.addMapType(maptype);
-        });
+ArcGISSpatialReferences.addSpatialReference(2264, 'PROJCS["NAD_1983_StatePlane_North_Carolina_FIPS_3200_Feet",......');
+var maptype=new ArcGISMapType(url);
+GEvent.addListener(maptype, 'load', function(){
+  gmap.addMapType(maptype);
+});
       </pre>.
      </li>
      <li> If you use a tiled map service, but you just want to quickly use the service, and
@@ -252,10 +246,10 @@ ESRI documentation</a> and add it into the application, then use it after the "l
      The API will use 
      <a href="reference.html#ArcGISFlatSpatialReference">ArcGISFlatSpatialReference</a>. 
      <pre>
-        var maptype=new ArcGISMapType(url);
-        GEvent.addListener(maptype, 'load', function(){
-          gmap.addMapType(maptype);
-        });
+var maptype=new ArcGISMapType(url);
+  GEvent.addListener(maptype, 'load', function(){
+  gmap.addMapType(maptype);
+});
       </pre>.
      </li>
      <li> Finally, if you use a tiled map service, but it's spatial reference was not based on LCC or Transverse Mercator, and
@@ -263,15 +257,15 @@ ESRI documentation</a> and add it into the application, then use it after the "l
      <a href="reference.html#ArcGISSpatialReference">ArcGISSpatialReference</a> class, add it to application, 
      then use it after the "load" event.
      <pre>
-        function MySpatialReference=function(params){...}
-        MySpatialReference.prototype.reverse=function(coordsArray){...return [lng,lat]};
-        MySpatialReference.prototype.forward=function(lnglatArray){...return [x,y]};
-        MySpatialReference.prototype.getWrapWidth=function(){...};
-        ArcGISSpatialReferences.addSpatialReference(myWkid,new MySpatialReference({...}));
-        var maptype=new ArcGISMapType(url);
-        GEvent.addListener(maptype, 'load', function(){
-          gmap.addMapType(maptype);
-        });
+function MySpatialReference=function(params){...}
+MySpatialReference.prototype.reverse=function(coordsArray){...return [lng,lat]};
+MySpatialReference.prototype.forward=function(lnglatArray){...return [x,y]};
+MySpatialReference.prototype.getWrapWidth=function(){...};
+ArcGISSpatialReferences.addSpatialReference(myWkid,new MySpatialReference({...}));
+var maptype=new ArcGISMapType(url);
+GEvent.addListener(maptype, 'load', function(){
+  gmap.addMapType(maptype);
+});
       </pre>.
      </li>
   </ul>
