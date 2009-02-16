@@ -2126,9 +2126,9 @@
             </tr>
             
               <tr class="odd">
-                <td><code>ArcGISMapService(<span class="type">url:String</span>, <span class="type">opt_callback:Function</span>)</code></td>
+                <td><code>ArcGISMapService(<span class="type">url:String</span>, <span class="type">opt_service:ArcGISMapServiceOptions</span>)</code></td>
                 
-                <td>Creates a ArcGISMapService objects that can be used by UI components.<ul><li> <code> url</code> (required) is the URL of the map servive, e.g. <code>http://server.arcgisonline.com/ArcGIS/rest/services/ESRI_StreetMap_World_2D/MapServer</code>.<li> <code>opt_callback</code> optional callback function.<ul/> Note the spatial reference of the map service must already existsin the <code><a href="reference.html#_global_#ArcGISSpatialReferences">ArcGISSpatialReferences</a></code> if actual coordinates transformation is needed.</td>
+                <td>Creates a ArcGISMapService objects that can be used by UI components.<ul><li> <code> url</code> (required) is the URL of the map servive, e.g. <code>http://server.arcgisonline.com/ArcGIS/rest/services/ESRI_StreetMap_World_2D/MapServer</code>.<li> <code>opt_service</code> optional parameter of type <code><a href="reference.html#ArcGISMapServiceOptions">ArcGISMapServiceOptions</a></code><ul/> Note the spatial reference of the map service must already existsin the <code><a href="reference.html#_global_#ArcGISSpatialReferences">ArcGISSpatialReferences</a></code> if actual coordinates transformation is needed.</td>
               </tr>
             
           </tbody>
@@ -2199,16 +2199,6 @@
               </tr>
             
               <tr class="even">
-                <td><code>layers</code></td>
-                
-                  
-                    <td><code>Layer[]</code></td>
-                  
-                
-                <td>Array of <code><a href="reference.html#ArcGISLayer">ArcGISLayer</a></code>s.</td>
-              </tr>
-            
-              <tr class="odd">
                 <td><code>mapName</code></td>
                 
                   
@@ -2218,7 +2208,7 @@
                 <td>map frame Name inside the map document</td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>name</code></td>
                 
                   
@@ -2228,7 +2218,7 @@
                 <td>map service Name, taken as part of URL.</td>
               </tr>
             
-              <tr class="odd">
+              <tr class="even">
                 <td><code>serviceDescription</code></td>
                 
                   
@@ -2238,7 +2228,7 @@
                 <td>serviceDescription</td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>singleFusedMapCache</code></td>
                 
                   
@@ -2248,7 +2238,7 @@
                 <td>if map cache is singleFused</td>
               </tr>
             
-              <tr class="odd">
+              <tr class="even">
                 <td><code>tileInfo</code></td>
                 
                   
@@ -2258,7 +2248,7 @@
                 <td>See <code><a href="reference.html#ArcGISTileInfo">ArcGISTileInfo</a></code></td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>units</code></td>
                 
                   
@@ -2268,7 +2258,7 @@
                 <td>unit</td>
               </tr>
             
-              <tr class="odd">
+              <tr class="even">
                 <td><code>url</code></td>
                 
                   
@@ -2420,6 +2410,37 @@
                   
                 
                 <td>This event is fired when the service and it's service info is loaded.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="ArcGISMapServiceOptions"></a>class ArcGISMapServiceOptions</h2>
+      <p>This class is the optional parameter passed in the constructor of <code><a href="reference.html#ArcGISMapService">ArcGISMapService</a></code>.  <br/>There is no constructor for this class. Use as object literal.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class ArcGISMapServiceOptions - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>name</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>name of the service. Default to the name published.</td>
               </tr>
             
           </tbody>
