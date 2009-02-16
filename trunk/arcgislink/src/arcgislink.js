@@ -1465,10 +1465,16 @@
    * @property {Number} [scale] actual map scale. e.g a value of 5000 means 1:5000 scale.
    */
   /**
+   * @name ArcGISMapServiceOptions
+   * @class This class is the optional parameter passed in the constructor of {@link ArcGISMapService}.
+   *   <br/>There is no constructor for this class. Use as object literal.
+   * @property {String} [name] name of the service. Default to the name published.
+   */
+  /**
    * Creates a ArcGISMapService objects that can be used by UI components.
    * <ul><li> <code> url</code> (required) is the URL of the map servive, e.g. <code>
    * http://server.arcgisonline.com/ArcGIS/rest/services/ESRI_StreetMap_World_2D/MapServer</code>.
-   * <li> <code>opt_callback</code> optional callback function.
+   * <li> <code>opt_service</code> optional parameter of type {@link ArcGISMapServiceOptions }
    * <ul/> Note the spatial reference of the map service must already exists
    * in the {@link ArcGISSpatialReferences} if actual coordinates transformation is needed.
    * @name ArcGISMapService
@@ -1480,14 +1486,13 @@
    * passed in the constructor.
    * <br/>For more info see <a  href  = 'http://resources.esri.com/help/9.3/arcgisserver/apis/rest/mapserver.html'>Map Service</a>
    * @param {String} url
-   * @param {Function} opt_callback
+   * @param {ArcGISMapServiceOptions} opt_service
    * @property {String} [url] map service URL
    * @property {String} [name] map service Name, taken as part of URL.
    * @property {String} [serviceDescription] serviceDescription
    * @property {String} [mapName] map frame Name inside the map document
    * @property {String} [description] description
    * @property {String} [copyrightText] copyrightText
-   * @property {Layer[]} [layers] Array of {@link ArcGISLayer}s.
    * @property {Boolean} [singleFusedMapCache] if map cache is singleFused
    * @property {TileInfo} [tileInfo] See {@link ArcGISTileInfo}
    * @property {Envelope} [initialExtent] initialExtent, see {@link ArcGISEnvelope}
@@ -1495,17 +1500,18 @@
    * @property {String} [units] unit
    * @property {Object} [documentInfo] Object with the folloing properties: <code>Title, Author,Comments,Subject,Category,Keywords</code>
    */
-  function ArcGISMapService(url, opt_callback) {
+  function ArcGISMapService(url, opt_service) {
+    opt_service = opt_service || {};
     this.url = url;
     var tks = url.split("/");
-    this.name = tks[tks.length - 2].replace(/_/g, ' ');
+    this.name = opt_service.name || tks[tks.length - 2].replace(/_/g, ' ');
     var me = this;
     this.loaded_ = false;
     this.correct_ = false;
     ArcGISUtil.getJSON(url, {
       f: 'json'
     }, 'callback', function (json) {
-      me.init_(json, opt_callback);
+      me.init_(json, opt_service);
     });
   }
   
@@ -1514,8 +1520,9 @@
    * The <code>json</code> parameter is the json object returned by Map Service.
    * @private
    * @param {Object} json
+   * @param {ArcGISMapServiceOptions} opt_service
    */
-  ArcGISMapService.prototype.init_ = function (json, opt_callback) {
+  ArcGISMapService.prototype.init_ = function (json, opt_service) {
     var me = this;
     function doneLoad(json) {
       me.loaded_ = true;
@@ -1543,9 +1550,6 @@
        * @event
        */
       triggerEvent(me, "load", me);
-      if (opt_callback) {
-        opt_callback(me);
-      }
     }
     
     if (json.error) {
@@ -2192,7 +2196,7 @@
    * @return {GPoint} pixel
    */
   ArcGISProjection.prototype.fromLatLngToPixel  =  function (gLatLng, zoom) {
-    if (gLatLng === null || isNaN(gLatLng.lat()) || isNaN(gLatLng.lng())) {
+    if (!gLatLng || isNaN(gLatLng.lat()) || isNaN(gLatLng.lng())) {
       return null;
     }
     var coords  =  this.spatialReference_.forward([gLatLng.lng(), gLatLng.lat()]);
