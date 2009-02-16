@@ -115,11 +115,11 @@
                  + '<a href="javascript:removeMap(\''+service.url+'\');void(0);">remove</a><br/>';
               }
               document.getElementById('dynas').innerHTML = html;
-              html='<b>Tiled/Cached Map Services:</b><br/>';
-              var types=map.getMapTypes();
-              var ct=map.getCurrentMapType();
+              html = '<b>Tiled/Cached Map Services:</b><br/>';
+              var types = map.getMapTypes();
+              var ct = map.getCurrentMapType();
               for (var i = 0; i < types.length; i++) {
-                var type=types[i];
+                var type = types[i];
                 if (type instanceof ArcGISMapType){
                   var service = type.getTileLayers()[0].getMapService();
                   html += '<input type="radio" name="tiles" id="Tile' + service.url + '"' + (type==ct ? ' checked' : '')
@@ -129,8 +129,8 @@
               }
               document.getElementById('tiled').innerHTML = html;
               function getHost(url){
-                var s=url.indexOf('://')+3;
-                var end=url.indexOf('/',s);
+                var s = url.indexOf('://')+3;
+                var end = url.indexOf('/',s);
                 return url.substring(s,end);
               }
             }

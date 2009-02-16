@@ -12,7 +12,7 @@
         
         function init(){
           var base = 'http://server.arcgisonline.com/ArcGIS/rest/services';
-          var type=new ArcGISMapType([new ArcGISTileLayer(base + '/ESRI_StreetMap_World_2D/MapServer')]);
+          var type = new ArcGISMapType([new ArcGISTileLayer(base + '/ESRI_StreetMap_World_2D/MapServer')]);
           GEvent.addListener(type,'load', function(){
             var map = new GMap2(document.getElementById("map"), {
               mapTypes: [type]

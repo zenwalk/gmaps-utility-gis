@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 /**
- * @name ArcGISServer Link for Google Maps Javascript API
+ * @name ArcGIS Server Link for Google Maps Javascript API
  * @version 1.0
  * @author: Nianwei Liu 
  * @fileoverview 
@@ -23,21 +23,22 @@
  *    <a  href = 'http://resources.esri.com/help/9.3/arcgisserver/apis/rest/'> 
  *    ESRI ArcGIS Server&#0153; REST API</a> into <a 
  *    href='http://code.google.com/apis/maps/documentation/reference.html'>
- *    Google Maps </a> and provide some additional support for map tiles created with 
- *    different spatial reference and tiling scheme.</p>
- *    <p style='background-color:#E5ECF9'>All classes are available under namespace 
- *    <code>google.maputils.arcgis.*</code>. 
- *    You can replace the normal <code>ArcGIS</code> prefix with the namespace.<br/>
+ *    Google Maps </a> and provide some additional support for map tiles created 
+ *    with different spatial reference and tiling scheme.</p>
+ *    <p style='background-color:#E5ECF9'>All classes are available under 
+ *    namespace <code>google.maputils.arcgis.*</code>. 
+ *    You can replace the normal <code>ArcGIS</code> prefix with the namespace.
+ *    <br/>
  *    For example, the <code>ArcGISTileLayer</code> can also be defined
  *    as <code>google.maputils.arcgis.TileLayer</code>. <br/>
  *    If you choose to load namespace only without all any global 
  *    <code>G</code> symbols by passing file=googleapionly in script URL, 
- *    the <code>ArcGIS</code> prefix will not be exported to global scope either. 
+ *    the <code>ArcGIS</code> prefix will not be exported to global scope either.
  *    You must use namespace for all classes in this library.
  *     </p>.
  *    <table style = 'border:0px'>
  *    <tr>
- *    <td colspan=2 style='border:0px;'>GMaps API related classes</td>
+ *    <td colspan=2 style='border:0px;'>Google Maps API related classes</td>
  *    <td colspan=2 style='border:0px;'>REST API related classes</td>
  *    </tr>
  *    <tr>
@@ -74,7 +75,8 @@
  *    {@link ArcGISFlatSpatialReference}<br/>
  *     </td>
  *    </tr></table>
- *    <p> There are many objects used in the REST API that do not require constructor and can be
+ *    <p> There are many objects used in the REST API that do not require 
+ *    a constructor and can be
  *    used just as object literal in the operation:<br/> 
  *    (note the name of the type does not matter for object literals)</p>
  *    <table style = 'border:0px'><tr>
@@ -126,14 +128,12 @@
     var i, c, n;
     var names = ns.split('.');
     n = window;
-    for (i = 0,c = names.length; i < c; i ++) {
+    for (i = 0, c = names.length; i < c; i ++) {
       n[names[i]] = n[names[i]] || {};
       n = n[names[i]];
     }
     return n;
   };
-  //http://code.google.com/p/gmaps-utility-library-dev/issues/detail?id=34
-  //http://groups.google.com/group/Google-Maps-API/browse_thread/thread/c6c5bd8f6441a39e/f24f549218a279f5?#f24f549218a279f5
   // deal with the situation when user only loaded namespace.
   var W = window;
   var G = namespace('google.maps');
@@ -149,7 +149,8 @@
   GCopyright = W.GCopyright || G.Copyright; 
   GMapType = W.GMapType || G.MapType;
   GMercatorProjection = W.GMercatorProjection || G.MercatorProjection;
-  G_MAP_OVERLAY_LAYER_PANE = W.G_MAP_OVERLAY_LAYER_PANE || G.MAP_OVERLAY_LAYER_PANE; 
+  G_MAP_OVERLAY_LAYER_PANE = W.G_MAP_OVERLAY_LAYER_PANE || 
+    G.MAP_OVERLAY_LAYER_PANE; 
   GTileLayerOverlay = W.GTileLayerOverlay || G.TileLayerOverlay; 
   GInfoWindowTab = W.GInfoWindowTab || G.InfoWindowTab; 
   GLatLngBounds = W.GLatLngBounds || G.LatLngBounds; 
@@ -162,10 +163,12 @@
   
   /**
  * @name ArcGISGeometry
- * @class This is the abstract class representing JSON geometry in the ArcGIS REST API. 
+ * @class This is the abstract class representing JSON geometry in the 
+ * ArcGIS REST API. 
  * The following types are supported: points, polylines, polygons and envelopes.
- * for more information, see <a  href = 
- * 'http://resources.esri.com/help/9.3/arcgisserver/apis/rest/geometry.html'>Geometry Objects</a>.
+ * for more information, see <a href = 
+ * 'http://resources.esri.com/help/9.3/arcgisserver/apis/rest/geometry.html'>
+ *  Geometry Objects</a>.
  *   <br/> There is no constructor for this class. See subclasses.
  * @property {SpatialReference} [spatialReference]  <b> wkid info only</b>.
  */	
@@ -186,11 +189,12 @@
 /**
  * @name ArcGISPolyline
  * @class A polyline contains an array of paths and a spatialReference.
- * <br/> There is no constructor for this class. Use javascript object literal. Example:
+ * <br/> There is no constructor for this class. Use javascript object literal. 
+ * Example:
  * <pre>
     {
     "paths" : [ 
-     [ [-97.06138,32.837], [-97.06133,32.836], [-97.06124,32.834], [-97.06127,32.832] ], 
+     [ [-97.06138,32.837], [-97.06133,32.836], [-97.06124,32.834] ], 
      [ [-97.06326,32.759], [-97.06298,32.755] ]
     ],
     "spatialReference" : {"wkid" : 4326}
@@ -203,12 +207,15 @@
  /**
  * @name ArcGISPolygon
  * @class A polygon contains an array of rings and a spatialReference.
- * <br/> There is no constructor for this class. Use javascript object literal. Example:
+ * <br/> There is no constructor for this class. Use javascript object literal. 
+ * Example:
  * <pre>
     {
     "rings" : [ 
-     [ [-97.06138,32.837], [-97.06133,32.836], [-97.06124,32.834], [-97.06127,32.832], [-97.06138,32.837] ], 
-     [ [-97.06326,32.759], [-97.06298,32.755], [-97.06153,32.749], [-97.06326,32.759] ]
+     [ [-97.06138,32.837], [-97.06133,32.836], [-97.06124,32.834], 
+     [-97.06127,32.832], [-97.06138,32.837] ], 
+     [ [-97.06326,32.759], [-97.06298,32.755], [-97.06153,32.749], 
+     [-97.06326,32.759] ]
     ],
     "spatialReference" : {"wkid" : 4326}
     }
@@ -220,10 +227,12 @@
  /**
  * @name ArcGISMultipoint
  * @class A multipoint contains an array of points and a spatialReference.
- * <br/> There is no constructor for this class. Use javascript object literal. Example:
+ * <br/> There is no constructor for this class. Use javascript object literal. 
+ * Example:
  * <pre>
     {
-    "points" : [ [-97.06138,32.837], [-97.06133,32.836], [-97.06124,32.834], [-97.06127,32.832] ],
+    "points" : [ [-97.06138,32.837], [-97.06133,32.836], [-97.06124,32.834], 
+     [-97.06127,32.832] ],
     "spatialReference" : {"wkid" : 4326}
     }
  * </pre>
@@ -234,9 +243,10 @@
  /**
  * @name ArcGISEnvelope
  * @class Instances of this class are used to represent an area with bounds.
- *   It is similar to <a href = 'http://code.google.com/apis/maps/documentation/reference.html#GLatLngBounds'>GLatLngBounds</a>
- *   but the coordinates are in map units. 
- * <br/> There is no constructor for this class. Use javascript object literal. Example:
+ * It is similar to <a href='http://code.google.com/apis/maps/documentation/reference.html#GLatLngBounds'>GLatLngBounds</a>
+ * but the coordinates are in map units. 
+ * <br/> There is no constructor for this class. Use javascript object literal. 
+ * Example:
  * <pre>
     {
     "xmin" : -109.55, "ymin" : 25.76, "xmax" : -86.39, "ymax" : 49.94,
@@ -260,34 +270,36 @@
   /*
    * @name ArcGISESRIGeometryTypes
    * @private
-   * @class This is actually a list of constants that represent geometry types. They should be used
-   * directly. e.g.:  <code> var param = {geometryType:ESRI_GEOMETRY_POINT}</code>
-   * </pre>
-   * @property {String} [ESRI_GEOMETRY_POINT] <code>esriGeometryPoint</code>
-   * @property {String} [ESRI_GEOMETRY_POLYLINE] <code>esriGeometryPolyline</code>
-   * @property {String} [ESRI_GEOMETRY_POLYGON] <code>esriGeometryPolygon</code>
-   * @property {String} [ESRI_GEOMETRY_MULTIPOINT] <code>esriGeometryMultipoint</code>
-   * @property {String} [ESRI_GEOMETRY_ENVELOPE] <code>esriGeometryEnvelope</code>
+   * @class This is actually a list of constants that represent geometry types. 
+   * They should be used directly, e.g.:  
+   * <code> var param = {geometryType:ESRI_GEOMETRY_POINT}</code>
+   * 
+   * @property {String} [ESRI_GEOMETRY_POINT] esriGeometryPoint
+   * @property {String} [ESRI_GEOMETRY_POLYLINE] esriGeometryPolyline
+   * @property {String} [ESRI_GEOMETRY_POLYGON] esriGeometryPolygon
+   * @property {String} [ESRI_GEOMETRY_MULTIPOINT] esriGeometryMultipoint
+   * @property {String} [ESRI_GEOMETRY_ENVELOPE] esriGeometryEnvelope
    */
   var ESRI_GEOMETRY_POINT  =  "esriGeometryPoint";
   var ESRI_GEOMETRY_POLYLINE  =  "esriGeometryPolyline";
   var ESRI_GEOMETRY_POLYGON  =  "esriGeometryPolygon";
   var ESRI_GEOMETRY_MULTIPOINT  =  "esriGeometryMultipoint";
   var ESRI_GEOMETRY_ENVELOPE  =  "esriGeometryEnvelope";
- /*
+
+  /*
    * @name ArcGISESRISpatialRelTypes
    * @private
-   * @class This is actually a list of constants that represent spatial relationship types. They should be used
-   * directly. e.g.:  <code> var param = {spatialRel:ESRI_SPATIALREL_INTERSECTS}</code>
-   * </pre>
-   * @property {String} [ESRI_SPATIALREL_INTERSECTS] <code>esriSpatialRelIntersects </code>
-   * @property {String} [ESRI_SPATIALREL_CONTAINS] <code>esriSpatialRelContains </code>
-   * @property {String} [ESRI_SPATIALREL_CROSSES] <code>esriSpatialRelCrosses </code>
-   * @property {String} [ESRI_SPATIALREL_ENVELOPEINTERSECTS] <code>esriSpatialRelEnvelopeIntersects </code>
-   * @property {String} [ESRI_SPATIALREL_INDEXINTERSECTS] <code>esriSpatialRelIndexIntersects </code>
-   * @property {String} [ESRI_SPATIALREL_OVERLAPS] <code>esriSpatialRelOverlaps  </code>
-   * @property {String} [ESRI_SPATIALREL_TOUCHES] <code>esriSpatialRelTouches  </code>
-   * @property {String} [ESRI_SPATIALREL_WITHIN] <code>esriSpatialRelWithin  </code>
+   * @class This is actually a list of constants that represent spatial 
+   * relationship types. They should be used directly. e.g.:  
+   * <code> var param = {spatialRel:ESRI_SPATIALREL_INTERSECTS}</code>
+   * @property {String} [ESRI_SPATIALREL_INTERSECTS] esriSpatialRelIntersects 
+   * @property {String} [ESRI_SPATIALREL_CONTAINS] esriSpatialRelContains
+   * @property {String} [ESRI_SPATIALREL_CROSSES] esriSpatialRelCrosses
+   * @property {String} [ESRI_SPATIALREL_ENVELOPEINTERSECTS] esriSpatialRelEnvelopeIntersects
+   * @property {String} [ESRI_SPATIALREL_INDEXINTERSECTS] esriSpatialRelIndexIntersects
+   * @property {String} [ESRI_SPATIALREL_OVERLAPS] esriSpatialRelOverlaps
+   * @property {String} [ESRI_SPATIALREL_TOUCHES] esriSpatialRelTouches
+   * @property {String} [ESRI_SPATIALREL_WITHIN] esriSpatialRelWithin
    */
   var ESRI_SPATIALREL_INTERSECTS  =  "esriSpatialRelIntersects";
   var ESRI_SPATIALREL_CONTAINS  =  "esriSpatialRelContains";
@@ -299,8 +311,8 @@
   var ESRI_SPATIALREL_WITHIN  =  "esriSpatialRelWithin";
  
  
-  /**
- * extract the substring from full string, between start string and end string
+/**
+ * Extract the substring from full string, between start string and end string
  * @param {Object} full
  * @param {Object} start
  * @param {Object} end
@@ -312,7 +324,7 @@
   };
   
   /**
-   * If the object is String
+   * Check if the object is String
    * @param {Object} o
    */
   var isString = function (o) {
@@ -320,7 +332,7 @@
   };
   
   /**
-   * if the object is array
+   * Check if the object is array
    * @param {Object} o
    */
   var isArray = function (o) {
@@ -328,7 +340,8 @@
   };
   
   /**
-   * Add the property of the src object to destination object if not already exists.
+   * Add the property of the source object to destination object 
+   * if not already exists.
    * @param {Object} dest
    * @param {Object} src
    * @param {Boolean} force
@@ -402,14 +415,14 @@
   
  
   /**
-   * A list of utilities ((<code>google.maputils.arcgis.Util</code>) that performs the commonly used functions.
+   * A list of utilities ((<code>google.maputils.arcgis.Util</code>) 
+   * for commonly used functions.
    * @name ArcGISUtil
    * @namespace
    */
   var ArcGISUtil = {};
   var jsonpID_ = 0;
-  //cross domain function list. this namespace is what gmap is using
-  
+  // cross domain function list. this namespace is what gmap is using
   window.ags_jsonp = window.ags_jsonp || {};
   var xdc = window.ags_jsonp;
   
@@ -2168,7 +2181,7 @@
    * @name ArcGISProjection
    * @class This class (<code>google.maputils.arcgis.Projection</code>) implements a custom
    * <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GProjection'>GProjection</a> 
-   * from the core GMaps API.
+   * from the core Google Maps API.
    *   It carries a real {@link ArcGISSpatialReference} object to convert LatLng from/to
    *   map coordinates, and tiling scheme informations to convert
    *   map coordinates from/to pixel coordinates. <b>The tiles must be square, with same width and height</b>.
@@ -2359,7 +2372,7 @@
    * @name ArcGISTileLayer
    * @class This class (<code>google.maputils.arcgis.TileLayer</code>) extends
    * <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GTileLayer'>GTileLayer</a>
-   *  from the core GMaps API and provides access to a cached ArcGIS Server map service.<br/> This class can be used in {@link ArcGISMapType} or
+   *  from the core Google Maps API and provides access to a cached ArcGIS Server map service.<br/> This class can be used in {@link ArcGISMapType} or
    * {@link ArcGISTileLayerOverlay}.
    * @param {String|ArcGISMapService} service
    * @param {TileLayerOptions} opt_layerOpts
@@ -2513,7 +2526,7 @@
    *  or a single URL as shortcut.
    * <li><code>opt_typeOpts</code>: optional. An instance of {@link ArcGISMapTypeOptions}
    * @name ArcGISMapType
-   * @class This class (<code>google.maputils.arcgis.MapType</code>) extends GMaps core API's
+   * @class This class (<code>google.maputils.arcgis.MapType</code>) extends the Google Maps API's
    * <a href  = http://code.google.com/apis/maps/documentation/reference.html#GMapType>GMapType</a>.
    * It holds a list of {@link ArcGISTileLayer}s.
    * <p> Because all tileLayers are loaded asynchronously, and currently the
@@ -2617,12 +2630,12 @@
    * <li/> <code> service</code> (required) is url of the underline {@link ArcGISMapService} or the ArcGISMapService itself.
    * <li/> <code>opt_overlayOpts</code> (optional) is an instance of {@link ArcGISMapOverlayOptions}.
    * @name ArcGISMapOverlay
-   * @class This class (<code>google.maputils.arcgis.MapOverlay</code>) extends GMaps core API's
+   * @class This class (<code>google.maputils.arcgis.MapOverlay</code>) extends the Google Maps API's
    * <a href  = http://code.google.com/apis/maps/documentation/reference.html#GOverlay>GOverlay</a>
    * that draws map images from data source on the fly. It is also known as "<b>Dynamic Maps</b>".
    * It can be added to the map via <code>GMap2.addOverlay </code> method.
    * The similar class in the core GMap API is <a href  = http://code.google.com/apis/maps/documentation/reference.html#GGroundOverlay>GGroundOverlay</a>,
-   * however, the instance of this class always cover the view port exactly, and will redraw itself as map moves.
+   * however, the instance of this class always cover the viewport exactly, and will redraw itself as map moves.
    * @constructor
    * @param {String|ArcGISMapService} service
    * @param {MapOverlayOptions} opt_overlayOpts
@@ -2688,8 +2701,8 @@
         type.agsOvs_.push(this);
       }
     } else if (this.map_) {
-      var types  =  this.map_.getMapTypes();
-      for (var i  =  0; i < types.length; i++) {
+      var types = this.map_.getMapTypes();
+      for (var i = 0; i < types.length; i++) {
         type  =  types[i];
         type.agsOvs_  =  type.agsOvs_ || [];
         if (indexOf(type.agsOvs_, this)  ===  -1) {
@@ -2957,7 +2970,7 @@
    * @param {GTileLayerOverlayOptions} opt_tileOverlayOpts 
    * @class This class (<code>google.maputils.arcgis.TileLayerOverlay</code>) extends
    * <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GTileLayerOverlay'>GTileLayerOverlay</a>
-   *  from the core GMaps API. It tracks ArcGISTileLayerOverlay collections in 
+   *  from the core Google Maps API. It tracks ArcGISTileLayerOverlay collections in 
    *  <code>GMap2</code> internally and make them available via <code>GMap2.getArcGISOverlays()</code>
    */
   function ArcGISTileLayerOverlay(tileLayer, opt_tileOverlayOpts) {
@@ -3212,8 +3225,8 @@
    *   {@link ArcGISArcGISClickOptions}, {@link ArcGISArcGISClickServiceOptions}. It specify how
    *   the geometry features returned by ArcGIS server should be rendered in the browser.
    *   It's properties have same meaning as <a href  = http://code.google.com/apis/maps/documentation/reference.html#GPolyStyleOptions>GPolyStyleOptions</a> 
-   *   in the core GMaps API.
-   * @property {GIcon} [icon] an instance of <a href  = http://code.google.com/apis/maps/documentation/reference.html#GIcon>GIcon</a>  in the core GMaps API. This will be used as the icon
+   *   in the core Google Maps API.
+   * @property {GIcon} [icon] an instance of <a href  = http://code.google.com/apis/maps/documentation/reference.html#GIcon>GIcon</a>  in the core Google Maps API. This will be used as the icon
    *    for rendering of point features.
    * @property {String} [strokeColor] line features color in hex HTML color.
    * @property {Number} [strokeWeight] The width of the line in pixels
@@ -3549,7 +3562,7 @@
     return {rings: [pts], spatialReference: center.spatialReference};
   };
   /**
-   * Convert a {@link ArcGISFeature} or {@link ArcGISIdentifyResult} or {@link ArcGISFindResult} to core GMaps API 
+   * Convert a {@link ArcGISFeature} or {@link ArcGISIdentifyResult} or {@link ArcGISFindResult} to core Google Maps API 
    * overlays such as  {@link ArcGISGMarker}, 
    * {@link ArcGISGPolyline}, or {@link ArcGISGPolygon}s.
    * Note ArcGIS Geometry may have multiple parts, but the coresponding GOverlay 
