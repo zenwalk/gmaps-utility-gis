@@ -665,7 +665,7 @@
     style: {
       icon: null,
       strokeColor: "#FF0000",
-      strokeWeight: 2,
+      strokeWeight: 8,
       strokeOpacity: 0.5,
       outlineColor: "#FF0000",
       outlineWeight: 2,
@@ -3202,7 +3202,8 @@
    */
   GMap2.prototype.addArcGISMap  =  function (url, opt_callback) {
     var me  =  this;
-    var service  =  new ArcGISMapService(url, function () {
+    var service  =  new ArcGISMapService(url);
+    GEvent.addListener(service, 'load', function () {
       if (service.singleFusedMapCache) {
         var tile  =  new ArcGISTileLayer(service);
         var type  =  new ArcGISMapType([tile]);
