@@ -664,7 +664,7 @@
     maxPolyPoints: 1000,
     style: {
       icon: null,
-      strokeColor: "#FF0000",
+      strokeColor: "#FFFF00",
       strokeWeight: 8,
       strokeOpacity: 0.5,
       outlineColor: "#FF0000",
