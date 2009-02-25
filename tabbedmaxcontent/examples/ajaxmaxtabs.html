@@ -29,8 +29,6 @@
                     var regular = '<div>LatLng:' + latlng + '</div><a href="javascript:void(0)" onclick="javascript:map.getInfoWindow().maximize()">more info.. </a>'
                     var summary = '<div id="sum">Address of' + latlng + '</div><a href="javascript:void(0)" onclick="javascript:map.getInfoWindow().restore()">less info.. </a>';
                     var panoDiv = document.createElement('div');
-                    //panoDiv.id = "pano";
-                    //panoDiv.innerHTML = 'Street View not available.'
                     panoDiv.style.width = "400px"; // can be anything, will be auto resized
                     panoDiv.style.width = "200px";
                     var tabs = [new GInfoWindowTab('address', '<div id="address"></div>'), new GInfoWindowTab('streetview', panoDiv)];

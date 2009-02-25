@@ -222,7 +222,7 @@
    */
   TabbedMaxContent.prototype.onMaximizeEnd_ = function () {
     this.checkResize();
-   // move into checkResize  this.selectTab(this.selectedTab_);
+    this.selectTab(this.selectedTab_);
   };
   /**
    * Select tab at given index or name
@@ -230,6 +230,7 @@
    */
   TabbedMaxContent.prototype.selectTab = function (t) {
     var trigger = false;
+    var hasVisibleTab = false;
     for (var i = 0, ct = this.navNodes_.length; i < ct; i++) {
       if (i === t || this.contentNodes_[i].name === t) {
         if (this.contentNodes_[i].style.display === 'none') {
@@ -238,6 +239,7 @@
           this.selectedTab_ = i;  
           trigger = true;
         }
+        hasVisibleTab = true; 
       } else {
         setVals(this.navNodes_[i].style, this.style_.tabOff);
         this.contentNodes_[i].style.display = 'none';
@@ -254,6 +256,9 @@
        * @event
        */
       GEvent.trigger(this, 'selecttab', this.contentNodes_[this.selectedTab_].name, this.contentNodes_[this.selectedTab_]);
+    }
+    if (!hasVisibleTab) {
+      this.selectTab(0);
     }
   };
   /**
@@ -276,24 +281,15 @@
    * as ajax action changed summary content may require an additional resize.
    */
   TabbedMaxContent.prototype.checkResize = function () {
-    var me = this;
     var container = this.infoWindow_.getContentContainers()[0];
     var contents = this.contentsNode_;
     var summary = this.summaryNode_;
     var contNodes = this.contentNodes_;
-    // it appears GInfoWindow.maximizeend event is fired too early, 
-    // before DOM is ready. As a workaround use a timeout here.
-    // See http://code.google.com/p/gmaps-api-issues/issues/detail?id=1020
-    setTimeout(function () {
-      var pos = getPosition(contents, container);
-      for (var i = 0, ct = contNodes.length; i < ct; i++) {
-        contNodes[i].style.width = container.style.width;
-        contNodes[i].style.height = (parseInt(container.style.height, 10) - pos.top) + 'px';
-      }
-      // this should be in onMaxmizeEnd_ but DOM is not ready at that time so move to here to avoid
-      // errors in selecttab event.
-      me.selectTab(me.selectedTab_);
-    }, 0);
+    var pos = getPosition(contents, container);
+    for (var i = 0, ct = contNodes.length; i < ct; i++) {
+      contNodes[i].style.width = container.style.width;
+      contNodes[i].style.height = (parseInt(container.style.height, 10) - pos.top) + 'px';
+    }
   };
 
 
