@@ -22,11 +22,11 @@
                     var min = 'regular map info:' + latlng;
                     var sum = '<p>summary map info:<br/><br/>' + latlng+ Math.random()+'</p>';
                     var tabs = [
-                     new GInfoWindowTab('map tab0', 'map content0'),
-                     new GInfoWindowTab('map tab1', 'map content1'),
-                     new GInfoWindowTab('map tab2', 'map content2'), 
-                     new GInfoWindowTab('map tab3', 'map content3')];
-                    map.openInfoWindowMaxTabsHtml(latlng, min, sum, tabs, {
+                     new MaxContentTab('map tab0', 'map content0'),
+                     new MaxContentTab('map tab1', 'map content1'),
+                     new MaxContentTab('map tab2', 'map content2'), 
+                     new MaxContentTab('map tab3', 'map content3')];
+                    map.openMaxContentTabsHtml(latlng, min, sum, tabs, {
                       maxTitle: "More Map Info"
                     });
                   }
@@ -39,11 +39,11 @@
                     var min = 'regular marker info:' + latlng;
                     var sum = '<p>summary marker info:' + latlng+ Math.random()+'</p>';
                     var tabs = [
-                     new GInfoWindowTab('marker tab0', 'marker content 0'),
-                     new GInfoWindowTab('marker tab1', 'marker content 1'),
-                     new GInfoWindowTab('marker tab2', 'marker content 2'), 
-                     new GInfoWindowTab('marker tab3', 'marker content 3')];
-                    marker.openInfoWindowMaxTabsHtml(map, min, sum, tabs, {
+                     new MaxContentTab('marker tab0', 'marker content 0'),
+                     new MaxContentTab('marker tab1', 'marker content 1'),
+                     new MaxContentTab('marker tab2', 'marker content 2'), 
+                     new MaxContentTab('marker tab3', 'marker content 3')];
+                    marker.openMaxContentTabsHtml(map, min, sum, tabs, {
                       maxTitle: "More Marker Info"
                     });
                 });

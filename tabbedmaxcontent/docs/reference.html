@@ -30,33 +30,33 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
             </tr>
             
               <tr class="odd">
-                <td><code>getInfoWindowMaxContent()</code></td>
+                <td><code>getTabbedMaxContent()</code></td>
                 
                   
                     <td><code>TabbedMaxContent</code></td>
                   
                 
-                <td>Returns the TabbedMaxContent for the infowindow.</td>
+                <td>Returns the <code><a href="reference.html#TabbedMaxContent">TabbedMaxContent</a></code> for the infowindow.</td>
               </tr>
             
               <tr class="even">
-                <td><code>openInfoWindowMaxTabs(<span class="type">latlng:GLatLng</span>, <span class="type">node:Node</span>, <span class="type">summary:Node</span>, <span class="type">tabs:GInfoWindowTab[]</span>, <span class="type">opt_maxOptions:MaxInfoWindowOptions</span>)</code></td>
+                <td><code>openMaxContentTabs(<span class="type">latlng:GLatLng</span>, <span class="type">node:Node</span>, <span class="type">summary:Node</span>, <span class="type">tabs:MaxContentTab[]</span>, <span class="type">opt_maxOptions:MaxContentOptions</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
                   
                 
-                <td>Opens an info window with max content at the given point.The content of the info window is given as DOM node.The max content has summary info and a set of tabs.The content of each tab is DOM node.</td>
+                <td>Opens an info window with max content at the given point.The content of the info window is given as DOM node.The max content has summary info and a set of tabs.Each tab is an instance of <code><a href="reference.html#MaxContentTab">MaxContentTab</a></code>, The content of each tab is a DOM node.<code>opt_maxOptions</code> is an instance of <code><a href="reference.html#MaxContentOptions">MaxContentOptions</a></code>.</td>
               </tr>
             
               <tr class="odd">
-                <td><code>openInfoWindowMaxTabsHtml(<span class="type">latlng:GLatLng</span>, <span class="type">html:String</span>, <span class="type">summary:String</span>, <span class="type">tabs:GInfoWindowTab[]</span>, <span class="type">opt_maxOptions:MaxInfoWindowOptions</span>)</code></td>
+                <td><code>openMaxContentTabsHtml(<span class="type">latlng:GLatLng</span>, <span class="type">html:String</span>, <span class="type">summary:String</span>, <span class="type">tabs:MaxContentTab[]</span>, <span class="type">opt_maxOptions:MaxContentOptions</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
                   
                 
-                <td>Opens an info window with max content at the given point.The content of the info window is given as HTML text.The max content has summary info and a set of tabs.The content of each tab is html.</td>
+                <td>Opens an info window with max content at the given point.The content of the info window is given as HTML text.The max content has summary info and a set of tabs. Each tab is an instance of <code><a href="reference.html#MaxContentTab">MaxContentTab</a></code>, The content of each tab is html.<code>opt_maxOptions</code> is an instance of <code><a href="reference.html#MaxContentOptions">MaxContentOptions</a></code>.</td>
               </tr>
             
           </tbody>
@@ -81,34 +81,34 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
             </tr>
             
               <tr class="odd">
-                <td><code>openInfoWindowMaxTabs(<span class="type">map:GMap2</span>, <span class="type">node:Node</span>, <span class="type">summary:Node</span>, <span class="type">tabs:GInfoWindowTab[]</span>, <span class="type">opt_maxOptions:MaxInfoWindowOptions</span>)</code></td>
+                <td><code>openMaxContentTabs(<span class="type">map:GMap2</span>, <span class="type">node:Node</span>, <span class="type">summary:Node</span>, <span class="type">tabs:MaxContentTab[]</span>, <span class="type">opt_maxOptions:MaxContentOptions</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
                   
                 
-                <td>Opens an info window with max content at the given point.The content of the info window is given as DOM node.The max content has summary info and a set of tabs.The content of each tab is DOM node.</td>
+                <td>Opens an info window with max content at the marker.The content of the info window is given as DOM node.The max content has summary info and a set of tabs.Each tab is an instance of <code><a href="reference.html#MaxContentTab">MaxContentTab</a></code>, The content of each tab is a DOM node.<code>opt_maxOptions</code> is an instance of <code><a href="reference.html#MaxContentOptions">MaxContentOptions</a></code>.</td>
               </tr>
             
               <tr class="even">
-                <td><code>openInfoWindowMaxTabsHtml(<span class="type">map:GMap2</span>, <span class="type">html:String</span>, <span class="type">summary:String</span>, <span class="type">tabs:GInfoWindowTab[]</span>, <span class="type">opt_maxOptions:MaxInfoWindowOptions</span>)</code></td>
+                <td><code>openMaxContentTabsHtml(<span class="type">map:GMap2</span>, <span class="type">html:String</span>, <span class="type">summary:String</span>, <span class="type">tabs:MaxContentTab[]</span>, <span class="type">opt_maxOptions:MaxContentOptions</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
                   
                 
-                <td>Opens an info window with max content at the marker.The content of the info window is given as HTML text.The max content has summary info and a set of tabs.The content of each tab is html.</td>
+                <td>Opens an info window with max content at the marker.The content of the info window is given as HTML text.The max content has summary info and a set of tabs.Each tab is an instance of <code><a href="reference.html#MaxContentTab">MaxContentTab</a></code>, The content of each tab is html.</td>
               </tr>
             
           </tbody>
         </table>
       
     
-      <h2><a name="MaxInfoWindowOptions"></a>class MaxInfoWindowOptions</h2>
-      <p>Instances of this class are used in the opts_maxOption argument to the methods openInfoWindowMaxTabs(), openInfoWindowMaxTabsHtml(). It's basically same as <code>GInfoWindowOptions</code> and will actually be used to pass in as <code>GInfoWindowOptions</code> to  <code>openInfoWindow</code>Please note the <code>GInfoWindowOptions.maxContent</code> is not applicable. For other properties, see <a href='http://code.google.com/apis/maps/documentation/reference.html#GInfoWindowOptions'>GInfoWindowOptions</a>  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
+      <h2><a name="MaxContentOptions"></a>class MaxContentOptions</h2>
+      <p>Instances of this class are used in the <code>opts_maxOption</code> argument to methods openMaxConentTabs(), openMaxContentTabsHtml(). It will eventually be passed to <code>GMap2.openInfoWindow</code> as <code>GInfoWindowOptions</code>.Note, <code>GInfoWindowOptions.maxContent</code> can not be used. For other properties, see <a href='http://code.google.com/apis/maps/documentation/reference.html#GInfoWindowOptions'>GInfoWindowOptions</a>  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
       
         <h3>Properties</h3>
-        <table summary="class MaxInfoWindowOptions - Properties" width="90%">
+        <table summary="class MaxContentOptions - Properties" width="90%">
           
           <tbody>
             <tr>
@@ -122,6 +122,16 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
             </tr>
             
               <tr class="odd">
+                <td><code>maximized</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>Specifies if the window should be open as maximized by default.</td>
+              </tr>
+            
+              <tr class="even">
                 <td><code>maxTitle</code></td>
                 
                   
@@ -131,7 +141,7 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
                 <td>Specifies title to be shown when the infowindow is maximized. The content may be either an HTML string or an HTML DOM element.</td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>selectedTab</code></td>
                 
                   
@@ -141,7 +151,7 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
                 <td>Selects the tab with the given index or name. index base is 0.</td>
               </tr>
             
-              <tr class="odd">
+              <tr class="even">
                 <td><code>style</code></td>
                 
                   
@@ -149,6 +159,66 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
                   
                 
                 <td>the object that hold a set of css style of the max content. It has the following properties:    <code> tabOn, tabOff, tabBar, tabLeft, tabRight, content </code>. Each property is a css object such as     <code> {backgroundColor: 'gray', opacity: 0.2}</code>.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="MaxContentTab"></a>class MaxContentTab</h2>
+      <p>This class represents a tab in the max content window. An array of instancesof this class can be passed in as the tabs argument to the methods <code>openMaxContentTabs*()</code> etc.This class is similar to the <a target=_blank href=http://code.google.com/apis/maps/documentation/reference.html#GInfoWindowTab>GInfoWindowTab</a>class in core API.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class MaxContentTab - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>MaxContentTab(<span class="type">label:String</span>, <span class="type">content:Node|String</span>)</code></td>
+                
+                <td>Creates a content tab data structure that can be passed in the <code>tabs</code> argumentin the <code>openMaxContentTabs*()</code> methods.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class MaxContentTab - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>getContentNode()</code></td>
+                
+                  
+                    <td><code>Node</code></td>
+                  
+                
+                <td>Get the content DOM Node of the tab</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>getLabel()</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>Get the label of the tab</td>
               </tr>
             
           </tbody>
@@ -183,13 +253,13 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
               </tr>
             
               <tr class="even">
-                <td><code>getTabContainer(<span class="type">t:Number|String</span>)</code></td>
+                <td><code>getTab(<span class="type">t:Number|String</span>)</code></td>
                 
                   
-                    <td><code>Node</code></td>
+                    <td><code>MaxContentTab</code></td>
                   
                 
-                <td>Get tab Container at given index or name</td>
+                <td>Get the <code><a href="reference.html#MaxContentTab">MaxContentTab</a></code> at given index or name</td>
               </tr>
             
               <tr class="odd">
@@ -223,10 +293,10 @@ This lib provides a similar infowindow behavior avaiable atmaps.google.com. The
                 <td><code>selecttab</code></td>
                 
                   
-                    <td><code><span class="type">name:String</span>, <span class="type">Node:Node</span></code></td>
+                    <td><code><span class="type">selected:MaxContentTab</span></code></td>
                   
                 
-                <td>This event is fired after a tab is selected.Passing tab name and container node as parameters.</td>
+                <td>This event is fired after a tab is selected.Passing the selected <code><a href="reference.html#MaxContentTab">MaxContentTab</a></code> as argument for callback.</td>
               </tr>
             
           </tbody>

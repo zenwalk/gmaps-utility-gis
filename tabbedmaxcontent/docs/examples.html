@@ -14,7 +14,7 @@
   <p>
 This lib provides a similar infowindow behavior avaiable at
 maps.google.com. The maxContent of info window contains multiple tabs and can be opened with method: <br/>
-<code>openInfoWindowMaxTabs</code> or <code>openInfoWindowMaxTabsHtml</code></p>    
+<code>openMaxContentTabs</code> or <code>openMaxContentTabsHtml</code></p>    
    
 </div>
 <div>
@@ -29,8 +29,8 @@ in your document header, after GMaps API is load. You can use the online version
 </div>
 
 <div><h2><span lang="en-us">Open Max Tabbed Content</span></h2> 
-<p><span lang="en-us">You can simply call GMap2.openInfoWindowMaxTabs() to open an window with max contents, similar 
-    the same way you call GMap2.openInfoWindowTabs().</span></p>
+<p>You can simply call <code>GMap2.openMaxContentTabs()</code> to open an window with max contents, similar 
+    the same way you call <code>GMap2.openInfoWindowTabs()</code>.</p>
 
 <pre class="prettyprint">
      function init(){
@@ -40,11 +40,11 @@ in your document header, after GMaps API is load. You can use the online version
        var min = 'regular map info:' + latlng;
        var sum = 'summary map info:' + latlng+ Math.random();
        var tabs = [
-          new GInfoWindowTab('map tab0', 'map content0'),
-          new GInfoWindowTab('map tab1', 'map content1'),
-          new GInfoWindowTab('map tab2', 'map content2'), 
-          new GInfoWindowTab('map tab3', 'map content3')];
-       map.openInfoWindowMaxTabsHtml(latlng, min, sum, tabs, { maxTitle: "More Map Info" });
+          new MaxContentTab('map tab0', 'map content0'),
+          new MaxContentTab('map tab1', 'map content1'),
+          new MaxContentTab('map tab2', 'map content2'), 
+          new MaxContentTab('map tab3', 'map content3')];
+       map.openMaxContentTabsHtml(latlng, min, sum, tabs, { maxTitle: "More Map Info" });
      }
     </pre>
 
@@ -65,7 +65,7 @@ in your document header, after GMaps API is load. You can use the online version
           var map = new GMap2(document.getElementById("map"));
           map.setCenter(new GLatLng(45.5, -122.7), 14);
           //...
-          map.openInfoWindowMaxTabsHtml(latlng, latlng.toString(), summary, tabs, {
+          map.openMaxContentTabsHtml(latlng, latlng.toString(), summary, tabs, {
              maxTitle: "More Info",
              selectedTab: 1,
              style: {...}
