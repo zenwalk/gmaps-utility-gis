@@ -166,7 +166,7 @@
  * @class This class represent the max content in the info window. It has three parts:
  * summary info; tab Navigation bar, and tabbed contents.
  * There is no public constructor for this class. If needed, it can be accessed via 
- * <code>GMap2.getInfoWindowMaxContent()</code> 
+ * <code>GMap2.getTabbedMaxContent()</code> 
  * @param {GInfoWindow} iw 
  */
   function TabbedMaxContent(iw) {
