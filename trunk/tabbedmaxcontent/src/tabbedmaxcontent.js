@@ -15,8 +15,10 @@
  * @name Tabbed Max Content
  * @version 1.0
  * @author: Nianwei Liu [nianwei at gmail dot com]
- * @fileoverview This lib provides a similar infowindow behavior avaiable at
- * maps.google.com. The maxContent of info window contains multiple tabs.
+ * @fileoverview This library provides a max info window UI that's similar 
+ *  to the info window UI for local business results on Google Maps. It lets a 
+ *  developer pass in an array of content that will be rendered in tabs in the 
+ *  maximized state of an info window.
  */
 (function () {
   /*jslint browser:true */
@@ -133,11 +135,12 @@
    * Creates a content tab data structure that can be passed in the <code>tabs</code> argument
    * in the <code>openMaxContentTabs*()</code> methods.
    * @name MaxContentTab
-   * @class This class represents a tab in the max content window. An array of instances
-   * of this class can be passed in as the tabs argument to the methods <code>openMaxContentTabs*()</code> etc.
+   * @class This class represents a tab in the maximized info window. An array of
+   *  instances of this class can be passed in as the {@link tabs} argument to 
+   *  the methods <code>openMaxContentTabs*()</code> etc.
    * This class is similar to the 
    * <a target=_blank href=http://code.google.com/apis/maps/documentation/reference.html#GInfoWindowTab>GInfoWindowTab</a>
-   * class in core API.
+   * class in the core API.
    * @param {String} label
    * @param {Node|String} content 
    */
@@ -146,15 +149,17 @@
     this.contentNode_ = createEl('div', null, content, null, null);
     this.navNode_ = null;
   }
+
    /**
-   * Get the label of the tab
+   * Returns the label of the tab.
    * @return {String} label
    */
   MaxContentTab.prototype.getLabel = function () {
     return this.label_;
   };
+
   /**
-   * Get the content DOM Node of the tab
+   * Returns the content of the tab.
    * @return {Node} conent
    */
   MaxContentTab.prototype.getContentNode = function () {
@@ -163,10 +168,9 @@
   
  /**
  * @name TabbedMaxContent
- * @class This class represent the max content in the info window. It has three parts:
- * summary info; tab Navigation bar, and tabbed contents.
- * There is no public constructor for this class. If needed, it can be accessed via 
- * <code>GMap2.getTabbedMaxContent()</code> 
+ * @class This class represent the max content in the info window. 
+ * There is no public constructor for this class. If needed, it can be accessed 
+ * via  <code>GMap2.getTabbedMaxContent()</code>.
  * @param {GInfoWindow} iw 
  */
   function TabbedMaxContent(iw) {
@@ -249,16 +253,16 @@
     this.selectTab(this.selectedTab_);
   };
   /**
-   * Select tab by index or tab label.
-   * @param {Number|String} t
+   * Select a tab using the given index or label.
+   * @param {Number|String} identifier
    */
-  TabbedMaxContent.prototype.selectTab = function (t) {
+  TabbedMaxContent.prototype.selectTab = function (identifier) {
     var trigger = false;
     var hasVisibleTab = false;
     var tab;
     for (var i = 0, ct = this.tabs_.length; i < ct; i++) {
       tab = this.tabs_[i];
-      if (i === t || tab.getLabel() === t) {
+      if (i === identifier || tab.getLabel() === identifier) {
         if (tab.getContentNode().style.display === 'none') {
           setVals(tab.navNode_.style, this.style_.tabOn);
           tab.getContentNode().style.display = 'block';
@@ -274,8 +278,8 @@
     // avoid excessive event if clicked on a selected tab.
     if (trigger) {
       /**
-       * This event is fired after a tab is selected.
-       * Passing the selected {@link MaxContentTab} as argument for callback.
+       * This event is fired after a tab is selected,
+       * passing the selected {@link MaxContentTab} into the callback.
        * @name TabbedMaxContent#selecttab
        * @param {MaxContentTab} selected tab
        * @event
@@ -287,23 +291,24 @@
     }
   };
   /**
-   * Get the {@link MaxContentTab} at given index or name
-   * @param {Number|String} t
+   * Return the {@link MaxContentTab} at the given index or label.
+   * @param {Number|String} identifier
    * @return {MaxContentTab}
    */
-  TabbedMaxContent.prototype.getTab = function (t) {
+  TabbedMaxContent.prototype.getTab = function (identifier) {
     for (var i = 0, ct = this.tabs_.length; i < ct; i++) {
-      if (i === t || this.tabs_[i].getLabel() === t) {
+      if (i === identifier || this.tabs_[i].getLabel() === identifier) {
         return this.tabs_[i];
       }
     }
   };
   
   /**
-   * Adjust sizes of tab containers to fit in the max window. 
+   * Adjust sizes of tabs to fit inside the maximized info window. 
    * This method is automatically called on <code>
-   * GInfoWindow</code>'s <code>'maximizeend'</code> event. However, in some cases such
-   * as ajax action changed summary content may require an additional resize.
+   * GInfoWindow</code>'s <code>'maximizeend'</code> event. However, there may
+   * be cases where additional content is loaded in after that event,
+   * and an additional resize is needed.
    */
   TabbedMaxContent.prototype.checkResize = function () {
     var container = this.infoWindow_.getContentContainers()[0];
@@ -319,35 +324,39 @@
 
   /**
    * @name MaxContentOptions
-   * @class Instances of this class are used in the <code>opts_maxOption</code> argument to methods 
-   * openMaxConentTabs(), openMaxContentTabsHtml(). 
-   * It will eventually be passed to <code>GMap2.openInfoWindow</code> as <code>GInfoWindowOptions</code>.
-   * Note, <code>GInfoWindowOptions.maxContent</code> can not be used. 
-   * For other properties, see <a href='http://code.google.com/apis/maps/documentation/reference.html#GInfoWindowOptions'>GInfoWindowOptions</a>
-   * @property {Object} [style] the object that hold a set of css style of the max content. It has the following properties:
-   *     <code> tabOn, tabOff, tabBar, tabLeft, tabRight, content </code>. Each property is a css object such as 
+   * @class 
+   * This class extends <a href='http://code.google.com/apis/maps/documentation/reference.ht    ml#GInfoWindowOptions'><code>GInfoWindowOptions</code></a>. 
+   * Instances of this class are used in the <code>opts_maxOption</code> 
+   * argument to methods openMaxContentTabs(), openMaxContentTabsHtml(). 
+   * Note, <code>GInfoWindowOptions.maxContent</code> can not be specified. 
+   * @property {Object} [style] The object that holds a set of css styles 
+   * for the maximized content. It has the following properties:
+   *     <code> tabOn, tabOff, tabBar, tabLeft, tabRight, content </code>. 
+   *  Each property is a css object such as 
    *     <code> {backgroundColor: 'gray', opacity: 0.2}</code>. 
-   * @property {Number|String} [selectedTab] Selects the tab with the given index or name. index base is 0.
-   * @property {String} [maxTitle] 	Specifies title to be shown when the infowindow is maximized. The content may be either an HTML string or an HTML DOM element. 
-   * @property {Boolean} [maximized] 	Specifies if the window should be open as maximized by default. 
+   * @property {Number|String} [selectedTab = 0] Selects the tab with the given 
+   * index or name by default when the info window is first maximized.
+   * @property {String|Node} [maxTitle = ""] Specifies the title to be shown when
+   * the infowindow is maximized.  
+   * @property {Boolean} [maximized = false] Specifies if the window should be 
+   * opened in the maximized state by default.  
    */
  
   /**
    * @name GMap2
-   * @class These are new methods added to Google Maps API's
+   * @class These are new methods added to the Google Maps API's
    * <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GMap2'>GMap2</a>
    * class.
    */
   /**
-   * Opens an info window with max content at the given point.
-   * The content of the info window is given as DOM node.
-   * The max content has summary info and a set of tabs.
-   * Each tab is an instance of {@link MaxContentTab}, 
-   * The content of each tab is a DOM node.
-   * <code>opt_maxOptions</code> is an instance of {@link MaxContentOptions}.
+   * Opens an info window with maximizable content at the given {@link latlng}.
+   * The infowindow displays the content in the {@link minNode} in the 
+   * minimized state, and then displays the content in the {@link summaryNode}
+   * along with the array of {@link tabs} in the maximized state.
+   * Additional options can be sent in {@link opt_maxOptions}.
    * @param {GLatLng} latlng
-   * @param {Node} node
-   * @param {Node} summary
+   * @param {Node} minNode
+   * @param {Node} summaryNode
    * @param {MaxContentTab[]} tabs
    * @param {MaxContentOptions} opt_maxOptions
    */
@@ -374,24 +383,25 @@
       });
     }
   };
+
   /**
-   * Opens an info window with max content at the given point.
-   * The content of the info window is given as HTML text.
-   * The max content has summary info and a set of tabs. 
-   * Each tab is an instance of {@link MaxContentTab}, 
-   * The content of each tab is html.
-   * <code>opt_maxOptions</code> is an instance of {@link MaxContentOptions}.
+   * Opens an info window with maximizable content at the given {@link latlng}.
+   * The infowindow displays the content in the {@link minHtml} in the 
+   * minimized state, and then displays the content in the {@link summaryHtml}
+   * along with the array of {@link tabs} in the maximized state.
+   * Additional options can be sent in {@link opt_maxOptions}.
    * @param {GLatLng} latlng
-   * @param {String} html
-   * @param {String} summary
+   * @param {String} minHtml
+   * @param {String} summaryHtml
    * @param {MaxContentTab[]} tabs
    * @param {MaxContentOptions} opt_maxOptions
    */
   GMap2.prototype.openMaxContentTabsHtml = function (latlng, html, summary, tabs, opt_maxOptions) {
     this.openMaxContentTabs(latlng, createEl('div', null, html), createEl('div', null, summary), tabs, opt_maxOptions);
   };
+
   /**
-   * Returns the {@link TabbedMaxContent} for the infowindow.
+   * Returns the {@link TabbedMaxContent} for currently opened info window.
    * @return {TabbedMaxContent}
    */
   GMap2.prototype.getTabbedMaxContent = function () {
@@ -405,36 +415,37 @@
    * <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GMarker'>GMarker</a>
    * class.
    */
+
   /**
-   * Opens an info window with max content at the marker.
-   * The content of the info window is given as HTML text.
-   * The max content has summary info and a set of tabs.
-   * Each tab is an instance of {@link MaxContentTab}, 
-   * The content of each tab is html.
+   * Opens an info window with maximizable content above the marker.
+   * The infowindow displays the content in the {@link minHtml} in the 
+   * minimized state, and then displays the content in the {@link summaryHtml}
+   * along with the array of {@link tabs} in the maximized state.
+   * Additional options can be sent in {@link opt_maxOptions}.
    * @param {GMap2} map
-   * @param {String} html
-   * @param {String} summary
+   * @param {String} minHtml
+   * @param {String} summaryHtml
    * @param {MaxContentTab[]} tabs
    * @param {MaxContentOptions} opt_maxOptions
    */
-  GMarker.prototype.openMaxContentTabsHtml = function (map, html, summary, tabs, opt_maxOptions) {
-    map.openMaxContentTabsHtml(this.getLatLng(), html, summary, tabs, opt_maxOptions);
+  GMarker.prototype.openMaxContentTabsHtml = function (map, minHtml, summaryHtml, tabs, opt_maxOptions) {
+    map.openMaxContentTabsHtml(this.getLatLng(), minHtml, summaryHtml, tabs, opt_maxOptions);
   };
+
   /**
-   * Opens an info window with max content at the marker.
-   * The content of the info window is given as DOM node.
-   * The max content has summary info and a set of tabs.
-   * Each tab is an instance of {@link MaxContentTab}, 
-   * The content of each tab is a DOM node.
-   * <code>opt_maxOptions</code> is an instance of {@link MaxContentOptions}.
+   * Opens an info window with maximizable content above the marker.
+   * The infowindow displays the content in the {@link minNode} in the 
+   * minimized state, and then displays the content in the {@link summaryNode}
+   * along with the array of {@link tabs} in the maximized state.
+   * Additional options can be sent in {@link opt_maxOptions}.
    * @param {GMap2} map
-   * @param {Node} node
-   * @param {Node} summary
+   * @param {Node} minNode
+   * @param {Node} summaryNode
    * @param {MaxContentTab[]} tabs
    * @param {MaxContentOptions} opt_maxOptions
    */
-  GMarker.prototype.openMaxContentTabs = function (map, minNode, sumNode, tabs, opt_maxOptions) {
-    map.openMaxContentTabs(this.getLatLng(), minNode, sumNode, tabs, opt_maxOptions);
+  GMarker.prototype.openMaxContentTabs = function (map, minNode, summaryNode, tabs, opt_maxOptions) {
+    map.openMaxContentTabs(this.getLatLng(), minNode, summaryNode, tabs, opt_maxOptions);
   };
   
   window.MaxContentTab = MaxContentTab;
