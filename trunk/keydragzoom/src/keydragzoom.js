@@ -245,9 +245,11 @@
     this.dragging_ = false;
     this.startPt_ = null;
     this.endPt_ = null;
-    this.mapPosn_ = null;
     this.boxMaxX_ = null;
     this.boxMaxY_ = null;
+    this.mousePosn_ = null;
+    this.mapPosn_ = getElementPosition(this.map_.getContainer());
+
   }
  
   /**
@@ -286,12 +288,32 @@
     }
     return isHot;
   };
+  
+  /**
+  * Checks if the mouse is on top of the map. The position is captured 
+  * in onMouseMove_.
+  * @return true if mouse is on top of the map div.
+  */
+  DragZoom.prototype.isMouseOnMap_ = function () {
+    var mousePos = this.mousePosn_;
+    if (mousePos) {
+      var mapPos = this.mapPosn_;
+      var size = this.map_.getSize();
+      return mousePos.left > mapPos.left && mousePos.left < mapPos.left + size.width &&
+      mousePos.top > mapPos.top &&
+      mousePos.top < mapPos.top + size.height;
+    } else {
+      // if user never moved mouse
+      return false;
+    }
+  };
+  
    /**
-   * Handle key down.
+   * Handle key down. Activate the tool if 
    * @param {Event} e
    */
   DragZoom.prototype.onKeyDown_ = function (e) {
-    if (this.map_ && !this.hotKeyDown_ && this.isHotKeyDown_(e)) {
+    if (this.map_ && !this.hotKeyDown_ && this.isHotKeyDown_(e) && this.isMouseOnMap_()) {
       this.hotKeyDown_ = true;
       var size = this.map_.getSize();
       this.paneDiv_.style.left = 0 + 'px';
@@ -351,6 +373,7 @@
    * @param {Event} e
    */
   DragZoom.prototype.onMouseMove_ = function (e) {
+    this.mousePosn_ = getMousePosition(e);
     if (this.dragging_) {
       this.endPt_ = this.getMousePoint_(e);
       var left = Math.min(this.startPt_.x, this.endPt_.x);
