@@ -675,7 +675,8 @@
     }
   };
   /**
-   * ArcGISSpatialReferences has an internal collection of Spatial Refeneces supported in the application.
+   * @name ArcGISSpatialReferences
+   * @class ArcGISSpatialReferences has an internal collection of Spatial Refeneces supported in the application.
    * The key of the collection is the wkid, and value is an instance of
    * {@link ArcGISSpatialReference}.
    * The {@link ArcGISTileLayer}'s Spatial Refeneces <b>must be already added to collection
@@ -687,8 +688,6 @@
    * </code>
    * <br/> The application can add a supported spatial references using static method
    * <code>ArcGISSpatialReferences.addSpatialReference(wkid,sr);</code>
-   * @name ArcGISSpatialReferences
-   * @name ArcGISspace
    */
   var ArcGISSpatialReferences = {};
   
