@@ -2,14 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>ArcGIS Server Link for Google Maps Javascript API v1.0 Reference</title>
+    <title>ArcGIS Server Link for Google Maps Javascript API v2.0 (for GMaps API v3) Reference</title>
     <link rel="stylesheet" type="text/css" href="http://code.google.com/css/codesite.css"></link>
     <link rel="stylesheet" type="text/css" href="../../util/docs/template/local_extensions.css"></link>
   </head>
   <body>
     <h1>ArcGIS Server Link for Google Maps Javascript API</h1>
     <p>
-<p><a href="concepts.html">Concepts</a> | <a href="examples.html">Examples</a>  </p>  <p>This library lets you add map resources accessible via    <a  href = 'http://resources.esri.com/help/9.3/arcgisserver/apis/rest/'>    ESRI ArcGIS Server&#0153; REST API</a> into <a    href='http://code.google.com/apis/maps/documentation/reference.html'>   Google Maps </a> and provide some additional support for map tiles created    with different spatial reference and tiling scheme.</p>   <p style='background-color:#E5ECF9'>All classes are available under    namespace <code>google.maputils.arcgis.*</code>.    You can replace the normal <code>ArcGIS</code> prefix with the namespace.   <br/>   For example, the <code>ArcGISTileLayer</code> can also be defined   as <code>google.maputils.arcgis.TileLayer</code>. <br/>   If you choose to load namespace only without all any global    <code>G</code> symbols by passing file=googleapionly in script URL,    the <code>ArcGIS</code> prefix will not be exported to global scope either.   You must use namespace for all classes in this library.    </p>.   <table style = 'border:0px'>   <tr>   <td colspan=2 style='border:0px;'>Google Maps API related classes</td>   <td colspan=2 style='border:0px;'>REST API related classes</td>   </tr>   <tr>   <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISTileLayer">ArcGISTileLayer</a></code><br/>   <code><a href="reference.html#ArcGISTileLayerOptions">ArcGISTileLayerOptions</a></code><br/>   <code><a href="reference.html#ArcGISMapType">ArcGISMapType</a></code><br/>   <code><a href="reference.html#ArcGISMapTypeOptions">ArcGISMapTypeOptions</a></code><br/>   <code><a href="reference.html#ArcGISTileLayerOverlay">ArcGISTileLayerOverlay</a></code><br/>   <code><a href="reference.html#ArcGISMapOverlay">ArcGISMapOverlay</a></code><br/>   <code><a href="reference.html#ArcGISMapOverlayOptions">ArcGISMapOverlayOptions</a></code><br/>   </td>   <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISProjection">ArcGISProjection</a></code><br/>   <code><a href="reference.html#ArcGISUtil">ArcGISUtil</a></code> <br/>    <code><a href="reference.html#ArcGISConfig">ArcGISConfig</a></code> <br/>    <i> <code><a href="reference.html#GMercatorProjection">GMercatorProjection</a></code></i>  <br/>   <i> <code><a href="reference.html#GMap2">GMap2</a></code> </i> <br/>   <i> <code><a href="reference.html#GMapType">GMapType</a></code></i> <br/>   </td>   <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISMapService">ArcGISMapService</a></code><br/></b>   <code><a href="reference.html#ArcGISLayer">ArcGISLayer</a></code><br/>   <code><a href="reference.html#ArcGISGeocodeService">ArcGISGeocodeService</a></code><br/>   <code><a href="reference.html#ArcGISGeometryService">ArcGISGeometryService</a></code><br/>    <br/></td>    <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISSpatialReference">ArcGISSpatialReference</a></code><br/>   <code><a href="reference.html#ArcGISSpatialReferences">ArcGISSpatialReferences</a></code><br/>   <code><a href="reference.html#ArcGISGeographic">ArcGISGeographic</a></code><br/>   <code><a href="reference.html#ArcGISLambertConformalConic">ArcGISLambertConformalConic</a></code><br/>   <code><a href="reference.html#ArcGISTransverseMercator">ArcGISTransverseMercator</a></code><br/>   <code><a href="reference.html#ArcGISSphereMercator">ArcGISSphereMercator</a></code><br/>   <code><a href="reference.html#ArcGISFlatSpatialReference">ArcGISFlatSpatialReference</a></code><br/>    </td>   </tr></table>   <p> There are many objects used in the REST API that do not require    a constructor and can be   used just as object literal in the operation:<br/>    (note the name of the type does not matter for object literals)</p>   <table style = 'border:0px'><tr>   <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISField">ArcGISField</a></code><br/>   <code><a href="reference.html#ArcGISTileInfo">ArcGISTileInfo</a></code><br/>   <code><a href="reference.html#ArcGISLOD">ArcGISLOD</a></code><br/>   <code><a href="reference.html#ArcGISExportMapParameters">ArcGISExportMapParameters</a></code><br/>   <code><a href="reference.html#ArcGISMapImage">ArcGISMapImage</a></code><br/>   <code><a href="reference.html#ArcGISIdentifyParameters">ArcGISIdentifyParameters</a></code><br/>   <code><a href="reference.html#ArcGISIdentifyResults">ArcGISIdentifyResults</a></code><br/>   <code><a href="reference.html#ArcGISIdentifyResult">ArcGISIdentifyResult</a></code><br/>    <br/></td>    <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISQueryParameters">ArcGISQueryParameters</a></code><br/>   <code><a href="reference.html#ArcGISResultSet">ArcGISResultSet</a></code><br/>   <code><a href="reference.html#ArcGISFeature">ArcGISFeature</a></code><br/>   <code><a href="reference.html#ArcGISFindParameters">ArcGISFindParameters</a></code><br/>   <code><a href="reference.html#ArcGISFindResults">ArcGISFindResults</a></code><br/>   <code><a href="reference.html#ArcGISFindResult">ArcGISFindResult</a></code><br/>    </td>    <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISGeocodeParameters">ArcGISGeocodeParameters</a></code><br/>   <code><a href="reference.html#ArcGISGeocodeResults">ArcGISGeocodeResults</a></code><br/>   <code><a href="reference.html#ArcGISGeocodeResult">ArcGISGeocodeResult</a></code><br/>   <code><a href="reference.html#ArcGISReverseGeocodeParameters">ArcGISReverseGeocodeParameters</a></code><br/>   <code><a href="reference.html#ArcGISReverseGeocodeResult">ArcGISReverseGeocodeResult</a></code><br/>   </td>    <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISGeometry">ArcGISGeometry</a></code><br/>   <code><a href="reference.html#ArcGISPoint">ArcGISPoint</a></code><br/>   <code><a href="reference.html#ArcGISPolyline">ArcGISPolyline</a></code><br/>   <code><a href="reference.html#ArcGISPolygon">ArcGISPolygon</a></code><br/>   <code><a href="reference.html#ArcGISEnvelope">ArcGISEnvelope</a></code><br/>   <code><a href="reference.html#ArcGISMultipoint">ArcGISMultipoint</a></code><br/>    </td>   </tr></table></p>
+<p><a href="concepts.html">Concepts</a> | <a href="examples.html">Examples</a>  </p>  <p><b style="font-color:red">DOCUMENTTION is for V2, NOT UPDATED for V3 YET!</b>This library lets you add map resources accessible via    <a  href = 'http://resources.esri.com/help/9.3/arcgisserver/apis/rest/'>    ESRI ArcGIS Server&#0153; REST API</a> into <a    href='http://code.google.com/apis/maps/documentation/reference.html'>   Google Maps </a> and provide some additional support for map tiles created    with different spatial reference and tiling scheme.</p>   <p style='background-color:#E5ECF9'>All classes are available under    namespace <code>google.maputils.arcgis.*</code>.    You can replace the normal <code>ArcGIS</code> prefix with the namespace.   <br/>   For example, the <code>ArcGISTileLayer</code> can also be defined   as <code>google.maputils.arcgis.TileLayer</code>. <br/>   </p>.   <table style = 'border:0px'>   <tr>   <td colspan=2 style='border:0px;'>Google Maps API related classes</td>   <td colspan=2 style='border:0px;'>REST API related classes</td>   </tr>   <tr>   <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISTileLayer">ArcGISTileLayer</a></code><br/>   <code><a href="reference.html#ArcGISTileLayerOptions">ArcGISTileLayerOptions</a></code><br/>   <code><a href="reference.html#ArcGISMapType">ArcGISMapType</a></code><br/>   <code><a href="reference.html#ArcGISMapTypeOptions">ArcGISMapTypeOptions</a></code><br/>   <code><a href="reference.html#ArcGISTileLayerOverlay">ArcGISTileLayerOverlay</a></code><br/>   <code><a href="reference.html#ArcGISMapOverlay">ArcGISMapOverlay</a></code><br/>   <code><a href="reference.html#ArcGISMapOverlayOptions">ArcGISMapOverlayOptions</a></code><br/>   </td>   <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISProjection">ArcGISProjection</a></code><br/>   <code><a href="reference.html#ArcGISUtil">ArcGISUtil</a></code> <br/>    <code><a href="reference.html#ArcGISConfig">ArcGISConfig</a></code> <br/>    <i> <code><a href="reference.html#GMercatorProjection">GMercatorProjection</a></code></i>  <br/>   <i> <code><a href="reference.html#GMap">GMap</a></code> </i> <br/>   <i> <code><a href="reference.html#GMapType">GMapType</a></code></i> <br/>   </td>   <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISMapService">ArcGISMapService</a></code><br/></b>   <code><a href="reference.html#ArcGISLayer">ArcGISLayer</a></code><br/>   <code><a href="reference.html#ArcGISGeocodeService">ArcGISGeocodeService</a></code><br/>   <code><a href="reference.html#ArcGISGeometryService">ArcGISGeometryService</a></code><br/>    <br/></td>    <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISSpatialReference">ArcGISSpatialReference</a></code><br/>   <code><a href="reference.html#ArcGISSpatialReferences">ArcGISSpatialReferences</a></code><br/>   <code><a href="reference.html#ArcGISGeographic">ArcGISGeographic</a></code><br/>   <code><a href="reference.html#ArcGISLambertConformalConic">ArcGISLambertConformalConic</a></code><br/>   <code><a href="reference.html#ArcGISTransverseMercator">ArcGISTransverseMercator</a></code><br/>   <code><a href="reference.html#ArcGISSphereMercator">ArcGISSphereMercator</a></code><br/>   <code><a href="reference.html#ArcGISFlatSpatialReference">ArcGISFlatSpatialReference</a></code><br/>    </td>   </tr></table>   <p> There are many objects used in the REST API that do not require    a constructor and can be   used just as object literal in the operation:<br/>    (note the name of the type does not matter for object literals)</p>   <table style = 'border:0px'><tr>   <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISField">ArcGISField</a></code><br/>   <code><a href="reference.html#ArcGISTileInfo">ArcGISTileInfo</a></code><br/>   <code><a href="reference.html#ArcGISLOD">ArcGISLOD</a></code><br/>   <code><a href="reference.html#ArcGISExportMapParameters">ArcGISExportMapParameters</a></code><br/>   <code><a href="reference.html#ArcGISMapImage">ArcGISMapImage</a></code><br/>   <code><a href="reference.html#ArcGISIdentifyParameters">ArcGISIdentifyParameters</a></code><br/>   <code><a href="reference.html#ArcGISIdentifyResults">ArcGISIdentifyResults</a></code><br/>   <code><a href="reference.html#ArcGISIdentifyResult">ArcGISIdentifyResult</a></code><br/>    <br/></td>    <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISQueryParameters">ArcGISQueryParameters</a></code><br/>   <code><a href="reference.html#ArcGISResultSet">ArcGISResultSet</a></code><br/>   <code><a href="reference.html#ArcGISFeature">ArcGISFeature</a></code><br/>   <code><a href="reference.html#ArcGISFindParameters">ArcGISFindParameters</a></code><br/>   <code><a href="reference.html#ArcGISFindResults">ArcGISFindResults</a></code><br/>   <code><a href="reference.html#ArcGISFindResult">ArcGISFindResult</a></code><br/>    </td>    <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISGeocodeParameters">ArcGISGeocodeParameters</a></code><br/>   <code><a href="reference.html#ArcGISGeocodeResults">ArcGISGeocodeResults</a></code><br/>   <code><a href="reference.html#ArcGISGeocodeResult">ArcGISGeocodeResult</a></code><br/>   <code><a href="reference.html#ArcGISReverseGeocodeParameters">ArcGISReverseGeocodeParameters</a></code><br/>   <code><a href="reference.html#ArcGISReverseGeocodeResult">ArcGISReverseGeocodeResult</a></code><br/>   </td>    <td style = 'border:0px;width:200px'>   <code><a href="reference.html#ArcGISGeometry">ArcGISGeometry</a></code><br/>   <code><a href="reference.html#ArcGISPoint">ArcGISPoint</a></code><br/>   <code><a href="reference.html#ArcGISPolyline">ArcGISPolyline</a></code><br/>   <code><a href="reference.html#ArcGISPolygon">ArcGISPolygon</a></code><br/>   <code><a href="reference.html#ArcGISEnvelope">ArcGISEnvelope</a></code><br/>   <code><a href="reference.html#ArcGISMultipoint">ArcGISMultipoint</a></code><br/>    </td>   </tr></table></p>
     <p>For a description and examples of how to use this library, check out the <a href="examples.html">how-to</a>.</p>
     
       <h2><a name="ArcGISConfig"></a>class ArcGISConfig</h2>
@@ -46,7 +46,7 @@
                     <td><code>StyleOptions</code></td>
                   
                 
-                <td>The default style used for GOverlays.</td>
+                <td>The default style used for OverlayViews.</td>
               </tr>
             
           </tbody>
@@ -1835,7 +1835,7 @@
       
     
       <h2><a name="ArcGISMapOverlay"></a>class ArcGISMapOverlay</h2>
-      <p>This class (<code>google.maputils.arcgis.MapOverlay</code>) extends the Google Maps API's<a href  = http://code.google.com/apis/maps/documentation/reference.html#GOverlay>GOverlay</a>that draws map images from data source on the fly. It is also known as "<b>Dynamic Maps</b>".It can be added to the map via <code>GMap2.addOverlay </code> method.The similar class in the core GMap API is <a href  = http://code.google.com/apis/maps/documentation/reference.html#GGroundOverlay>GGroundOverlay</a>,however, the instance of this class always cover the viewport exactly, and will redraw itself as map moves.</p>
+      <p>This class (<code>google.maputils.arcgis.MapOverlay</code>) extends the Google Maps API's<a href  = http://code.google.com/apis/maps/documentation/reference.html#OverlayView>OverlayView</a>that draws map images from data source on the fly. It is also known as "<b>Dynamic Maps</b>".It can be added to the map via <code>GMap.addOverlay </code> method.The similar class in the core GMap API is <a href  = http://code.google.com/apis/maps/documentation/reference.html#GGroundOverlay>GGroundOverlay</a>,however, the instance of this class always cover the viewport exactly, and will redraw itself as map moves.</p>
       
         <h3>Constructor</h3>
         <table summary="class ArcGISMapOverlay - Constructor" width="90%">
@@ -2752,7 +2752,7 @@
               <tr class="odd">
                 <td><code>ArcGISProjection(<span class="type">tileInfo:TileInfo</span>, <span class="type">fullExtent:Envelope</span>)</code></td>
                 
-                <td>Creates an ArcGIS Map Tiling Reference System.<ul><li><code>tileInfo</code> tiling information. An instance of <code><a href="reference.html#ArcGISTileInfo">ArcGISTileInfo</a></code><li><code>opt_fullExtent</code> full extent of the tiles. An instance of <code><a href="reference.html#ArcGISEnvelope">ArcGISEnvelope</a></code></ul>Applications normally do not create instances of this class directly.If needed, it can be accessed by <code>GMap2.getCurrentMapType().getProjection()</code>for customized <code>GMapType</code>s.</td>
+                <td>Creates an ArcGIS Map Tiling Reference System.<ul><li><code>tileInfo</code> tiling information. An instance of <code><a href="reference.html#ArcGISTileInfo">ArcGISTileInfo</a></code><li><code>opt_fullExtent</code> full extent of the tiles. An instance of <code><a href="reference.html#ArcGISEnvelope">ArcGISEnvelope</a></code></ul>Applications normally do not create instances of this class directly.If needed, it can be accessed by <code>GMap.getCurrentMapType().getProjection()</code>for customized <code>GMapType</code>s.</td>
               </tr>
             
           </tbody>
@@ -2773,20 +2773,20 @@
             </tr>
             
               <tr class="odd">
-                <td><code>fromLatLngToPixel(<span class="type">gLatLng:GLatLng</span>, <span class="type">zoom:Number</span>)</code></td>
+                <td><code>fromDivPixelToLatLng(<span class="type">pixel:GPoint</span>, <span class="type">zoom:Number</span>, <span class="type">unbound:Boolean</span>)</code></td>
                 
                   
-                    <td><code>GPoint</code></td>
+                    <td><code>GLatLng</code></td>
                   
                 
                 <td>See <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GProjection'>GProjection</a>.</td>
               </tr>
             
               <tr class="even">
-                <td><code>fromPixelToLatLng(<span class="type">pixel:GPoint</span>, <span class="type">zoom:Number</span>, <span class="type">unbound:Boolean</span>)</code></td>
+                <td><code>fromLatLngToDivPixel(<span class="type">gLatLng:GLatLng</span>, <span class="type">zoom:Number</span>)</code></td>
                 
                   
-                    <td><code>GLatLng</code></td>
+                    <td><code>GPoint</code></td>
                   
                 
                 <td>See <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GProjection'>GProjection</a>.</td>
@@ -2833,7 +2833,17 @@
               </tr>
             
               <tr class="odd">
-                <td><code>getWrapWidth(<span class="type">zoom:Number</span>)</code></td>
+                <td><code>getWorldHeight(<span class="type">zoom:</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>getWorldWidth(<span class="type">zoom:Number</span>)</code></td>
                 
                   
                     <td><code>Number</code></td>
@@ -2842,7 +2852,7 @@
                 <td>See <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GProjection'>GProjection</a>.</td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>maxResolution()</code></td>
                 
                   
@@ -2852,7 +2862,7 @@
                 <td>Get max zoom level of actual tiles</td>
               </tr>
             
-              <tr class="odd">
+              <tr class="even">
                 <td><code>minResolution()</code></td>
                 
                   
@@ -2862,7 +2872,7 @@
                 <td>Get min zoom level of actual tiles</td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>tileCheckRange(<span class="type">tile:Object</span>, <span class="type">zoom:Number</span>, <span class="type">tilesize:Number</span>)</code></td>
                 
                   
@@ -3872,7 +3882,7 @@
       
     
       <h2><a name="ArcGISTileLayerOverlay"></a>class ArcGISTileLayerOverlay</h2>
-      <p>This class (<code>google.maputils.arcgis.TileLayerOverlay</code>) extends<a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GTileLayerOverlay'>GTileLayerOverlay</a> from the core Google Maps API. It tracks ArcGISTileLayerOverlay collections in  <code>GMap2</code> internally and make them available via <code>GMap2.getArcGISOverlays()</code></p>
+      <p>This class (<code>google.maputils.arcgis.TileLayerOverlay</code>) extends<a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GTileLayerOverlay'>GTileLayerOverlay</a> from the core Google Maps API. It tracks ArcGISTileLayerOverlay collections in  <code>GMap</code> internally and make them available via <code>GMap.getArcGISOverlays()</code></p>
       
         <h3>Constructor</h3>
         <table summary="class ArcGISTileLayerOverlay - Constructor" width="90%">
@@ -4060,10 +4070,10 @@ A list of utilities ((<code>google.maputils.arcgis.Util</code>) for commonly us
                 <td><code>fromFeatureToOverlays(<span class="type">feature:Feature</span>, <span class="type">opt_sr:ArcGISSpatialReference</span>, <span class="type">opt_agsStyle:StyleOptions</span>, <span class="type">opt_displayName:String</span>)</code></td>
                 
                   
-                    <td><code>GOverlay[]</code></td>
+                    <td><code>OverlayView[]</code></td>
                   
                 
-                <td>Convert a <code><a href="reference.html#ArcGISFeature">ArcGISFeature</a></code> or <code><a href="reference.html#ArcGISIdentifyResult">ArcGISIdentifyResult</a></code> or <code><a href="reference.html#ArcGISFindResult">ArcGISFindResult</a></code> to core Google Maps API overlays such as  <code>ArcGISGMarker</code>, <code>ArcGISGPolyline</code>, or <code>ArcGISGPolygon</code>s.Note ArcGIS Geometry may have multiple parts, but the coresponding GOverlay does not  support multi-parts, so the result is an array.<ul><li><code>feature</code>: an object returned by ArcGIS Server with at least <code>geometry</code> property of type <code><a href="reference.html#ArcGISGeometry">ArcGISGeometry</a></code>.  if it contains a name-value pair "attributes" property, it will be attached to the result overlays.<li><code>opt_sr</code>: optional <code><a href="reference.html#ArcGISSpatialReference">ArcGISSpatialReference</a></code>. Can be object literal. <li><code>opt_agsStyle</code> <code><a href="reference.html#ArcGISStyleOptions">ArcGISStyleOptions</a></code>. default is <code><a href="reference.html#ArcGISConfig">ArcGISConfig</a></code>.style.<li><code>opt_displayName</code> optional field name used for title of feature.</td>
+                <td>Convert a <code><a href="reference.html#ArcGISFeature">ArcGISFeature</a></code> or <code><a href="reference.html#ArcGISIdentifyResult">ArcGISIdentifyResult</a></code> or <code><a href="reference.html#ArcGISFindResult">ArcGISFindResult</a></code> to core Google Maps API overlays such as  <code>ArcGISGMarker</code>, <code>ArcGISGPolyline</code>, or <code>ArcGISGPolygon</code>s.Note ArcGIS Geometry may have multiple parts, but the coresponding OverlayView does not  support multi-parts, so the result is an array.<ul><li><code>feature</code>: an object returned by ArcGIS Server with at least <code>geometry</code> property of type <code><a href="reference.html#ArcGISGeometry">ArcGISGeometry</a></code>.  if it contains a name-value pair "attributes" property, it will be attached to the result overlays.<li><code>opt_sr</code>: optional <code><a href="reference.html#ArcGISSpatialReference">ArcGISSpatialReference</a></code>. Can be object literal. <li><code>opt_agsStyle</code> <code><a href="reference.html#ArcGISStyleOptions">ArcGISStyleOptions</a></code>. default is <code><a href="reference.html#ArcGISConfig">ArcGISConfig</a></code>.style.<li><code>opt_displayName</code> optional field name used for title of feature.</td>
               </tr>
             
               <tr class="even">
@@ -4167,11 +4177,11 @@ A list of utilities ((<code>google.maputils.arcgis.Util</code>) for commonly us
         </table>
       
     
-      <h2><a name="GMap2"></a>class GMap2</h2>
-      <p>This is new method added to Google Maps API's<a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GMap2'>GMap2</a>class.</p>
+      <h2><a name="GMap"></a>class GMap</h2>
+      <p>This is new method added to Google Maps API's<a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GMap'>GMap</a>class.</p>
       
         <h3>Methods</h3>
-        <table summary="class GMap2 - Methods" width="90%">
+        <table summary="class GMap - Methods" width="90%">
           
           <tbody>
             <tr>
@@ -4195,13 +4205,13 @@ A list of utilities ((<code>google.maputils.arcgis.Util</code>) for commonly us
               </tr>
             
               <tr class="even">
-                <td><code>addOverlays(<span class="type">ovs:GOverlay[]..</span>)</code></td>
+                <td><code>addOverlays(<span class="type">ovs:OverlayView[]..</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
                   
                 
-                <td>Convenient method to add array of GOverlays</td>
+                <td>Convenient method to add array of OverlayViews</td>
               </tr>
             
               <tr class="odd">
@@ -4238,10 +4248,10 @@ A list of utilities ((<code>google.maputils.arcgis.Util</code>) for commonly us
                 <td><code>getArcGISOverlays()</code></td>
                 
                   
-                    <td><code>GOverlay[]</code></td>
+                    <td><code>OverlayView[]</code></td>
                   
                 
-                <td>Get an array of the <code>ArcGISGOverlay</code>s. The entry in the array can be instance of<code><a href="reference.html#ArcGISMapOverlay">ArcGISMapOverlay</a></code> (dynamic maps) or <code><a href="reference.html#ArcGISTileLayerOverlay">ArcGISTileLayerOverlay</a></code>.</td>
+                <td>Get an array of the <code>ArcGISOverlayView</code>s. The entry in the array can be instance of<code><a href="reference.html#ArcGISMapOverlay">ArcGISMapOverlay</a></code> (dynamic maps) or <code><a href="reference.html#ArcGISTileLayerOverlay">ArcGISTileLayerOverlay</a></code>.</td>
               </tr>
             
               <tr class="odd">
@@ -4255,13 +4265,13 @@ A list of utilities ((<code>google.maputils.arcgis.Util</code>) for commonly us
               </tr>
             
               <tr class="even">
-                <td><code>removeOverlays(<span class="type">ovs:GOverlay[]..</span>)</code></td>
+                <td><code>removeOverlays(<span class="type">ovs:OverlayView[]..</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
                   
                 
-                <td>Convenient method to remove array of GOverlays</td>
+                <td>Convenient method to remove array of OverlayViews</td>
               </tr>
             
               <tr class="odd">
