@@ -13,13 +13,13 @@
  */
 /**
  * @name ArcGIS Server Link for Google Maps Javascript API
- * @version 1.0
+ * @version 2.0 (for GMaps API v3)
  * @author: Nianwei Liu 
  * @fileoverview 
  *  <p><a href="concepts.html">Concepts</a>
  *  | <a href="examples.html">Examples</a>
  *   </p> 
- *  <p>This library lets you add map resources accessible via 
+ *  <p><b style="font-color:red">DOCUMENTTION is for V2, NOT UPDATED for V3 YET!</b>This library lets you add map resources accessible via 
  *    <a  href = 'http://resources.esri.com/help/9.3/arcgisserver/apis/rest/'> 
  *    ESRI ArcGIS Server&#0153; REST API</a> into <a 
  *    href='http://code.google.com/apis/maps/documentation/reference.html'>
@@ -31,11 +31,7 @@
  *    <br/>
  *    For example, the <code>ArcGISTileLayer</code> can also be defined
  *    as <code>google.maputils.arcgis.TileLayer</code>. <br/>
- *    If you choose to load namespace only without all any global 
- *    <code>G</code> symbols by passing file=googleapionly in script URL, 
- *    the <code>ArcGIS</code> prefix will not be exported to global scope either.
- *    You must use namespace for all classes in this library.
- *     </p>.
+ *    </p>.
  *    <table style = 'border:0px'>
  *    <tr>
  *    <td colspan=2 style='border:0px;'>Google Maps API related classes</td>
@@ -56,7 +52,7 @@
  *    {@link ArcGISUtil} <br/> 
  *    {@link ArcGISConfig} <br/> 
  *    <i> {@link GMercatorProjection}</i>  <br/>
- *    <i> {@link GMap2} </i> <br/>
+ *    <i> {@link GMap} </i> <br/>
  *    <i> {@link GMapType}</i> <br/>
  *    </td>
  *    <td style = 'border:0px;width:200px'>
@@ -137,29 +133,30 @@
   // deal with the situation when user only loaded namespace.
   var W = window;
   var G = namespace('google.maps');
-  var GEvent, GLatLng, GMap2, GProjection, GTileLayer, GCopyrightCollection, 
+  var NA = function(){}; // a dummy function for classes not available in V3 yet
+  var GEvent, GLatLng, GMap, GProjection, GTileLayer, GCopyrightCollection, 
     GCopyright, GMapType, GMercatorProjection, G_MAP_OVERLAY_LAYER_PANE, 
     GTileLayerOverlay, GInfoWindowTab, GLatLngBounds, GPolygon, GPolyline, 
-    GOverlay,  GMarker, GPoint;
-  GMap2 = W.GMap2 || G.Map2;
-  GEvent = W.GEvent || G.Event;
-  GProjection = W.GProjection || G.Projection;
-  GTileLayer = W.GTileLayer || G.TileLayer;
-  GCopyrightCollection = W.CopyrightCollection || G.CopyrightCollection;
-  GCopyright = W.GCopyright || G.Copyright; 
-  GMapType = W.GMapType || G.MapType;
-  GMercatorProjection = W.GMercatorProjection || G.MercatorProjection;
-  G_MAP_OVERLAY_LAYER_PANE = W.G_MAP_OVERLAY_LAYER_PANE || 
-    G.MAP_OVERLAY_LAYER_PANE; 
-  GTileLayerOverlay = W.GTileLayerOverlay || G.TileLayerOverlay; 
-  GInfoWindowTab = W.GInfoWindowTab || G.InfoWindowTab; 
-  GLatLngBounds = W.GLatLngBounds || G.LatLngBounds; 
-  GPolygon = W.GPolygon || G.Polygon; 
-  GPolyline = W.GPolyline || G.Polyline;
-  GOverlay = W.GOverlay || G.Overlay; 
-  GLatLng = W.GLatLng || G.LatLng;
-  GPoint = W.GPoint || G.Point;
-  GMarker = W.GMarker || G.Marker;
+    OverlayView,  GMarker, GPoint;
+  GMap = G.Map;
+  GEvent = G.event;
+  GProjection = G.MapCanvasProjection;
+  GTileLayer =NA;// W.GTileLayer || G.TileLayer;
+  //GCopyrightCollection = W.CopyrightCollection || G.CopyrightCollection;
+  //GCopyright = W.GCopyright || G.Copyright; 
+  GMapType = NA;// avoid V3 error
+  GMercatorProjection = NA;//W.GMercatorProjection || G.MercatorProjection;
+  //G_MAP_OVERLAY_LAYER_PANE = W.G_MAP_OVERLAY_LAYER_PANE || 
+  //  G.MAP_OVERLAY_LAYER_PANE; 
+  GTileLayerOverlay =NA;//} W.GTileLayerOverlay || G.TileLayerOverlay; 
+  //GInfoWindowTab = W.GInfoWindowTab || G.InfoWindowTab; 
+  GLatLngBounds = G.LatLngBounds; 
+  GPolygon =NA;// W.GPolygon || G.Polygon; 
+  GPolyline =NA;// W.GPolyline || G.Polyline;
+  OverlayView = G.OverlayView; 
+  GLatLng = G.LatLng;
+  GPoint =  G.Point;
+  GMarker = G.Marker;
   
   /**
  * @name ArcGISGeometry
@@ -658,7 +655,7 @@
    * @name ArcGISConfig
    * @class This is an object literal that sets common configuration values used across the lib.
    * @property {Number} [maxPolyPoints  = 1000] max number of points allowed in polyline's path or polygon's ring. If exceed, no overlay will be created.(for now)
-   * @property {StyleOptions} [style] The default style used for GOverlays.
+   * @property {StyleOptions} [style] The default style used for OverlayViews.
    */
   var ArcGISConfig = {
     maxPolyPoints: 1000,
@@ -2175,7 +2172,7 @@
    * <li><code>tileInfo</code> tiling information. An instance of {@link ArcGISTileInfo}
    * <li><code>opt_fullExtent</code> full extent of the tiles. An instance of {@link ArcGISEnvelope}
    * </ul>Applications normally do not create instances of this class directly.
-   * If needed, it can be accessed by <code>GMap2.getCurrentMapType().getProjection()</code>
+   * If needed, it can be accessed by <code>GMap.getCurrentMapType().getProjection()</code>
    * for customized <code>GMapType</code>s.
    * @name ArcGISProjection
    * @class This class (<code>google.maputils.arcgis.Projection</code>) implements a custom
@@ -2199,7 +2196,7 @@
     this.zoomOffset_  =  Math.floor(Math.log(this.spatialReference_.getCircumference() / this.tileInfo_.lods[0].resolution / 256) / Math.LN2 + 0.5);
     this.fullExtent_  =  opt_fullExtent;
   }
-  ArcGISProjection.prototype  =  new GProjection();
+  //V3 ArcGISProjection.prototype  =  new GProjection();
   
   /**
    * See <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GProjection'>GProjection</a>.
@@ -2207,7 +2204,7 @@
    * @param {Number} zoom
    * @return {GPoint} pixel
    */
-  ArcGISProjection.prototype.fromLatLngToPixel  =  function (gLatLng, zoom) {
+  ArcGISProjection.prototype.fromLatLngToDivPixel  =  function (gLatLng, zoom) {// not sure how V3 handles zoom level
     if (!gLatLng || isNaN(gLatLng.lat()) || isNaN(gLatLng.lng())) {
       return null;
     }
@@ -2261,7 +2258,7 @@
    * @param {Boolean} unbound
    * @return {GLatLng} gLatLng
    */
-  ArcGISProjection.prototype.fromPixelToLatLng  =  function (pixel, zoom, unbound) {
+  ArcGISProjection.prototype.fromDivPixelToLatLng  =  function (pixel, zoom, unbound) {
     if (pixel === null) {
       return null;
     }
@@ -2301,7 +2298,7 @@
    * @param {Number} zoom
    * @return {Number} numOfpixel
    */
-  ArcGISProjection.prototype.getWrapWidth  =  function (zoom) {
+  ArcGISProjection.prototype.getWorldWidth  =  function (zoom) {// not working yet
     var zoomIdx  =  zoom - this.zoomOffset_;
     if (this.tileInfo_.lods[zoomIdx]) {
       return this.spatialReference_.getCircumference() / this.tileInfo_.lods[zoomIdx].resolution;
@@ -2309,6 +2306,10 @@
       return Number.MAX_VALUE;
     }
   };
+  ArcGISProjection.prototype.getWorldHeight  =  function (zoom) {
+   return Number.MAX_VALUE;
+  };
+  
   /**
    * Get the tile size used by this Projection. Shortcut to tileInfo.rows;
    * @return {Number}
@@ -2409,7 +2410,7 @@
   /**
    * Create Prototype
    */
-  ArcGISTileLayer.prototype  =  new GTileLayer();
+ ArcGISTileLayer.prototype  =  new GTileLayer();
   
   /**
    * Initialize the tile layer from a loaded map service
@@ -2630,9 +2631,9 @@
    * <li/> <code>opt_overlayOpts</code> (optional) is an instance of {@link ArcGISMapOverlayOptions}.
    * @name ArcGISMapOverlay
    * @class This class (<code>google.maputils.arcgis.MapOverlay</code>) extends the Google Maps API's
-   * <a href  = http://code.google.com/apis/maps/documentation/reference.html#GOverlay>GOverlay</a>
+   * <a href  = http://code.google.com/apis/maps/documentation/reference.html#OverlayView>OverlayView</a>
    * that draws map images from data source on the fly. It is also known as "<b>Dynamic Maps</b>".
-   * It can be added to the map via <code>GMap2.addOverlay </code> method.
+   * It can be added to the map via <code>GMap.addOverlay </code> method.
    * The similar class in the core GMap API is <a href  = http://code.google.com/apis/maps/documentation/reference.html#GGroundOverlay>GGroundOverlay</a>,
    * however, the instance of this class always cover the viewport exactly, and will redraw itself as map moves.
    * @constructor
@@ -2640,6 +2641,7 @@
    * @param {MapOverlayOptions} opt_overlayOpts
    */
   function ArcGISMapOverlay(service, opt_overlayOpts) {
+    OverlayView.call(this);
     opt_overlayOpts  =  opt_overlayOpts || {};
     this.mapService_  = (service instanceof ArcGISMapService)?service:new ArcGISMapService(service);
     if (opt_overlayOpts.name) {
@@ -2648,20 +2650,21 @@
     this.minZoom_  = opt_overlayOpts.minResolution;
     this.maxZoom_  = opt_overlayOpts.maxResolution;
     if (this.mapService_.hasLoaded()) {
-      this.init_(opt_overlayOpts);
+      this.init_( opt_overlayOpts);
     } else {
       var me  =  this;
       GEvent.addListener(this.mapService_, 'load', function () {
-        me.init_(opt_overlayOpts);
+        me.init_( opt_overlayOpts);
       });
     }
+    
   }
   
-  ArcGISMapOverlay.prototype  =  new GOverlay();
+  ArcGISMapOverlay.prototype  =  new OverlayView();
   
   /**
    * Intialize the map layer info.
-   * It is called before GOverlay.initialize which setups the UI elements.
+   * It is called before OverlayView.initialize which setups the UI elements.
    * @private
    * @param {ArcGISMapService} mapService
    * @param {MapOverlayOptions} opt_overlayOpts
@@ -2680,8 +2683,11 @@
       this.refresh();
     }
     if (this.map_) {
-      this.setupMapType_();
+     //V3 this.setupMapType_();
     }
+     
+    
+    
    /**
    * This event is fired when the layer's service is loaded. Passing {@link ArcGISMapOverlay} as argument
    * @name ArcGISMapOverlay#load
@@ -2787,19 +2793,24 @@
       this.redraw_  =  true;
       return;
     }
-    if (this.img_ !== null && this.moveend_) {
+    if (this.img_ !== null){//V3} && this.moveend_) {
       this.div_.removeChild(this.img_);
       this.img_  =  null;
     }
     if (this.isHidden()) {
       return;
     }
-    var bnds  = this.map_.getBounds();
-    var sr  =  this.map_.getCurrentMapType().getProjection().getSpatialReference();
+    var bnds  = this.map_.get_bounds();
+     var sr  = WEB_MERCATOR;//V3 this.map_.getCurrentMapType().getProjection().getSpatialReference();
     var me  =  this;
     var params  =  this.exportParams_;
-    params.size  =  '' + this.map_.getSize().width + ',' + this.map_.getSize().height;
-    //note: if GMapType's maxzoom is larger than any GTileLayer's maxZoom, GMap2.getBounds return 0,0,0,0
+    // V3 no map.getSize()!!! cheating here
+    var w = parseInt(this.map_.getDiv().style.width);
+    var h = parseInt(this.map_.getDiv().style.height);
+    //params.size  =  '' + this.map_.getSize().width + ',' + this.map_.getSize().height;
+    params.size  =  '' + w + ',' + h;
+    //note: if GMapType's maxzoom is larger than any GTileLayer's maxZoom, GMap.getBounds return 0,0,0,0
+   
     params.bbox  =  ArcGISUtil.fromLatLngBoundsToEnvelope(bnds, sr);
     params.bboxSR  =  sr.wkid;
     params.imageSR  =  sr.wkid;
@@ -2820,9 +2831,10 @@
       var div = me.div_;
       if (json.href) {
         var bnds = ArcGISUtil.fromEnvelopeToLatLngBounds(json.extent);
-        var wrapWidth = me.map_.getCurrentMapType().getProjection().getWrapWidth(me.map_.getZoom());
-        var swpx = me.map_.fromLatLngToDivPixel(bnds.getSouthWest());
-        var nepx = me.map_.fromLatLngToDivPixel(bnds.getNorthEast());
+        var prj = me.get_projection();
+        var wrapWidth = prj.getWorldWidth();
+        var swpx = prj.fromLatLngToDivPixel(bnds.getSouthWest());
+        var nepx = prj.fromLatLngToDivPixel(bnds.getNorthEast());
         div.style.width = json.width + "px";
         div.style.height = json.height + "px";
         div.style.left = swpx.x % wrapWidth + "px";
@@ -2854,40 +2866,31 @@
     });
   };
   /**
-   * See {@link ArcGISGOverlay.initialize}
+   * See {@link ArcGISOverlayView.initialize}
    * @private
    */
-  ArcGISMapOverlay.prototype.initialize  =  function (map) {
-    var div  =  document.createElement("div");
-    div.style.position  =  "absolute";
-    map.getPane(G_MAP_OVERLAY_LAYER_PANE).appendChild(div);//
-    this.map_  =  map;
-    this.zoomLevel_  =  map.getZoom();
-    this.div_  =  div;
-    this.img_  =  null;
-    this.moveEndListener_  =  GEvent.bind(this.map_, "moveend", this, function () {
-      this.moveend_ = true;
-      this.refresh();
+  ArcGISMapOverlay.prototype.addToMap  =  function (map) {
+    this.map_ = map;
+    this.set_map(map);//V3
+    var me = this;
+    this.moveEndListener_  =  GEvent.addListener(this.map_, "bounds_changed", function () {
+      me.moveend_ = true;
+      me.refresh();
     });
-    this.mapTypeChangeListener_  =  GEvent.bind(this.map_, "maptypechanged", this, this.refresh);
-    this.mapTypeAddListener_  =  GEvent.bind(this.map_, "addmaptype", this, this.setupMapType_);
-    this.map_.getArcGISOverlays().push(this);
-    if (this.hasLoaded()) {
-      this.setupMapType_();
-    }
-    this.show();
+    
   };
   
   /**
-   * See {@link ArcGISGOverlay.remove}
+   * See {@link ArcGISOverlayView.remove}
    * @private
    */
   ArcGISMapOverlay.prototype.remove  =  function () {
     GEvent.removeListener(this.moveEndListener_);
-    GEvent.removeListener(this.mapTypeChangeListener_);
+   //V3 GEvent.removeListener(this.mapTypeChangeListener_);
     this.div_.parentNode.removeChild(this.div_);
     
-    removeFromArray(this.map_.getArcGISOverlays(), this);
+    /*V3
+     removeFromArray(this.map_.getArcGISOverlays(), this);
     var types  =  this.map_.getMapTypes();
     for (var i  =  0; i < types.length; i++) {
       var type  =  types[i];
@@ -2895,6 +2898,7 @@
         removeFromArray(type.agsOvs_, this);
       }
     }
+    */
     
   };
   /**
@@ -2909,7 +2913,7 @@
     }
   };
   /**
-   * See {@link ArcGISGOverlay.copy}
+   * See {@link ArcGISOverlayView.copy}
    * @private
    */
   ArcGISMapOverlay.prototype.copy  =  function () {
@@ -2920,14 +2924,14 @@
    * @return {Boolean} visible
    */
   ArcGISMapOverlay.prototype.isHidden  =  function () {
-    return !(this.visible_ && this.isInZoomRange_() && this.getFullBounds().intersects(this.map_.getBounds()));
+    return !(this.visible_ && this.isInZoomRange_());//V3 && this.getFullBounds().intersects(this.map_.get_bounds()));
   };
   /**
    * If this in zoom range
    * @return {Boolean}
    */
   ArcGISMapOverlay.prototype.isInZoomRange_  =  function () {
-    var z  = this.map_.getZoom();
+    var z  = this.map_.get_zoom();
     if ((this.minZoom_ !== undefined && z < this.minZoom_) || 
      (this.maxZoom_ !== undefined && z > this.maxZoom_)) {
       return false; 
@@ -2952,13 +2956,32 @@
   };
   
   /**
-   * See GOverlay.redraw.
+   * See OverlayView.redraw.
    * @private
    * @param {Boolean} force
    */
-  ArcGISMapOverlay.prototype.redraw  =  function (force) {
+  ArcGISMapOverlay.prototype.draw  =  function () {
     // do nothing. defered to onmove handler because Gmaps api 
     // does not pass 'force' parameter consistently to meet the need for this class;
+  if (!this.div_){
+    var div  =  document.createElement("div");
+    div.style.position  =  "absolute";
+    //map.getPane(G_MAP_OVERLAY_LAYER_PANE).appendChild(div);//
+    var panes = this.get_panes();
+    panes.overlayImage.appendChild(div);
+    //this.map_  =  map;
+    this.zoomLevel_  =  this.map_.get_zoom();
+    this.div_  =  div;
+    this.img_  =  null;
+   
+   //V3 this.mapTypeChangeListener_  =  GEvent.bind(this.map_, "maptypechanged", this, this.refresh);
+   //V3 this.mapTypeAddListener_  =  GEvent.bind(this.map_, "addmaptype", this, this.setupMapType_);
+    //V3this.map_.getArcGISOverlays().push(this);
+    if (this.hasLoaded()) {
+      //this.setupMapType_();
+    }
+    this.show();
+  } 
   };
   /**
    * Creates an ArcGISTileLayerOverlay. Params:
@@ -2970,7 +2993,7 @@
    * @class This class (<code>google.maputils.arcgis.TileLayerOverlay</code>) extends
    * <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GTileLayerOverlay'>GTileLayerOverlay</a>
    *  from the core Google Maps API. It tracks ArcGISTileLayerOverlay collections in 
-   *  <code>GMap2</code> internally and make them available via <code>GMap2.getArcGISOverlays()</code>
+   *  <code>GMap</code> internally and make them available via <code>GMap.getArcGISOverlays()</code>
    */
   function ArcGISTileLayerOverlay(tileLayer, opt_tileOverlayOpts) {
     var me  = this;
@@ -3012,7 +3035,7 @@
     }
   };
   /**
-   * track itself in GMap2
+   * track itself in GMap
    * @private should not be called by client directly
    * @param {Object} map
    */ 
@@ -3040,7 +3063,7 @@
   };
   
   /**
-   * remove itself in GMap2
+   * remove itself in GMap
    * @private should not be called by client directly
    * @param {Object} map
    */
@@ -3062,6 +3085,7 @@
    * <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GMercatorProjection'>GMercatorProjection</a>
    * class.
    */
+  function GMercatorProjection(){}// for V3
   /**
    * Get the Spatial Reference used by GMercatorProjection.It's wkid  = 102113,
    * an instance of {@link ArcGISSphereMercator}.
@@ -3104,19 +3128,19 @@
     return cps;
   };
   /**
-   * @name GMap2
+   * @name GMap
    * @class This is new method added to Google Maps API's
-   * <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GMap2'>GMap2</a>
+   * <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GMap'>GMap</a>
    * class.
    */
   /**
    * Sets the map view to the given bounds .
    * @param {GLatLngBounds} bnds
    */
-  GMap2.prototype.setBounds  =  function (bnds) {
+  GMap.prototype.setBounds  =  function (bnds) {
     var center  = bnds.getCenter();
     var z  = this.getBoundsZoomLevel(bnds) + 1;
-    this.setCenter(center, z);
+    this.set_center(center, z);
   };
   
   
@@ -3124,16 +3148,16 @@
    * Shortcut method to get the current map type's spatial reference
    * @return {ArcGISSpatialReference}
    */
-  GMap2.prototype.getSpatialReference  = function () {
+  GMap.prototype.getSpatialReference  = function () {
     return this.getCurrentMapType().getProjection().getSpatialReference();
   };
 
  /**
- * Get an array of the {@link ArcGISGOverlay}s. The entry in the array can be instance of
+ * Get an array of the {@link ArcGISOverlayView}s. The entry in the array can be instance of
  * {@link ArcGISMapOverlay} (dynamic maps) or {@link ArcGISTileLayerOverlay}.
- * @return {GOverlay[]}
+ * @return {OverlayView[]}
  */
-  GMap2.prototype.getArcGISOverlays  =  function () {
+  GMap.prototype.getArcGISOverlays  =  function () {
     this.agsOvs_ = this.agsOvs_ || [];
     return  this.agsOvs_;
   };
@@ -3141,9 +3165,9 @@
   /**
    * @private for now. Should this be in Lib?
    * Get the overlays added as the result of an operation.
-   * @return {GOverlay[]}
+   * @return {OverlayView[]}
    */ 
-  GMap2.prototype.getArcGISResults = function () {
+  GMap.prototype.getArcGISResults = function () {
     this.agsResults_ = this.agsResults_ || [];
     return this.agsResults_;
   };
@@ -3151,7 +3175,7 @@
   * @private for now. Should this be in Lib?
   * Clear the highlight results.
   */
-  GMap2.prototype.clearArcGISResults = function () {
+  GMap.prototype.clearArcGISResults = function () {
     if (this.agsResults_) {
       for (var i = 0, c = this.agsResults_.length; i < c; i++) {
         GEvent.clearInstanceListeners(this.agsResults_[i]);
@@ -3162,10 +3186,10 @@
     this.agsResults_ = [];
   };
   /**
-  * Convenient method to remove array of GOverlays
-  * @param {GOverlay[]..} ovs
+  * Convenient method to remove array of OverlayViews
+  * @param {OverlayView[]..} ovs
   */
-  GMap2.prototype.removeOverlays = function (ovs) {
+  GMap.prototype.removeOverlays = function (ovs) {
     if (isArray(ovs)) {
       for (var i = 0, c = ovs.length; i < c; i++) {
         this.removeOverlays(ovs[i]);
@@ -3175,10 +3199,10 @@
     }
   };
   /**
-  * Convenient method to add array of GOverlays
-  * @param {GOverlay[]..} ovs
+  * Convenient method to add array of OverlayViews
+  * @param {OverlayView[]..} ovs
   */
-  GMap2.prototype.addOverlays = function (ovs) {
+  GMap.prototype.addOverlays = function (ovs) {
     if (isArray(ovs)) {
       for (var i = 0, c = ovs.length; i < c; i++) {
         this.addOverlays(ovs[i]);
@@ -3199,7 +3223,7 @@
    * @param {String} url
    * @param {Function} opt_callback
    */
-  GMap2.prototype.addArcGISMap  =  function (url, opt_callback) {
+  GMap.prototype.addArcGISMap  =  function (url, opt_callback) {
     var me  =  this;
     var service  =  new ArcGISMapService(url);
     GEvent.addListener(service, 'load', function () {
@@ -3298,21 +3322,21 @@
    * map feature will be displayed in a InfoWindow after a single click on the map.
    * The optional parameter <code>opt_clickOpts</code> is an instance of {@link ArcGISArcGISClickOptions}
    */
-  GMap2.prototype.enableArcGISClick  =  function () {
+  GMap.prototype.enableArcGISClick  =  function () {
     this.agsClickListener_  = this.agsClickListener_ || GEvent.addListener(this, 'click', this.doArcGISIdentify_);
   };
   /**
    * If identify operation onclick map is enabled.
    * @return {Boolean}
    */
-  GMap2.prototype.arcgisClickEnabled  =  function () {
+  GMap.prototype.arcgisClickEnabled  =  function () {
     return this.agsClickListener_ !== null;
   };
   
   /**
    * Disable click identify capability
    */
-  GMap2.prototype.disableArcGISClick  =  function () {
+  GMap.prototype.disableArcGISClick  =  function () {
     if (this.agsClickListener_) {
       GEvent.removeListener(this.agsClickListener_);
       this.agsClickListener_  =  null;
@@ -3322,7 +3346,7 @@
    * @private for now. Should this be in the API or left the application do these?
    * 
    */
-  GMap2.prototype.setArcGISClickOptions  =  function (opts) {
+  GMap.prototype.setArcGISClickOptions  =  function (opts) {
     this.agsClickOpts_  = opts || {};
   };
   /**
@@ -3331,7 +3355,7 @@
    * @param {Object} latlng
    * @param {Object} overlaylatlng
    */
-  GMap2.prototype.doArcGISIdentify_  =  function (overlay, latlng, overlaylatlng) {
+  GMap.prototype.doArcGISIdentify_  =  function (overlay, latlng, overlaylatlng) {
     var me  =  this;
     var opts  =  this.agsClickOpts_ || {};
     var services;
@@ -3565,7 +3589,7 @@
    * Convert a {@link ArcGISFeature} or {@link ArcGISIdentifyResult} or {@link ArcGISFindResult} to core Google Maps API 
    * overlays such as  {@link ArcGISGMarker}, 
    * {@link ArcGISGPolyline}, or {@link ArcGISGPolygon}s.
-   * Note ArcGIS Geometry may have multiple parts, but the coresponding GOverlay 
+   * Note ArcGIS Geometry may have multiple parts, but the coresponding OverlayView 
    * does not  support multi-parts, so the result is an array.
    * <ul><li><code>feature</code>: an object returned by ArcGIS Server with at least <code>geometry</code> property of type {@link ArcGISGeometry}. 
    *  if it contains a name-value pair "attributes" property, it will be attached to the result overlays.
@@ -3576,7 +3600,7 @@
    * @param {ArcGISSpatialReference} opt_sr
    * @param {StyleOptions} opt_agsStyle
    * @param {String} opt_displayName
-   * @return {GOverlay[]} 
+   * @return {OverlayView[]} 
    */
   ArcGISUtil.fromFeatureToOverlays  =  function (feature, opt_sr, opt_agsStyle, opt_displayName) {
     var ovs  =  [];
@@ -3679,13 +3703,13 @@
   var NS = namespace('google.maputils');
   NS.arcgis = arcgis;
   // if the user loaded global symbol, export all class with prefix ArcGIS to global.
-  if (window.GMap2) {
+ // if (window.GMap) {
     for (var x in arcgis) {
       if (arcgis.hasOwnProperty(x)) {
         window['ArcGIS' + x] = arcgis[x];
       }
     }
-  }
+  //}
 })();
 
 
