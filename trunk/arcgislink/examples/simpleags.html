@@ -9,7 +9,7 @@
             document.write('<script type="text/javascript" src="../src/arcgislink' + (document.location.search.indexOf('packed') > -1 ? '_packed' : '') + '.js"><' + '/script>');
         </script>
         <script type="text/javascript">
-            var map, ov;
+            var map, ov, iw, marker;
             function init() {
               var myOptions = {
                 zoom: 4,
@@ -88,24 +88,65 @@
                   imageDisplay: '' + size.width + ',' + size.height + ',' + 96, //dpi
                   returnGeometry: false
                 };
-               service.identify(params, function(json) {
-                 if (json){
-                   if (json.error){
-                     alert(json.error.message+'\n'+json.error.details.join('\n'));
-                   } else if (json.results){
-                     processIdentifyResults(json);
-                   }
-                   
-                 }
+                service.identify(params, function(json) {
+                  if (json) {
+                    if (json.error) {
+                      alert(json.error.message + '\n' + json.error.details.join('\n'));
+                    } else if (json.results) {
+                      processIdentifyResults(json, ll);
+                    }
+                    
+                  }
                 });
                 
               }
             }
-       
-           function processIdentifyResults(json){
-             var a = json;
-             
-           }
+            
+            function processIdentifyResults(json, ll) {
+              var html = '';
+              if (json.results) {
+                for (var i = 0, c = json.results.length; i < c; i++) {
+                  var r = json.results[i];
+                  if (i > 0) {
+                    html += '<hr/>';
+                  }
+                  html += '<div><table>';
+                  html += '<tr><td>' + r.layerName + '</td></tr>';
+                  html += '<tr><td><table>';
+                  var a = r.attributes;
+                  for (var x in a) {
+                    if (a.hasOwnProperty(x)) {
+                      html += '<tr>';
+                      html += '<td>' + x + '</td>';
+                      var val = a[x];
+                      val = (val === null || typeof val === 'undefined') ? '' : '' + val;
+                      html += '<td>' + val + '</td></tr>';
+                    }
+                  }
+                  html += '</table></td></tr></table></div>';
+                  
+                }
+              }
+              html = '<div style="height:100px;overflow:auto">' + html + '</div>';
+              if (iw == null) {
+                iw = new google.maps.InfoWindow({
+                  content: html,
+                  position: ll
+                });
+                marker = new google.maps.Marker({
+                  position: ll, 
+                  map: map
+                })
+                iw.open(map, marker);
+              } else {
+                iw.set_content(html);
+                iw.set_position(ll);
+                marker.set_position(ll);
+                iw.open(map, marker);
+              }
+              
+              
+            }
         </script>
     </head>
     <body onload="init()">
