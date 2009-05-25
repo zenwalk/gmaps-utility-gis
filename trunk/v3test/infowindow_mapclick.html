@@ -28,13 +28,20 @@
      google.maps.event.addListener(marker, 'click', function() {
         infowindow.open(map,marker);
     });
+     google.maps.event.addListener(map, 'click', function(evt) {
+       marker.set_position(evt.latLng);
+        infowindow.open(map,marker);
+    });
   }
 
 </script>
 </head>
 <body style="margin:0px; padding:0px;" onload="initialize()">
-<div>click on map, then scoll the bar in infowindow. Map should not move because the mouse event should not passed down to map if event is captured at infowindow. 
-However, it moved in FF2, not moving in IE6.</div>
+<div>click on map or marker, then scoll the bar in the infowindow. Map should not move because the mouse event should not be propagated down to map when workign with infowindow. 
+However, the whole map moved in FF2, (not moving in IE6, which is the correct behavior).
+The issue also exist in a number of other cases when interact with infowindow, the event is passed to map from info window. For example, trying to close the infowindow may triggered another "map click" event, even the mouse only clicked the "close" icon on info window. 
+
+</div>
   <div id="map_canvas" style="width:100%; height:80%"/>
 </body>
 </html>
