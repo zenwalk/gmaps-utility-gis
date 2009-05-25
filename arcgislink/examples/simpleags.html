@@ -9,36 +9,53 @@
             document.write('<script type="text/javascript" src="../src/arcgislink' + (document.location.search.indexOf('packed') > -1 ? '_packed' : '') + '.js"><' + '/script>');
         </script>
         <script type="text/javascript">
-            var ov;
+            var map, ov;
             function init() {
               var myOptions = {
                 zoom: 4,
                 center: new google.maps.LatLng(40, -100),
+                size: new google.maps.Size(600, 400),// needed for get('size') to work for now
                 mapTypeId: google.maps.MapTypeId.ROADMAP
               }
-              var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+              map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+              loadMapService();
+            }
+            
+            /**
+             * Create a map overlay and add to map
+             */
+            function loadMapService() {
               var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer';
               ov = new ArcGISMapOverlay(url, {
-                opacity: 0.5
+                opacity: 0.8
               });
               google.maps.event.addListener(ov, 'load', function() {
                 ov.addToMap(map);
-                var service = ov.getMapService();
-                var toc = '';
-                var layers = service.getLayers();
-                for (var i = 0; i < layers.length; i++) {
-                  toc += '<input type="checkbox" id="layer' + layers[i].id + '"';
-                  if (layers[i].visible) 
-                    toc += ' checked="checked"';
-                  toc += ' onclick="setVis()">' + layers[i].name + '<br/>';
-                }
-                document.getElementById('toc').innerHTML = toc;
+                refreshTOC();
+                google.maps.event.addListener(map, 'click', doIdentify);
               });
-              
-             
             }
             
-            function setVis() {
+            /**
+             * Create layer list.
+             */
+            function refreshTOC() {
+              var service = ov.getMapService();
+              var toc = '';
+              var layers = service.getLayers();
+              for (var i = 0; i < layers.length; i++) {
+                toc += '<input type="checkbox" id="layer' + layers[i].id + '"';
+                if (layers[i].visible) 
+                  toc += ' checked="checked"';
+                toc += ' onclick="setLayerVisibility()">' + layers[i].name + '<br/>';
+              }
+              document.getElementById('toc').innerHTML = toc;
+            }
+            
+            /**
+             * Check the visibility of layers and refresh map
+             */
+            function setLayerVisibility() {
               var service = ov.getMapService();
               var layers = service.getLayers();
               for (var i = 0; i < layers.length; i++) {
@@ -47,6 +64,48 @@
               }
               ov.refresh();
             }
+            
+            /**
+             * Handler function for map click event
+             * @param {google.maps.MouseEvent} evt
+             */
+            function doIdentify(evt) {
+              var opts = {};
+              if (evt && evt.latLng) {
+                var ll = evt.latLng;
+                var bnds = map.get_bounds();
+                var sw = bnds.getSouthWest();
+                var ne = bnds.getNorthEast();
+                var size = map.get('size');
+                var service = ov.getMapService();
+                var params = {
+                  geometry: '' + ll.lng() + ',' + ll.lat(),
+                  geometryType: 'esriGeometryPoint',
+                  sr: 4326,//use lat lng for demo simplicity 
+                  layers: opts.layers || 'top',
+                  tolerance: 5,//pixel
+                  mapExtent: '' + sw.lng() + ',' + sw.lat() + ',' + ne.lng() + ',' + ne.lat(),
+                  imageDisplay: '' + size.width + ',' + size.height + ',' + 96, //dpi
+                  returnGeometry: false
+                };
+               service.identify(params, function(json) {
+                 if (json){
+                   if (json.error){
+                     alert(json.error.message+'\n'+json.error.details.join('\n'));
+                   } else if (json.results){
+                     processIdentifyResults(json);
+                   }
+                   
+                 }
+                });
+                
+              }
+            }
+       
+           function processIdentifyResults(json){
+             var a = json;
+             
+           }
         </script>
     </head>
     <body onload="init()">
@@ -60,11 +119,14 @@
         <table>
             <tr>
                 <td valign="top">
-                    <div id="toc" style="width:130px;">
+                    <div id="toc" style="width:130px;border:1px solid gray">
+                    </div>
+                    <br/>
+                    <div id="info" style="width:130px; border:1px solid gray">
                     </div>
                 </td>
                 <td>
-                    <div id="map_canvas" style="width:800px; height:400px; border:1px solid #000;">
+                    <div id="map_canvas" style="width:600px; height:400px; border:1px solid #000;">
                     </div>
                 </td>
             </tr>
