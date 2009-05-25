@@ -17,8 +17,7 @@
     
     var infowindow = new google.maps.InfoWindow(
       { content: '<div style="height:60px; overflow:auto"><b>Uluru</b><p>test</p><p>test</p><p>test</p><p>test</p></div>'
-//,
-        //size: new google.maps.Size(50,50)
+      //,  size: new google.maps.Size(50,50)
       });
     
     var marker = new google.maps.Marker({
@@ -26,15 +25,16 @@
         map: map, 
         title:"Uluru (Ayers Rock)"
     }); 
-    google.maps.event.addListener(map, 'click', function(mouseEvt) {
-      marker.set_position(mouseEvt.latLng);
-      infowindow.open(map,marker);
+     google.maps.event.addListener(marker, 'click', function() {
+        infowindow.open(map,marker);
     });
   }
 
 </script>
 </head>
 <body style="margin:0px; padding:0px;" onload="initialize()">
-  <div id="map_canvas" style="width:100%; height:100%"/>
+<div>click on map, then scoll the bar in infowindow. Map should not move because the mouse event should not passed down to map if event is captured at infowindow. 
+However, it moved in FF2, not moving in IE6.</div>
+  <div id="map_canvas" style="width:100%; height:80%"/>
 </body>
 </html>
