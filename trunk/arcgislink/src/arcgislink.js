@@ -2807,9 +2807,9 @@
      var sr  = WEB_MERCATOR;//V3 this.map_.getCurrentMapType().getProjection().getSpatialReference();
     var me  =  this;
     var params  =  this.exportParams_;
-    // V3 no map.getSize()!!! cheating here
-    var s = this.map_.getSize();
-    params.size  =  '' + s.width+ ',' + s.height;
+    // V3 no map.getSize()
+    var s = this.map_.getDiv();
+    params.size  =  '' + s.offsetWidth+ ',' + s.offsetHeight;
     //note: if GMapType's maxzoom is larger than any GTileLayer's maxZoom, GMap.getBounds return 0,0,0,0
    
     params.bbox  =  ArcGISUtil.fromLatLngBoundsToEnvelope(bnds, sr);
@@ -3489,14 +3489,7 @@
       this.openInfoWindowHtml(overlaylatlng, '<div class  = "ags-infowindow">' + overlay.html + '</div>');
     }
   };
-// V3 workaround, only works abs pixel if not set in construtor
-GMap.prototype.getSize = function (){
-  return this.get('size')||{
-      width:parseInt(this.getDiv().style.width),
-      height: parseInt(this.getDiv().style.height)
-    };
- 
-}
+
 
     
     
