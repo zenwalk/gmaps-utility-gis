@@ -15,41 +15,101 @@
                 zoom: 4,
                 center: new google.maps.LatLng(40, -100),
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
-                draggableCursor:'default'
+                draggableCursor: 'default'
               }
               map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
               loadMapService();
+              google.maps.event.addListener(map, 'click', function(evt) {
+                if (evt.latLng) {
+                  doIdentify(evt.latLng);
+                }
+              });
+              google.maps.event.addListener(map, 'zoom_changed', updateTOC);
             }
             
             /**
              * Create a map overlay and add to map
              */
             function loadMapService() {
-              var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer';
+              var url = document.getElementById('svc').value;
+              //'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer';
+              //var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer';
+              if (ov != null) {
+                ov.remove();
+                ov = null;
+              }
               ov = new ArcGISMapOverlay(url, {
                 opacity: 0.8
               });
               google.maps.event.addListener(ov, 'load', function() {
+                var bnds = ov.getFullBounds();
                 ov.addToMap(map);
-                refreshTOC();
-                google.maps.event.addListener(map, 'click', doIdentify);
+                if (bnds.getSouthWest().lng() > bnds.getNorthEast().lng()) {
+                  // let's not worry about span greenwich for now 
+                  map.set_center(new google.maps.LatLng(40, -100));
+                  map.set_zoom(4);
+                } else {
+                  map.fitBounds(bnds);
+                }
+                var service = ov.getMapService();
+                var svcInfo = 'This is a <b>dynamic</b> map service. You can turn on/off individual layers using the check box.'
+                if (service.singleFusedMapCache) {
+                  svcInfo = 'This is a <b>cached</b> map service. You can <b>NOT</b> turn on/off individual layers.'
+                }
+                document.getElementById('svcInfo').innerHTML = svcInfo;
+                document.getElementById('svcDesc').innerHTML = service.description + '<br/>Copyright:' + service.copyrightText;
+                var clickOpts = ' <select id="clickOpts" style="font-size:9pt" onchange="onClickOptionChanged()">';
+                clickOpts += '<option value="top">&lt;Top-most layer&gt;</option>';
+                clickOpts += '<option value="visible">&lt;Visible layers&gt;</option>';
+                clickOpts += '<option value="all">&lt;All layers&gt;</option>';
+                var layers = service.getLayers();
+                for (var i = 0; i < layers.length; i++) {
+                  var layer = layers[i];
+                  // now fetch the scale info for each layer.
+                  layer.loadInfo(updateTOC);
+                  if (!layer.subLayerIds) {
+                    clickOpts += '<option value="all:' + i + '">' + layer.name + '</option>';
+                  }
+                }
+                document.getElementById('clickOptsDiv').innerHTML = clickOpts + '</select>';
               });
+              
             }
             
             /**
              * Create layer list.
              */
-            function refreshTOC() {
-              var service = ov.getMapService();
-              var toc = '';
-              var layers = service.getLayers();
-              for (var i = 0; i < layers.length; i++) {
-                toc += '<input type="checkbox" id="layer' + layers[i].id + '"';
-                if (layers[i].visible) 
-                  toc += ' checked="checked"';
-                toc += ' onclick="setLayerVisibility()">' + layers[i].name + '<br/>';
+            function updateTOC() {
+              if (ov && ov.getMapService().hasLoaded()) {
+                var service = ov.getMapService();
+                var toc = '';
+                var scale = 591657527.591555 / (Math.pow(2, map.get_zoom()));//591657527.591555 is the scale at level 0
+                var layers = service.getLayers();
+                for (var i = 0; i < layers.length; i++) {
+                  var layer = layers[i];
+                  var inScale = layer.isInScale(scale);
+                  toc += '<div style="color:' + (inScale ? 'black' : 'gray') + '">';
+                  
+                  if (layer.subLayerIds) {
+                    toc += layer.name + '(group)<br/>';
+                  } else {
+                    if (layer.parentLayer) {
+                      toc += '&nbsp;&nbsp;&nbsp;&nbsp;';
+                    }
+                    toc += '<input type="checkbox" id="layer' + layer.id + '"';
+                    if (layer.visible) {
+                      toc += ' checked="checked"';
+                    }
+                    if (!inScale || service.singleFusedMapCache) {
+                      toc += ' disabled="disabled"';
+                    }
+                    toc += ' onclick="setLayerVisibility()">' + layer.name + '<br/>';
+                  }
+                  toc += '</div>';
+                }
+                document.getElementById('toc').innerHTML = toc;
               }
-              document.getElementById('toc').innerHTML = toc;
+              
             }
             
             /**
@@ -60,29 +120,39 @@
               var layers = service.getLayers();
               for (var i = 0; i < layers.length; i++) {
                 var el = document.getElementById('layer' + layers[i].id);
-                layers[i].visible = (el.checked === true);
+                if (el) {
+                  layers[i].visible = (el.checked === true);
+                }
+                
               }
               ov.refresh();
             }
             
+            
+            function onClickOptionChanged() {
+              if (marker != null) {
+                doIdentify(marker.get_position());
+              }
+            }
+            
             /**
              * Handler function for map click event
-             * @param {google.maps.MouseEvent} evt
+             * @param {google.maps.LatLng} ll
              */
-            function doIdentify(evt) {
-              var opts = {};
-              if (evt && evt.latLng) {
-                var ll = evt.latLng;
+            function doIdentify(ll) {
+              var layers = document.getElementById('clickOpts').value;
+              if (ov && ov.getMapService().hasLoaded()) {
+              
                 var bnds = map.get_bounds();
                 var sw = bnds.getSouthWest();
                 var ne = bnds.getNorthEast();
-                var div =map.getDiv();// map.get('size');
+                var div = map.getDiv();
                 var service = ov.getMapService();
                 var params = {
                   geometry: '' + ll.lng() + ',' + ll.lat(),
                   geometryType: 'esriGeometryPoint',
                   sr: 4326,//use lat lng for demo simplicity 
-                  layers: opts.layers || 'top',
+                  layers: layers || 'top',
                   tolerance: 5,//pixel
                   mapExtent: '' + sw.lng() + ',' + sw.lat() + ',' + ne.lng() + ',' + ne.lat(),
                   imageDisplay: '' + div.offsetWidth + ',' + div.offsetHeight + ',' + 96, //dpi
@@ -99,20 +169,23 @@
                   }
                 });
                 
+                
               }
+              
             }
             
             function processIdentifyResults(json, ll) {
               var html = '';
               if (json.results) {
+                html += 'Total # of Results:' + json.results.length;
                 for (var i = 0, c = json.results.length; i < c; i++) {
                   var r = json.results[i];
                   if (i > 0) {
                     html += '<hr/>';
                   }
-                  html += '<div>Feature '+i+': <i>'+r.value+'</i><br/><table>';
+                  html += '<div>Feature ' + i + ': <i>' + r.value + '</i><br/><table>';
                   html += '<tr><td>Layer: <b>' + r.layerName + '</b></td></tr>';
-                  html += '<tr><td > <table style="border:1px solid blue;font-size:9pt">';
+                  html += '<tr><td > <table style="font-size:9pt">';
                   var a = r.attributes;
                   for (var x in a) {
                     if (a.hasOwnProperty(x)) {
@@ -127,47 +200,68 @@
                   
                 }
               }
-              html = '<div style="height:300px;overflow:auto">' + html + '</div>';
-              document.getElementById('info').innerHTML= html;
+              document.getElementById('info').innerHTML = html;
               if (marker == null) {
                 marker = new google.maps.Marker({
-                  position: ll, 
+                  position: ll,
                   map: map
                 })
-              } else{
+              } else {
                 marker.set_position(ll);
-              } 
-                
-              
-              
-              
+              }
+            }
+            
+            function log(s) {
+              document.getElementById('status').innerHTML = s;
             }
         </script>
     </head>
     <body onload="init()">
-        <a href='../docs/examples.html'>More examples</a>
-        | Use<a href='?packed'>Packed </a>
-        | <a href='?'>Unpacked</a>
-        Version of the script.
+        This sample is the initial port of library <a href='http://gmaps-utility-library-dev.googlecode.com/svn/trunk/arcgislink/docs/examples.html' target='_blank'>ArcGIS Server Link</a>
+        to Google Maps API V3.
         <br/>
-        <br/>
-        Use Check box to turn on/off layers in a dynamic map service.
+        Switch to map service: 
+        <select id="svc" onchange="loadMapService()">
+            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer</option>
+            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer</option>
+            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StatesCitiesRivers_USA/MapServer</option>
+            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer</option>
+            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_LandBase_AGO/MapServer</option>
+            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_Neighborhoods_AGO/MapServer</option>
+            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Louisville/LOJIC_LandRecords_Louisville/MapServer</option>
+            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Louisville/LOJIC_PublicSafety_Louisville/MapServer</option>
+            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Petroleum/KGS_OilGasFields_Kansas/MapServer</option>
+            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/WaterTemplate/WaterDistributionAdministrativeReport/MapServer</option>
+        </select>
         <table>
             <tr>
-                <td valign="top" width="200">
-                    <div id="toc" style="border:1px solid gray">
-                    </div>
-                    <br/>
-                    <div>
-                      </div>
-                    <div id="info" style="border:1px solid gray">
+                <td valign="top">
+                    <div style="width:200px;overflow:auto">
+                        <div id="svcInfo">
+                        </div>
+                        Layers from cached service or not visible in current zoom level is disabled. 
+                        <br/>
+                        <div id="toc" style="border:1px solid gray">
+                        </div>
+                        Click anywhere on map to show data(on right side of map). 
+                        <br/>
+                        Retrieve data for layer:
+                        <div id="clickOptsDiv">
+                        </div>
                     </div>
                 </td>
                 <td>
                     <div id="map_canvas" style="width:600px; height:400px; border:1px solid #000;">
                     </div>
                 </td>
+                <td valign="top" width="200">
+                    Map data at clicked location:
+                    <div id="info" style="border:1px solid gray; height:380px; overflow:auto">
+                    </div>
+                </td>
             </tr>
         </table>
+        <div id="svcDesc" style="border:1px solid red; width:1000px">
+        </div>
     </body>
 </html>
