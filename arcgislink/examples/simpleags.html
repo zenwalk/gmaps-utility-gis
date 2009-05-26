@@ -31,15 +31,14 @@
              * Create a map overlay and add to map
              */
             function loadMapService() {
-              var url = document.getElementById('svc').value;
-              //'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer';
-              //var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer';
+              var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/'+document.getElementById('svc').value;
               if (ov != null) {
                 ov.remove();
                 ov = null;
               }
+              
               ov = new ArcGISMapOverlay(url, {
-                opacity: 0.8
+                opacity: document.getElementById('op').value
               });
               google.maps.event.addListener(ov, 'load', function() {
                 var bnds = ov.getFullBounds();
@@ -210,10 +209,7 @@
                 marker.set_position(ll);
               }
             }
-            
-            function log(s) {
-              document.getElementById('status').innerHTML = s;
-            }
+           
         </script>
     </head>
     <body onload="init()">
@@ -225,16 +221,23 @@
         <br/>
         Switch to map service: 
         <select id="svc" onchange="loadMapService()">
-            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer</option>
-            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer</option>
-            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StatesCitiesRivers_USA/MapServer</option>
-            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer</option>
-            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_LandBase_AGO/MapServer</option>
-            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_Neighborhoods_AGO/MapServer</option>
-            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Louisville/LOJIC_LandRecords_Louisville/MapServer</option>
-            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Louisville/LOJIC_PublicSafety_Louisville/MapServer</option>
-            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Petroleum/KGS_OilGasFields_Kansas/MapServer</option>
-            <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/WaterTemplate/WaterDistributionAdministrativeReport/MapServer</option>
+            <option>Specialty/ESRI_StateCityHighway_USA/MapServer</option>
+            <option>Specialty/ESRI_StatesCitiesRivers_USA/MapServer</option>
+            <option>Demographics/ESRI_Census_USA/MapServer</option>
+            <option>Portland/ESRI_LandBase_WebMercator/MapServer</option>
+            <option>Portland/Portland_ESRI_LandBase_AGO/MapServer</option>
+            <option>Portland/Portland_ESRI_Neighborhoods_AGO/MapServer</option>
+            <option>Louisville/LOJIC_LandRecords_Louisville/MapServer</option>
+            <option>Louisville/LOJIC_PublicSafety_Louisville/MapServer</option>
+            <option>Petroleum/KGS_OilGasFields_Kansas/MapServer</option>
+        </select>
+        Map Opacity(0=transparent;1=opaque):
+        <select id="op" onchange="if (ov){ov.setOpacity(this.value)}">
+         <option>0</option>
+          <option>0.2</option>
+           <option>0.5</option>
+            <option selected>0.8</option>
+             <option>1</option>
         </select>
         <table>
             <tr>
