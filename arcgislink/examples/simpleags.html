@@ -9,13 +9,13 @@
             document.write('<script type="text/javascript" src="../src/arcgislink' + (document.location.search.indexOf('packed') > -1 ? '_packed' : '') + '.js"><' + '/script>');
         </script>
         <script type="text/javascript">
-            var map, ov, iw, marker;
+            var map, ov, marker;
             function init() {
               var myOptions = {
                 zoom: 4,
                 center: new google.maps.LatLng(40, -100),
-                size: new google.maps.Size(600, 400),// needed for get('size') to work for now
-                mapTypeId: google.maps.MapTypeId.ROADMAP
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                draggableCursor:'default'
               }
               map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
               loadMapService();
@@ -76,7 +76,7 @@
                 var bnds = map.get_bounds();
                 var sw = bnds.getSouthWest();
                 var ne = bnds.getNorthEast();
-                var size = map.get('size');
+                var div =map.getDiv();// map.get('size');
                 var service = ov.getMapService();
                 var params = {
                   geometry: '' + ll.lng() + ',' + ll.lat(),
@@ -85,7 +85,7 @@
                   layers: opts.layers || 'top',
                   tolerance: 5,//pixel
                   mapExtent: '' + sw.lng() + ',' + sw.lat() + ',' + ne.lng() + ',' + ne.lat(),
-                  imageDisplay: '' + size.width + ',' + size.height + ',' + 96, //dpi
+                  imageDisplay: '' + div.offsetWidth + ',' + div.offsetHeight + ',' + 96, //dpi
                   returnGeometry: false
                 };
                 service.identify(params, function(json) {
@@ -110,14 +110,14 @@
                   if (i > 0) {
                     html += '<hr/>';
                   }
-                  html += '<div><table>';
-                  html += '<tr><td>' + r.layerName + '</td></tr>';
-                  html += '<tr><td><table>';
+                  html += '<div>Feature '+i+': <i>'+r.value+'</i><br/><table>';
+                  html += '<tr><td>Layer: <b>' + r.layerName + '</b></td></tr>';
+                  html += '<tr><td > <table style="border:1px solid blue;font-size:9pt">';
                   var a = r.attributes;
                   for (var x in a) {
                     if (a.hasOwnProperty(x)) {
                       html += '<tr>';
-                      html += '<td>' + x + '</td>';
+                      html += '<td style="background-color:#DDDDDD;">' + x + '</td>';
                       var val = a[x];
                       val = (val === null || typeof val === 'undefined') ? '' : '' + val;
                       html += '<td>' + val + '</td></tr>';
@@ -127,23 +127,18 @@
                   
                 }
               }
-              html = '<div style="height:100px;overflow:auto">' + html + '</div>';
-              if (iw == null) {
-                iw = new google.maps.InfoWindow({
-                  content: html,
-                  position: ll
-                });
+              html = '<div style="height:300px;overflow:auto">' + html + '</div>';
+              document.getElementById('info').innerHTML= html;
+              if (marker == null) {
                 marker = new google.maps.Marker({
                   position: ll, 
                   map: map
                 })
-                iw.open(map, marker);
-              } else {
-                iw.set_content(html);
-                iw.set_position(ll);
+              } else{
                 marker.set_position(ll);
-                iw.open(map, marker);
-              }
+              } 
+                
+              
               
               
             }
@@ -159,11 +154,13 @@
         Use Check box to turn on/off layers in a dynamic map service.
         <table>
             <tr>
-                <td valign="top">
-                    <div id="toc" style="width:130px;border:1px solid gray">
+                <td valign="top" width="200">
+                    <div id="toc" style="border:1px solid gray">
                     </div>
                     <br/>
-                    <div id="info" style="width:130px; border:1px solid gray">
+                    <div>
+                      </div>
+                    <div id="info" style="border:1px solid gray">
                     </div>
                 </td>
                 <td>
