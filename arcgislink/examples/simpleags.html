@@ -182,8 +182,8 @@
                   if (i > 0) {
                     html += '<hr/>';
                   }
-                  html += '<div>Feature ' + i + ': <i>' + r.value + '</i><br/><table>';
-                  html += '<tr><td>Layer: <b>' + r.layerName + '</b></td></tr>';
+                  html += '<div>Result #' + (i+1) + ': <i>' + r.value + '</i><br/><table>';
+                  html += '<tr><td>From layer: <b>' + r.layerName + '</b></td></tr>';
                   html += '<tr><td > <table style="font-size:9pt">';
                   var a = r.attributes;
                   for (var x in a) {
@@ -245,7 +245,7 @@
                     <div style="width:200px;overflow:auto">
                         <div id="svcInfo">
                         </div>
-                        Layers from cached service or Layers that are not visible in current zoom level are disabled. 
+                        Note:Layers from cached service or Layers that are not visible in current zoom level are disabled. 
                         <br/>
                         <div id="toc" style="border:1px solid gray">
                         </div>
