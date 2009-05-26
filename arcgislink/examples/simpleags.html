@@ -58,7 +58,7 @@
                 }
                 document.getElementById('svcInfo').innerHTML = svcInfo;
                 document.getElementById('svcDesc').innerHTML = service.description + '<br/>Copyright:' + service.copyrightText;
-                var clickOpts = ' <select id="clickOpts" style="font-size:9pt" onchange="onClickOptionChanged()">';
+                var clickOpts = ' <select id="clickOpts" style="font-size:9pt;width:200px" onchange="onClickOptionChanged()">';
                 clickOpts += '<option value="top">&lt;Top-most layer&gt;</option>';
                 clickOpts += '<option value="visible">&lt;Visible layers&gt;</option>';
                 clickOpts += '<option value="all">&lt;All layers&gt;</option>';
@@ -218,7 +218,10 @@
     </head>
     <body onload="init()">
         This sample is the initial port of library <a href='http://gmaps-utility-library-dev.googlecode.com/svn/trunk/arcgislink/docs/examples.html' target='_blank'>ArcGIS Server Link</a>
-        to Google Maps API V3.
+        to Google Maps API V3. The sample map service used are from <a href="http://www.arcgisonline.com" target="_blank">ArcGISOnline</a><br/>
+        It has the basic functions of a GIS system: 
+        <br/>1) A table of contents(TOC) to allow layers turn on/off, layers visiblity controled by map scale and reflected on TOC. 
+        <br/>2) Allow click on map to do spatial query, with options to choose layers.
         <br/>
         Switch to map service: 
         <select id="svc" onchange="loadMapService()">
