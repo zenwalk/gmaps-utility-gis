@@ -6,12 +6,17 @@
         <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false">
         </script>
         <script type="text/javascript">
-            function ProjectionHelperOverlay() {
+            function ProjectionHelperOverlay(map) {
               google.maps.OverlayView.call(this);
+              this.set_map(map);
             }
             ProjectionHelperOverlay.prototype = new google.maps.OverlayView();
             ProjectionHelperOverlay.prototype.draw = function() {
-              google.maps.event.trigger(this,'ready');
+              if (!this.ready){
+                this.ready = true;
+                google.maps.event.trigger(this,'ready');
+              }
+              
             }
             var ov;
             var intv; 
@@ -26,10 +31,9 @@
               
               
               
-              ov = new ProjectionHelperOverlay();
-              ov.set_map(map);
-             google.maps.event.addListener(ov,'ready', function(){
-                intv=setInterval(checkProjection, 1);
+              ov = new ProjectionHelperOverlay(map);
+              google.maps.event.addListener(ov,'ready', function(){
+                checkProjection();
              });
              
             }
