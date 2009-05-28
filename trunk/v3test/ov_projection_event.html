@@ -1,0 +1,62 @@
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+        <title>OverlayView Projection</title>
+        <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false">
+        </script>
+        <script type="text/javascript">
+            function ProjectionHelperOverlay() {
+              google.maps.OverlayView.call(this);
+            }
+            ProjectionHelperOverlay.prototype = new google.maps.OverlayView();
+            ProjectionHelperOverlay.prototype.draw = function() {
+              google.maps.event.trigger(this,'ready');
+            }
+            var ov;
+            var intv; 
+            function initialize() {
+              var myLatlng = new google.maps.LatLng(-25.363882, 131.044922);
+              var myOptions = {
+                zoom: 4,
+                center: myLatlng,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+              }
+              var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+              
+              
+              
+              ov = new ProjectionHelperOverlay();
+              ov.set_map(map);
+             google.maps.event.addListener(ov,'ready', function(){
+                intv=setInterval(checkProjection, 1);
+             });
+             
+            }
+            var msg = '';
+            function checkProjection() {
+              prj = ov.get_projection();
+              if (prj) {
+                msg += '<br/>Got Projection now.';
+                clearInterval(intv);
+                document.getElementById("message").innerHTML =msg;
+              } else {
+                 msg += '<br/>No Projection Yet...';
+              }
+              
+            }
+        </script>
+    </head>
+    <body style="margin:0px; padding:0px;" onload="initialize()">
+    <div style="width:800px">
+      When using a dummy custom OverlayView as a workaround to gain access to MapCanvasProjection, 
+      the projection class is not available in the same javascript execution context
+       after the overlay is created and added to map. It appears to be an async process thus create un-predictable behavior. 
+       <b>The workaround is to use trigger an event in the draw method then listen the event in the place that needs the projection class </b>
+        </div>
+        <div id="map_canvas" style="width: 600px; height: 350px">
+        </div>
+        <div style="font-size:18px;color:red" id="message">
+        </div>
+    </body>
+</html>
