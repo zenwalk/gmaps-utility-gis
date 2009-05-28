@@ -11,6 +11,7 @@
             }
             ProjectionHelperOverlay.prototype = new google.maps.OverlayView();
             ProjectionHelperOverlay.prototype.draw = function() {
+            //  this.get_projection();
             }
             var ov;
             var intv; 
@@ -45,13 +46,13 @@
         </script>
     </head>
     <body style="margin:0px; padding:0px;" onload="initialize()">
-    <div style="width:600px">
+    <div style="width:800px">
       When using a dummy custom OverlayView as a workaround to gain access to MapCanvasProjection, 
       the projection class is not available in the same javascript execution context
        after the overlay is created and added to map. It appears to be an async process thus create un-predictable behavior.
       <br/> Refresh the page a few times and you may see different result below the map.
         </div>
-        <div id="map_canvas" style="width: 400px; height: 400px">
+        <div id="map_canvas" style="width: 600px; height: 350px">
         </div>
         <div style="font-size:18px;color:red" id="message">
         </div>
