@@ -11,7 +11,8 @@
             }
             ProjectionHelperOverlay.prototype = new google.maps.OverlayView();
             ProjectionHelperOverlay.prototype.draw = function() {
-            //  this.get_projection();
+           // var c=this.get_projection();
+           // google.maps.event.trigger(this,'load');
             }
             var ov;
             var intv; 
@@ -30,16 +31,20 @@
               ov.set_map(map);
               // should already be called inside set_map already but just trying to make a point here.
              // ov.draw();
-              intv=setInterval(checkProjection, 1);
+             //google.maps.event.addListener(ov,'load', function(){
+                intv=setInterval(checkProjection, 1);
+            // })
+             
             }
             var msg = '';
             function checkProjection() {
               prj = ov.get_projection();
-               msg += '<br/>No Projection Yet...';
               if (prj) {
                 msg += '<br/>Got Projection now.';
                 clearInterval(intv);
                 document.getElementById("message").innerHTML =msg;
+              } else {
+                 msg += '<br/>No Projection Yet...';
               }
               
             }
