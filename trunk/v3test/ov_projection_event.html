@@ -37,15 +37,17 @@
              });
              
             }
-            var msg = '';
+           
             function checkProjection() {
               prj = ov.get_projection();
+               var msg = '';
               if (prj) {
-                msg += '<br/>Got Projection now.';
-                 document.getElementById("message").innerHTML =msg;
+                msg = '<br/>Got Projection now.';
+                 
               } else {
-                 msg += '<br/>No Projection Yet...';
+                 msg = '<br/>No Projection Yet...';
               }
+              document.getElementById("message").innerHTML +=msg;
               
             }
         </script>
