@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+                layout="absolute">
+                <mx:Panel title="Dynamic Map Layers" width="100%" height="100%">
+                
+                <mx:HBox>
+                  <mx:Button click="removeOverlay()" label="Remove"/>
+                <mx:Button click="addOverlay()" label="Add"/>
+                <mx:Label text="Transparency"/>
+      <mx:HSlider id="alphaSlider"
+                  value="0.5"
+                  allowTrackClick="false"
+                  minimum="0"
+                  maximum="1"
+                  snapInterval="0.05"
+                  enabled="true"
+                  liveDragging="true"
+                  change="onAlphaChange(event)"/>
+      <mx:Label text="{alphaSlider.value}"/>
+    
+                <mx:Label id="msg"/>
+    
+                </mx:HBox>
+   <maps:Map xmlns:maps="com.google.maps.*"
+            id="map"
+            mapevent_mapready="onMapReady(event)"
+            width="100%"
+            height="100%"
+            key="ABQIAAAA7QUChpcnvnmXxsjC7s1fCxQGj0PqsCtxKvarsoS-iqLdqZSKfxTd7Xf-2rEc_PC9o8IsJde80Wnj4g"/>
+            </mx:Panel>
+  <mx:Script>
+    <![CDATA[
+      import com.google.maps.MapOptions;
+      import com.google.maps.controls.NavigationControl;
+      import com.google.maps.controls.ZoomControl;
+      import com.google.maps.controls.MapTypeControl;
+      import com.google.maps.LatLng;
+      import com.google.maps.Map;
+      import com.google.maps.MapEvent;
+      import com.google.maps.MapType;
+      import com.google.maps.interfaces.*;
+      import mx.events.*;
+      import ags.*;
+      
+      private var ov:ArcGISMapOverlay;
+      private function onMapReady(event:Event):void {
+        map.setCenter(new LatLng(38.19,-85.68),11);
+        map.enableScrollWheelZoom();
+        map.addControl(new MapTypeControl());
+        map.addControl(new NavigationControl());
+        addOverlay();
+      }
+      
+      private function addOverlay():void{
+        removeOverlay();
+       // var url:String = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Population_World/MapServer';
+        var url:String = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Louisville/LOJIC_LandRecords_Louisville/MapServer';
+        ov = new ArcGISMapOverlay(url, new ArcGISMapOverlayOptions({alpha:alphaSlider.value}));
+        map.addOverlay(ov);
+        ov.addEventListener(ArcGISEvent.EXPORTIMAGE_START, function(evt:Event):void{
+          msg.text = 'start drawing..';
+        });
+        ov.addEventListener(ArcGISEvent.EXPORTIMAGE_END, function(evt:Event):void{
+           msg.text ='end drawing..';
+        });
+      }
+      private function removeOverlay():void{
+        if (ov){
+        map.removeOverlay(ov);
+        }
+      }
+      
+      private function onAlphaChange(event:SliderEvent):void {
+        if (ov) {
+          ov.setAlpha(event.value);
+        }
+      }
+      
+    ]]>
+  </mx:Script>
+</mx:Application>
