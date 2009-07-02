@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+                layout="absolute"
+                width="100%"
+                height="100%" viewSourceURL="srcview/index.html">
+  <mx:Panel title="Simple Add ArcGIS Maps"
+            width="100%"
+            height="100%">
+    <maps:Map xmlns:maps="com.google.maps.*"
+              id="map"
+              mapevent_mapready="onMapReady(event)"
+              width="100%"
+              height="100%"
+              key="ABQIAAAA7QUChpcnvnmXxsjC7s1fCxQGj0PqsCtxKvarsoS-iqLdqZSKfxTd7Xf-2rEc_PC9o8IsJde80Wnj4g"/>
+
+  </mx:Panel>
+
+  <mx:Script>
+    <![CDATA[
+      import com.google.maps.controls.NavigationControl;
+      import com.google.maps.controls.MapTypeControl;
+
+      import com.google.maps.LatLng;
+      import com.google.maps.Map;
+      import com.google.maps.MapEvent;
+      import com.google.maps.MapType;
+      import com.google.maps.MapOptions;
+      import com.google.maps.interfaces.*;
+
+      import ags.gmaps.*; import ags.service.*;
+
+
+      private function onMapReady(event:Event):void {
+        map.setCenter(new LatLng(45.5, -122.7), 14);
+        map.addControl(new com.google.maps.controls.MapTypeControl());
+        map.addControl(new NavigationControl());
+        map.enableScrollWheelZoom();
+        map.enableContinuousZoom();
+        var base:String='http://sampleserver1.arcgisonline.com/ArcGIS/rest/services';
+        var tiled:String=base + '/Portland/Portland_ESRI_LandBase_AGO/MapServer';
+        var dyna:String=base + '/Demographics/ESRI_Census_USA/MapServer';
+        ArcGISUtil.addArcGISMap(map, tiled, function(res:ArcGISMapType):void{
+          map.setMapType(res);
+        });
+        ArcGISUtil.addArcGISMap(map, dyna);
+      }
+    ]]>
+  </mx:Script>
+</mx:Application>

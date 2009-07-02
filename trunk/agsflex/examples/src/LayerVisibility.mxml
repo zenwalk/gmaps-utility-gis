@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+                layout="absolute"
+                width="100%"
+                height="100%">
+  <mx:Panel title="Layer Visibility"
+            width="100%"
+            height="100%">
+            <mx:HBox width="100%">
+           <mx:VBox id="toc" width="150" height="600">
+           </mx:VBox>
+               <mx:UIComponent id="mapHolder"
+                    creationComplete="onHolderCreated(event)"
+                     resize="onHolderResize(event)" width="700"
+                                        height="600"/>
+            </mx:HBox>
+   
+  </mx:Panel>
+
+  <mx:Script>
+    <![CDATA[
+      import mx.controls.CheckBox;
+      import com.google.maps.LatLngBounds;
+      import com.google.maps.controls.NavigationControl;
+      import com.google.maps.controls.MapTypeControl;
+
+      import com.google.maps.LatLng;
+      import com.google.maps.Map;
+      import com.google.maps.MapEvent;
+      import com.google.maps.MapType;
+      import com.google.maps.MapOptions;
+      import com.google.maps.interfaces.*;
+
+      import ags.gmaps.*; import ags.service.*;
+
+      private var map:Map;
+      private var tiled:MapService;
+      private var dynaLayer:ArcGISMapOverlay;
+  
+      public function onHolderCreated(event:Event):void {
+        tiled=new MapService('http://server.arcgisonline.com/ArcGIS/rest/services/ESRI_StreetMap_World_2D/MapServer');
+        tiled.addEventListener(ServiceEvent.LOAD, onServiceLoad);
+      }
+      public function onHolderResize(event:Event):void {
+        if (map!=null){
+          map.setSize(new Point(mapHolder.width, mapHolder.height));
+        }
+      }
+      public function onServiceLoad(event:ServiceEvent):void {
+        // map should be constructed after service load instead from MXML, if you do not want load Google Tiles at all. 
+        map=new Map();
+         map.key="ABQIAAAA7QUChpcnvnmXxsjC7s1fCxQGj0PqsCtxKvarsoS-iqLdqZSKfxTd7Xf-2rEc_PC9o8IsJde80Wnj4g";
+        map.width=mapHolder.width;
+        map.height=mapHolder.height;
+       map.addEventListener(MapEvent.MAP_PREINITIALIZE, onMapPreinitialize);
+        map.addEventListener(MapEvent.MAP_READY, onMapReady);
+        mapHolder.addChild(map);
+      }
+
+      private function onMapPreinitialize(event:Event):void {
+        var agsMapType:ArcGISMapType=new ArcGISMapType([new ArcGISTileLayer(tiled)], new ArcGISMapTypeOptions({name: tiled.name.replace(/ /g, '\n')}));
+        var opts:MapOptions=new MapOptions();
+        opts.zoom=4;
+        opts.center=new LatLng(40, -95);
+        opts.mapTypes=[agsMapType];
+        map.setInitOptions(opts);
+      }
+
+      private function onMapReady(event:Event):void {
+        map.addControl(new com.google.maps.controls.MapTypeControl());
+        map.addControl(new NavigationControl());
+        map.enableScrollWheelZoom();
+        map.enableContinuousZoom();
+        var bnds:LatLngBounds=new LatLngBounds(new LatLng(36.8,-103),new LatLng(40.2,-94));
+       dynaLayer=new ArcGISMapOverlay("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer", new ArcGISMapOverlayOptions({alpha:0.5}));
+        dynaLayer.addEventListener(ServiceEvent.LOAD, function(evt:Event):void {
+            map.addOverlay(dynaLayer);
+            var service:MapService=dynaLayer.getMapService();
+            var layers:Array= service.getLayers();
+            for (var i:int=0; i< layers.length; i++){
+              var layer:Layer = layers[i] as Layer;
+              var chk:CheckBox = new CheckBox();
+              chk.id = 'layer'+layer.id;
+              chk.selected = layer.visible;
+              chk.label = layer.name;
+              chk.name = 'layer'+layer.id;
+              chk.addEventListener(MouseEvent.CLICK,setVis);
+              toc.addChild(chk);
+            }
+          });
+
+
+
+      }
+      
+      private function setVis(evt:Event):void{
+        var service:MapService=dynaLayer.getMapService();
+            var layers:Array= service.getLayers();
+            for (var i:int=0; i< layers.length; i++){
+              var layer:Layer = layers[i] as Layer;
+               var chk:CheckBox = toc.getChildByName('layer'+layer.id) as CheckBox;
+               if (chk!=null){
+                  layer.visible = chk.selected;
+               }
+            }
+            dynaLayer.refresh();
+      }
+    ]]>
+  </mx:Script>
+</mx:Application>
