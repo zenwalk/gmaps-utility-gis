@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+                layout="absolute">
+  <maps:Map xmlns:maps="com.google.maps.*"
+            id="map"
+            mapevent_mapready="onMapReady(event)"
+            width="100%"
+            height="100%"
+            key="ABQIAAAA7QUChpcnvnmXxsjC7s1fCxQGj0PqsCtxKvarsoS-iqLdqZSKfxTd7Xf-2rEc_PC9o8IsJde80Wnj4g"/>
+  <mx:Script>
+    <![CDATA[
+      import com.google.maps.controls.NavigationControl;
+      import com.google.maps.controls.ZoomControl;
+      import com.google.maps.controls.MapTypeControl;
+      import com.google.maps.LatLng;
+      import com.google.maps.Map;
+      import com.google.maps.MapEvent;
+      import com.google.maps.MapType;
+      import ags.gmaps.*; import ags.service.*;
+
+      private function onMapReady(event:Event):void {
+        map.enableScrollWheelZoom();
+        map.addControl(new MapTypeControl());
+        map.addControl(new NavigationControl());
+        map.setCenter(new LatLng(45.5, -122.7), 15);
+        // The core API seems does not use the overrided tilesize. 
+        // otherwise it is possible to do:
+        //var agsType:ArcGISMapType = new ArcGISMapType(url);
+        //agsType.addEventListener(ArcGISEvent.LOAD, function(evt:Event):void {
+        var url:String='http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_LandBase_AGO/MapServer';
+        var agsTile:ArcGISTileLayer = new ArcGISTileLayer(url);
+        agsTile.addEventListener(ServiceEvent.LOAD, function(evt:Event):void {
+           var agsType:ArcGISMapType=new ArcGISMapType([agsTile]);
+           map.addMapType(agsType);
+           map.setMapType(agsType);
+        });
+      }
+    ]]>
+  </mx:Script>
+</mx:Application>

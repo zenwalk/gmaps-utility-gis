@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+                layout="absolute"
+                viewSourceURL="srcview/index.html">
+  <mx:Panel title="Map Click: Click on map to get information"
+            width="100%"
+            height="100%">
+
+
+    <maps:Map xmlns:maps="com.google.maps.*"
+              id="map"
+              mapevent_mappreinitialize="onMapPreInitialize(event)"
+              mapevent_mapready="onMapReady(event)"
+              width="100%"
+              height="100%"
+              key="ABQIAAAA7QUChpcnvnmXxsjC7s1fCxQGj0PqsCtxKvarsoS-iqLdqZSKfxTd7Xf-2rEc_PC9o8IsJde80Wnj4g"/>
+  </mx:Panel>
+  <mx:Script>
+    <![CDATA[
+      import com.google.maps.InfoWindowOptions;
+      import mx.controls.Alert;
+      import com.google.maps.LatLngBounds;
+      import com.google.maps.MapOptions;
+      import com.google.maps.controls.NavigationControl;
+      import com.google.maps.controls.ZoomControl;
+      import com.google.maps.controls.MapTypeControl;
+      import com.google.maps.LatLng;
+      import com.google.maps.Map;
+      import com.google.maps.MapEvent;
+      import com.google.maps.MapType;
+      import com.google.maps.MapMouseEvent;
+      import com.google.maps.interfaces.*;
+      import ags.gmaps.*;
+      import ags.service.*;
+      import ags.sr.*;
+      
+      import flash.display.*;
+      import mx.controls.*;
+      import mx.controls.dataGridClasses.*;
+      import mx.collections.*;
+
+      private var _svc:MapService;
+      private var _flag:Boolean;
+
+      private function onMapPreInitialize(event:Event):void {
+        var url:String='http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
+        _svc=new MapService(url);
+        var agsType:ArcGISMapType=new ArcGISMapType([new ArcGISTileLayer(_svc)]);
+        var opts:MapOptions=new MapOptions({mapTypes: [agsType], center: new LatLng(45.5, -122.7), zoom: 17});
+        map.setInitOptions(opts);
+      }
+
+      private function onMapReady(event:Event):void {
+        map.enableScrollWheelZoom();
+        map.addControl(new MapTypeControl());
+        map.addControl(new NavigationControl());
+        map.addEventListener(MapMouseEvent.CLICK, doIdentify);
+      }
+
+      private function doIdentify(evt:MapMouseEvent):void {
+        var latlng:LatLng=evt.latLng;
+        var sr:SpatialReference=_svc.getSpatialReference() || SpatialReferences.WEB_MERCATOR;
+        var bnds:LatLngBounds=map.getLatLngBounds();
+        var size:Point=map.getSize();
+        var ext:Object=ArcGISUtil.fromLatLngBoundsToEnvelope(bnds, sr);
+        var pt:Object=ArcGISUtil.fromLatLngToPoint(latlng, sr);
+        var idParams:Object={geometry: '' + pt.x + ',' + pt.y, geometryType: Constants.ESRI_GEOMETRY_POINT, sr: sr.wkid, layers: 'top', tolerance: 5, mapExtent: ext, imageDisplay: '' + size.x + ',' + size.y + ',96', //dpi
+            returnGeometry: false};
+        _svc.identify(idParams, function processResults(json:*):void {
+            if (json.error) {
+              mx.controls.Alert.show(json.error.message + '\n' + json.error.details.join('\n'));
+            } else if (json.results) {
+              idWin.visible=true;
+              idWin.title=json.results[0].layerName + ' : ' + json.results[0].value;
+              var data:ArrayCollection=new ArrayCollection();
+              for (var i:int=0, c:int=json.results.length; i < c; i++) {
+                var r:*=json.results[i];
+                //layerName= r.layerName;
+                var a:*=r.attributes;
+                for (var x:String in a) {
+                  if (a.hasOwnProperty(x)) {
+                    var val:*=a[x];
+                    val=(val === null || typeof val === 'undefined') ? '' : '' + val;
+                    data.addItem({name: x, value: val});
+                  }
+                }
+              }
+              idResults.dataProvider=data;
+              map.openInfoWindow(latlng, new InfoWindowOptions({
+                //width: idResults.width, height: idResults.height, 
+                  drawDefaultFrame: true, customContent: idWin}));
+            }
+          });
+      }
+    ]]>
+  </mx:Script>
+  <mx:Panel id="idWin"
+            visible="false"
+            layout="vertical">
+
+    <mx:DataGrid id="idResults"
+                 width="250"
+                 height="200">
+      <mx:columns>
+        <mx:DataGridColumn headerText="Name"
+                           dataField="name"
+                           sortable="false"/>
+        <mx:DataGridColumn headerText="Value"
+                           dataField="value"
+                           sortable="false"/>
+      </mx:columns>
+    </mx:DataGrid>
+  </mx:Panel>
+
+
+</mx:Application>
