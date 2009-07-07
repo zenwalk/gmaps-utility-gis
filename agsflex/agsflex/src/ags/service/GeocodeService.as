@@ -18,6 +18,8 @@ package ags.service
  */ 
   public dynamic class GeocodeService implements IEventDispatcher
   {
+    
+    
     public var url:String;
     
     public function GeocodeService(url:String)
