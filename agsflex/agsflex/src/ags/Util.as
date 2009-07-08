@@ -9,7 +9,7 @@ package ags {
 
     import mx.rpc.events.*;
     import mx.rpc.http.*;
-    import ags.service.*;
+    import ags.*;
 
     public function Util() {
     }
