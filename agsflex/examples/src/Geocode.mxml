@@ -39,10 +39,14 @@
                         width="84"/>
         </mx:HBox>
         <mx:HBox>
-          <mx:Button label="Geocode"
-                     id="gc"
+          <mx:Button label="Geocode via callback"
+                     id="gc0"
                      enabled="false"
-                     click="geocode()"/>
+                     click="geocode(true)"/>
+          <mx:Button label="Geocode via event"
+                     id="gc1"
+                     enabled="false"
+                     click="geocode(false)"/>
           <mx:Label text="Running...."
                     id="busy"
                     color="#FF1200"
@@ -77,9 +81,8 @@
       import com.google.maps.*;
       import com.google.maps.interfaces.*;
 
-      import ags.gmaps.*;
-      import ags.service.*;
-
+      import ags.*;
+     
       private var svc:GeocodeService;
 
       private var results:Array=[];
@@ -94,9 +97,10 @@
         map.enableContinuousZoom();
         svc=new GeocodeService('http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Locators/ESRI_Geocode_USA/GeocodeServer');
 
-        svc.addEventListener(ServiceEvent.LOAD, function(evt:Event):void {
-            gc.enabled=true;
-          });
+        svc.addEventListener(ServiceEvent.LOAD, function(evt:ServiceEvent):void {
+            gc0.enabled=true;
+            gc1.enabled=true;
+         });
         resultList.addEventListener(ListEvent.ITEM_CLICK, function(evt:ListEvent):void {
             var row:int=evt.rowIndex;
             if (overlays[row]) {
@@ -106,11 +110,10 @@
             }
           });
       }
-
-      private function geocode():void {
+      private function geocode(useCallback:Boolean):void {
         map.clearOverlays();
         map.closeInfoWindow();
-        results=[];
+        results.length=0;//=[];
         overlays=[];
         bnds=new LatLngBounds();
         var inputs:*={};
@@ -119,11 +122,25 @@
           inputs[fields[i].name]=this[fields[i].name].text;
         }
         busy.visible=true;
-        svc..findAddressCandidates({inputs: inputs}, function(gcRes:*):void {
+        if (useCallback){
+          svc.findAddressCandidates(new GeocodeParameters({inputs: inputs}),processResults, handleError);
+        } else {
+          svc.addEventListener(ServiceEvent.GEOCODE_COMPLETE,function(evt:ServiceEvent):void{
+            processResults(evt.data as GeocodeResults);
+          });
+          svc.addEventListener(ServiceEvent.ERROR,function(evt:ServiceEvent):void{
+            handleError(evt.data as ServiceError);
+          });
+          svc.findAddressCandidates(new GeocodeParameters({inputs: inputs}));
+        }
+        
+      }
+      private function processResults(gcRes:GeocodeResults):void {
             busy.visible=false;
+            results=[];
             if (gcRes.candidates) {
               for (var i:int=0, c:int=gcRes.candidates.length; i < c; i++) {
-                var res:*=gcRes.candidates[i];
+                var res:GeocodeResult=gcRes.candidates[i];
                 var marker:Marker=createMarker(res);
                 map.addOverlay(marker);
                 bnds.extend(marker.getLatLng());
@@ -136,10 +153,11 @@
               }
               resultList.dataProvider=results;
             }
-          });
-      }
-
-      private function createMarker(gc:*):Marker {
+      }  
+      private function handleError(err:ServiceError):void{
+        Alert.show(err.toString());
+      }  
+      private function createMarker(gc:GeocodeResult):Marker {
         var html:String=gc.address + '<br/>' + 'Score:' + gc.score + '<br/>';
         if (gc.attributes) {
           var attrs:*=gc.attributes;
@@ -149,8 +167,7 @@
             }
           }
         }
-        var latlng:LatLng=ArcGISUtil.fromPointToLatLng(gc.location, svc.spatialReference);
-        var marker:Marker=new Marker(latlng, new MarkerOptions({tooltip: gc.address}));
+        var marker:Marker= new Marker(gc.location, new MarkerOptions({tooltip: gc.address}));
         marker.addEventListener(MapMouseEvent.CLICK, function(evt:MapMouseEvent):void {
             marker.openInfoWindow(new InfoWindowOptions({contentHTML: html}));
           });

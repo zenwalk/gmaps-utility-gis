@@ -11,7 +11,7 @@
       <mx:VBox height="100%"
                width="80%">
         <mx:HBox>
-          <mx:Label text="Search a State or City with name containing text:"/>
+          <mx:Label text="Search a State, City or River with name containing text:"/>
           <mx:TextInput text="KS"
                         id="q"
                         maxChars="20"
@@ -48,6 +48,7 @@
 
   <mx:Script>
     <![CDATA[
+      import ags.FindParameters;
       import mx.events.ListEvent;
       import mx.controls.*;
       import mx.controls.dataGridClasses.*;
@@ -56,13 +57,13 @@
       import com.google.maps.*;
       import com.google.maps.interfaces.*;
 
-      import ags.gmaps.*; import ags.service.*;
+      import ags.*; 
 
       private var service:MapService;
       private var grid:DataGrid;
 
       [Bindable]
-      private var findResults:Array=new Array();
+      private var findValues:Array=new Array();
       private var overlayResults:Array=new Array();
 
 
@@ -88,7 +89,10 @@
         service.addEventListener(ServiceEvent.LOAD, function(evt:Event):void {
             find.enabled=true;
           });
-        results.dataProvider=findResults;
+         service.addEventListener(ServiceEvent.ERROR, function(evt:ServiceEvent):void{
+           Alert.show(evt.data.toString());
+         });
+        results.dataProvider=findValues;
         results.addEventListener(ListEvent.ITEM_CLICK, function(evt:ListEvent):void {
             var row:int=evt.rowIndex;
             if (overlayResults[row]) {
@@ -103,26 +107,27 @@
         map.clearOverlays();
         map.closeInfoWindow();
         var ex:Boolean=exact.selected;
-        findResults=[];
+        findValues=[];
         overlayResults=[];
-        var params:*={returnGeometry: true, searchText: q, contains: !ex, layers: ['Cities', 'Rivers', 'States'], //
-            searchFields: ["CITY_NAME", "NAME", "SYSTEM", "STATE_ABBR", "STATE_NAME"], sr: 4326};
+        var params:FindParameters=new FindParameters({returnGeometry: true, searchText: q, 
+        contains: !ex, layerIds: service.getLayerIdsByName(['Cities', 'Rivers', 'States']), //
+            searchFields: ["CITY_NAME", "NAME", "SYSTEM", "STATE_ABBR", "STATE_NAME"]});;
         busy.visible=true;
         service.find(params, processFindResults);
       }
 
-      private function processFindResults(rs:*):void {
+      private function processFindResults(rs:FindResults):void {
         busy.visible=false;
         var fs:Array=rs.results;
         for (var i:int=0, c:int=fs.length; i < c; i++) {
           processFindResult(fs[i]);
         }
-        results.dataProvider=findResults;
+        results.dataProvider=findValues;
       }
 
-      private function processFindResult(res:*):void {
+      private function processFindResult(res:FindResult):void {
         var title:String=res.layerName + ':' + res.foundFieldName + ' = ' + res.value;
-        var ovs:Array=ArcGISUtil.fromFeatureToOverlays(res.geometry, null, null, title);
+        var ovs:Array= res.geometry;//ArcGISUtil.fromFeatureToOverlays(res.geometry, null, null, title);
         var a:*=res.attributes;
         var html:Array=[];
         for (var x:String in a) {
@@ -130,7 +135,7 @@
             html.push({name: x, value: a[x]});
           }
         }
-        findResults.push(title);
+        findValues.push(title);
         for (var j:int=0, jc:int=ovs.length; j < jc; j++) {
           var ov:*=ovs[j];
           var idx:int = overlayResults.length;

@@ -16,17 +16,13 @@
       import com.google.maps.Map;
       import com.google.maps.MapEvent;
       import com.google.maps.MapType;
-      import ags.gmaps.*; import ags.service.*;
+      import ags.*; 
 
       private function onMapReady(event:Event):void {
         map.enableScrollWheelZoom();
         map.addControl(new MapTypeControl());
         map.addControl(new NavigationControl());
         map.setCenter(new LatLng(45.5, -122.7), 15);
-        // The core API seems does not use the overrided tilesize. 
-        // otherwise it is possible to do:
-        //var agsType:ArcGISMapType = new ArcGISMapType(url);
-        //agsType.addEventListener(ArcGISEvent.LOAD, function(evt:Event):void {
         var url:String='http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_LandBase_AGO/MapServer';
         var agsTile:ArcGISTileLayer = new ArcGISTileLayer(url);
         agsTile.addEventListener(ServiceEvent.LOAD, function(evt:Event):void {

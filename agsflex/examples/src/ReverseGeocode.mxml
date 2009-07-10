@@ -3,7 +3,7 @@
                 layout="absolute"
                 width="100%"
                 height="100%">
-  <mx:Panel title="Reverse Geocode: Click on Map or Drag Marker"
+  <mx:Panel title="Reverse Geocode: Click on Map or Drag and Drop Marker to get it's address"
             width="100%"
             height="100%">
     <maps:Map xmlns:maps="com.google.maps.*"
@@ -15,6 +15,7 @@
   </mx:Panel>
   <mx:Script>
     <![CDATA[
+      import ags.ReverseGeocodeParameters;
       import mx.events.ListEvent;
       import mx.controls.*;
       import mx.controls.dataGridClasses.*;
@@ -23,11 +24,9 @@
       import com.google.maps.*;
       import com.google.maps.interfaces.*;
 
-      import ags.gmaps.*; 
-      import ags.service.*;
-      import ags.sr.*;
-      
-      private var svc: GeocodeService;
+      import ags.*;
+
+      private var svc:GeocodeService;
       private var marker:Marker;
 
 
@@ -39,7 +38,7 @@
         map.enableContinuousZoom();
         marker=new Marker(map.getCenter(), new MarkerOptions({draggable: true}));
         map.addOverlay(marker);
-        svc=new GeocodeService('http://sampleserver1.arcgisonline.com/ArcGIS/rest/svcs/Locators/ESRI_Geocode_USA/GeocodeServer');
+        svc=new GeocodeService('http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Locators/ESRI_Geocode_USA/GeocodeServer');
 
         svc.addEventListener(ServiceEvent.LOAD, function(evt:Event):void {
             map.addEventListener(MapMouseEvent.CLICK, function(evt:MapMouseEvent):void {
@@ -55,9 +54,8 @@
 
       private function reverseGeocode(latlng:LatLng):void {
         if (latlng) {
-          var point:*=ArcGISUtil.fromLatLngToPoint(latlng, SpatialReferences.WGS84);
-          var params:*={location: point, distance: 100};
-          svc.reverseGeocode(params, function(result:*):void {
+          var params:ReverseGeocodeParameters=new ReverseGeocodeParameters({location: latlng, distance: 100});
+          svc.reverseGeocode(params, function(result:ReverseGeocodeResult):void {
               if (result.address) {
                 var html:String='';
                 var attrs:*=result.address;
@@ -66,7 +64,7 @@
                     html+=x + ': ' + attrs[x] + '<br/>';
                   }
                 }
-                var loc:LatLng=ArcGISUtil.fromPointToLatLng(result.location, SpatialReferences.WGS84);
+                var loc:LatLng=result.location; //   ArcGISUtil.fromPointToLatLng(result.location, SpatialReferences.WGS84);
                 marker.setLatLng(loc);
                 marker.openInfoWindow(new InfoWindowOptions({contentHTML: html}));
               } else {

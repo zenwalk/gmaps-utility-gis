@@ -25,7 +25,7 @@
       import com.google.maps.MapOptions;
       import com.google.maps.interfaces.*;
 
-      import ags.gmaps.*; import ags.service.*;
+      import ags.*; 
 
       private var map:Map;
       private var svc:MapService;
@@ -61,9 +61,10 @@
       private function onMapReady(event:Event):void {
         map.addControl(new com.google.maps.controls.MapTypeControl());
         map.addControl(new NavigationControl());
-       
         map.enableContinuousZoom();
-        
+        // as of google api 1.9a, wheelzoom does not work correctly if tile scales are not factor of 2 between zoom levels.
+        // map.enableScrollWheelZoom();
+        ArcGISUtil.enableScrollWheelZoom(map);
       }
     ]]>
   </mx:Script>

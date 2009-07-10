@@ -24,7 +24,7 @@
       import com.google.maps.MapOptions;
       import com.google.maps.interfaces.*;
 
-      import ags.gmaps.*; import ags.service.*;
+      import ags.*; 
 
       private var base:String='http://server.arcgisonline.com/ArcGIS/rest/services';
       private var map:Map;
@@ -36,7 +36,6 @@
       }
 
       public function onServiceLoad(event:ServiceEvent):void {
-        // map should be constructed after service load instead from MXML, if you do not want load Google Tiles at all. 
         map=new Map();
         map.width=mapHolder.width;
         map.height=mapHolder.height;

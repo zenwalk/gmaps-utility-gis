@@ -16,16 +16,19 @@
 
   <mx:Script>
     <![CDATA[
+      import mx.controls.Alert;
       import com.google.maps.controls.*;
       import com.google.maps.overlays.*;
       import com.google.maps.*;
       import com.google.maps.interfaces.*;
 
-      import ags.gmaps.*; import ags.service.*;
+      import ags.*;
 
       private var layer:Layer;
-      private var hStyle:*={fillStyle: {color: 0xffff00, alpha: 0.35}, strokeStyle: {color: 0xFF0000, thickness: 4}};
-      private var style:*={fillStyle: {color: 0x888888, alpha: 0.35}, strokeStyle: {color: 0x0000ff, thickness: 1}};
+      private var hStyle:OverlayOptions=new OverlayOptions({polygon: new PolygonOptions({fillStyle: {color: 0xffff00, alpha: 0.35}, strokeStyle: {color: 0xFF0000, thickness: 4}})});
+      private var style:OverlayOptions=new OverlayOptions({polygon: new PolygonOptions({fillStyle: {color: 0x888888, alpha: 0.35}, strokeStyle: {color: 0x0000ff, thickness: 1}})});
+
+      //;
 
       private function onMapReady(event:Event):void {
         map.setCenter(new LatLng(35.7, -79.5), 7);
@@ -38,11 +41,11 @@
       }
 
       private function initFunctionality(evt:Event):void {
-        var params:*={returnGeometry: true, where: "STATE_NAME = 'North Carolina'", outFields: ["NAME", "POP2000", "POP2007", "POP00_SQMI", "POP07_SQMI"], outSR: 4326};
-        layer.query(params, processResultSet);
+        var params:QueryParameters=new QueryParameters({returnGeometry: true, where: "STATE_NAME = 'North Carolina'", outFields: ["NAME", "POP2000", "POP2007", "POP00_SQMI", "POP07_SQMI"]});
+        layer.query(params, processResultSet, handleError, style);
       }
 
-      private function processResultSet(rs:*):void {
+      private function processResultSet(rs:ResultSet):void {
         var fs:Array=rs.features;
         for (var i:int=0, c:int=fs.length; i < c; i++) {
           var ovs:Array=createGPolys(fs[i], rs.spatialReference);
@@ -52,28 +55,32 @@
         }
       }
 
-      private function createGPolys(feat:*, sr:*):Array {
+      private function createGPolys(feat:Feature, sr:SpatialReference):Array {
         var a:*=feat.attributes;
-        var ovs:Array=ArcGISUtil.fromFeatureToOverlays(feat.geometry, sr, style, a['NAME']);
-        var html:String="<div id='iwdiv'><b>" + a['NAME'] + "</b><hr/>" + "<b>2000 Population: </b>" + a['POP2000'] + "<br/>" + "<b>2000 Population per Sq. Mi.: </b>" + a['POP00_SQMI'] + "<br/>" + "<b>2007 Population: </b>" + a['POP2007'] + "<br/>" + "<b>2007 Population per Sq. Mi.: </b>" + a['POP07_SQMI'] + '</div>';
-       // note  it is possible each feature has more than one poly.
+        var ovs:Array=feat.geometry; ////ArcGISUtil.fromGeometryToOverlays(feat.geometry, sr, style, a['NAME']);
+        var html:String="<div id='iwdiv'><b>" + a['NAME'] + "</b><br/>" + "<b>2000 Population: </b>" + a['POP2000'] + "<br/>" + "<b>2000 Population per Sq. Mi.: </b>" + a['POP00_SQMI'] + "<br/>" + "<b>2007 Population: </b>" + a['POP2007'] + "<br/>" + "<b>2007 Population per Sq. Mi.: </b>" + a['POP07_SQMI'] + '</div>';
+        // note  it is possible each feature has more than one poly.
         for (var j:int=0, jc:int=ovs.length; j < jc; j++) {
           var ov:Polygon=ovs[j] as Polygon;
           ov.addEventListener(MapMouseEvent.ROLL_OVER, function(event:MapMouseEvent):void {
               for (var i:int=0, ic:int=ovs.length; i < ic; i++) {
-                (ovs[i] as Polygon).setOptions(new PolygonOptions(hStyle));
+                (ovs[i] as Polygon).setOptions(hStyle.polygon);
               }
             });
           ov.addEventListener(MapMouseEvent.ROLL_OUT, function(event:MapMouseEvent):void {
               for (var i:int=0, ic:int=ovs.length; i < ic; i++) {
-                (ovs[i] as Polygon).setOptions(new PolygonOptions(style));
+                (ovs[i] as Polygon).setOptions(style.polygon);
               }
-          });
+            });
           ov.addEventListener(MapMouseEvent.CLICK, function(event:MapMouseEvent):void {
               map.openInfoWindow(event.latLng, new InfoWindowOptions({contentHTML: html}));
-          });
+            });
         }
         return ovs;
+      }
+
+      private function handleError(err:ServiceError):void {
+        mx.controls.Alert.show(err.toString());
       }
     ]]>
   </mx:Script>
