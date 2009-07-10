@@ -7,7 +7,6 @@
 */
 package ags
 {
-  import ags.*;
   /**
   * Collection of ArcGISSpatialReference
   */ 
@@ -23,9 +22,9 @@ package ags
     });
     
     private static var _srs:Object = {
-      '4326': WGS84,
-      '4269': NAD83,
-      '102113': WEB_MERCATOR
+      '4326': SpatialReferences.WGS84,
+      '4269': SpatialReferences.NAD83,
+      '102113': SpatialReferences.WEB_MERCATOR
     };
     public static function addSpatialReference(wkid:int, wktOrSR:Object):SpatialReference
     {

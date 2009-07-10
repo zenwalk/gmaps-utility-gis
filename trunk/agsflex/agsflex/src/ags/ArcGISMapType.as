@@ -20,7 +20,7 @@ package ags {
  */ 
   public class ArcGISMapType extends MapType {// MapType already but do not know what event implements IEventDispatcher {
     
-    private var projection_:ArcGISProjection;
+    private var projection_:ArcGISTileConfig;
     
     public function ArcGISMapType(tileLayers:*, opt_typeOpts:ArcGISMapTypeOptions=null) {
       var me:ArcGISMapType = this;
@@ -41,7 +41,7 @@ package ags {
          
       }
       var layer0:ArcGISTileLayer=layers[0] as ArcGISTileLayer;
-      var prj:ArcGISProjection=opt_typeOpts.projection||layer0.getProjection();
+      var prj:ArcGISTileConfig=opt_typeOpts.projection||layer0.getProjection();
      // var gOpts:MapTypeOptions=new MapTypeOptions({tileSize: prj.getTileSize()});
      // ArcGISUtil.augmentObject(opt_typeOpts, gOpts);
       opt_typeOpts.tileSize =prj.getTileSize(); 

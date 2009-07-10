@@ -29,7 +29,7 @@ package ags {
       dispatcher_=new EventDispatcher(this);
       this.url=url;
       var me:GeocodeService=this;
-      ArcGISUtil.getJSON(url, {f: 'json'}, me, function(json:*):void {
+      ArcGISUtil.restRequest(url, {f: 'json'}, me, function(json:*):void {
           me.init_(json);
         });
 
@@ -73,7 +73,7 @@ package ags {
         params.outFields=params.outFields.join(',');
       }
       var me:GeocodeService=this;
-      ArcGISUtil.getJSON(this.url + '/findAddressCandidates', params, this, function(json:*):void {
+      ArcGISUtil.restRequest(this.url + '/findAddressCandidates', params, this, function(json:*):void {
           var res:GeocodeResults=new GeocodeResults(json, me.spatialReference);
           if (callbackFn != null) {
             callbackFn.call(me, res);
@@ -102,7 +102,7 @@ package ags {
         params.location=ArcGISUtil.fromGeometryToJSON(ArcGISUtil.fromLatLngToPoint(params.location));
       }
       var me:GeocodeService=this;
-      ArcGISUtil.getJSON(this.url + '/reverseGeocode', params, this, function(json:*):void {
+      ArcGISUtil.restRequest(this.url + '/reverseGeocode', params, this, function(json:*):void {
           var res:ReverseGeocodeResult=new ReverseGeocodeResult(json, me.spatialReference);
           if (callbackFn != null) {
             callbackFn.call(me, res);

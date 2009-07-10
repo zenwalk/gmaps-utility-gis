@@ -53,7 +53,7 @@ This class represent an
       }
       params.geometries = '{ geometryType:' + gt + ', geometries:[' + json.join(',') + ']}';
     }
-    ArcGISUtil.getJSON(this.url + '/project', params, this, callbackFn, failedFn);
+    ArcGISUtil.restRequest(this.url + '/project', params, this, callbackFn, failedFn);
   };
     private var dispatcher_:EventDispatcher ;
     public function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = false):void{

@@ -49,7 +49,7 @@ package ags {
      * 
      * @default 
      */
-    public var projection:ArcGISProjection;
+    public var projection:ArcGISTileConfig;
     
 
     /**

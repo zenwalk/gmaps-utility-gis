@@ -28,7 +28,7 @@ package ags {
     private var mapService_:MapService;
     private var urlTemplate_:String;
     private var numOfHosts_:int;
-    internal var projection_:ArcGISProjection; // need access from MapType
+    internal var projection_:ArcGISTileConfig; // need access from MapType
     private var fullBounds_:* /*Envelope*/ ;
     private var initialBounds_:* /*Envelope*/ ;
 
@@ -79,7 +79,7 @@ package ags {
      * @param {Object} opt_layerOpts
      */
     private function init_(opt_layerOpts:*):void {
-      this.projection_=new ArcGISProjection(this.mapService_.tileInfo, this.mapService_.fullExtent);
+      this.projection_=new ArcGISTileConfig(this.mapService_.tileInfo, this.mapService_.fullExtent);
       var copy:CopyrightCollection=opt_layerOpts.copyrights;
       if (!copy) {
         copy=new CopyrightCollection('');
@@ -149,8 +149,8 @@ package ags {
      *  used by this ArcGISTileLayer.
      * @return {ArcGISProjection}
      */
-    public function getProjection():ArcGISProjection {
-      return this.projection_ || ArcGISProjection.WEB_MERCATOR;
+    public function getProjection():ArcGISTileConfig {
+      return this.projection_ || ArcGISTileConfig.GOOGLE_MAPS;
     }
 
     public function hasLoaded():Boolean {

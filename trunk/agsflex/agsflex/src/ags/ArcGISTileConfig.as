@@ -8,22 +8,20 @@
 package ags {
   import com.google.maps.*;
   import com.google.maps.interfaces.*;
-   import ags.*;
-   import ags.*;
-   
+  
   import flash.geom.Point;
 
   /**
    * This class is a bridge between Google's projection and ArcGIS's spatial reference system.
    */
-  public class ArcGISProjection extends ProjectionBase {
+  public class ArcGISTileConfig extends ProjectionBase {
     private var tileInfo_:*;
     private var spatialReference_:SpatialReference;
     internal var zoomOffset_:int; //used in TileLayer
     private var fullExtent_:*;
 
 
-    public function ArcGISProjection( /*TileInfo*/ tileInfo:*, /*Envelope*/  opt_fullExtent:*=null) {
+    public function ArcGISTileConfig( /*TileInfo*/ tileInfo:*, /*Envelope*/  opt_fullExtent:*=null) {
       super();
       if (!tileInfo) {
         throw new Error('map service is not tiled');
@@ -195,9 +193,14 @@ package ags {
       return this.spatialReference_;
     }
 
-
-    public static const WEB_MERCATOR:ArcGISProjection=new ArcGISProjection({"rows": 256, "cols": 256, "dpi": 96, "format": "PNG8", "compressionQuality": 0, "origin": {"x": -20037508.342787, "y": 20037508.342787}, "spatialReference": {"wkid": 102113}, "lods": [{"level": 0, "resolution": 156543.033928, "scale": 591657527.591555}, {"level": 1, "resolution": 78271.5169639999, "scale": 295828763.795777}, {"level": 2, "resolution": 39135.7584820001, "scale": 147914381.897889}, {"level": 3, "resolution": 19567.8792409999, "scale": 73957190.948944}, {"level": 4, "resolution": 9783.93962049996, "scale": 36978595.474472}, {"level": 5, "resolution": 4891.96981024998, "scale": 18489297.737236}, {"level": 6, "resolution": 2445.98490512499, "scale": 9244648.868618}, {"level": 7, "resolution": 1222.99245256249, "scale": 4622324.434309}, {"level": 8, "resolution": 611.49622628138, "scale": 2311162.217155}, {"level": 9, "resolution": 305.748113140558, "scale": 1155581.108577}, {"level": 10, "resolution": 152.874056570411, "scale": 577790.554289}, {"level": 11, "resolution": 76.4370282850732, "scale": 288895.277144}, {"level": 12, "resolution": 38.2185141425366, "scale": 144447.638572}, {"level": 13, "resolution": 19.1092570712683, "scale": 72223.819286}, {"level": 14, "resolution": 9.55462853563415, "scale": 36111.909643}, {"level": 15, "resolution": 4.77731426794937, "scale": 18055.954822}, {"level": 16, "resolution": 2.38865713397468, "scale": 9027.977411}, {"level": 17, "resolution": 1.19432856685505, "scale": 4513.988705}, {"level": 18, "resolution": 0.597164283559817, "scale": 2256.994353}, {"level": 19, "resolution": 0.298582141647617, "scale": 1128.497176}]}, null);
-    public static const ARCGIS_ONLINE:ArcGISProjection=new ArcGISProjection({"rows": 512, "cols": 512, "dpi": 96, "origin": {"x": -180, "y": 90}, "spatialReference": {"wkid": 4326}, "lods": [{"level": 0, "resolution": 0.351562499999999, "scale": 147748799.285417}, {"level": 1, "resolution": 0.17578125, "scale": 73874399.6427087}, {"level": 2, "resolution": 0.0878906250000001, "scale": 36937199.8213544}, {"level": 3, "resolution": 0.0439453125, "scale": 18468599.9106772}, {"level": 4, "resolution": 0.02197265625, "scale": 9234299.95533859}, {"level": 5, "resolution": 0.010986328125, "scale": 4617149.97766929}, {"level": 6, "resolution": 0.0054931640625, "scale": 2308574.98883465}, {"level": 7, "resolution": 0.00274658203124999, "scale": 1154287.49441732}, {"level": 8, "resolution": 0.001373291015625, "scale": 577143.747208662}, {"level": 9, "resolution": 0.0006866455078125, "scale": 288571.873604331}, {"level": 10, "resolution": 0.000343322753906249, "scale": 144285.936802165}, {"level": 11, "resolution": 0.000171661376953125, "scale": 72142.9684010827}, {"level": 12, "resolution": 8.58306884765626E-05, "scale": 36071.4842005414}, {"level": 13, "resolution": 4.29153442382813E-05, "scale": 18035.7421002707}, {"level": 14, "resolution": 2.14576721191406E-05, "scale": 9017.87105013534}, {"level": 15, "resolution": 1.07288360595703E-05, "scale": 4508.93552506767}]});
+    /**
+     *tile configuration used by Google Maps 
+     */
+    public static const GOOGLE_MAPS:ArcGISTileConfig=new ArcGISTileConfig({"rows": 256, "cols": 256, "dpi": 96, "format": "PNG8", "compressionQuality": 0, "origin": {"x": -20037508.342787, "y": 20037508.342787}, "spatialReference": {"wkid": 102113}, "lods": [{"level": 0, "resolution": 156543.033928, "scale": 591657527.591555}, {"level": 1, "resolution": 78271.5169639999, "scale": 295828763.795777}, {"level": 2, "resolution": 39135.7584820001, "scale": 147914381.897889}, {"level": 3, "resolution": 19567.8792409999, "scale": 73957190.948944}, {"level": 4, "resolution": 9783.93962049996, "scale": 36978595.474472}, {"level": 5, "resolution": 4891.96981024998, "scale": 18489297.737236}, {"level": 6, "resolution": 2445.98490512499, "scale": 9244648.868618}, {"level": 7, "resolution": 1222.99245256249, "scale": 4622324.434309}, {"level": 8, "resolution": 611.49622628138, "scale": 2311162.217155}, {"level": 9, "resolution": 305.748113140558, "scale": 1155581.108577}, {"level": 10, "resolution": 152.874056570411, "scale": 577790.554289}, {"level": 11, "resolution": 76.4370282850732, "scale": 288895.277144}, {"level": 12, "resolution": 38.2185141425366, "scale": 144447.638572}, {"level": 13, "resolution": 19.1092570712683, "scale": 72223.819286}, {"level": 14, "resolution": 9.55462853563415, "scale": 36111.909643}, {"level": 15, "resolution": 4.77731426794937, "scale": 18055.954822}, {"level": 16, "resolution": 2.38865713397468, "scale": 9027.977411}, {"level": 17, "resolution": 1.19432856685505, "scale": 4513.988705}, {"level": 18, "resolution": 0.597164283559817, "scale": 2256.994353}, {"level": 19, "resolution": 0.298582141647617, "scale": 1128.497176}]}, null);
+    /**
+     *tile configuration used by ArcGIS online 
+     */
+    public static const ARCGIS_ONLINE:ArcGISTileConfig=new ArcGISTileConfig({"rows": 512, "cols": 512, "dpi": 96, "origin": {"x": -180, "y": 90}, "spatialReference": {"wkid": 4326}, "lods": [{"level": 0, "resolution": 0.351562499999999, "scale": 147748799.285417}, {"level": 1, "resolution": 0.17578125, "scale": 73874399.6427087}, {"level": 2, "resolution": 0.0878906250000001, "scale": 36937199.8213544}, {"level": 3, "resolution": 0.0439453125, "scale": 18468599.9106772}, {"level": 4, "resolution": 0.02197265625, "scale": 9234299.95533859}, {"level": 5, "resolution": 0.010986328125, "scale": 4617149.97766929}, {"level": 6, "resolution": 0.0054931640625, "scale": 2308574.98883465}, {"level": 7, "resolution": 0.00274658203124999, "scale": 1154287.49441732}, {"level": 8, "resolution": 0.001373291015625, "scale": 577143.747208662}, {"level": 9, "resolution": 0.0006866455078125, "scale": 288571.873604331}, {"level": 10, "resolution": 0.000343322753906249, "scale": 144285.936802165}, {"level": 11, "resolution": 0.000171661376953125, "scale": 72142.9684010827}, {"level": 12, "resolution": 8.58306884765626E-05, "scale": 36071.4842005414}, {"level": 13, "resolution": 4.29153442382813E-05, "scale": 18035.7421002707}, {"level": 14, "resolution": 2.14576721191406E-05, "scale": 9017.87105013534}, {"level": 15, "resolution": 1.07288360595703E-05, "scale": 4508.93552506767}]});
 
 
   }

@@ -16,7 +16,7 @@ package ags
     /**
     * Additional parameters defined by the REST API,
     */ 
-    public var exportParams:ExportMapParameters;
+    public var imageParameters:ImageParameters;
     public var name:String;
     public var maxResolution:Number;
     public var minResolution:Number;

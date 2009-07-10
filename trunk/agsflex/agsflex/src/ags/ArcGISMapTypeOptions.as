@@ -13,7 +13,7 @@ package ags
     
     
     public var name:String;
-    public var projection:ArcGISProjection;
+    public var projection:ArcGISTileConfig;
         
     public function ArcGISMapTypeOptions(opts:*=null)
     {
