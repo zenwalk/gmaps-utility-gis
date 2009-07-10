@@ -19,17 +19,15 @@
       import com.google.maps.MapEvent;
       import com.google.maps.MapType;
       import com.google.maps.interfaces.*;
-      import ags.gmaps.*; import ags.service.*;
-      private function onMapPreInitialize(event:Event):void{
-        var url:String='http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/Portland_ESRI_LandBase_AGO/MapServer';
-        var agsType:ArcGISMapType=new ArcGISMapType(url, new ArcGISMapTypeOptions({projection:ArcGISProjection.ARCGIS_ONLINE}));
-        var opts:MapOptions = new MapOptions({
-          mapTypes:[agsType],
-          center: new LatLng(45.5, -122.7), 
-          zoom: 15
-        });
+      import ags.*;
+      
+      private function onMapPreInitialize(event:Event):void {
+        var url:String='http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
+        var agsType:ArcGISMapType=new ArcGISMapType(url);
+        var opts:MapOptions=new MapOptions({mapTypes: [agsType], center: new LatLng(45.5, -122.7), zoom: 15});
         map.setInitOptions(opts);
       }
+
       private function onMapReady(event:Event):void {
         map.enableScrollWheelZoom();
         map.addControl(new MapTypeControl());

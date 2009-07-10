@@ -17,6 +17,7 @@
   </mx:Panel>
   <mx:Script>
     <![CDATA[
+      import com.google.maps.styles.FillStyle;
       import com.google.maps.InfoWindowOptions;
       import mx.controls.Alert;
       import com.google.maps.LatLngBounds;
@@ -30,9 +31,6 @@
       import com.google.maps.MapType;
       import com.google.maps.MapMouseEvent;
       import com.google.maps.interfaces.*;
-      import ags.gmaps.*;
-      import ags.service.*;
-      import ags.sr.*;
       import ags.*;
       
       import flash.display.*;
@@ -46,7 +44,10 @@
       private function onMapPreInitialize(event:Event):void {
         var url:String='http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
         _svc=new MapService(url);
-        var agsType:ArcGISMapType=new ArcGISMapType([new ArcGISTileLayer(_svc)]);
+        _svc.addEventListener(ServiceEvent.ERROR, function(evt:ServiceEvent):void{
+           Alert.show(evt.data.toString());
+        });
+        var agsType:ArcGISMapType=new ArcGISMapType([new ArcGISTileLayer(_svc)], new ArcGISMapTypeOptions({minResolution:10, maxResolution:19}));
         var opts:MapOptions=new MapOptions({mapTypes: [agsType], center: new LatLng(45.5, -122.7), zoom: 17});
         map.setInitOptions(opts);
       }
@@ -59,23 +60,23 @@
       }
 
       private function doIdentify(evt:MapMouseEvent):void {
+        map.clearOverlays();
         var latlng:LatLng=evt.latLng;
-        var sr:SpatialReference=_svc.getSpatialReference() || SpatialReferences.WEB_MERCATOR;
         var bnds:LatLngBounds=map.getLatLngBounds();
         var size:Point=map.getSize();
-        var ext:Object=ArcGISUtil.fromLatLngBoundsToEnvelope(bnds, sr);
-        var pt:Object=ArcGISUtil.fromLatLngToPoint(latlng, sr);
-        var idParams:Object={geometry: '' + pt.x + ',' + pt.y, geometryType: Constants.ESRI_GEOMETRY_POINT, sr: sr.wkid, layers: 'top', tolerance: 5, mapExtent: ext, imageDisplay: '' + size.x + ',' + size.y + ',96', //dpi
-            returnGeometry: false};
-        _svc.identify(idParams, function processResults(json:*):void {
-            if (json.error) {
-              mx.controls.Alert.show(json.error.message + '\n' + json.error.details.join('\n'));
-            } else if (json.results) {
+        var idParams:IdentifyParameters=new IdentifyParameters({
+        geometry: latlng, 
+        layerOption: 'top', tolerance: 5, bounds: bnds, width: size.x, height : size.y ,dpi:96,
+            returnGeometry: true});
+        _svc.identify(idParams, function processResults(res:IdentifyResults):void {
+             if (res.results && res.results.length>0) {
               idWin.visible=true;
-              idWin.title=json.results[0].layerName + ' : ' + json.results[0].value;
+             
+              idWin.title=res.results[0].layerName + ' : ' + res.results[0].value;
               var data:ArrayCollection=new ArrayCollection();
-              for (var i:int=0, c:int=json.results.length; i < c; i++) {
-                var r:*=json.results[i];
+              for (var i:int=0, c:int=res.results.length; i < c; i++) {
+                var r:IdentifyResult=res.results[i] as IdentifyResult;
+                
                 //layerName= r.layerName;
                 var a:*=r.attributes;
                 for (var x:String in a) {
@@ -85,11 +86,18 @@
                     data.addItem({name: x, value: val});
                   }
                 }
+                if (r.geometry && r.geometry.length>0){
+                  for each (var ov:IOverlay in r.geometry){
+                    map.addOverlay(ov);
+                  }
+                }
               }
               idResults.dataProvider=data;
+              idResults.alpha = 0.5;
               map.openInfoWindow(latlng, new InfoWindowOptions({
-                //width: idResults.width, height: idResults.height, 
-                  drawDefaultFrame: true, customContent: idWin}));
+                  drawDefaultFrame: true, customContent: idWin
+                  , fillStyle:new FillStyle({alpha:0.2})
+                  }));
             }
           });
       }
@@ -97,15 +105,15 @@
   </mx:Script>
   <mx:Panel id="idWin"
             visible="false"
-            layout="vertical">
+            layout="vertical"  backgroundAlpha="0.5" >
 
     <mx:DataGrid id="idResults"
                  width="250"
-                 height="200">
+                 height="200" >
       <mx:columns>
         <mx:DataGridColumn headerText="Name"
                            dataField="name"
-                           sortable="false"/>
+                           sortable="false" />
         <mx:DataGridColumn headerText="Value"
                            dataField="value"
                            sortable="false"/>
