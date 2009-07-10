@@ -37,31 +37,7 @@ package ags
     public function getCircumference():Number{
       return 360;
     }
-    /**
- * Transform an extent to this Spatial Reference and return 
- * a new instance of {@link ArcGISEnvelope} if the spatial references are different.
- * @param {Envelope} extent
- * @return {Envelope}
- */
-    public function transform(extent:Object):Object{
-      if (extent.spatialReference.wkid !== this.wkid) {
-        var sr:SpatialReference = SpatialReferences.getSpatialReference(extent.spatialReference.wkid);
-        var sw:Array = sr.reverse([extent.xmin, extent.ymin]);
-        var ne:Array = sr.reverse([extent.ymin, extent.ymax]);
-        sw = this.forward(sw);
-        ne = this.forward(ne);
-        return {
-          xmin: sw[0],
-          ymin: sw[1],
-          xmax: ne[0],
-          ymax: ne[1],
-          spatialReference: {
-            wkid: this.wkid
-          }
-        };
-      } else {
-        return extent;
-      }
-    }
+  
+    
   }
 }

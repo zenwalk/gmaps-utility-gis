@@ -7,7 +7,6 @@
 */
 package ags {
   import flash.events.*;
- import ags.*;
  
   /**
    * This class represents a Map layer inside an ArcGISMapService. It carries
@@ -67,7 +66,7 @@ package ags {
       if (this.loaded_ && this.correct_) {
         return;
       }
-      ArcGISUtil.getJSON(this.url, {f: 'json'}, this, function(json:Object):void {
+      ArcGISUtil.restRequest(this.url, {f: 'json'}, this, function(json:Object):void {
           if (json.error) {
             me.correct_=false;
           } else {
@@ -121,23 +120,31 @@ package ags {
      * @param {QueryParameters} params
      * @param {Function} callback
      */
-    public function query(qparams:Object, callback:Function):void {
+    public function query(qparams:QueryParameters, callbackFn:Function=null, failedFn:Function=null, ovOpts:OverlayOptions=null):void {
       if (!qparams) {
         return;
       }
-      var params:Object=ArcGISUtil.augmentObject(qparams, {});
-      params.f=params.f || 'json';
-      if (params.geometry && !(params.geometry is String)) { // !isString(params.geometry)) {
-        params.geometry=ArcGISUtil.fromGeometryToJSON(params.geometry);
+      var params:Object={
+        f:'json',
+        outFields:qparams.outFields.join(','),
+        returnGeometry:qparams.returnGeometry === false ? false : true,
+        where:qparams.where,
+        outSR:SpatialReferences.WGS84.wkid
+      };
+      if (qparams.geometry && qparams.geometry.length>0){
+        params.geometry=ArcGISUtil.fromGeometryToJSON(ArcGISUtil.fromOverlaysToGeometry(qparams.geometry, SpatialReferences.WGS84));
+        params.spatialRel=qparams.spatialRelationship;
+        params.inSR=SpatialReferences.WGS84.wkid;
+        
       }
-      if (params.geometry) {
-        params.spatialRel=params.spatialRel || ArcGISConstants.SPATIALREL_INTERSECTS;
-      }
-      if (params.outFields && !(params.outFields is String)) { // !isString(params.outFields)) {
-        params.outFields=params.outFields.join(',');
-      }
-      params.returnGeometry=params.returnGeometry === false ? false : true;
-      ArcGISUtil.getJSON(this.url + '/query', params, this, callback);
+      var me:Layer=this;
+      ArcGISUtil.restRequest(this.url + '/query', params, this, function(json:*):void {
+          var res:ResultSet=new ResultSet(json);
+          if (callbackFn != null) {
+            callbackFn.call(me, res);
+          }
+          me.dispatchEvent(new ServiceEvent(ServiceEvent.QUERY_COMPLETE, res));
+        }, failedFn);
     }
     ;
 

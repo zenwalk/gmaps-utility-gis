@@ -185,8 +185,11 @@ package ags {
               glatlngs.push(new LatLng(lnglat[1], lnglat[0]));
             }
             if (geom.paths) {
+              
               ov=new Polyline(glatlngs, overlayOptions.polyline); //new PolylineOptions({strokeStyle: style.strokeStyle}));
             } else if (geom.rings) {
+              overlayOptions.polygon = overlayOptions.polygon || new PolygonOptions();
+              overlayOptions.polygon.tooltip = title;
               ov=new Polygon(glatlngs, overlayOptions.polygon); //new PolygonOptions({strokeStyle: style.strokeStyle, fillStyle: style.fillStyle, tooltip: title})); //, style.outlineColor, style.outlineWeight, style.outlineOpacity, style.fillColor, style.fillOpacity);
             }
           }
@@ -204,7 +207,7 @@ package ags {
         sr=SpatialReferences.WGS84;
       }
       var ov:*;
-      if (!ovs || ovs.length==0) return {};
+      if (!ovs || ovs.length==0) return null;
       ov = ovs[0];
       var x:String, i:int, ic:int, j:int, jc:int, parts:Array, part:Array, ll:LatLng, lnglat:Array;
       if (ovs.length==1 && (ov is LatLng || ov is Marker)){
@@ -243,7 +246,7 @@ package ags {
         }
       } 
     }
-    public static function getJSON(url:String, params:Object, thisObj:IEventDispatcher, sucessFn:Function, failFn:Function=null):void {
+    public static function restRequest(url:String, params:Object, thisObj:IEventDispatcher, sucessFn:Function, failFn:Function=null):void {
       var full:String=url + (url.indexOf('?') === -1 ? '?' : '&');
       var service:HTTPService=new HTTPService();
       service.url=url;
@@ -345,6 +348,15 @@ package ags {
 
     public static function isArray(o:*):Boolean {
       return o && o is Array;
+    }
+     public static function getAttributeValue(attrs:*, name:String):* {
+       if (attrs[name]) return attrs[name];
+       for(var x:String in attrs){
+         if (x.toUpperCase()==name.toUpperCase()){
+           return attrs[x];
+         }
+       }
+      return null;
     }
 
     public static function fromGeometryToJSON(geom:Object, opt_includeSR:Boolean=false):String {

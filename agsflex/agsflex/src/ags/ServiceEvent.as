@@ -10,6 +10,9 @@ package ags
   import flash.events.Event;
 /**
  * Events dispatched when interact with server. Depending on the request type, the data property type can be different.
+ * There is no individual events defined for each operation, reasons are:
+ * 1. simplified listening code. 
+ * 2. similar convention to Google API's MapEvent with a feature property of multiple types.
  */ 
   public class ServiceEvent extends Event
   {
@@ -21,6 +24,8 @@ package ags
     public static const EXPORTMAP_COMPLETE:String = "exportmap_complete";
     public static const EXPORTMAP_LOAD:String = "exportmap_load";
     public static const IDENTIFY_COMPLETE:String = 'identify_complete';
+    public static const FIND_COMPLETE:String = 'find_complete';
+    public static const QUERY_COMPLETE:String = 'query_complete';
     
     /**
     * The data returned by server if applicable. It can be of type GeocodeResults etc depending on the request type.  

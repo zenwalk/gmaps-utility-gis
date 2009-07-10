@@ -23,7 +23,7 @@ package ags {
     private var minZoom_:Number;
     private var maxZoom_:Number;
     private var mapService_:MapService;
-    private var exportParams_:*;
+    private var exportParams_:ImageParameters;
     private var drawing_:Boolean;
     private var redraw_:Boolean;
     private var map_:IMap;
@@ -65,7 +65,7 @@ package ags {
 
     private function init_(opt_overlayOpts:ArcGISMapOverlayOptions):void {
       // this.opacity_  =  opt_overlayOpts.opacity || 1;
-      this.exportParams_=opt_overlayOpts.exportParams || new ExportMapParameters({});
+      this.exportParams_=opt_overlayOpts.imageParameters || new ImageParameters({});
       // if the map imaging is been generated on server.
       this.drawing_=false;
       // if a follow up refresh is needed, normally cause by map view change before
@@ -133,17 +133,17 @@ package ags {
       var bnds:LatLngBounds=this.map_.getLatLngBounds();
       var prj:IProjection=this.map_.getCurrentMapType().getProjection();
       var sr:SpatialReference;
-      if (prj is ArcGISProjection) {
-        sr=(prj as ArcGISProjection).getSpatialReference();
+      if (prj is ArcGISTileConfig) {
+        sr=(prj as ArcGISTileConfig).getSpatialReference();
       } else {
         sr=SpatialReferences.WEB_MERCATOR;
       }
       var me:ArcGISMapOverlay=this;
-      var params:*=this.exportParams_;
-      params.size='' + this.map_.getSize().x + ',' + this.map_.getSize().y;
-      params.bbox=ArcGISUtil.fromLatLngBoundsToEnvelope(bnds, sr);
-      params.bboxSR=sr.wkid;
-      params.imageSR=sr.wkid;
+      var params:ImageParameters=this.exportParams_;
+      params.width=this.map_.getSize().x;
+      params.height=this.map_.getSize().y;
+      params.bounds = bnds;//.bbox=ArcGISUtil.fromLatLngBoundsToEnvelope(bnds, sr);
+      params.imageSpatialReference = sr;
       this.drawing_=true;
       this.dispatchEvent(new ServiceEvent(ServiceEvent.EXPORTMAP_START));
       this.mapService_.exportMap(params, function(json:MapImage):void {
@@ -162,6 +162,7 @@ package ags {
             me.positionOverlay(false);
           } else {
             me.img_.source=null;
+            me.dispatchEvent(new ServiceEvent(ServiceEvent.EXPORTMAP_LOAD));
           }
 
 
@@ -172,12 +173,12 @@ package ags {
       return this.mapService_;
     }
 
-    public function getFullBounds():LatLngBounds {
+    public function get fullBounds():LatLngBounds {
       this.fullBounds_=this.fullBounds_ || ArcGISUtil.fromEnvelopeToLatLngBounds(this.mapService_.fullExtent);
       return this.fullBounds_;
     }
 
-    public function getInitialBounds_():LatLngBounds {
+    public function get initialBounds():LatLngBounds {
       this.initialBounds_=this.initialBounds_ || ArcGISUtil.fromEnvelopeToLatLngBounds(this.mapService_.initialExtent);
       return this.initialBounds_;
     }

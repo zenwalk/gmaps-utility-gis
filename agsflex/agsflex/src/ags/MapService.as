@@ -7,7 +7,7 @@
  */
 package ags {
   import com.google.maps.*;
-
+  
   import flash.events.*;
 
   /**
@@ -65,7 +65,7 @@ package ags {
       var me:MapService=this;
       this.loaded_=false;
       this.correct_=false;
-      ArcGISUtil.getJSON(url, {f: 'json'}, this, function(json:Object):void {
+      ArcGISUtil.restRequest(url, {f: 'json'}, this, function(json:Object):void {
           me.init_(json, opt_service);
         });
 
@@ -128,7 +128,8 @@ package ags {
 
         this.spatialReference_=SpatialReferences.getSpatialReference(json.spatialReference.wkid);
         if (!this.spatialReference_) {
-          this.exportMap(new ExportMapParameters({bbox: json.fullExtent, bboxSR: json.spatialReference.wkid, size: '1,1', imageSR: 4326, layers: 'hide:' + ids.join(',')}), function(image:MapImage):void {
+          var bbox:*=json.fullExtent;
+          ArcGISUtil.restRequest(this.url + '/export', {f: 'json', bbox: '' + bbox.xmin + ',' + bbox.ymin + ',' + bbox.xmax + ',' + bbox.ymax, bboxSR: json.spatialReference.wkid, size: '1,1', imageSR: 4326, layers: 'hide:' + ids.join(',')}, this, function(image:*):void {
               var sr:FlatSpatialReference=new FlatSpatialReference({wkid: json.spatialReference.wkid, latlng: image.extent, coords: json.fullExtent});
               SpatialReferences.addSpatialReference(json.spatialReference.wkid, sr);
               me.spatialReference_=sr;
@@ -196,22 +197,14 @@ package ags {
      * @param {String|String[]} names
      * @return {Number|Number[]}
      */
-    public function getLayerIds(name:Object):Object {
+    public function getLayerIdsByName(names:Array):Array {
       var layer:Layer;
-      if (name is String) {
-        layer=this.getLayer(name);
-        if (layer) {
-          return layer.id;
-        }
-      } else if (name is Array) {
-        var ids:Array=[];
-        for (var i:int=0, c:int=name.length; i < c; i++) {
-          layer=this.getLayer(name[i]);
-          ids.push(layer ? layer.id : -1);
-        }
-        return ids;
+      var ids:Array=[];
+      for (var i:int=0, c:int=names.length; i < c; i++) {
+        layer=this.getLayer(names[i]);
+        ids.push(layer ? layer.id : -1);
       }
-      return -1;
+      return ids;
     }
 
 
@@ -227,19 +220,21 @@ package ags {
      * @param {ExportMapOptions} params
      * @param {Function} callback
      */
-    public function exportMap(eparams:ExportMapParameters, callbackFn:Function=null, failedFn:Function=null):void {
-      if (!eparams) {
+    public function exportMap(params:ImageParameters, callbackFn:Function=null, failedFn:Function=null):void {
+      if (!params) {
         return;
       }
       // note: dynamic map may overlay on top of maptypes with different projection
-      var params:*=ArcGISUtil.augmentObject(eparams, {});
-      params.f=params.f || 'json';
-      var bbox:*=params.bbox;
-      if (bbox.xmin) {
-        params.bbox='' + bbox.xmin + ',' + bbox.ymin + ',' + bbox.xmax + ',' + bbox.ymax;
-      }
-      params.size=params.size || '' + params.width + ',' + params.height;
-      params.transparent=(params.transparent === false ? false : true);
+      var ps:*={f: params.f, size: '' + params.width + ',' + params.height, dpi: params.dpi || 96, format: params.format, transparent: params.transparent === false ? false : true};
+      var sr:SpatialReference=params.imageSpatialReference || SpatialReferences.WEB_MERCATOR;
+      // although AGS support different imageSR & bboxSR, we only use one here.
+      ps.imageSR=sr.wkid;
+
+      var inSr:SpatialReference=sr; //SpatialReferences.WGS84
+      ps.bboxSR=inSr.wkid; //sr.wkid;
+      var bbox:*=ArcGISUtil.fromLatLngBoundsToEnvelope(params.bounds, inSr);
+      ps.bbox='' + bbox.xmin + ',' + bbox.ymin + ',' + bbox.xmax + ',' + bbox.ymax;
+
       var vlayers:Array=[];
       var layerDefs:Array=[];
       var changed:Boolean=false;
@@ -269,24 +264,30 @@ package ags {
           layerDefs.push(layer.id + ':' + layer.definition);
         }
       }
-      if (changed === true) {
-        if (!params.layers || !(params.layers is String)) { // !isString(params.layers)) {
-          params.layers='show:' + vlayers.join(',');
-        }
+      if (params.layerIds != null && params.layerOption != null) {
+        ps.layers=params.layerOption + ':' + params.layerIds.join(',');
+      } else if (changed === true) {
+        ps.layers=ArcGISConstants.LAYER_OPTION_SHOW + ':' + vlayers.join(',');
       }
-      if (layerDefs.length > 0) {
-        if (!params.layerDefs || !(params.layerDefs is String)) { // !isString(params.layerDefs)) {
-          params.layerDefs=layerDefs.join(';');
-        }
+      if (params.layerDefinitions != null) {
+        ps.layerDef=params.layerDefinitions.join(';');
+      } else if (layerDefs.length > 0) {
+        ps.layerDefs=layerDefs.join(';');
       }
+      var me:MapService=this;
       if (vlayers.length === 0) {
         // avoid an error:{"error":{"code":400,"message":"","details":["Invalid layer ID specified."]}
-        callbackFn.call(this, new MapImage({}));
+        var res:MapImage=new MapImage({});
+        if (callbackFn != null) {
+          callbackFn.call(me, res);
+        }
+        me.dispatchEvent(new ServiceEvent(ServiceEvent.EXPORTMAP_COMPLETE, res));
+
         return;
       } else {
-        var me:MapService=this;
+
         this.dispatchEvent(new ServiceEvent(ServiceEvent.EXPORTMAP_START, params));
-        ArcGISUtil.getJSON(this.url + '/export', params, this, function(json:*):void {
+        ArcGISUtil.restRequest(this.url + '/export', ps, this, function(json:*):void {
             var res:MapImage=new MapImage(json);
             if (callbackFn != null) {
               callbackFn.call(me, res);
@@ -333,7 +334,7 @@ package ags {
       params.imageDisplay='' + iparams.width + ',' + iparams.height + ',' + (iparams.dpi || 96);
       params.layers=iparams.layerOption || 'all' + ':' + iparams.layerIds.join(',');
       var me:MapService=this;
-      ArcGISUtil.getJSON(this.url + '/identify', params, this, function(json:*):void {
+      ArcGISUtil.restRequest(this.url + '/identify', params, this, function(json:*):void {
           var res:IdentifyResults=new IdentifyResults(json);
           if (callbackFn != null) {
             callbackFn.call(me, res);
@@ -351,21 +352,25 @@ package ags {
      * @param {FindParameters} params
      * @param {Function} callback
      */
-    public function find(fparams:*, callback:Function):void {
+    public function find(fparams:FindParameters, callbackFn:Function=null, failedFn:Function=null, ovOpts:OverlayOptions=null):void {
       if (!fparams) {
         return;
       }
-      var params:*=ArcGISUtil.augmentObject(fparams, {});
-      params.f=params.f || 'json';
-      if (params.layers && !ArcGISUtil.isString(params.layers)) {
-        params.layers=this.getLayerIds(params.layers).join(',');
+      var params:*={f: 'json', searchText: fparams.searchText, sr: SpatialReferences.WGS84.wkid, contains: fparams.contains === false ? false : true, returnGeometry: fparams.returnGeometry === false ? false : true};
+      if (fparams.layerIds && fparams.layerIds.length > 0) {
+        params.layers=fparams.layerIds.join(',');
       }
-      if (params.searchFields && !ArcGISUtil.isString(params.searchFields)) {
-        params.searchFields=params.searchFields.join(',');
+      if (fparams.searchFields && fparams.searchFields.length > 0) {
+        params.searchFields=fparams.searchFields.join(',');
       }
-      params.contains=(params.contains === false ? false : true);
-      params.returnGeometry=(params.returnGeometry === false ? false : true);
-      ArcGISUtil.getJSON(this.url + '/find', params, this, callback);
+      var me:MapService=this;
+      ArcGISUtil.restRequest(this.url + '/find', params, this, function(json:*):void {
+          var res:FindResults=new FindResults(json);
+          if (callbackFn != null) {
+            callbackFn.call(me, res);
+          }
+          me.dispatchEvent(new ServiceEvent(ServiceEvent.FIND_COMPLETE, res));
+        }, failedFn);
     }
 
 
@@ -378,10 +383,10 @@ package ags {
      * @param {QueryParameters} params
      * @param {Function} callback
      */
-    public function queryLayer(layerNameOrId:String, params:*, callback:Function):void {
+    public function queryLayer(layerNameOrId:String, params:*, callback:Function=null, failedFn:Function=null):void {
       var layer:Layer=this.getLayer(layerNameOrId);
       if (layer) {
-        layer.query(params, callback);
+        layer.query(params, callback, failedFn);
       }
     }
 
