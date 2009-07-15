@@ -4,7 +4,7 @@
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" href="../style.css" type="text/css" media="screen">
 <link rel="stylesheet" href="../print.css" type="text/css" media="print">
-<meta content="ArcGISUtil,ags.ArcGISUtil,ArcGISConfig,addArcGISMap,augmentObject,enableScrollWheelZoom,extractString,fromEnvelopeToLatLngBounds,fromFeatureToOverlays,fromGeometryToJSON,fromLatLngBoundsToEnvelope,fromLatLngToPoint,fromPointToLatLng,getJSON,isArray,isString" name="keywords">
+<meta content="ArcGISUtil,ags.ArcGISUtil,ArcGISConfig,addArcGISMap,augmentObject,enableScrollWheelZoom,extractString,fromEnvelopeToLatLngBounds,fromGeometryToJSON,fromGeometryToOverlays,fromLatLngBoundsToEnvelope,fromLatLngToPoint,fromOverlaysToGeometry,fromPointToLatLng,getAttributeValue,isArray,isString,restRequest" name="keywords">
 <title>ags.ArcGISUtil</title>
 </head>
 <body>
@@ -82,7 +82,7 @@ if (!isEclipse() || window.name != ECLIPSE_FRAME_NAME) {titleBar_setSubTitle("Cl
 <tr class="">
 <td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
 <div class="summarySignature">
-<a class="signatureLink" href="#augmentObject()">augmentObject</a>(src:Object, dest:Object, force:Boolean = false):Object</div>
+<a class="signatureLink" href="#augmentObject()">augmentObject</a>(src:*, dest:Boolean, force:* = false):Object</div>
 <div class="summaryTableDescription">[static]</div>
 </td><td class="summaryTableOwnerCol">ArcGISUtil</td>
 </tr>
@@ -114,14 +114,6 @@ if (!isEclipse() || window.name != ECLIPSE_FRAME_NAME) {titleBar_setSubTitle("Cl
 <tr class="">
 <td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
 <div class="summarySignature">
-<a class="signatureLink" href="#fromFeatureToOverlays()">fromFeatureToOverlays</a>(geom:*, opt_sr:String = null, opt_agsStyle:* = null, title:*):Array</div>
-<div class="summaryTableDescription">[static]
-     Convert a {</div>
-</td><td class="summaryTableOwnerCol">ArcGISUtil</td>
-</tr>
-<tr class="">
-<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
-<div class="summarySignature">
 <a class="signatureLink" href="#fromGeometryToJSON()">fromGeometryToJSON</a>(geom:Object, opt_includeSR:Boolean = false):String</div>
 <div class="summaryTableDescription">[static]</div>
 </td><td class="summaryTableOwnerCol">ArcGISUtil</td>
@@ -129,28 +121,43 @@ if (!isEclipse() || window.name != ECLIPSE_FRAME_NAME) {titleBar_setSubTitle("Cl
 <tr class="">
 <td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
 <div class="summarySignature">
-<a class="signatureLink" href="#fromLatLngBoundsToEnvelope()">fromLatLngBoundsToEnvelope</a>(gLatLngBounds:LatLngBounds, spatialReference:<a href="ArcGISSpatialReference.html">ArcGISSpatialReference</a>):*</div>
+<a class="signatureLink" href="#fromGeometryToOverlays()">fromGeometryToOverlays</a>(geom:*, opt_sr:<a href="SpatialReference.html">SpatialReference</a> = null, overlayOptions:<a href="OverlayOptions.html">OverlayOptions</a> = null, title:String = ""):Array</div>
+<div class="summaryTableDescription">[static]
+     Convert a {</div>
+</td><td class="summaryTableOwnerCol">ArcGISUtil</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
+<div class="summarySignature">
+<a class="signatureLink" href="#fromLatLngBoundsToEnvelope()">fromLatLngBoundsToEnvelope</a>(gLatLngBounds:LatLngBounds, spatialReference:<a href="SpatialReference.html">SpatialReference</a> = null):*</div>
 <div class="summaryTableDescription">[static]</div>
 </td><td class="summaryTableOwnerCol">ArcGISUtil</td>
 </tr>
 <tr class="">
 <td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
 <div class="summarySignature">
-<a class="signatureLink" href="#fromLatLngToPoint()">fromLatLngToPoint</a>(gLatLng:LatLng, sr:<a href="ArcGISSpatialReference.html">ArcGISSpatialReference</a>):*</div>
+<a class="signatureLink" href="#fromLatLngToPoint()">fromLatLngToPoint</a>(gLatLng:LatLng, sr:<a href="SpatialReference.html">SpatialReference</a> = null):*</div>
 <div class="summaryTableDescription">[static]</div>
 </td><td class="summaryTableOwnerCol">ArcGISUtil</td>
 </tr>
 <tr class="">
 <td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
 <div class="summarySignature">
-<a class="signatureLink" href="#fromPointToLatLng()">fromPointToLatLng</a>(point:*, opt_sr:*):LatLng</div>
+<a class="signatureLink" href="#fromOverlaysToGeometry()">fromOverlaysToGeometry</a>(ovs:Array, opt_sr:<a href="SpatialReference.html">SpatialReference</a> = null):*</div>
 <div class="summaryTableDescription">[static]</div>
 </td><td class="summaryTableOwnerCol">ArcGISUtil</td>
 </tr>
 <tr class="">
 <td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
 <div class="summarySignature">
-<a class="signatureLink" href="#getJSON()">getJSON</a>(url:String, params:Object, callbackFn:Function):void</div>
+<a class="signatureLink" href="#fromPointToLatLng()">fromPointToLatLng</a>(point:*, opt_sr:* = null):LatLng</div>
+<div class="summaryTableDescription">[static]</div>
+</td><td class="summaryTableOwnerCol">ArcGISUtil</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
+<div class="summarySignature">
+<a class="signatureLink" href="#getAttributeValue()">getAttributeValue</a>(attrs:*, name:String):*</div>
 <div class="summaryTableDescription">[static]</div>
 </td><td class="summaryTableOwnerCol">ArcGISUtil</td>
 </tr>
@@ -165,6 +172,13 @@ if (!isEclipse() || window.name != ECLIPSE_FRAME_NAME) {titleBar_setSubTitle("Cl
 <td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
 <div class="summarySignature">
 <a class="signatureLink" href="#isString()">isString</a>(o:*):Boolean</div>
+<div class="summaryTableDescription">[static]</div>
+</td><td class="summaryTableOwnerCol">ArcGISUtil</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
+<div class="summarySignature">
+<a class="signatureLink" href="#restRequest()">restRequest</a>(url:String, params:Object, thisObj:IEventDispatcher, sucessFn:Function, failFn:Function = null):void</div>
 <div class="summaryTableDescription">[static]</div>
 </td><td class="summaryTableOwnerCol">ArcGISUtil</td>
 </tr>
@@ -234,22 +248,22 @@ showHideInherited();
 </tr>
 </table>
 <div class="detailBody">
-<code>public static function augmentObject(src:Object, dest:Object, force:Boolean = false):Object</code><span class="label">Parameters</span>
+<code>public static function augmentObject(src:*, dest:Boolean, force:* = false):Object</code><span class="label">Parameters</span>
 <table border="0" cellspacing="0" cellpadding="0">
 <tr>
-<td width="20px"></td><td><code><span class="label">src</span>:Object</code></td>
+<td width="20px"></td><td><code><span class="label">src</span>:*</code></td>
 </tr>
 <tr>
 <td class="paramSpacer">&nbsp;</td>
 </tr>
 <tr>
-<td width="20px"></td><td><code><span class="label">dest</span>:Object</code></td>
+<td width="20px"></td><td><code><span class="label">dest</span>:Boolean</code></td>
 </tr>
 <tr>
 <td class="paramSpacer">&nbsp;</td>
 </tr>
 <tr>
-<td width="20px"></td><td><code><span class="label">force</span>:Boolean</code> (default = <code>false</code>)<code></code></td>
+<td width="20px"></td><td><code><span class="label">force</span>:*</code> (default = <code>false</code>)<code></code></td>
 </tr>
 </table>
 <p></p>
@@ -338,51 +352,6 @@ showHideInherited();
 </tr>
 </table>
 </div>
-<a name="fromFeatureToOverlays()"></a>
-<table cellspacing="0" cellpadding="0" class="detailHeader">
-<tr>
-<td class="detailHeaderName">fromFeatureToOverlays</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td><td class="detailHeaderRule">&nbsp;</td>
-</tr>
-</table>
-<div class="detailBody">
-<code>public static function fromFeatureToOverlays(geom:*, opt_sr:String = null, opt_agsStyle:* = null, title:*):Array</code><p>
-     Convert a {</p><span class="label">Parameters</span>
-<table border="0" cellspacing="0" cellpadding="0">
-<tr>
-<td width="20px"></td><td><code><span class="label">geom</span>:*</code> &mdash; feature
-     </td>
-</tr>
-<tr>
-<td class="paramSpacer">&nbsp;</td>
-</tr>
-<tr>
-<td width="20px"></td><td><code><span class="label">opt_sr</span>:String</code> (default = <code>null</code>)<code></code> &mdash; opt_sr
-     </td>
-</tr>
-<tr>
-<td class="paramSpacer">&nbsp;</td>
-</tr>
-<tr>
-<td width="20px"></td><td><code><span class="label">opt_agsStyle</span>:*</code> (default = <code>null</code>)<code></code> &mdash; opt_agsStyle
-     </td>
-</tr>
-<tr>
-<td class="paramSpacer">&nbsp;</td>
-</tr>
-<tr>
-<td width="20px"></td><td><code><span class="label">title</span>:*</code> &mdash; opt_displayName
-     </td>
-</tr>
-</table>
-<p></p>
-<span class="label">Returns</span>
-<table border="0" cellspacing="0" cellpadding="0">
-<tr>
-<td width="20"></td><td><code>Array</code> &mdash; {GOverlay[]}
-     </td>
-</tr>
-</table>
-</div>
 <a name="fromGeometryToJSON()"></a>
 <table cellspacing="0" cellpadding="0" class="detailHeader">
 <tr>
@@ -410,6 +379,51 @@ showHideInherited();
 </tr>
 </table>
 </div>
+<a name="fromGeometryToOverlays()"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">fromGeometryToOverlays</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public static function fromGeometryToOverlays(geom:*, opt_sr:<a href="SpatialReference.html">SpatialReference</a> = null, overlayOptions:<a href="OverlayOptions.html">OverlayOptions</a> = null, title:String = ""):Array</code><p>
+     Convert a {</p><span class="label">Parameters</span>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="20px"></td><td><code><span class="label">geom</span>:*</code> &mdash; feature
+     </td>
+</tr>
+<tr>
+<td class="paramSpacer">&nbsp;</td>
+</tr>
+<tr>
+<td width="20px"></td><td><code><span class="label">opt_sr</span>:<a href="SpatialReference.html">SpatialReference</a></code> (default = <code>null</code>)<code></code> &mdash; opt_sr
+     </td>
+</tr>
+<tr>
+<td class="paramSpacer">&nbsp;</td>
+</tr>
+<tr>
+<td width="20px"></td><td><code><span class="label">overlayOptions</span>:<a href="OverlayOptions.html">OverlayOptions</a></code> (default = <code>null</code>)<code></code> &mdash; opt_agsStyle
+     </td>
+</tr>
+<tr>
+<td class="paramSpacer">&nbsp;</td>
+</tr>
+<tr>
+<td width="20px"></td><td><code><span class="label">title</span>:String</code> (default = "<code></code>")<code></code> &mdash; opt_displayName
+     </td>
+</tr>
+</table>
+<p></p>
+<span class="label">Returns</span>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="20"></td><td><code>Array</code> &mdash; {GOverlay[]}
+     </td>
+</tr>
+</table>
+</div>
 <a name="fromLatLngBoundsToEnvelope()"></a>
 <table cellspacing="0" cellpadding="0" class="detailHeader">
 <tr>
@@ -417,7 +431,7 @@ showHideInherited();
 </tr>
 </table>
 <div class="detailBody">
-<code>public static function fromLatLngBoundsToEnvelope(gLatLngBounds:LatLngBounds, spatialReference:<a href="ArcGISSpatialReference.html">ArcGISSpatialReference</a>):*</code><span class="label">Parameters</span>
+<code>public static function fromLatLngBoundsToEnvelope(gLatLngBounds:LatLngBounds, spatialReference:<a href="SpatialReference.html">SpatialReference</a> = null):*</code><span class="label">Parameters</span>
 <table border="0" cellspacing="0" cellpadding="0">
 <tr>
 <td width="20px"></td><td><code><span class="label">gLatLngBounds</span>:LatLngBounds</code></td>
@@ -426,7 +440,7 @@ showHideInherited();
 <td class="paramSpacer">&nbsp;</td>
 </tr>
 <tr>
-<td width="20px"></td><td><code><span class="label">spatialReference</span>:<a href="ArcGISSpatialReference.html">ArcGISSpatialReference</a></code></td>
+<td width="20px"></td><td><code><span class="label">spatialReference</span>:<a href="SpatialReference.html">SpatialReference</a></code> (default = <code>null</code>)<code></code></td>
 </tr>
 </table>
 <p></p>
@@ -444,7 +458,7 @@ showHideInherited();
 </tr>
 </table>
 <div class="detailBody">
-<code>public static function fromLatLngToPoint(gLatLng:LatLng, sr:<a href="ArcGISSpatialReference.html">ArcGISSpatialReference</a>):*</code><span class="label">Parameters</span>
+<code>public static function fromLatLngToPoint(gLatLng:LatLng, sr:<a href="SpatialReference.html">SpatialReference</a> = null):*</code><span class="label">Parameters</span>
 <table border="0" cellspacing="0" cellpadding="0">
 <tr>
 <td width="20px"></td><td><code><span class="label">gLatLng</span>:LatLng</code></td>
@@ -453,7 +467,34 @@ showHideInherited();
 <td class="paramSpacer">&nbsp;</td>
 </tr>
 <tr>
-<td width="20px"></td><td><code><span class="label">sr</span>:<a href="ArcGISSpatialReference.html">ArcGISSpatialReference</a></code></td>
+<td width="20px"></td><td><code><span class="label">sr</span>:<a href="SpatialReference.html">SpatialReference</a></code> (default = <code>null</code>)<code></code></td>
+</tr>
+</table>
+<p></p>
+<span class="label">Returns</span>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="20"></td><td><code>*</code></td>
+</tr>
+</table>
+</div>
+<a name="fromOverlaysToGeometry()"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">fromOverlaysToGeometry</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public static function fromOverlaysToGeometry(ovs:Array, opt_sr:<a href="SpatialReference.html">SpatialReference</a> = null):*</code><span class="label">Parameters</span>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="20px"></td><td><code><span class="label">ovs</span>:Array</code></td>
+</tr>
+<tr>
+<td class="paramSpacer">&nbsp;</td>
+</tr>
+<tr>
+<td width="20px"></td><td><code><span class="label">opt_sr</span>:<a href="SpatialReference.html">SpatialReference</a></code> (default = <code>null</code>)<code></code></td>
 </tr>
 </table>
 <p></p>
@@ -471,7 +512,7 @@ showHideInherited();
 </tr>
 </table>
 <div class="detailBody">
-<code>public static function fromPointToLatLng(point:*, opt_sr:*):LatLng</code><span class="label">Parameters</span>
+<code>public static function fromPointToLatLng(point:*, opt_sr:* = null):LatLng</code><span class="label">Parameters</span>
 <table border="0" cellspacing="0" cellpadding="0">
 <tr>
 <td width="20px"></td><td><code><span class="label">point</span>:*</code></td>
@@ -480,7 +521,7 @@ showHideInherited();
 <td class="paramSpacer">&nbsp;</td>
 </tr>
 <tr>
-<td width="20px"></td><td><code><span class="label">opt_sr</span>:*</code></td>
+<td width="20px"></td><td><code><span class="label">opt_sr</span>:*</code> (default = <code>null</code>)<code></code></td>
 </tr>
 </table>
 <p></p>
@@ -491,29 +532,30 @@ showHideInherited();
 </tr>
 </table>
 </div>
-<a name="getJSON()"></a>
+<a name="getAttributeValue()"></a>
 <table cellspacing="0" cellpadding="0" class="detailHeader">
 <tr>
-<td class="detailHeaderName">getJSON</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td><td class="detailHeaderRule">&nbsp;</td>
+<td class="detailHeaderName">getAttributeValue</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td><td class="detailHeaderRule">&nbsp;</td>
 </tr>
 </table>
 <div class="detailBody">
-<code>public static function getJSON(url:String, params:Object, callbackFn:Function):void</code><span class="label">Parameters</span>
+<code>public static function getAttributeValue(attrs:*, name:String):*</code><span class="label">Parameters</span>
 <table border="0" cellspacing="0" cellpadding="0">
 <tr>
-<td width="20px"></td><td><code><span class="label">url</span>:String</code></td>
+<td width="20px"></td><td><code><span class="label">attrs</span>:*</code></td>
 </tr>
 <tr>
 <td class="paramSpacer">&nbsp;</td>
 </tr>
 <tr>
-<td width="20px"></td><td><code><span class="label">params</span>:Object</code></td>
+<td width="20px"></td><td><code><span class="label">name</span>:String</code></td>
 </tr>
+</table>
+<p></p>
+<span class="label">Returns</span>
+<table border="0" cellspacing="0" cellpadding="0">
 <tr>
-<td class="paramSpacer">&nbsp;</td>
-</tr>
-<tr>
-<td width="20px"></td><td><code><span class="label">callbackFn</span>:Function</code></td>
+<td width="20"></td><td><code>*</code></td>
 </tr>
 </table>
 </div>
@@ -556,6 +598,44 @@ showHideInherited();
 <table border="0" cellspacing="0" cellpadding="0">
 <tr>
 <td width="20"></td><td><code>Boolean</code></td>
+</tr>
+</table>
+</div>
+<a name="restRequest()"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">restRequest</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public static function restRequest(url:String, params:Object, thisObj:IEventDispatcher, sucessFn:Function, failFn:Function = null):void</code><span class="label">Parameters</span>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="20px"></td><td><code><span class="label">url</span>:String</code></td>
+</tr>
+<tr>
+<td class="paramSpacer">&nbsp;</td>
+</tr>
+<tr>
+<td width="20px"></td><td><code><span class="label">params</span>:Object</code></td>
+</tr>
+<tr>
+<td class="paramSpacer">&nbsp;</td>
+</tr>
+<tr>
+<td width="20px"></td><td><code><span class="label">thisObj</span>:IEventDispatcher</code></td>
+</tr>
+<tr>
+<td class="paramSpacer">&nbsp;</td>
+</tr>
+<tr>
+<td width="20px"></td><td><code><span class="label">sucessFn</span>:Function</code></td>
+</tr>
+<tr>
+<td class="paramSpacer">&nbsp;</td>
+</tr>
+<tr>
+<td width="20px"></td><td><code><span class="label">failFn</span>:Function</code> (default = <code>null</code>)<code></code></td>
 </tr>
 </table>
 </div>
