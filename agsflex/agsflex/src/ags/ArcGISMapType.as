@@ -1,24 +1,24 @@
 /*
-* ArcGIS for Google Maps Flash API
-* @author nianwei at gmail dot com
-*
-* Licensed under the Apache License, Version 2.0:
-*  http://www.apache.org/licenses/LICENSE-2.0
-*/
+ * ArcGIS for Google Maps Flash API
+ *
+ * License http://www.apache.org/licenses/LICENSE-2.0
+ */
+ /**
+ * @author nianwei at gmail dot com
+ */ 
+
 package ags {
   import com.google.maps.MapType;
   import com.google.maps.MapTypeOptions;
   import com.google.maps.interfaces.*;
   
   import flash.events.*;
- import ags.*;
- import ags.*;
  
 
 /**
  * A customized map type that can be used as background map.
  */ 
-  public class ArcGISMapType extends MapType {// MapType already but do not know what event implements IEventDispatcher {
+  public class ArcGISMapType extends MapType {// MapType already implements IEventDispatcher {
     
     private var projection_:ArcGISTileConfig;
     
