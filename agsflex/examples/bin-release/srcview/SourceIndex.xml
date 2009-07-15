@@ -13,9 +13,9 @@
 			<node label="LayerQuery.mxml" icon="mxmlIcon" url="source/LayerQuery.mxml.html"/>
 			<node label="LayerQuery3D.mxml" icon="mxmlIcon" url="source/LayerQuery3D.mxml.html"/>
 			<node label="LayerVisibility.mxml" icon="mxmlIcon" url="source/LayerVisibility.mxml.html"/>
-			<node selected="true" label="MapClick.mxml" icon="mxmlAppIcon" url="source/MapClick.mxml.html"/>
+			<node label="MapClick.mxml" icon="mxmlIcon" url="source/MapClick.mxml.html"/>
 			<node label="MapClick3D.mxml" icon="mxmlIcon" url="source/MapClick3D.mxml.html"/>
-			<node label="MultiService3D.mxml" icon="mxmlIcon" url="source/MultiService3D.mxml.html"/>
+			<node selected="true" label="MultiService3D.mxml" icon="mxmlAppIcon" url="source/MultiService3D.mxml.html"/>
 			<node label="ReverseGeocode.mxml" icon="mxmlIcon" url="source/ReverseGeocode.mxml.html"/>
 			<node label="SimpleAdd.mxml" icon="mxmlIcon" url="source/SimpleAdd.mxml.html"/>
 			<node label="StatePlane.mxml" icon="mxmlIcon" url="source/StatePlane.mxml.html"/>
