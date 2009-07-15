@@ -64,7 +64,7 @@
                     html+=x + ': ' + attrs[x] + '<br/>';
                   }
                 }
-                var loc:LatLng=result.location; //   ArcGISUtil.fromPointToLatLng(result.location, SpatialReferences.WGS84);
+                var loc:LatLng=result.location; 
                 marker.setLatLng(loc);
                 marker.openInfoWindow(new InfoWindowOptions({contentHTML: html}));
               } else {

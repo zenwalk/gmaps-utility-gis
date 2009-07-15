@@ -27,7 +27,7 @@
       import com.google.maps.MapOptions;
       import com.google.maps.interfaces.*;
 
-      import ags.gmaps.*; import ags.service.*;
+      import ags.*; 
 
 
       private function onMapReady(event:Event):void {

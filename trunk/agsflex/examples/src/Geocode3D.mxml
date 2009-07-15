@@ -12,28 +12,28 @@
                width="80%">
         <mx:HBox>
           <mx:Label text="Address"/>
-          <mx:TextInput text="380 new york st"
+          <mx:TextInput text="600 E 4th"
                         id="Address"
                         maxChars="60"
                         width="200"/>
         </mx:HBox>
         <mx:HBox>
           <mx:Label text="City"/>
-          <mx:TextInput text="Redlands"
+          <mx:TextInput text="Charlotte"
                         id="City"
                         maxChars="20"
                         width="84"/>
         </mx:HBox>
         <mx:HBox>
           <mx:Label text="State"/>
-          <mx:TextInput text="CA"
+          <mx:TextInput text="NC"
                         id="State"
                         maxChars="20"
                         width="84"/>
         </mx:HBox>
         <mx:HBox>
           <mx:Label text="Zip"/>
-          <mx:TextInput text="92373"
+          <mx:TextInput text="28202"
                         id="Zip"
                         maxChars="20"
                         width="84"/>
@@ -53,8 +53,9 @@
                     width="131"
                     visible="false"/>
         </mx:HBox>
-        <maps:Map xmlns:maps="com.google.maps.*"
+        <maps:Map3D xmlns:maps="com.google.maps.*"
                   id="map"
+                  mapevent_mappreinitialize="onMapPreinitialize(event);"
                   mapevent_mapready="onMapReady(event)"
                   width="100%"
                   height="100%"
@@ -73,6 +74,7 @@
 
   <mx:Script>
     <![CDATA[
+      import com.google.maps.geom.Attitude;
       import mx.events.ListEvent;
       import mx.controls.*;
       import mx.controls.dataGridClasses.*;
@@ -88,7 +90,9 @@
       private var results:Array=[];
       private var overlays:Array=[];
       private var bnds:LatLngBounds;
-
+      private function onMapPreinitialize(event:MapEvent):void {
+        map.setInitOptions(new MapOptions({viewMode: View.VIEWMODE_PERSPECTIVE, attitude: new Attitude(0, 0, 0)}));
+      }
       private function onMapReady(event:Event):void {
         map.setCenter(new LatLng(40, -100), 4);
         map.addControl(new MapTypeControl());
@@ -148,7 +152,8 @@
             overlays.push(marker);
             results.push(res.address + ' (' + res.score + ')');
           }
-          map.setCenter(bnds.getCenter(), map.getBoundsZoomLevel(bnds));
+          map.flyTo(bnds.getCenter(), map.getBoundsZoomLevel(bnds), new com.google.maps.geom.Attitude(20,30,0));
+          
           if (overlays.length > 0) {
             overlays[0].dispatchEvent(new MapMouseEvent(MapMouseEvent.CLICK, overlays[0], overlays[0].getLatLng()));
           }

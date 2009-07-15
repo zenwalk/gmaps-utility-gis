@@ -82,10 +82,11 @@
         var loadEnd:Date;
         ov.addEventListener(ServiceEvent.EXPORTMAP_START, function(evt:ServiceEvent):void {
             start=new Date();
-            msg.text='Drawing Imaging on Server....'; //.visible=true;
+            msg.text='Drawing Imaging on Server....'; 
           });
         ov.addEventListener(ServiceEvent.EXPORTMAP_COMPLETE, function(evt:ServiceEvent):void {
             exportEnd=new Date();
+            msg.text='Downloading Image from Server....'; 
           });
         ov.addEventListener(ServiceEvent.EXPORTMAP_LOAD, function(evt:ServiceEvent):void {
             loadEnd=new Date();
