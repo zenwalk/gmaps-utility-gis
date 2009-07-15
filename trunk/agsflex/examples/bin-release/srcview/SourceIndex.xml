@@ -2,37 +2,30 @@
 <index>
 	<title>Source of examples</title>
 	<nodes>
-		<node label="html-template">
-			<node label="history">
-				<node label="history.css" icon="cssIcon" url="source/html-template/history/history.css.html"/>
-				<node label="history.js" url="source/html-template/history/history.js.txt"/>
-				<node label="historyFrame.html" icon="htmlIcon" url="source/html-template/history/historyFrame.html"/>
-			</node>
-			<node label="AC_OETags.js" url="source/html-template/AC_OETags.js.txt"/>
-			<node label="index.template.html" icon="htmlIcon" url="source/html-template/index.template.html"/>
-			<node label="playerProductInstall.swf" icon="swfIcon" url="source/html-template/playerProductInstall.swf"/>
-		</node>
-		<node label="libs">
-		</node>
 		<node label="src" icon="classpathIcon" expanded="true">
-			<node label="AGOTileLayer.mxml" icon="mxmlIcon" url="source/AGOTileLayer.mxml.html"/>
 			<node label="ArcGISOnline.mxml" icon="mxmlIcon" url="source/ArcGISOnline.mxml.html"/>
 			<node label="DynamicLayer.mxml" icon="mxmlIcon" url="source/DynamicLayer.mxml.html"/>
+			<node label="Find.mxml" icon="mxmlIcon" url="source/Find.mxml.html"/>
 			<node label="Flat.mxml" icon="mxmlIcon" url="source/Flat.mxml.html"/>
 			<node label="Geocode.mxml" icon="mxmlIcon" url="source/Geocode.mxml.html"/>
+			<node label="Geocode3D.mxml" icon="mxmlIcon" url="source/Geocode3D.mxml.html"/>
 			<node label="LayerDefinition.mxml" icon="mxmlIcon" url="source/LayerDefinition.mxml.html"/>
 			<node label="LayerQuery.mxml" icon="mxmlIcon" url="source/LayerQuery.mxml.html"/>
+			<node label="LayerQuery3D.mxml" icon="mxmlIcon" url="source/LayerQuery3D.mxml.html"/>
 			<node label="LayerVisibility.mxml" icon="mxmlIcon" url="source/LayerVisibility.mxml.html"/>
 			<node selected="true" label="MapClick.mxml" icon="mxmlAppIcon" url="source/MapClick.mxml.html"/>
-			<node label="MapTypeOnLoad.mxml" icon="mxmlIcon" url="source/MapTypeOnLoad.mxml.html"/>
-			<node label="MercatorDirect.mxml" icon="mxmlIcon" url="source/MercatorDirect.mxml.html"/>
-			<node label="PreProjection.mxml" icon="mxmlIcon" url="source/PreProjection.mxml.html"/>
+			<node label="MapClick3D.mxml" icon="mxmlIcon" url="source/MapClick3D.mxml.html"/>
+			<node label="MultiService3D.mxml" icon="mxmlIcon" url="source/MultiService3D.mxml.html"/>
 			<node label="ReverseGeocode.mxml" icon="mxmlIcon" url="source/ReverseGeocode.mxml.html"/>
-			<node label="ServiceFind.mxml" icon="mxmlIcon" url="source/ServiceFind.mxml.html"/>
 			<node label="SimpleAdd.mxml" icon="mxmlIcon" url="source/SimpleAdd.mxml.html"/>
 			<node label="StatePlane.mxml" icon="mxmlIcon" url="source/StatePlane.mxml.html"/>
 			<node label="TileAndDynamic.mxml" icon="mxmlIcon" url="source/TileAndDynamic.mxml.html"/>
+			<node label="TileLayerAGO.mxml" icon="mxmlIcon" url="source/TileLayerAGO.mxml.html"/>
+			<node label="TileLayerAGO3D.mxml" icon="mxmlIcon" url="source/TileLayerAGO3D.mxml.html"/>
+			<node label="TileLayerMercator.mxml" icon="mxmlIcon" url="source/TileLayerMercator.mxml.html"/>
 			<node label="TileLayerOverlay.mxml" icon="mxmlIcon" url="source/TileLayerOverlay.mxml.html"/>
+			<node label="TileLayerOverlay3D.mxml" icon="mxmlIcon" url="source/TileLayerOverlay3D.mxml.html"/>
+			<node label="TileLayerPreConfig.mxml" icon="mxmlIcon" url="source/TileLayerPreConfig.mxml.html"/>
 		</node>
 	</nodes>
 </index>
