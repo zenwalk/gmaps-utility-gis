@@ -1,4 +1,12 @@
-package ags {
+/*
+ * ArcGIS for Google Maps Flash API
+ *
+ * License http://www.apache.org/licenses/LICENSE-2.0
+ */
+ /**
+ * @author nianwei at gmail dot com
+ */ 
+ package ags {
 
   public class ArcGISConstants {
     public static const GEOMETRY_POINT:String="esriGeometryPoint";

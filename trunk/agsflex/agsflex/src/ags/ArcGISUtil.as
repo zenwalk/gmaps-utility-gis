@@ -1,10 +1,11 @@
 /*
  * ArcGIS for Google Maps Flash API
- * @author nianwei at gmail dot com
  *
- * Licensed under the Apache License, Version 2.0:
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * License http://www.apache.org/licenses/LICENSE-2.0
  */
+ /**
+ * @author nianwei at gmail dot com
+ */ 
 package ags {
 
   import ags.json.*;
@@ -261,7 +262,7 @@ package ags {
         });
       service.addEventListener(ResultEvent.RESULT, function(evt:ResultEvent):void {
           var jsons:String=evt.result as String;
-          var d:JSONDecoder=new JSONDecoder(jsons, true);
+          var d:JSONDecoder=new JSONDecoder(jsons, false);// false strict to allow NAN in geocode results
           var json:Object=d.getValue();
           if (json.error){
              var err:ServiceError = new ServiceError(json.error);

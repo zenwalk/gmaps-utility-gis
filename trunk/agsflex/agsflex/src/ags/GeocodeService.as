@@ -1,10 +1,12 @@
 /*
- *  ArcGIS for Google Maps Flash API
- * @author nianwei at gmail dot com
+ * ArcGIS for Google Maps Flash API
  *
- * Licensed under the Apache License, Version 2.0:
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * License http://www.apache.org/licenses/LICENSE-2.0
  */
+ /**
+ * @author nianwei at gmail dot com
+ */ 
+
 package ags {
   import flash.events.Event;
   import flash.events.EventDispatcher;
@@ -14,7 +16,7 @@ package ags {
    * This class represent an  <a href="http://resources.esri.com/help/9.3/arcgisserver/apis/rest/geocodeserver.html">GeocodeServer</a>
    *  service.
    */
-  public dynamic class GeocodeService implements IEventDispatcher {
+  public class GeocodeService implements IEventDispatcher {
 
 
     public var url:String;
@@ -41,7 +43,7 @@ package ags {
      * @param {Object} json
      */
     private function init_(json:*):void {
-      this.spatialReference=new SpatialReference(json.spatialReference);
+      this.spatialReference= SpatialReferences.getSpatialReference(json.spatialReference.wkid);
       ArcGISUtil.augmentObject(json, this);
       /**
        * This event is fired when the service and it's service info is loaded.
