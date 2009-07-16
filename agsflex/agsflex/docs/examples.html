@@ -55,7 +55,7 @@
 <li><a href="#Dyna">Dynamic Map Service</a></li>
 <li><a href="#Mercator">Add Cached Service in Web Mercator tiles</a></li>
 <li><a href="#TileLoad">Add Cached Service in Non-Mercator tiles</a></li>
-<li><a href="#TileLayerOverlay">Add as ArcGISTileLayerOverlay</a></li>
+<li><a href="#TileLayerOverlay">Add as TileLayerOverlay</a></li>
 <li><a href="#Combined">Combining Tiled and Dynamic Maps</a></li>
 <li><a href="#ArcGISOnline">Add ArcGISOnline Maps</a></li>
 <li><a href="#Simple">One-step Add Map</a></li>
@@ -73,12 +73,13 @@
    <li><a href="#Find">Find</a></li>
    <li><a href="#Geocode">Geocode</a></li>
    <li><a href="#ReverseGeocode">ReverseGeocode</a></li>
+   <li><a href="#Multiple">Use Multiple Services</a></li>
    </ul>
    </td>
    <td style="border:0px">
         <br/>
    <ul>
-   <li><a href="#3D">3D /Perspective:</a></li>
+   <li><a href="#3D">3D /Perspective</a></li>
    </ul>
    </td>
   </tr>
@@ -112,7 +113,7 @@
 </pre>
 
 <p>
-<a target="_blank" href="../../examples/bin-release/DynamicLayer.html">View example </a> 
+<a target="_blank" href="../../examples/bin-release/DynamicLayer.html">View Example </a> 
     |
 <a target="_blank" href="../../examples/bin-release/srcview/source/DynamicLayer.mxml.html">
     Source Code </a> |
@@ -172,7 +173,7 @@
 </pre>
 
 <p>
-<a target="_blank" href="../../examples/bin-release/TileLayerAGO.html">View example </a> 
+<a target="_blank" href="../../examples/bin-release/TileLayerAGO.html">View Example </a> 
     |
 <a target="_blank" href="../../examples/bin-release/srcview/source/TileLayerAGO.mxml.html">
     Source Code </a> |
@@ -210,14 +211,15 @@
 		</pre>
 
 <p>
-<p>
+
 <a target="_blank" href="../../examples/bin-release/TileLayerOverlay.html">View 
-    example </a> |
+    Example </a> |
 <a target="_blank" href="../../examples/bin-release/srcview/source/TileLayerOverlay.mxml.html">
-    Source Code </a> |
+    Source Code </a> | <a target="_blank" href="../../examples/bin-release/TileLayerOverlay3D.html">View 
+    in 3D </a> |
 <a href="#Top">Back to top</a>
 </p>
-</p>
+
 </div>
 
 
@@ -264,7 +266,7 @@
 
 <p>
 <a target="_blank" href="../../examples/bin-release/TileAndDynamic.html">View 
-    example </a> |
+    Example </a> |
 <a target="_blank" href="../../examples/bin-release/srcview/source/TileAndDynamic.mxml.html">
     Source Code </a> |
 <a href="#Top">Back to top</a>
@@ -297,7 +299,7 @@
 </pre>
 
 <p>
-<a target="_blank" href="../../examples/bin-release/ArcGISOnline.html">View example </a> 
+<a target="_blank" href="../../examples/bin-release/ArcGISOnline.html">View Example </a> 
     |
 <a target="_blank" href="../../examples/bin-release/srcview/source/ArcGISOnline.mxml.html">
     Source Code </a> | 
@@ -324,7 +326,7 @@
 </pre>
 
 <p>
-<a target="_blank" href="../../examples/bin-release/SimpleAdd.html">View example </a> 
+<a target="_blank" href="../../examples/bin-release/SimpleAdd.html">View Example </a> 
     |
 <a target="_blank" href="../../examples/bin-release/srcview/source/SimpleAdd.mxml.html">
     Source Code </a> |
@@ -399,7 +401,7 @@
 </pre>
 
 <p>
-<a target="_blank" href="../../examples/bin-release/StatePlane.html">View example </a> 
+<a target="_blank" href="../../examples/bin-release/StatePlane.html">View Example </a> 
     |
 <a target="_blank" href="../../examples/bin-release/srcview/source/StatePlane.mxml.html">
     Source Code </a> |
@@ -436,10 +438,11 @@
    
 
 <p>
-<a target="_blank" href="../../examples/bin-release/MapClick.html">View example </a> 
-    |
+<a target="_blank" href="../../examples/bin-release/MapClick.html">View Example </a> 
+    | 
 <a target="_blank" href="../../examples/bin-release/srcview/source/MapClick.mxml.html">
-    Source Code </a> | 
+    Source Code </a> | <a target="_blank" href="../../examples/bin-release/MapClick3D.html">View in 3D </a> 
+    |
 <a href="#Top">Back to top</a></p>
 </div>
 
@@ -530,10 +533,11 @@ dynaLayer.refresh();
 </pre>
 
 <p>
-<a target="_blank" href="../../examples/bin-release/LayerQuery.html">View example </a> 
-    |
+<a target="_blank" href="../../examples/bin-release/LayerQuery.html">View Example </a> 
+    | 
 <a target="_blank" href="../../examples/bin-release/srcview/source/LayerQuery.mxml.html">
-    Source Code </a> | 
+    Source Code </a> | <a target="_blank" href="../../examples/bin-release/LayerQuery3D.html"> View 
+              in 3D </a> |
 <a href="#Top">Back to top</a>
 </p>
 </div>
@@ -569,7 +573,7 @@ dynaLayer.refresh();
 </pre>
 
 <p>
-<a target="_blank" href="../../examples/bin-release/Find.html">View example </a> |
+<a target="_blank" href="../../examples/bin-release/Find.html">View Example </a> |
 <a target="_blank" href="../../examples/bin-release/srcview/source/Find.mxml.html">
     Source Code </a> | 
 <a href="#Top">Back to top</a>
@@ -620,14 +624,15 @@ dynaLayer.refresh();
 </pre>
 
 <p>
-<a target="_blank" href="../../examples/bin-release/Geocode.html">View example </a> 
-    |
+<a target="_blank" href="../../examples/bin-release/Geocode.html">View Example </a> 
+    | 
 <a target="_blank" href="../../examples/bin-release/srcview/source/Geocode.mxml.html">
-    Source Code </a> | 
+    Source Code </a> | <a target="_blank" href="../../examples/bin-release/Geocode3D.html">View in 3D </a> 
+    |
 <a href="#Top">Back to top</a>
 </p>
 </div>
-<div>
+
   <div>
 <h2><a name="ReverseGeocode"></a>Reverse Geocode</h2>
 <p>You can also find the address of a given geographic coordinates (reverse 
@@ -661,15 +666,66 @@ private function reverseGeocode(latlng:LatLng):void {
 
 <p>
 <a target="_blank" href="../../examples/bin-release/ReverseGeocode.html">View 
-    example </a> |
+    Example </a> |
 <a target="_blank" href="../../examples/bin-release/srcview/source/ReverseGeocode.mxml.html">
     Source Code </a> | 
 <a href="#Top">Back to top</a>
 </p>
 </div>
   <div>
+<h2><a name="Multiple"></a>Use Mutiple Services</h2>
+<p>A complete application generally uses more than one type of services together, 
+    for example, geocoding service results will be added to a map service. The 
+    following example combines GeocodeService.findAddressCandiate and 
+    MapService.identify. </p> 
+<pre class="prettyprint">
+    private function doIdentify(latlng:LatLng):void {
+       ...
+        var idParams:IdentifyParameters=new IdentifyParameters({
+          geometry: latlng, 
+          layerOption: 'top', 
+          tolerance: 5, 
+          bounds: bnds, 
+          width: size.x, 
+          height: size.y, 
+          dpi: 96, 
+          returnGeometry: true});
+        svc.identify(idParams, function processResults(res:IdentifyResults):void {
+        ...
+              map.openInfoWindow(latlng, new InfoWindowOptions({
+              drawDefaultFrame: true, 
+              customContent: idWin, 
+              fillStyle: new FillStyle({alpha: 0.2})}));
+            }
+          });
+      }
+      
+    private function doGeocode(addr:String):void {
+      var params:GeocodeParameters=new GeocodeParameters({inputs: {Street: addr}});
+      gc.findAddressCandidates(params, function(gcRes:GeocodeResults):void {
+            Application.application.cursorManager.removeBusyCursor();
+            if (gcRes.candidates && gcRes.candidates.length > 0) {
+              var res:GeocodeResult=gcRes.candidates[0];
+              ...
+                doIdentify(res.location);
+                return;
+              }
+            } 
+      });
+   }
+</pre>
+
+<p>
+<a target="_blank" href="../../examples/bin-release/MultiService3D.html">View 
+    Example in 3D </a> |
+<a target="_blank" href="../../examples/bin-release/srcview/source/MultiService3D.mxml.html">
+    Source Code </a> | 
+<a href="#Top">Back to top</a>
+</p>
+</div>
+  <div>
 <h2><a name="3D"></a>3D/Perspective</h2>
-<p>The following are a few above samples running in 3D /Perspective mode:</p> 
+<p>Google Flash API supports Perspective view since V1.13.The following are a few above samples running in 3D /Perspective mode:</p> 
 
       <ul>
           <li>Layer Query/Overlays: <a target="_blank" href="../../examples/bin-release/LayerQuery3D.html"> View 
@@ -679,10 +735,6 @@ private function reverseGeocode(latlng:LatLng):void {
                         <li>Map Click /Identify: <a target="_blank" href="../../examples/bin-release/MapClick3D.html"> View 
               Example</a> |
               <a target="_blank" href="../../examples/bin-release/srcview/source/MapClick3D.mxml.html">
-              Source Code</a></li>
-                        <li>State Plane Tiles: <a target="_blank" href="../../examples/bin-release/StatePlane3D.html"> View 
-              Example</a> |
-              <a target="_blank" href="../../examples/bin-release/srcview/source/StatePlane3D.mxml.html">
               Source Code</a></li>
               <li>TileLayerOverlay: <a target="_blank" href="../../examples/bin-release/TileLayerOverlay3D.html"> View 
               Example</a> |
@@ -710,8 +762,8 @@ private function reverseGeocode(latlng:LatLng):void {
               for AS3. 
           </li>
       </ul>    
-</p>
-
+<p>&nbsp;</p>
+<p>&nbsp;</p>
       
 
 <script type="text/javascript">
