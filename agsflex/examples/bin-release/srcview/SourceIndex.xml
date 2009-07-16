@@ -21,7 +21,6 @@
 			<node label="StatePlane.mxml" icon="mxmlIcon" url="source/StatePlane.mxml.html"/>
 			<node label="TileAndDynamic.mxml" icon="mxmlIcon" url="source/TileAndDynamic.mxml.html"/>
 			<node label="TileLayerAGO.mxml" icon="mxmlIcon" url="source/TileLayerAGO.mxml.html"/>
-			<node label="TileLayerAGO3D.mxml" icon="mxmlIcon" url="source/TileLayerAGO3D.mxml.html"/>
 			<node label="TileLayerMercator.mxml" icon="mxmlIcon" url="source/TileLayerMercator.mxml.html"/>
 			<node label="TileLayerOverlay.mxml" icon="mxmlIcon" url="source/TileLayerOverlay.mxml.html"/>
 			<node label="TileLayerOverlay3D.mxml" icon="mxmlIcon" url="source/TileLayerOverlay3D.mxml.html"/>
