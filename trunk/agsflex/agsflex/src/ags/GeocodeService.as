@@ -43,7 +43,13 @@ package ags {
      * @param {Object} json
      */
     private function init_(json:*):void {
-      this.spatialReference= SpatialReferences.getSpatialReference(json.spatialReference.wkid);
+      if (json.spatialReference){
+        // some service will miss saptial reference definition like the one on sampleserver1.arcgisonline.com
+        this.spatialReference= SpatialReferences.getSpatialReference(json.spatialReference.wkid);
+      } else {
+        this.spatialReference= SpatialReferences.WGS84;
+      }
+      
       ArcGISUtil.augmentObject(json, this);
       /**
        * This event is fired when the service and it's service info is loaded.
