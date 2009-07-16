@@ -4,30 +4,31 @@
                 width="100%"
                 height="100%"
                 viewSourceURL="srcview/index.html">
-  <mx:Panel title="Use Multiple ArcGIS Service"
+  <mx:Panel title="Use Multiple ArcGIS Service: GeocodeService and MapService"
             width="100%"
             height="100%">
     <mx:VBox width="100%"
              height="100%">
-      <mx:Text htmlText="This sample shows using ArcGIS Map Service and Geocoding Service together. 
-      &lt;br/&gt;The base map is a customized map type with tiles created in NC State Plane 83 Feet Coordinate System, with tile size of 512 x 512.
-       &lt;br/&gt;The Map Click event is wired to an Identify operation (Spatial Query) on the map service. Results are displayed in an InfoWindow.
-       &lt;br/&gt;Returned geometry is also added to map as Marker, Polyline or Polygon overlay, depending on what you clicked on (address point, parcel or street).
-       &lt;br/&gt;It also uses a Locator based on descrete master address point data for roof top level geocoding (Charlotte, NC address only). 
-       &lt;br/&gt;The Geocoding result is then passed into an Identify opertation again to get detail information about the address.
-      " />
+      <mx:Text htmlText="The base map is a map type with tiles created in NC State Plane 83 with tile size of 512 x 512.
+       &lt;br/&gt;Click anywhere on map will trigger MapService.Identify operation. Results are displayed in an InfoWindow and highlighted on map as either Marker, Polyline or Polygon.
+       &lt;br/&gt;It also uses a GeocodeService.findAddressCandiates (Charlotte, NC address only) and result is chained to MapSerivce.Identify again for detailed info. 
+       " />
       <mx:HBox width="100%">
-        <mx:Label text="Go to Address:">
+        <mx:Label text="Type in a Charlotte,NC address or pick a sample:">
         </mx:Label>
-        <mx:TextInput id="address"
-                      text="600 E 4th st"/>
-
-        <mx:Label text="(Charlotte, NC)">
-        </mx:Label>
+        <mx:ComboBox editable="true" id="addr" width="300">
+        <mx:ArrayCollection>
+         <mx:String>600 E 4th st</mx:String>
+         <mx:String>700 N tryon st</mx:String>
+         <mx:String>5801 Rea rd</mx:String>
+         <mx:String>8015 ballantyne commons parkway</mx:String>
+      </mx:ArrayCollection>
+      </mx:ComboBox>
         <mx:Button id="go"
                    label="Go"
                    enabled="false"
-                   click="doGeocode(address.text)"/>
+                   click="doGeocode(addr.text)"/>
+        
       </mx:HBox>
       <mx:UIComponent id="mapHolder"
                       creationComplete="onHolderCreated(event)"
@@ -90,7 +91,7 @@
         var agsLayer:ArcGISTileLayer=new ArcGISTileLayer(svc);
         var agsMapType:ArcGISMapType=new ArcGISMapType([agsLayer], new ArcGISMapTypeOptions({name: agsLayer.getName().replace(/ /g, '\n')}));
         var bnds:LatLngBounds=agsLayer.getInitialBounds();
-        var opts:MapOptions=new MapOptions({viewMode: View.VIEWMODE_PERSPECTIVE, attitude: new Attitude(20, 30, 0)});
+        var opts:MapOptions=new MapOptions({viewMode: View.VIEWMODE_PERSPECTIVE, attitude: new Attitude(0, 30, 0)});
         opts.zoom=17;
         opts.center=new LatLng(35.227, -80.84);
         opts.mapTypes=[agsMapType];
@@ -155,6 +156,10 @@
       }
 
       private function doGeocode(addr:String):void {
+        if (!addr){
+          Alert.show('Please type or choose a valid Charlotte address');
+          return;
+        }
         map.clearOverlays();
         map.closeInfoWindow();
         var params:GeocodeParameters=new GeocodeParameters({inputs: {Street: addr}});
