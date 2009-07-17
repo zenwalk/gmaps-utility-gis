@@ -128,11 +128,13 @@ package ags {
       }
       var params:Object={
         f:'json',
-        outFields:qparams.outFields.join(','),
         returnGeometry:qparams.returnGeometry === false ? false : true,
         where:qparams.where,
         outSR:SpatialReferences.WGS84.wkid
       };
+      if (qparams.outFields && qparams.outFields.length>0){
+        params.outFields=qparams.outFields.join(',');
+      }
       if (qparams.geometry && qparams.geometry.length>0){
         params.geometry=ArcGISUtil.fromGeometryToJSON(ArcGISUtil.fromOverlaysToGeometry(qparams.geometry, SpatialReferences.WGS84));
         params.spatialRel=qparams.spatialRelationship;

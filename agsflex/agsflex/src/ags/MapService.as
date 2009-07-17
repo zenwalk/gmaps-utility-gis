@@ -385,10 +385,15 @@ package ags {
      * @param {QueryParameters} params
      * @param {Function} callback
      */
-    public function queryLayer(layerNameOrId:String, params:*, callback:Function=null, failedFn:Function=null):void {
+    public function queryLayer(layerNameOrId:String, params:QueryParameters, callback:Function=null, failedFn:Function=null):void {
       var layer:Layer=this.getLayer(layerNameOrId);
       if (layer) {
         layer.query(params, callback, failedFn);
+      } else {
+        this.dispatchEvent(new ServiceEvent(ServiceEvent.ERROR,
+        new ServiceError(
+        {message:"Can not find Layer:"+layerNameOrId}
+        )));
       }
     }
 
