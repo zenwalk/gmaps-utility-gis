@@ -10,8 +10,8 @@
     <mx:VBox width="100%"
              height="100%">
       <mx:Text htmlText="The base map is a map type with tiles created in NC State Plane 83 with tile size of 512 x 512.
-       &lt;br/&gt;Click anywhere on map will trigger MapService.Identify operation. Results are displayed in an InfoWindow and highlighted on map as either Marker, Polyline or Polygon.
-       &lt;br/&gt;It also uses a GeocodeService.findAddressCandiates (Charlotte, NC address only) and result is chained to MapSerivce.Identify again for detailed info. 
+       &lt;br/&gt;Click anywhere on map will trigger MapService.identify operation. Results are displayed in an InfoWindow and highlighted on map as either Marker, Polyline or Polygon.
+       &lt;br/&gt;It also uses a GeocodeService.findAddressCandiates (for Charlotte, NC address only) and result is passed to MapSerivce.query operation again for detailed info about the address. 
        " />
       <mx:HBox width="100%">
         <mx:Label text="Type in a Charlotte,NC address or pick a sample:">
@@ -58,6 +58,7 @@
       private var map:Map3D;
       private var svc:MapService;
       private var gc:GeocodeService;
+      private var layer:Layer;
 
       SpatialReferences.addSpatialReference(2264, 'PROJCS["NAD_1983_StatePlane_North_Carolina_FIPS_3200_Feet",GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Lambert_Conformal_Conic"],PARAMETER["False_Easting",2000000.002616666],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",-79.0],PARAMETER["Standard_Parallel_1",34.33333333333334],PARAMETER["Standard_Parallel_2",36.16666666666666],PARAMETER["Latitude_Of_Origin",33.75],UNIT["Foot_US",0.3048006096012192]]');
 
@@ -68,6 +69,7 @@
             Alert.show(evt.data.toString());
             Application.application.cursorManager.removeBusyCursor();
           });
+       
       }
 
       public function onHolderResized(event:Event):void {
@@ -77,17 +79,17 @@
       }
 
       public function onServiceLoad(event:ServiceEvent):void {
-        // map should be constructed after service load instead from MXML, if you do not want load Google Tiles at all. 
         map=new Map3D();
         map.key="ABQIAAAA7QUChpcnvnmXxsjC7s1fCxQGj0PqsCtxKvarsoS-iqLdqZSKfxTd7Xf-2rEc_PC9o8IsJde80Wnj4g";
         map.width=mapHolder.width;
         map.height=mapHolder.height;
         mapHolder.addChild(map);
-        map.addEventListener(MapEvent.MAP_PREINITIALIZE, onMapPreinitialize);
+        map.addEventListener(MapEvent.MAP_PREINITIALIZE, onMapPreInitialize);
         map.addEventListener(MapEvent.MAP_READY, onMapReady);
+        layer = svc.getLayer('Master Address');
       }
 
-      private function onMapPreinitialize(event:Event):void {
+      private function onMapPreInitialize(event:Event):void {
         var agsLayer:ArcGISTileLayer=new ArcGISTileLayer(svc);
         var agsMapType:ArcGISMapType=new ArcGISMapType([agsLayer], new ArcGISMapTypeOptions({name: agsLayer.getName().replace(/ /g, '\n')}));
         var bnds:LatLngBounds=agsLayer.getInitialBounds();
@@ -105,11 +107,11 @@
         map.enableScrollWheelZoom();
         map.addEventListener(MapMouseEvent.CLICK, function(evt:MapMouseEvent):void {
             doIdentify(evt.latLng);
-          });
+        });
         gc=new GeocodeService('http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/GET/MATLocator/GeocodeServer');
         gc.addEventListener(ServiceEvent.LOAD, function(evt:ServiceEvent):void {
             go.enabled=true;
-          });
+        });
       }
 
 
@@ -117,6 +119,7 @@
         map.clearOverlays();
         var prj:IProjection=map.getProjection();
         var size:Point=map.getSize();
+        // Map.getLatLngBounds returns null, so approximate here.
         var pt:Point=map.fromLatLngToPoint(latlng);
         var sw:LatLng=map.fromPointToLatLng(new Point(pt.x - size.x / 2, pt.y + size.y / 2));
         var ne:LatLng=map.fromPointToLatLng(new Point(pt.x + size.x / 2, pt.y - size.y / 2));
@@ -125,7 +128,7 @@
 
         var idParams:IdentifyParameters=new IdentifyParameters({geometry: latlng, layerOption: 'top', tolerance: 5, bounds: bnds, width: size.x, height: size.y, dpi: 96, returnGeometry: true});
         Application.application.cursorManager.setBusyCursor();
-        svc.identify(idParams, function processResults(res:IdentifyResults):void {
+        svc.identify(idParams, function (res:IdentifyResults):void {
             Application.application.cursorManager.removeBusyCursor();
             if (res.results && res.results.length > 0) {
               idWin.visible=true;
@@ -162,7 +165,7 @@
         }
         map.clearOverlays();
         map.closeInfoWindow();
-        var params:GeocodeParameters=new GeocodeParameters({inputs: {Street: addr}});
+        var params:GeocodeParameters=new GeocodeParameters({inputs: {Street: addr, outFields:['Ref_ID']}});
         Application.application.cursorManager.setBusyCursor();
         gc.findAddressCandidates(params, function(gcRes:GeocodeResults):void {
             Application.application.cursorManager.removeBusyCursor();
@@ -172,15 +175,46 @@
               if (res.location!=null){
                 trace(res.location.toUrlValue());
                 map.flyTo(res.location, 17, new com.google.maps.geom.Attitude(20, 30, 0));
-                doIdentify(res.location);
+                doQuery(res.attributes['Ref_ID'], res.location);
+                //doIdentify();
                 return;
               }
             } 
              Alert.show('Can not find address. Please check your input. Note only Charlotte, NC address can be located');
-            
+           });
+
+
+      }
+      
+      private function doQuery(objectid:int, latlng:LatLng):void{
+         var params:QueryParameters=new QueryParameters({
+         returnGeometry: false, 
+         where: "OBJECTID = "+objectid, outFields:['*']});
+         
+         layer.query(params, function(rs:ResultSet):void {
+           Application.application.cursorManager.removeBusyCursor();
+           var fs:Array=rs.features;
+           if (fs && fs.length>0){
+              idWin.visible=true;
+              idWin.title= layer.name+':'+ArcGISUtil.getAttributeValue((fs[0] as Feature).attributes, rs.displayFieldName);
+              var data:ArrayCollection=new ArrayCollection();
+              for (var i:int=0, c:int=fs.length; i < c; i++) {
+                var r:Feature=fs[i] as Feature;
+                var a:*=r.attributes;
+                for (var x:String in a) {
+                  if (a.hasOwnProperty(x)) {
+                    var val:*=a[x];
+                    val=(val === null || typeof val === 'undefined') ? '' : '' + val;
+                    data.addItem({name: rs.fieldAliases[x], value: val});
+                  }
+                }
+              }
+              idResults.dataProvider=data;
+              idResults.alpha=0.5;
+              map.openInfoWindow(latlng, new InfoWindowOptions({drawDefaultFrame: true, customContent: idWin, fillStyle: new FillStyle({alpha: 0.2})}));
+            }
           });
-
-
+       
       }
     ]]>
   </mx:Script>

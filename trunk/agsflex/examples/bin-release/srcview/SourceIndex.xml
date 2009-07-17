@@ -2,6 +2,63 @@
 <index>
 	<title>Source of examples</title>
 	<nodes>
+		<node label="[source path] src" icon="classpathIcon" expanded="true">
+			<node label="ags" icon="packageIcon" expanded="true">
+				<node label="ArcGISConstants.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ArcGISConstants.as.html"/>
+				<node label="ArcGISMapOverlay.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ArcGISMapOverlay.as.html"/>
+				<node label="ArcGISMapOverlayOptions.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ArcGISMapOverlayOptions.as.html"/>
+				<node label="ArcGISMapType.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ArcGISMapType.as.html"/>
+				<node label="ArcGISMapTypeOptions.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ArcGISMapTypeOptions.as.html"/>
+				<node label="ArcGISTileConfig.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ArcGISTileConfig.as.html"/>
+				<node label="ArcGISTileLayer.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ArcGISTileLayer.as.html"/>
+				<node label="ArcGISTileLayerOptions.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ArcGISTileLayerOptions.as.html"/>
+				<node label="ArcGISTileLayerOverlay.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ArcGISTileLayerOverlay.as.html"/>
+				<node label="ArcGISUtil.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ArcGISUtil.as.html"/>
+				<node label="Feature.as" icon="actionScriptIcon" url="source//agsflex/src/ags/Feature.as.html"/>
+				<node label="FindParameters.as" icon="actionScriptIcon" url="source//agsflex/src/ags/FindParameters.as.html"/>
+				<node label="FindResult.as" icon="actionScriptIcon" url="source//agsflex/src/ags/FindResult.as.html"/>
+				<node label="FindResults.as" icon="actionScriptIcon" url="source//agsflex/src/ags/FindResults.as.html"/>
+				<node label="FlatSpatialReference.as" icon="actionScriptIcon" url="source//agsflex/src/ags/FlatSpatialReference.as.html"/>
+				<node label="GeocodeParameters.as" icon="actionScriptIcon" url="source//agsflex/src/ags/GeocodeParameters.as.html"/>
+				<node label="GeocodeResult.as" icon="actionScriptIcon" url="source//agsflex/src/ags/GeocodeResult.as.html"/>
+				<node label="GeocodeResults.as" icon="actionScriptIcon" url="source//agsflex/src/ags/GeocodeResults.as.html"/>
+				<node label="GeocodeService.as" icon="actionScriptIcon" url="source//agsflex/src/ags/GeocodeService.as.html"/>
+				<node label="Geographic.as" icon="actionScriptIcon" url="source//agsflex/src/ags/Geographic.as.html"/>
+				<node label="GeometryService.as" icon="actionScriptIcon" url="source//agsflex/src/ags/GeometryService.as.html"/>
+				<node label="IdentifyParameters.as" icon="actionScriptIcon" url="source//agsflex/src/ags/IdentifyParameters.as.html"/>
+				<node label="IdentifyResult.as" icon="actionScriptIcon" url="source//agsflex/src/ags/IdentifyResult.as.html"/>
+				<node label="IdentifyResults.as" icon="actionScriptIcon" url="source//agsflex/src/ags/IdentifyResults.as.html"/>
+				<node label="ImageParameters.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ImageParameters.as.html"/>
+				<node label="LambertConformalConic.as" icon="actionScriptIcon" url="source//agsflex/src/ags/LambertConformalConic.as.html"/>
+				<node label="Layer.as" icon="actionScriptIcon" url="source//agsflex/src/ags/Layer.as.html"/>
+				<node label="LayerOptions.as" icon="actionScriptIcon" url="source//agsflex/src/ags/LayerOptions.as.html"/>
+				<node label="MapImage.as" icon="actionScriptIcon" url="source//agsflex/src/ags/MapImage.as.html"/>
+				<node label="MapService.as" icon="actionScriptIcon" url="source//agsflex/src/ags/MapService.as.html"/>
+				<node label="MapServiceOptions.as" icon="actionScriptIcon" url="source//agsflex/src/ags/MapServiceOptions.as.html"/>
+				<node label="NetworkService.as" icon="actionScriptIcon" url="source//agsflex/src/ags/NetworkService.as.html"/>
+				<node label="OverlayOptions.as" icon="actionScriptIcon" url="source//agsflex/src/ags/OverlayOptions.as.html"/>
+				<node label="QueryParameters.as" icon="actionScriptIcon" url="source//agsflex/src/ags/QueryParameters.as.html"/>
+				<node label="ResultSet.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ResultSet.as.html"/>
+				<node label="ReverseGeocodeParameters.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ReverseGeocodeParameters.as.html"/>
+				<node label="ReverseGeocodeResult.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ReverseGeocodeResult.as.html"/>
+				<node label="ServiceError.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ServiceError.as.html"/>
+				<node label="ServiceEvent.as" icon="actionScriptIcon" url="source//agsflex/src/ags/ServiceEvent.as.html"/>
+				<node label="SpatialReference.as" icon="actionScriptIcon" url="source//agsflex/src/ags/SpatialReference.as.html"/>
+				<node label="SpatialReferences.as" icon="actionScriptIcon" url="source//agsflex/src/ags/SpatialReferences.as.html"/>
+				<node label="SphereMercator.as" icon="actionScriptIcon" url="source//agsflex/src/ags/SphereMercator.as.html"/>
+				<node label="TransverseMercator.as" icon="actionScriptIcon" url="source//agsflex/src/ags/TransverseMercator.as.html"/>
+			</node>
+			<node label="ags.json" icon="packageIcon" expanded="true">
+				<node label="JSON.as" icon="actionScriptIcon" url="source//agsflex/src/ags/json/JSON.as.html"/>
+				<node label="JSONDecoder.as" icon="actionScriptIcon" url="source//agsflex/src/ags/json/JSONDecoder.as.html"/>
+				<node label="JSONEncoder.as" icon="actionScriptIcon" url="source//agsflex/src/ags/json/JSONEncoder.as.html"/>
+				<node label="JSONParseError.as" icon="actionScriptIcon" url="source//agsflex/src/ags/json/JSONParseError.as.html"/>
+				<node label="JSONToken.as" icon="actionScriptIcon" url="source//agsflex/src/ags/json/JSONToken.as.html"/>
+				<node label="JSONTokenizer.as" icon="actionScriptIcon" url="source//agsflex/src/ags/json/JSONTokenizer.as.html"/>
+				<node label="JSONTokenType.as" icon="actionScriptIcon" url="source//agsflex/src/ags/json/JSONTokenType.as.html"/>
+				<node label="OrderedObject.as" icon="actionScriptIcon" url="source//agsflex/src/ags/json/OrderedObject.as.html"/>
+			</node>
+		</node>
 		<node label="src" icon="classpathIcon" expanded="true">
 			<node label="ArcGISOnline.mxml" icon="mxmlIcon" url="source/ArcGISOnline.mxml.html"/>
 			<node label="DynamicLayer.mxml" icon="mxmlIcon" url="source/DynamicLayer.mxml.html"/>
