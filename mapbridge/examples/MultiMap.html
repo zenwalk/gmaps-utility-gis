@@ -1,0 +1,71 @@
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <title>Diff MultiMap</title>
+        <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw">
+        </script>
+        <script type="text/javascript">
+            
+            var map1;
+            var map2;
+            function init() {
+              MapBridge.createMap(document.getElementById('map1'), function(m) {
+                map1 = m;
+                map1.addEventListener('mapevent_mappreinitialize', onMapPreinitialize1);
+                map1.addEventListener('mapevent_mapready', onMapReady1);
+              });
+              MapBridge.createMap(document.getElementById('map2'), function(m) {
+                map2 = m;
+                map2.addEventListener('mapevent_mappreinitialize', onMapPreinitialize2);
+                map2.addEventListener('mapevent_mapready', onMapReady2);
+              });
+            }
+            
+            function onMapPreinitialize1(e) {
+              map1.setInitOptions(new MapOptions(map1, {
+                viewMode: View.C(map1,'VIEWMODE_PERSPECTIVE'),
+                zoom: 5,
+                center: new LatLng(map1, -29.3, 149.6),
+                attitude: new Attitude(map1, -53, 46, 0),
+                mapType: MapType.C(map1,'HYBRID_MAP_TYPE')
+              }));
+            }
+            
+            function onMapReady1(e) {
+              map1.enableContinuousZoom();
+              map1.enableScrollWheelZoom();
+              map1.addControl(new NavigationControl(map1));
+              map1.addControl(new MapTypeControl(map1));
+            }
+            
+            function onMapPreinitialize2(e) {
+              map2.setInitOptions(new MapOptions(map2, {
+                viewMode: View.C(map2,'VIEWMODE_2D'),
+                zoom: 5,
+                center: new LatLng(map2, -29.3, 149.6),
+                attitude: new Attitude(map2, -53, 46, 0),
+                mapType: MapType.C(map2,'NORMAL_MAP_TYPE')
+              }));
+            }
+            
+            function onMapReady2(e) {
+              map2.enableContinuousZoom();
+              map2.enableScrollWheelZoom();
+              map2.addControl(new NavigationControl(map2));
+              map2.addControl(new MapTypeControl(map2));
+            }
+        </script>
+    </head>
+    <body onload="init()">
+        <div>
+            Create 2 maps with different init options on same page.
+        </div>
+        <div style="position:relative">
+            <div id="map1" style="position:absolute;left :0px;top: 0px;width: 400px;height: 500px;">
+            </div>
+            <div id="map2" style="position:absolute;left :410px;top: 0px;width: 400px;height: 500px;">
+            </div>
+        </div>
+    </body>
+</html>

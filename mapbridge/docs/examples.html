@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <title>MapBridge Examples</title>
+        <link rel="stylesheet" type="text/css" href="http://code.google.com/css/codesite.css"/>
+        <link rel="stylesheet" type="text/css" href="http://gmaps-utility-library.googlecode.com/svn/trunk/util/docs/template/local_extensions.css"/>
+        <script type="text/javascript" src="http://code.google.com/js/prettify.js">
+        </script>
+    </head>
+    <body onload="prettyPrint()">
+        <div>
+            <a name="Top"></a>
+            <h1><a></a>MapBridge Examples</h1>
+        </div>
+        <p>
+            <a href="reference.html">API Reference</a>
+        </p>
+        <div>
+            <h2>How to Use</h2>
+            <p>
+                This library provides a JavaScript proxy library to Google Maps Flash API 
+                using Adobe&#39;s <a href="http://labs.adobe.com/wiki/index.php/Flex_Framework:FABridge">FABridge</a>
+                and project <a href="http://code.google.com/p/swfobject/">SWFObject</a>. 
+            </p>
+            <ul>
+                <li>
+                    &nbsp;<b>Include Library</b>. The first step is to include 
+                    <code>
+                        <span lang="en-us">mapbridge</span>.js
+                    </code>
+                    or 
+                    <code>
+                        <span lang="en-us">mapbridge</span>_packed.js
+                    </code>
+                    in your document header. You can use the online version if you do not want to download the script.
+                
+                    <br />Make sure to include your API key in the parameter. It will be passed to the 
+                    Flash API.<pre class="prettyprint">
+      &lt;script src=&quot;/path/to/mapbridge_packed.js?key=your_gmaps_api_key&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+    </li></pre>
+            </ul>
+            <ul>
+                <li>
+                    <b>Create Map Instance</b>. Use 
+                    <code>
+                        MapBridge.createMap
+                    </code>
+                    static method to create a map instance. Get reference to 
+                    the map from the callback function&#39;s first parameter. 
+                </li>
+                <pre class="prettyprint">
+      var map;
+      function init(){
+        MapBridge.createMap(document.getElementById(&#39;map_canvas&#39;), function(m){
+          map = m;
+          // start working with map
+        }
+      }
+    </pre>
+            </ul>
+            <ul>
+                <li>
+                    <b>Events.</b>
+                    Use 
+                    <code>
+                        obj.addEventListener(eventName, function(e){})
+                    </code>
+                    to handle events, and the actual event will be passed into the handler function. 
+                    , and an event object is passed in handler instead of individual values.&nbsp; 
+                    Refer to AS API docs for details about what object can trigger what event, and 
+                    what property is available in events. <br/>Note: <b>Make sure the handler function's signation contains the event parameter</b>
+                </li>
+                <pre class="prettyprint">
+      map.addEventListener('mapevent_mappreinitialize', function(evt){
+       //work on evt object's properties
+       ...
+      });      
+    </pre>
+            </ul>
+            <ul>
+                <li>
+                <b>Object Creation</b>. Most classes can be created with the same syntax as in the Flash API . The map instance also have a generic 'create' method
+                that can be used to create other objects in the core flash API. If you need additional class, compile a new swf and pass it in the <code>MapBridge.createMap</code> method.
+                <pre class="prettyprint">
+            var latlng = new LatLng(23, 45);    
+            var timer = map.create('flash.utils.Timer',[1000,1]);
+    </pre>
+            </ul>
+            <ul>
+                <li>
+                    <b>Object Properties</b>. Always use getter/setter method to access properties. See <a href="http://livedocs.adobe.com/flex/3/html/ajaxbridge_1.html">FABridge</a>
+                    docs for more info.
+                </li>
+                <pre class="prettyprint">
+      var attitude = map.getAttitude();
+      var pitch = attitude.getPitch(); // not attitude.pitch;   
+      attribute.setYaw(40);// not attitude.yaw = 40; 
+      </pre>
+            </ul>
+            <ul>
+                <li>
+                <b>Static/Constants</b>. For Class static variable/constants that is a class instance instead of a 
+                primitive type, access them via a special function &quot;C&quot; (as for &quot;constants&quot;) and pass 
+                    in the constant name.&nbsp;
+                    For thos constants in primitive types (int, string etc), you can also directly 
+                    use the value according to documentation.&nbsp;
+ <pre class="prettyprint">
+       MapType.C(&#39;HYBRID_MAP_TYPE&#39;); // not MapType.HYBRID_MAP_TYPE;    
+       map.addListener('mapevent_mapready', function (e){});
+       // or 
+       map.addListener(MapEvent.C('MAP_READY'), function (e){});
+       
+ </pre>
+            </ul>
+            <ul>
+                <li>
+                    <b>Instance Context</b>. All objects must reside in a flash context. Once the 
+                    first&nbsp; map is created, it will be used as default context. However, if there are  
+                    more than one map on the same page, all classes must be constructed with it's map instance as first parameter in constructor. Objects can not be shared among map instances. 
+                </li>
+                <pre class="prettyprint">
+       var latlng1 = new LatLng(map1, 35, -80);
+      var latlng2 = new LatLng(map2, 35, -80);
+           
+    </pre>
+            </ul>
+            <ul>
+                <li>
+                    <b>Extend Core Classes</b>. It's not possible to extend core classes in JS. They must be extended in ActionScript, compiled with the MapBridge.as,
+                     then pass the result swf URL in <code>MapBridge.createMap(node, callback, swfurl)</code> . 
+                </li>
+               
+            </ul>
+        </div>
+        <div>
+            <h2><span lang="en-us">Simple3D Map</span></h2>
+            <p>
+                Create a simple perspective map.
+            </p>
+            <pre class="prettyprint">
+        var map;
+            
+            function init() {
+              MapBridge.createMap(document.getElementById('map_canvas'), function (m) {
+                map = m;
+                map.addEventListener('mapevent_mappreinitialize', onMapPreinitialize);
+                map.addEventListener('mapevent_mapready', onMapReady);
+              });
+            }
+            function onMapPreinitialize(e) {
+              map.setInitOptions(new MapOptions({
+                viewMode: View.C(&#39;VIEWMODE_PERSPECTIVE&#39;),
+                zoom: 5,
+                center: new LatLng(-29.3, 149.6),
+                attitude: new Attitude(-53, 46, 0),
+                mapType: MapType.C(&#39;HYBRID_MAP_TYPE&#39;)
+              }));
+            }
+            function onMapReady(e) {
+              map.enableContinuousZoom();
+              map.enableScrollWheelZoom();
+              map.addControl(new NavigationControl());
+              map.addControl(new MapTypeControl());
+            }
+    </pre>
+            <p>
+                <a target="_blank" href="../examples/Map3DSimple.html">View Map3DSimple.html </a>
+            </p>
+        </div>
+        <h2>Basic Examples </h2>
+        <ul>
+            <li>
+                <a target="_blank" href="../examples/HelloWorld.html">HelloWorld.html</a>
+            </li>
+             <li>
+                <a target="_blank" href="../examples/MapMarkers.html">MapMarkers.html</a>
+            </li>
+             <li>
+                <a target="_blank" href="../examples/MapAnimate.html">MapAnimate.html</a>
+            </li>
+             <li>
+                <a target="_blank" href="../examples/MapInfoWindow.html">MapInfoWindow.html</a>
+            </li>
+            
+        </ul>
+        
+       <h2>Event Examples</h2>
+        <ul>
+            <li>
+                <a target="_blank" href="../examples/EventSimple.html">EventSimple.html</a>
+            </li>
+             <li>
+                <a target="_blank" href="../examples/EventContext.html">EventContext.html</a>
+            </li>
+             <li>
+                <a target="_blank" href="../examples/EventClosure.html">EventClosure.html</a>
+            </li>
+             <li>
+                <a target="_blank" href="../examples/EventRemoval.html">EventRemoval.html</a>
+            
+        </li>
+    </ul>
+    <h2>
+        Control Examples</h2>
+    <ul>
+        <li><a target="_blank" href="../examples/ControlSimple.html">ControlSimple.html</a>
+        </li>
+        <li><a target="_blank" href="../examples/ControlMapTypes.html">ControlMapTypes.html</a>
+        </li>
+        <li><a target="_blank" href="../examples/ControlPositioning.html">ControlPositioning.html</a>
+        </li>
+    </ul>
+    <h2>
+        Overlay Examples</h2>
+    <ul>
+        <li><a target="_blank" href="../examples/MarkerSimple.html">MarkerSimple.html</a>
+        </li>
+        <li><a target="_blank" href="../examples/MarkerDrag.html">MarkerDrag.html</a>
+        </li>
+        <li><a target="_blank" href="../examples/IconSimple.html">IconSimple.html</a>
+        </li>
+         <li><a target="_blank" href="../examples/PolylineSimple.html">PolylineSimple.html</a>
+        </li>
+         <li><a target="_blank" href="../examples/PolylineEncoding.html">PolylineEncoding.html</a>
+        </li>
+         <li><a target="_blank" href="../examples/PolygonSimple.html">PolygonSimple.html</a>
+        </li>
+         <li><a target="_blank" href="../examples/GroundOverlaySimple.html">GroundOverlaySimple.html</a>
+        </li>
+        
+    </ul>
+    <h1>
+    </h1>
+
+    <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+
+    <script type="text/javascript">
+            var pageTracker = _gat._getTracker("UA-3946449-5");
+            pageTracker._trackPageview();
+    </script>
+
+</body>
+</html>
