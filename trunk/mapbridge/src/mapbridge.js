@@ -154,7 +154,7 @@
    * @param {String} partName patial name excluding com.google.maps.
    * @param {Array} args. array that contains a optional map instance, plus the static variable name
    */
-  function getStatic(partName, args) {
+  function getStaticVal(partName, args) {
     var val;
     var pa = parseArgs(args);
     if (pa.args.length > 0) {
@@ -163,38 +163,75 @@
     }
     return undefined;
   }
-  function callStatic(partName, fnName, args) {
+  //callStaticFn('overlays.Polyline', 'fromEncoded', arguments);
+  function callStaticFn(partName, fnName, args) {
     var val;
     var pa = parseArgs(args);
-    return pa.map.staticFn(packageRoot + partName, fnName, pa.args);
+    val = pa.map.staticFn(packageRoot + partName, fnName, pa.args);
+    return val;
   }
   
   /**
    * Create a class and insert into class collection.
-   * @param {Boolean} useProxy if you, a proxy, otherwise just {} for constants.
    * @param {String} partial class name excluding com.google.maps., e.g  geom.Attitude.
    */
   function addClass(partName) {
-    var i = partName.lastIndexOf('.');
-    var key = partName.substring(i + 1);
+    var key = partName.substring(partName.lastIndexOf('.') + 1);
     mapClasses[key] = function() {
       return createProxy(partName, arguments);
     };
     // it is not possible to assign static AS variable without a bridge, 
     //so we use a special function C here. call e.g. View.C('VIEWMODE_2D');
     mapClasses[key].C = function() {
-      return getStatic(partName, arguments);
+      return getStaticVal(partName, arguments);
     };
   }
+  
   function addClasses(partNames) {
     for (var i = 0; i < partNames.length; i++) {
       addClass(partNames[i]);
     }
   }
-  addClasses(['Alpha', 'Color', 'Copyright', 'CopyrightCollection', 'CopyrightNotice', 'InfoWindowOptions', 'LatLng', 'LatLngBounds', 'Map', 'Map3D', 'MapAction', 'MapAttitudeEvent', 'MapEvent', 'MapMouseEvent', 'MapMoveEvent', 'MapOptions', 'MapType', 'MapTypeOptions', 'MapZoomEvent', 'PaneId', 'ProjectionBase', 'TileLayerBase', 'View', 'controls.ControlBase', 'controls.ControlPosition', 'controls.MapTypeControl', 'controls.MapTypeControlOptions', 'controls.NavigationControl', 'controls.NavigationControlOptions', 'controls.OverviewMapControl', 'controls.OverviewMapControlOptions', 'controls.PositionControl', 'controls.PositionControlOptions', 'controls.ScaleControl', 'controls.ScaleControlOptions', 'controls.ZoomControl', 'controls.ZoomControlOptions', 'geom.Attitude', 'geom.Point3D', 'geom.TransformationGeometry', 'overlays.EncodedPolylineData', 'overlays.GroundOverlay', 'overlays.GroundOverlayOptions', 'overlays.Marker', 'overlays.MarkerOptions', 'overlays.OverlayBase', 'overlays.Polygon', 'overlays.PolygonOptions', 'overlays.Polyline', 'overlays.PolylineOptions', 'overlays.TileLayerOverlay', 'services.ClientGeocoder', 'services.ClientGeocoderOptions', 'services.Directions', 'services.DirectionsEvent', 'services.DirectionsOptions', 'services.GeocodingEvent', 'services.GeocodingResponse', 'services.Placemark', 'services.Route', 'services.ServiceStatus', 'services.Step', 'styles.BevelStyle', 'styles.ButtonFaceStyle', 'styles.ButtonStyle', 'styles.FillStyle', 'styles.GradientStyle', 'styles.RectangleStyle', 'styles.StrokeStyle']);
-  mapClasses.Polyline.fromEncoded = function(){
-    return callStatic('overlays.Polyline', 'fromEncoded', arguments);
+  
+  function addStaticClsFn(partName, fnName) {
+    var key = partName.substring(partName.lastIndexOf('.') + 1);
+    mapClasses[key][fnName] = function() {
+      return callStaticFn(partName, fnName, arguments);
+    }
   }
+  function addStaticClsFns(partName, fnNames) {
+    for (var i = 0; i < fnNames.length; i++) {
+      // must use function closure here.
+      addStaticClsFn(partName, fnNames[i]);
+    }
+  }
+  /**
+   * add static functions
+   * @param {Object} cls: name = partClassName, value=Array of methods
+   */
+  function addStaticFns(cls) {
+    for (var x in cls) {
+      if (cls.hasOwnProperty(x)) {
+        addStaticClsFns(x, cls[x]);
+      }
+    }
+  }
+  /*
+   function Marker(latlng, opts) {
+   return createProxy('overlays.Marker', arguments);
+   }
+   mapClasses["Marker"] = Marker;
+   */
+  addClasses(['Alpha', 'Color', 'Copyright', 'CopyrightCollection', 'CopyrightNotice', 'InfoWindowOptions', 'LatLng', 'LatLngBounds', 'Map', 'Map3D', 'MapAction', 'MapAttitudeEvent', 'MapEvent', 'MapMouseEvent', 'MapMoveEvent', 'MapOptions', 'MapType', 'MapTypeOptions', 'MapZoomEvent', 'PaneId', 'ProjectionBase', 'TileLayerBase', 'View', 'controls.ControlBase', 'controls.ControlPosition', 'controls.MapTypeControl', 'controls.MapTypeControlOptions', 'controls.NavigationControl', 'controls.NavigationControlOptions', 'controls.OverviewMapControl', 'controls.OverviewMapControlOptions', 'controls.PositionControl', 'controls.PositionControlOptions', 'controls.ScaleControl', 'controls.ScaleControlOptions', 'controls.ZoomControl', 'controls.ZoomControlOptions', 'geom.Attitude', 'geom.Point3D', 'geom.TransformationGeometry', 'overlays.EncodedPolylineData', 'overlays.GroundOverlay', 'overlays.GroundOverlayOptions', 'overlays.Marker', 'overlays.MarkerOptions', 'overlays.OverlayBase', 'overlays.Polygon', 'overlays.PolygonOptions', 'overlays.Polyline', 'overlays.PolylineOptions', 'overlays.TileLayerOverlay', 'services.ClientGeocoder', 'services.ClientGeocoderOptions', 'services.Directions', 'services.DirectionsEvent', 'services.DirectionsOptions', 'services.GeocodingEvent', 'services.GeocodingResponse', 'services.Placemark', 'services.Route', 'services.ServiceStatus', 'services.Step', 'styles.BevelStyle', 'styles.ButtonFaceStyle', 'styles.ButtonStyle', 'styles.FillStyle', 'styles.GradientStyle', 'styles.RectangleStyle', 'styles.StrokeStyle']);
+  
+  /*mapClasses.Polyline.fromEncoded = function(){
+   return callStaticFn('overlays.Polyline', 'fromEncoded', arguments);
+   };*/
+  addStaticFns({
+    'overlays.Polyline': ['fromEncoded'],
+    'overlays.Polygon': ['fromEncoded']
+  });
+  
   
   for (var x in mapClasses) {
     if (mapClasses.hasOwnProperty(x)) {
