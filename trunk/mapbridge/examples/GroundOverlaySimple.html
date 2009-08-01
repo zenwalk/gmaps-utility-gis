@@ -13,7 +13,7 @@
               MapBridge.createMap(document.getElementById('map_canvas'), function(mp) {
                 map = mp;
                 map.addEventListener(MapEvent.C('MAP_READY'), onMapReady);//'mapevent_mapready'
-              }, '../bin-debug/MapBridge.swf');
+              });
             }
             
             function onMapReady(e) {
