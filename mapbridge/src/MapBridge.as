@@ -3,10 +3,10 @@
  */
 package {
   import bridge.FABridge;
-
-  import com.google.maps.*;
+  
+  import com.google.maps.Map3D;
   import com.google.maps.overlays.*;
-
+  
   import flash.system.ApplicationDomain;
 
   /**
@@ -29,14 +29,6 @@ package {
       // key should be set via FlashVars
       externalBridge=new FABridge();
       externalBridge.rootObject=this;
-    /*     var map:MapBridge = this;
-       this.addEventListener(MapEvent.MAP_READY, function(e:MapEvent):void{
-       map.setCenter(new LatLng(40.7121341, -73.967857), 13, MapType.NORMAL_MAP_TYPE);
-       var encodedPoints:String = "iuowFf{kbMzH}N`IbJb@zBpYzO{dAvfF{LwDyN`_@`NzKqB|Ec@|L}BKmBbCoPjrBeEdy@uJ`Mn@zoAer@bjA~Xz{JczBa]pIps@de@tW}rCdxSwhPl`XgikCl{soA{dLdAaaF~cCyxCk_Aao@jp@kEvnCgoJ`]y[pVguKhCkUflAwrEzKk@yzCv^k@?mI";
-       var encodedLevels:String = "B????????????????????????????????????B";
-       var encodedPolyline:Polyline = map.staticFn('com.google.maps.overlays.Polyline','fromEncoded', [new EncodedPolylineData(encodedPoints, 32, encodedLevels, 4)]);
-       map.addOverlay(encodedPolyline);
-     });*/
     }
 
     // 
@@ -56,11 +48,11 @@ package {
        }
        and call FABridge.bridgeName.create.
      */
-    public function create(className:String, args:Array):* {
-      try {
+    public function create(className:String, ags:Array=null):* {
+      try { 
         var c:Class=Class(ApplicationDomain.currentDomain.getDefinition(className));
         var instance:Object;
-        args=args || [];
+        var args: Array = ags || [];
         switch (args.length) {
           case 0:
             instance=new c();
@@ -109,12 +101,15 @@ package {
       return val;
     }
 
-    public function staticFn(className:String, fnName:String, args:Array):* {
-      var fn:Function;
+    public function staticFn(className:String, fnName:String, args:Array = null):* {
+      
       try {
         var c:Class=Class(ApplicationDomain.currentDomain.getDefinition(className));
-        fn=c[fnName];
-        return fn.apply(this, args);
+        var fn:Function = c[fnName];
+        if (fn != null) {
+          return  fn.apply(this, args || []);
+        }
+        
       } catch (e:Error) {
         return "__FLASHERROR__" + "||" + e.message;
       }
