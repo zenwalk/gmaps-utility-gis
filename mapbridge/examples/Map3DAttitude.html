@@ -18,23 +18,34 @@
               var myMapOptions = new MapOptions({
                 zoom: 12,
                 center: new LatLng(40.756054, -73.986951),
-               // mapType: MapType.S('NORMAL_MAP_TYPE'),
+                mapType: MapType.S('PHYSICAL_MAP_TYPE'),
                 viewMode: View.S('VIEWMODE_PERSPECTIVE'),
-               // attitude: new Attitude(20, 30, 0)
+                attitude: new Attitude(0, 0, 0)
               });
               map.setInitOptions(myMapOptions);
             }
             
             function onMapReady(e) {
-              map.enableContinuousZoom();
-              map.enableScrollWheelZoom();
               map.addControl(new NavigationControl());
-              map.addControl(new MapTypeControl());
+            }
+            
+            function changeYaw() {
+              var yaw = parseFloat(document.getElementById('yaw').value);
+              map.setAttitude(new Attitude(yaw, map.getAttitude().getPitch(), 0));
+            }
+            
+            function changePitch() {
+              var pitch = parseFloat(document.getElementById('pitch').value);
+              map.setAttitude(new Attitude(map.getAttitude().getYaw(), pitch, 0));
             }
         </script>
     </head>
     <body onload="init()">
-        <div id="map_canvas" style="width:100%;height:95%">
+        <div>
+            Yaw (0-360):<input id="yaw" type="text" value="20" /><input type="button" onclick="changeYaw()" value="Set Yaw"/>
+            Pitch (0-85):<input id="pitch" type="text" value="30" /><input type="button" onclick="changePitch()" value="Set Pitch"/>
+        </div>
+        <div id="map_canvas" style="width:100%;height:90%">
         </div>
     </body>
 </html>

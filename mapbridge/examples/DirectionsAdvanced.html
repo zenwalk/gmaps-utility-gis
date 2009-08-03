@@ -1,0 +1,106 @@
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Directions Advanced</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw">
+        </script>
+        <script type="text/javascript">
+            
+            var map;
+            var dir;
+            var turnCounter = 0;
+            function init() {
+              MapBridge.createMap(document.getElementById('map_canvas'), function(mp) {
+                map = mp;
+                map.addEventListener(MapEvent.S('MAP_READY'), onMapReady);//'mapevent_mapready'
+              });
+            }
+            
+            function onMapReady(e) {
+              map.setCenter(new LatLng(41.651505, -72.094455), 8);
+              map.addControl(new NavigationControl());
+              map.addControl(new MapTypeControl());
+              dir = new Directions();
+              dir.addEventListener(DirectionsEvent.S('DIRECTIONS_SUCCESS'), onDirLoad);
+              dir.addEventListener(DirectionsEvent.S('DIRECTIONS_FAILURE'), onDirFail);
+            }
+            
+            function $(id) {
+              return document.getElementById(id);
+            }
+            
+            function processDirections() {
+              dir.load("from: " + $('from').value + " to: " + $('to').value);
+              $('getTurnByTurnDirections').disabled = false;
+              
+              // Reset turnCounter to zero for new directions
+              turnCounter = 0;
+              $('step').innerHTML = "Start at " + $('from').value;
+            }
+            
+            function onDirFail(e) {
+              alert('Status:' + e.getDirections().getStatus());
+              $('step').innerHTML = '';
+            }
+            
+            function onDirLoad(e) {
+              dir = e.getDirections();
+              var startMarker;
+              var endMarker;
+              
+              map.clearOverlays();
+              map.addOverlay(dir.createPolyline());
+              map.setZoom(map.getBoundsZoomLevel(dir.getBounds()));
+              map.setCenter(dir.getBounds().getCenter());
+              
+              startMarker = new Marker(dir.getRoute(0).getStartGeocode().getPoint(), new MarkerOptions({
+                fillStyle: new FillStyle({
+                  color: Color.S('GREEN')
+                })
+              }));
+              endMarker = new Marker(dir.getRoute(0).getEndGeocode().getPoint(), new MarkerOptions({
+                fillStyle: new FillStyle({
+                  color: Color.S('BLUE')
+                })
+              }));
+              map.addOverlay(startMarker);
+              map.addOverlay(endMarker);
+              
+            }
+            
+            function processTurnByTurn() {
+            
+              var stepText;
+              var stepMarker;
+              turnCounter++;
+              var route = dir.getRoute(0);
+              if (turnCounter <= route.getNumSteps()) {
+                stepText = route.getStep(turnCounter - 1).getDescriptionHtml();
+                stepMarker = new Marker(route.getStep(turnCounter - 1).getLatLng(), new MarkerOptions({
+                  label: turnCounter.toString()
+                }));
+                map.addOverlay(stepMarker);
+                $('step').innerHTML = "Step " + turnCounter + ": " + stepText;
+              } else {
+                $('getTurnByTurnDirections').disabled = true;
+                $('step').innerHTML = "Arrive at " + $('to').value + " : " + route.getSummaryHtml();
+              }
+            }
+        </script>
+    </head>
+    <body onload="init()">
+        <form>
+            <div>
+                From: <input type="text" id="from" value="Boston, MA" size="20"/>
+            </div>
+            <div>
+                To: <input type="text" id="to" value="New York, NY" size="20"/>
+            </div><input type="button" onclick="processDirections()" value="Get Directions"/><input id="getTurnByTurnDirections" type="button" onclick="processTurnByTurn()" value="Get Next Step" disabled="true"/>
+            <div id="step" style="height:50px">
+            </div>
+        </form>
+        <div id="map_canvas" style="width:100%;height:500px">
+        </div>
+    </body>
+</html>

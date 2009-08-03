@@ -15,7 +15,7 @@ package {
    */
   public class MapBridge extends Map3D {
     private var externalBridge:FABridge;
-
+ 
     // a simple way to force the compiled swf to include a class
     // is to add then as a reference, as the FABridge sample did. 
     // e.g. private var cls:Array=[NavigationControl];

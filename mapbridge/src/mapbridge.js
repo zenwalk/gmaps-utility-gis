@@ -182,7 +182,7 @@
     };
     // it is not possible to assign static AS variable without a bridge, 
     //so we use a special function C here. call e.g. View.C('VIEWMODE_2D');
-    mapClasses[key].C = function() {
+    mapClasses[key].S = function() {
       return getStaticVal(partName, arguments);
     };
   }

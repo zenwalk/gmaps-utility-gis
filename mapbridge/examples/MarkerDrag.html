@@ -12,12 +12,12 @@
             function init() {
               MapBridge.createMap(document.getElementById('map_canvas'), function(mp) {
                 map = mp;
-                map.addEventListener(MapEvent.C('MAP_READY'), onMapReady);//'mapevent_mapready'
+                map.addEventListener(MapEvent.S('MAP_READY'), onMapReady);//'mapevent_mapready'
               });
             }
             
             function onMapReady(e) {
-              map.setCenter(new LatLng(40.736072, -73.992062), 14, MapType.C('NORMAL_MAP_TYPE'));
+              map.setCenter(new LatLng(40.736072, -73.992062), 14, MapType.S('NORMAL_MAP_TYPE'));
               var marker = new Marker(map.getCenter(), new MarkerOptions({
                 draggable: true
               }));

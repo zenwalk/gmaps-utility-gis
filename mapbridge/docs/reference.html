@@ -9,12 +9,12 @@
   <body>
     <h1>MapBridge for Google Map API for Flash to JavaScript</h1>
     <p>
-This library provides a JavaScript proxy to Google Maps ActionScript API (Flash and Flex)             It requires Adobe's FABridge (part of Flex SDK) and SWFObject (http://code.google.com/p/swfobject/).</p>
+This library provides a JavaScript proxy to Google Maps ActionScript API (Flash and Flex)             It requires Adobe's FABridge (http://labs.adobe.com/wiki/index.php/Flex_Framework:FABridge)             and SWFObject (http://code.google.com/p/swfobject/).</p>
     <p>For a description and examples of how to use this library, check out the <a href="examples.html">how-to</a>.</p>
     
       <h2><a name="MapBridge"></a>namespace MapBridge</h2>
       <p>
-Static methods to create a flash map instance. After map instance is created, refer to Google Maps ActionScript API for reference documentation.</p>
+Static methods to create a flash map instance. After map instance is created,refer to Google Maps ActionScript API for reference documentation.</p>
       
         <h3>Static Methods</h3>
         <table summary="namespace MapBridge - Static Methods" width="90%">
@@ -31,13 +31,44 @@ Static methods to create a flash map instance. After map instance is created, r
             </tr>
             
               <tr class="odd">
-                <td><code>createMap(<span class="type">node:Node</span>, <span class="type">key:String</span>, <span class="type">callback:Function</span>)</code></td>
+                <td><code>createMap(<span class="type">node:Node</span>, <span class="type">callback:Function</span>, <span class="type">opt_bridge:MapBridgeOptions</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
                   
                 
-                <td>Create a map. This method must be called before any other methods. The created map instance will be passed as the first parameter in the callback function.The bridge itself will be the second parameter. Normally there is no need to use the bridge itself.</td>
+                <td>Create a map. This method must be called before any other methods. The created map instancewill be passed as the first parameter in the callback function.The bridge itself will be the second parameter. Normally there is no need to use the bridge itself.The returned map instance also contains the following convient methods:<ul><li><code>create(fullClassName:String, args:Array)</code>. Construct a object instance with parameters.<li><code>staticVar(fullClassName:String, propName:String)</code>. Get static variables from a class<li><code>staticFn(fullClassName:String, functionName:String, args:Array)</code>. Call a static function on a class </ul></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="MapBridgeOptions"></a>class MapBridgeOptions</h2>
+      <p>This class represents the optional parameter passed into <code>MapBridge.createMap</code>.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class MapBridgeOptions - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>swf</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The customized swf file that may compiled with more classes.                     Default value is the MapBridge.swf in the same folder as the JS.                     The swf class must contains 'MapBridge' in its name if it extends MapBridge.as.</td>
               </tr>
             
           </tbody>
