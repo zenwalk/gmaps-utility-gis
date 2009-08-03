@@ -1,0 +1,67 @@
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw">
+        </script>
+        <script type="text/javascript">
+            var map;
+            function init() {
+              MapBridge.createMap(document.getElementById('map_canvas'), function(mp, brg) {
+                map = mp;
+                map.addEventListener('mapevent_mappreinitialize', onMapPreinitialize);
+                map.addEventListener('mapevent_mapready', onMapReady);
+              });
+            }
+            
+            function onMapPreinitialize(e) {
+              var myMapOptions = new MapOptions({
+                zoom: 12,
+                center: new LatLng(40.756054, -73.986951),
+                mapType: MapType.S('PHYSICAL_MAP_TYPE'),
+                viewMode: View.S('VIEWMODE_PERSPECTIVE'),
+                attitude: new Attitude(20, 30, 0)
+              });
+              map.setInitOptions(myMapOptions);
+            }
+            
+            function onMapReady(e) {
+              map.enableScrollWheelZoom();
+              map.addControl(new NavigationControl());
+            }
+            
+            function doFlyTo() {
+              // Instantiate a Geocoder
+              var geocoder = new ClientGeocoder();
+              
+              // Add an event listener for a GEOCODING SUCCESS  
+              geocoder.addEventListener(GeocodingEvent.S('GEOCODING_SUCCESS'), function(e) {
+                var placemarks = e.getResponse().getPlacemarks();
+                if (placemarks.length > 0) {
+                  map.flyTo(placemarks[0].getPoint(), 12, new Attitude(20, 30, 0), 3);
+                  var marker = new Marker(placemarks[0].getPoint());
+                  marker.addEventListener(MapMouseEvent.S('CLICK'), function(e) {
+                    marker.openInfoWindow(new InfoWindowOptions({
+                      content: placemarks[0].getAddress()
+                    }));
+                  });
+                  map.addOverlay(marker);
+                }
+              });
+              
+              geocoder.addEventListener(GeocodingEvent.S('GEOCODING_FAILURE'), function(e) {
+                alert("Geocoding failed " + e.getStatus());
+              });
+              
+              geocoder.geocode(document.getElementById('address').value);
+            }
+        </script>
+    </head>
+    <body onload="init()">
+        <form action="#" onsubmit="doFlyTo(); return false">
+            Enter Address:<input id="address" type="text" value="Coney Island, Brooklyn, NY" size="40"/><input type="button" value="Search" onclick="doFlyTo()"/>
+        </form>
+        <div id="map_canvas" style="width:100%;height:95%">
+        </div>
+    </body>
+</html>

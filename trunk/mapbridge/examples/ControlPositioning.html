@@ -15,9 +15,9 @@
             }
             
             function onMapReady(e) {
-              map.setCenter(new LatLng(37.4419, -122.1419), 13, MapType.C('NORMAL_MAP_TYPE'));
-              var topRight = new ControlPosition(ControlPosition.C('ANCHOR_TOP_RIGHT'), 16, 10);
-              var bottomRight = new ControlPosition(ControlPosition.C('ANCHOR_BOTTOM_RIGHT'), 16, 10);
+              map.setCenter(new LatLng(37.4419, -122.1419), 13, MapType.S('NORMAL_MAP_TYPE'));
+              var topRight = new ControlPosition(ControlPosition.S('ANCHOR_TOP_RIGHT'), 16, 10);
+              var bottomRight = new ControlPosition(ControlPosition.S('ANCHOR_BOTTOM_RIGHT'), 16, 10);
               
               var myZoomControl = new ZoomControl(new ZoomControlOptions({
                 position: topRight

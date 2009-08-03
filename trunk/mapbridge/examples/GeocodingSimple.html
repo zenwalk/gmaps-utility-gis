@@ -1,0 +1,58 @@
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Geocoding Simple</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw">
+        </script>
+        <script type="text/javascript">
+            
+            var map;
+            
+            function init() {
+              MapBridge.createMap(document.getElementById('map_canvas'), function(mp) {
+                map = mp;
+                map.addEventListener(MapEvent.S('MAP_READY'), onMapReady);//'mapevent_mapready'
+              });
+            }
+            
+            function onMapReady(e) {
+              map.addControl(new ZoomControl());
+              map.addControl(new MapTypeControl());
+            }
+            
+            function doGeocode() {
+              // Geocoding example
+              var geocoder = new ClientGeocoder();
+              
+              geocoder.addEventListener(GeocodingEvent.S('GEOCODING_SUCCESS'), function(e) {
+                var placemarks = e.getResponse().getPlacemarks();
+                if (placemarks.length > 0) {
+                  map.setCenter(placemarks[0].getPoint(), 14);
+                  var marker = new Marker(placemarks[0].getPoint());
+                  
+                  marker.addEventListener(MapMouseEvent.S('CLICK'), function(e) {
+                    marker.openInfoWindow(new InfoWindowOptions({
+                      content: placemarks[0].getAddress()
+                    }));
+                  });
+                  map.addOverlay(marker);
+                }
+              });
+              geocoder.addEventListener(GeocodingEvent.S('GEOCODING_FAILURE'), function(e) {
+                alert("Geocoding failed" + e.getStatus());
+              });
+              geocoder.geocode(document.getElementById('address').value);
+            }
+        </script>
+    </head>
+    <body onload="init()">
+        <form action="#" onsubmit="doGeocode(); return false">
+            <div>
+                Enter Address: <input type="text" id="address" value="Syndey AU" size="30"/><input type="button" onclick="doGeocode();" value="Search"/>
+            </div>
+        </form>
+        <div id="map_canvas" style="width:100%;height:90%">
+        </div>
+    </body>
+</html>

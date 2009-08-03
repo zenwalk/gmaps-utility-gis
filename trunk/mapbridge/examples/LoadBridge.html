@@ -1,23 +1,23 @@
 <!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <title>MapBridge: JavaScript Bridge for Google Maps Flash API</title>
+        <title>HelloWorld</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-        <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw">
+        <!-- script type="text/javascript" src="../src/mapbridge_packed.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw">
+        </ script -->
+        <script type="text/javascript">
+            document.write('<script type="text/javascript" src="../src/mapbridge' + (document.location.search.indexOf('packed') > -1 ? '_packed' : '') + '.js"><' + '/script>');
         </script>
         <script type="text/javascript">
             var map;
             function init() {
               MapBridge.createMap(document.getElementById('map_canvas'), function(mp) {
                 map = mp;
-                map.addEventListener('mapevent_mapready', onMapReady);
+                map.addEventListener(MapEvent.S('MAP_READY'), onMapReady);//'mapevent_mapready'
               });
             }
-            
             function onMapReady(e) {
-              map.setCenter(new LatLng(42.366662, -71.106262), 11, MapType.S('NORMAL_MAP_TYPE'));
-              map.removeMapType(MapType.S('HYBRID_MAP_TYPE'));
-              map.addControl(new MapTypeControl());
+              map.setCenter(new LatLng(40.736072, -73.992062), 14, MapType.S('NORMAL_MAP_TYPE'));
             }
         </script>
     </head>

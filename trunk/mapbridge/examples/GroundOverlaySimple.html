@@ -1,7 +1,7 @@
 <!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <title>Polygon simple</title>
+        <title>GroundOverlay Simple</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
         <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw">
         </script>
@@ -12,26 +12,24 @@
             function init() {
               MapBridge.createMap(document.getElementById('map_canvas'), function(mp) {
                 map = mp;
-                map.addEventListener(MapEvent.C('MAP_READY'), onMapReady);//'mapevent_mapready'
+                map.addEventListener(MapEvent.S('MAP_READY'), onMapReady);//'mapevent_mapready'
               });
             }
-            
             function onMapReady(e) {
-              map.setCenter(new LatLng(40.740, -74.18), 12, MapType.C('NORMAL_MAP_TYPE'));
+              map.setCenter(new LatLng(40.740, -74.18), 12, MapType.S('NORMAL_MAP_TYPE'));
               map.addControl(new ZoomControl());
               map.addControl(new MapTypeControl());
-              
               var testLoader = map.create('flash.display.Loader');
-              var urlRequest = map.create('flash.net.URLRequest', ["http://www.lib.utexas.edu/maps/historical/newark_nj_1922.jpg"]);
-              var contentLoader = testLoader.getContentLoaderInfo();
-              var loaderContext = map.create('flash.system.LoaderContext');//,[true]);
-              
-              contentLoader.addEventListener("complete", function(e) {
-                // to do security sandbox
+              // image must come from same domain or have crossdomain.xml with a checkPolicyFile LoaderContext on remote server 
+              // due to security restriction
+              // var context = map.create('flash.system.LoaderContext',[true]);
+              var url = 'groundoverlaysimple.jpg';
+              var urlRequest = map.create('flash.net.URLRequest', [url]);
+              testLoader.getContentLoaderInfo().addEventListener('complete', function(e) {
                 var groundOverlay = new GroundOverlay(testLoader, new LatLngBounds(new LatLng(40.716216, -74.213393), new LatLng(40.765641, -74.139235)));
                 map.addOverlay(groundOverlay);
               });
-              testLoader.load(urlRequest, loaderContext);
+              testLoader.load(urlRequest);//, context);
             }
         </script>
     </head>
