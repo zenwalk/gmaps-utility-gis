@@ -149,34 +149,6 @@
   }
   
   /**
-   * Retrieve a static/constant value from a class
-   * @private
-   * @param {String} partName patial name excluding com.google.maps.
-   * @param {Array} args. array that contains a optional map instance, plus the static variable name
-   */
-  function getStaticVal(partName, args) {
-    var val;
-    var pa = parseArgs(args);
-    if (pa.args.length > 0) {
-      //staticVar
-      return pa.map.staticVar(packageRoot + partName, pa.args[0]);
-    }
-    return undefined;
-  }
-  //callStaticFn('overlays.Polyline', 'fromEncoded', arguments);
-  function callStaticFn(partName, fnName, args) {
-    var val;
-    var pa = parseArgs(args);
-    val = pa.map.staticFn(packageRoot + partName, fnName, pa.args);
-    return val;
-  }
-  function callStaticVal(partName, valName, args) {
-    var val;
-    var pa = parseArgs(args);
-    val = pa.map.staticVal(packageRoot + partName, valName);
-    return val;
-  }
-  /**
    * Create a class and insert into class collection.
    * @param {String} partial class name excluding com.google.maps., e.g  geom.Attitude.
    */
@@ -186,9 +158,10 @@
       return createProxy(partName, arguments);
     };
     // it is not possible to assign static AS variable without a bridge, 
-    //so we use a special function C here. call e.g. View.C('VIEWMODE_2D');
+    //so we use a special function S here. call e.g. View.S('VIEWMODE_2D');
     mapClasses[key].S = function() {
-      return getStaticVal(partName, arguments);
+      var pa = parseArgs(arguments);
+      return pa.map.staticVar(packageRoot + partName, pa.args[0]);
     };
   }
   
@@ -197,42 +170,33 @@
       addClass(partNames[i]);
     }
   }
-  
-  function addStaticFn(partName, fnName) {
+  function addStatic(isFn, partName, fnVar) {
     var key = partName.substring(partName.lastIndexOf('.') + 1);
-    mapClasses[key][fnName] = function() {
-        return callStaticFn(partName, fnName, arguments);
-    };
-  }
-  function addStaticVal(partName, varName) {
-    var key = partName.substring(partName.lastIndexOf('.') + 1);
-      mapClasses[key][varName] = function(map) {
-        
-        return (map || defaultMap).staticVar(packageRoot + partName, varName);
+    if (isFn) {
+      mapClasses[key][fnVar] = function() {
+        var pa = parseArgs(arguments);
+        return pa.map.staticFn(packageRoot + partName, fnVar, pa.args);
       };
-    
+    } else {
+      mapClasses[key][fnVar] = function(map) {
+        return (map || defaultMap).staticFnVar(packageRoot + partName, fnVar);
+      };
+    }
     
   }
-  
-  function addStaticCls(isFn, partName, fnVals) {
+  function addStatics(isFn, partName, fnVals) {
     for (var i = 0; i < fnVals.length; i++) {
-      // must use function closure here.
-      if (isFn){
-         addStaticFn(partName, fnVals[i]);
-      } else {
-        addStaticVal(partName, fnVals[i]);
-      }
-      
+      addStatic(isFn, partName, fnVals[i]);
     }
   }
   /**
    * add static functions
    * @param {Object} cls: name = partClassName, value=Array of methods
    */
-  function addStatics(isFn, cls) {
+  function addClsStatics(isFn, cls) {
     for (var x in cls) {
       if (cls.hasOwnProperty(x)) {
-        addStaticCls(isFn, x, cls[x]);
+        addStatics(isFn, x, cls[x]);
       }
     }
   }
@@ -247,12 +211,12 @@
   /*mapClasses.Polyline.fromEncoded = function(){
    return callStaticFn('overlays.Polyline', 'fromEncoded', arguments);
    };*/
-  addStatics(true, {
+  addClsStatics(true, {
     'overlays.Polyline': ['fromEncoded'],
     'overlays.Polygon': ['fromEncoded']
   });
-  addStatics(false, {
-    'MapType': ['NORMAL_MAP_TYPE']
+  addClsStatics(false, {
+    'MapType': ['NORMAL_MAP_TYPE', 'PHYSICAL_MAP_TYPE']
   });
   
   for (var x in mapClasses) {

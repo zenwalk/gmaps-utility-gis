@@ -115,7 +115,19 @@ package {
       }
       return null;
     }
-    
+     public function staticFnVar(className:String, fnVar:String, args:Array = null):* {
+      var ret:*;
+      try {
+        var c:Class=Class(ApplicationDomain.currentDomain.getDefinition(className));
+        ret = c[fnVar];
+        if (ret != null && ret is Function) {
+          return  (ret as Function).apply(this, args || []);
+        }
+      } catch (e:Error) {
+        return "__FLASHERROR__" + "||" + e.message;
+      }
+      return ret;
+    }
    
   }
 
