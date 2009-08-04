@@ -84,7 +84,7 @@ package {
         }
 
       } catch (e:Error) {
-        return "__FLASHERROR__" + "||" + e.message;
+        return "__FLASHERROR__" + "||" + e.message + e.getStackTrace();
       }
       return instance;
     }
@@ -98,7 +98,7 @@ package {
           return  (ret as Function).apply(this, args || []);
         }
       } catch (e:Error) {
-        return "__FLASHERROR__" + "||" + e.message;
+        return "__FLASHERROR__" + "||" + e.message + e.getStackTrace();
       }
       return ret;
     }
