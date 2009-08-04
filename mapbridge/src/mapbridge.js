@@ -22,13 +22,14 @@
   
   function parseScriptSrc(js) {
     var scripts = document.getElementsByTagName('script');
-    var path, i;
+    var path, i, packed;
     var params = {};
     for (i = 0; i < scripts.length; i++) {
       var src = scripts[i].src;
       var idx = src.toLowerCase().lastIndexOf(js.toLowerCase());
       if (idx > -1) {
         path = src.substring(0, idx);
+        packed = src.indexOf('_packed', idx) !== -1;
         var q = src.indexOf('?', idx);
         if (q > -1) {
           var pairs = src.substring(q + 1).split('&');
@@ -41,15 +42,14 @@
       }
     }
     return {
+      packed: packed,
       path: path,
       params: params
     };
   }
-  var bscript = parseScriptSrc('mapbridge');
-  var scriptPath = bscript.path;
-  var apikey = bscript.params.key || 'your_api_key';
+  var ps = parseScriptSrc('mapbridge');
   loadScript('http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js');
-  loadScript(scriptPath + 'bridge/FABridge.js');
+  loadScript(ps.path + 'bridge/FABridge' + (ps.packed ? '_packed' : '') + '.js');
   
   var defaultBridge;
   var defaultMap;
@@ -88,11 +88,11 @@
     node.appendChild(embedNode);
     var flashvars = {
       bridgeName: bridgeName,
-      key: apikey
+      key: ps.params.key
     };
     opt_bridge = opt_bridge ||
     {};
-    var swfUrl = opt_bridge.swf || scriptPath + 'MapBridge.swf';
+    var swfUrl = opt_bridge.swf || ps.path + 'MapBridge.swf';
     swfobject.embedSWF(swfUrl, embedNode.id, node.offsetWidth, node.offsetHeight, "9.0.0", false, flashvars);
     FABridge.addInitializationCallback(bridgeName, function () {
       var bridge = FABridge[bridgeName];
