@@ -131,12 +131,16 @@
                     <b>Extending Core Classes</b>. It's not possible to extend core classes in JS. They must be extended in ActionScript, compiled with the MapBridge.as,
                      then pass the result swf URL in <code>MapBridge.createMap(node, callback, opts)</code> . 
                 </li>
+                 <li>
+                    <b>Domain Security Restriction</b>. Dynamic resource (bitmap etc) should be from the same domain of the swf file. If you need to load from remote server, either use 
+                    a server proxy or gain permission via remote server's crossdomain.xml. 
+                </li>
                
             </ul>
         </div>
         <div>
         <h2>Sample JavaScript Code:</h2>
-        <p>
+        
               <pre class="prettyprint">        
             var map;
             
@@ -162,7 +166,7 @@
               map.addControl(new NavigationControl());
               map.addControl(new MapTypeControl());
             }
-    </pre></p>
+    </pre>
 </div>
         <h1>Orginal Flash Example Rewritten in JavaScript</h1>
         <p>The following are JavaScript version of the original
