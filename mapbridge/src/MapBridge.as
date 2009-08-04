@@ -89,7 +89,7 @@ package {
       return instance;
     }
 
-    public function staticVar(className:String, prop:String):* {
+/*    public function staticVar(className:String, prop:String):* {
       var val:Object;
       try {
         var c:Class=Class(ApplicationDomain.currentDomain.getDefinition(className));
@@ -115,7 +115,9 @@ package {
       }
       return null;
     }
-     public function staticFnVar(className:String, fnVar:String, args:Array = null):* {
+  */ 
+  
+     public function getStatic(className:String, fnVar:String, args:Array = null):* {
       var ret:*;
       try {
         var c:Class=Class(ApplicationDomain.currentDomain.getDefinition(className));
