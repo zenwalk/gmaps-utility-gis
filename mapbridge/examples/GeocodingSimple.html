@@ -3,7 +3,7 @@
     <head>
         <title>Geocoding Simple</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-        <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw">
+        <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxQGj0PqsCtxKvarsoS-iqLdqZSKfxRdmoPmGl7Y9335WLC36wIGYa6o5Q">
         </script>
         <script type="text/javascript">
             
@@ -12,7 +12,7 @@
             function init() {
               MapBridge.createMap(document.getElementById('map_canvas'), function(mp) {
                 map = mp;
-                map.addEventListener(MapEvent.S('MAP_READY'), onMapReady);//'mapevent_mapready'
+                map.addEventListener(MapEvent.MAP_READY(), onMapReady);//'mapevent_mapready'
               });
             }
             
@@ -25,13 +25,13 @@
               // Geocoding example
               var geocoder = new ClientGeocoder();
               
-              geocoder.addEventListener(GeocodingEvent.S('GEOCODING_SUCCESS'), function(e) {
+              geocoder.addEventListener(GeocodingEvent.GEOCODING_SUCCESS(), function(e) {
                 var placemarks = e.getResponse().getPlacemarks();
                 if (placemarks.length > 0) {
                   map.setCenter(placemarks[0].getPoint(), 14);
                   var marker = new Marker(placemarks[0].getPoint());
                   
-                  marker.addEventListener(MapMouseEvent.S('CLICK'), function(e) {
+                  marker.addEventListener(MapMouseEvent.CLICK(), function(e) {
                     marker.openInfoWindow(new InfoWindowOptions({
                       content: placemarks[0].getAddress()
                     }));
@@ -39,7 +39,7 @@
                   map.addOverlay(marker);
                 }
               });
-              geocoder.addEventListener(GeocodingEvent.S('GEOCODING_FAILURE'), function(e) {
+              geocoder.addEventListener(GeocodingEvent.GEOCODING_FAILURE(), function(e) {
                 alert("Geocoding failed" + e.getStatus());
               });
               geocoder.geocode(document.getElementById('address').value);

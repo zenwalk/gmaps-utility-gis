@@ -3,7 +3,7 @@
     <head>
         <title>Map Markers</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-        <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw">
+        <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxQGj0PqsCtxKvarsoS-iqLdqZSKfxRdmoPmGl7Y9335WLC36wIGYa6o5Q">
         </script>
         <script type="text/javascript">
            
@@ -16,7 +16,7 @@
               });
             }
             function onMapReady(e) {
-              map.setCenter(new LatLng(37.4419, -122.1419), 13, MapType.S('NORMAL_MAP_TYPE'));
+              map.setCenter(new LatLng(37.4419, -122.1419), 13, MapType.NORMAL_MAP_TYPE());
               var bounds = map.getLatLngBounds();
               var southWest = bounds.getSouthWest();
               var northEast = bounds.getNorthEast();

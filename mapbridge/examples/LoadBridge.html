@@ -3,8 +3,8 @@
     <head>
         <title>HelloWorld</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-        <!-- script type="text/javascript" src="../src/mapbridge_packed.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw">
-        </ script -->
+        <!-- script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxQGj0PqsCtxKvarsoS-iqLdqZSKfxRdmoPmGl7Y9335WLC36wIGYa6o5Q">
+        </script -->
         <script type="text/javascript">
             document.write('<script type="text/javascript" src="../src/mapbridge' + (document.location.search.indexOf('packed') > -1 ? '_packed' : '') + '.js"><' + '/script>');
         </script>
@@ -13,11 +13,11 @@
             function init() {
               MapBridge.createMap(document.getElementById('map_canvas'), function(mp) {
                 map = mp;
-                map.addEventListener(MapEvent.S('MAP_READY'), onMapReady);//'mapevent_mapready'
+                map.addEventListener(MapEvent.MAP_READY(), onMapReady);//'mapevent_mapready'
               });
             }
             function onMapReady(e) {
-              map.setCenter(new LatLng(40.736072, -73.992062), 14, MapType.S('NORMAL_MAP_TYPE'));
+              map.setCenter(new LatLng(40.736072, -73.992062), 14, MapType.NORMAL_MAP_TYPE());
             }
         </script>
     </head>

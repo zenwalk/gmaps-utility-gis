@@ -37,7 +37,8 @@ Static methods to create a flash map instance. After map instance is created,re
                     <td><code>None</code></td>
                   
                 
-                <td>Create a map. This method must be called before any other methods. The created map instancewill be passed as the first parameter in the callback function.The bridge itself will be the second parameter. Normally there is no need to use the bridge itself.The returned map instance also contains the following convient methods:<ul><li><code>create(fullClassName:String, args:Array)</code>. Construct a object instance with parameters.<li><code>staticVar(fullClassName:String, propName:String)</code>. Get static variables from a class<li><code>staticFn(fullClassName:String, functionName:String, args:Array)</code>. Call a static function on a class </ul></td>
+                <td>Create a map. This method must be called before any other methods. The created map instancewill be passed as the first parameter in the callback function.The bridge itself will be the second parameter. Normally there is no need to use the bridge itself.The returned map instance also contains the following convient methods:<ul><li><code>create(fullClassName:String, args:Array)</code>. Construct a object instance with parameters.<li><code>getStatic(fullClassName:String, fnValName:String, args:Array)</code>. Get static variables or call static function from a class
+   </ul></td>
               </tr>
             
           </tbody>
