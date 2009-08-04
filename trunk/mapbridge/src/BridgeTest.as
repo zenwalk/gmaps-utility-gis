@@ -36,7 +36,7 @@ package {
         map.addControl(new ZoomControl());
         map.addControl(new MapTypeControl());
         
-       var a:* = map.staticVar('com.google.maps.MapType','PHYSICAL_MAP_TYPE');
+       var a:* = map.getStatic('com.google.maps.MapType','PHYSICAL_MAP_TYPE');
        trace(a);
        map.setMapType(a);
     }

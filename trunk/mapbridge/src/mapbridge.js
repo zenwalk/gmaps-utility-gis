@@ -161,7 +161,7 @@
     //so we use a special function S here. call e.g. View.S('VIEWMODE_2D');
     mapClasses[key].S = function() {
       var pa = parseArgs(arguments);
-      return pa.map.staticVar(packageRoot + partName, pa.args[0]);
+      return pa.map.getStatic(packageRoot + partName, pa.args[0]);
     };
   }
   
@@ -170,33 +170,26 @@
       addClass(partNames[i]);
     }
   }
-  function addStatic(isFn, partName, fnVar) {
+  function addStatic(partName, fnVar) {
     var key = partName.substring(partName.lastIndexOf('.') + 1);
-    if (isFn) {
-      mapClasses[key][fnVar] = function() {
-        var pa = parseArgs(arguments);
-        return pa.map.staticFn(packageRoot + partName, fnVar, pa.args);
-      };
-    } else {
-      mapClasses[key][fnVar] = function(map) {
-        return (map || defaultMap).staticFnVar(packageRoot + partName, fnVar);
-      };
-    }
-    
+    mapClasses[key][fnVar] = function() {
+      var pa = parseArgs(arguments);
+      return pa.map.getStatic(packageRoot + partName, fnVar, pa.args);
+    };
   }
-  function addStatics(isFn, partName, fnVals) {
+  function addClsStatics(partName, fnVals) {
     for (var i = 0; i < fnVals.length; i++) {
-      addStatic(isFn, partName, fnVals[i]);
+      addStatic(partName, fnVals[i]);
     }
   }
   /**
    * add static functions
    * @param {Object} cls: name = partClassName, value=Array of methods
    */
-  function addClsStatics(isFn, cls) {
+  function addStatics(cls) {
     for (var x in cls) {
       if (cls.hasOwnProperty(x)) {
-        addStatics(isFn, x, cls[x]);
+        addClsStatics(x, cls[x]);
       }
     }
   }
@@ -211,13 +204,12 @@
   /*mapClasses.Polyline.fromEncoded = function(){
    return callStaticFn('overlays.Polyline', 'fromEncoded', arguments);
    };*/
-  addClsStatics(true, {
+  addStatics({
     'overlays.Polyline': ['fromEncoded'],
-    'overlays.Polygon': ['fromEncoded']
+    'overlays.Polygon': ['fromEncoded'],
+    'MapType': ['NORMAL_MAP_TYPE', 'PHYSICAL_MAP_TYPE','HYBRID_MAP_TYPE']
   });
-  addClsStatics(false, {
-    'MapType': ['NORMAL_MAP_TYPE', 'PHYSICAL_MAP_TYPE']
-  });
+  
   
   for (var x in mapClasses) {
     if (mapClasses.hasOwnProperty(x)) {
