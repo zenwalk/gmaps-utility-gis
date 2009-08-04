@@ -12,7 +12,7 @@
  *
  * @author: Nianwei Liu [nianwei at gmail dot com]
  */
-(function() {
+(function () {
   /*jslint browser:true, evil: true */
   //jslint consider "document.write" evil. 
   /*global swfobject, FABridge */
@@ -26,13 +26,10 @@
     var params = {};
     for (i = 0; i < scripts.length; i++) {
       var src = scripts[i].src;
-      var idx = src.toLowerCase().lastIndexOf((js + '.js').toLowerCase());
-      if (idx === -1) {
-        idx = src.toLowerCase().lastIndexOf((js + '_packed.js').toLowerCase());
-      }
+      var idx = src.toLowerCase().lastIndexOf(js.toLowerCase());
       if (idx > -1) {
         path = src.substring(0, idx);
-        var q = src.indexOf('?');
+        var q = src.indexOf('?', idx);
         if (q > -1) {
           var pairs = src.substring(q + 1).split('&');
           for (i = 0; i < pairs.length; i++) {
@@ -57,7 +54,13 @@
   var defaultBridge;
   var defaultMap;
   var packageRoot = 'com.google.maps.';
-  
+  /**
+   * @name MapBridgeOptions
+   * @class This class represents the optional parameter passed into <code>MapBridge.createMap</code>.
+   * @property {String} [swf] The customized swf file that may compiled with more classes.
+   *                      Default value is the MapBridge.swf in the same folder as the JS.
+   *                      The swf class must contains 'MapBridge' in its name if it extends MapBridge.as.
+   */
   /**
    * Static methods to create a flash map instance. After map instance is created,
    * refer to Google Maps ActionScript API for reference documentation.
@@ -69,12 +72,16 @@
    * Create a map. This method must be called before any other methods. The created map instance
    * will be passed as the first parameter in the callback function.
    * The bridge itself will be the second parameter. Normally there is no need to use the bridge itself.
+   * The returned map instance also contains the following convient methods:
+   * <ul>
+   * <li><code>create(fullClassName:String, args:Array)</code>. Construct a object instance with parameters.
+   * <li><code>getStatic(fullClassName:String, fnValName:String, args:Array)</code>. Get static variables or call static function from a class
+   </ul>
    * @param {Node} node HTML node as map container.
    * @param {Function} callback Callback function. The parameters passed back is Map and Bridge.
-   * @param {opt_swfUrl} Optional. The customized swf file that may compiled with more classes.
-   *                      Default value is the MapBridge.swf in the same folder as the JS.
+   * @param {MapBridgeOptions} opt_bridge
    */
-  MapBridge.createMap = function(node, callback, opt_swfUrl) {
+  MapBridge.createMap = function (node, callback, opt_bridge) {
     var bridgeName = '__MAPBRIDGE__' + node.id;
     var embedNode = document.createElement('div');
     embedNode.id = bridgeName;
@@ -83,9 +90,11 @@
       bridgeName: bridgeName,
       key: apikey
     };
-    var swfUrl = opt_swfUrl || scriptPath + 'MapBridge.swf';
+    opt_bridge = opt_bridge ||
+    {};
+    var swfUrl = opt_bridge.swf || scriptPath + 'MapBridge.swf';
     swfobject.embedSWF(swfUrl, embedNode.id, node.offsetWidth, node.offsetHeight, "9.0.0", false, flashvars);
-    FABridge.addInitializationCallback(bridgeName, function() {
+    FABridge.addInitializationCallback(bridgeName, function () {
       var bridge = FABridge[bridgeName];
       var map = bridge.root();
       if (!defaultBridge) {
@@ -108,7 +117,7 @@
     if (args) {
       for (var i = 0; i < args.length; i++) {
         var ag = args[i];
-        if (ag.typeName === 'MapBridge' && ag.bridge) {
+        if (ag.typeName && ag.typeName.indexOf('MapBridge') > -1 && ag.bridge) {
           map = ag;
         } else {
           a.push(ag);
@@ -154,14 +163,8 @@
    */
   function addClass(partName) {
     var key = partName.substring(partName.lastIndexOf('.') + 1);
-    mapClasses[key] = function() {
+    mapClasses[key] = function () {
       return createProxy(partName, arguments);
-    };
-    // it is not possible to assign static AS variable without a bridge, 
-    //so we use a special function S here. call e.g. View.S('VIEWMODE_2D');
-    mapClasses[key].S = function() {
-      var pa = parseArgs(arguments);
-      return pa.map.getStatic(packageRoot + partName, pa.args[0]);
     };
   }
   
@@ -172,7 +175,7 @@
   }
   function addStatic(partName, fnVar) {
     var key = partName.substring(partName.lastIndexOf('.') + 1);
-    mapClasses[key][fnVar] = function() {
+    mapClasses[key][fnVar] = function () {
       var pa = parseArgs(arguments);
       return pa.map.getStatic(packageRoot + partName, fnVar, pa.args);
     };
@@ -193,23 +196,44 @@
       }
     }
   }
-  /*
-   function Marker(latlng, opts) {
-   return createProxy('overlays.Marker', arguments);
-   }
-   mapClasses["Marker"] = Marker;
-   */
   addClasses(['Alpha', 'Color', 'Copyright', 'CopyrightCollection', 'CopyrightNotice', 'InfoWindowOptions', 'LatLng', 'LatLngBounds', 'Map', 'Map3D', 'MapAction', 'MapAttitudeEvent', 'MapEvent', 'MapMouseEvent', 'MapMoveEvent', 'MapOptions', 'MapType', 'MapTypeOptions', 'MapZoomEvent', 'PaneId', 'ProjectionBase', 'TileLayerBase', 'View', 'controls.ControlBase', 'controls.ControlPosition', 'controls.MapTypeControl', 'controls.MapTypeControlOptions', 'controls.NavigationControl', 'controls.NavigationControlOptions', 'controls.OverviewMapControl', 'controls.OverviewMapControlOptions', 'controls.PositionControl', 'controls.PositionControlOptions', 'controls.ScaleControl', 'controls.ScaleControlOptions', 'controls.ZoomControl', 'controls.ZoomControlOptions', 'geom.Attitude', 'geom.Point3D', 'geom.TransformationGeometry', 'overlays.EncodedPolylineData', 'overlays.GroundOverlay', 'overlays.GroundOverlayOptions', 'overlays.Marker', 'overlays.MarkerOptions', 'overlays.OverlayBase', 'overlays.Polygon', 'overlays.PolygonOptions', 'overlays.Polyline', 'overlays.PolylineOptions', 'overlays.TileLayerOverlay', 'services.ClientGeocoder', 'services.ClientGeocoderOptions', 'services.Directions', 'services.DirectionsEvent', 'services.DirectionsOptions', 'services.GeocodingEvent', 'services.GeocodingResponse', 'services.Placemark', 'services.Route', 'services.ServiceStatus', 'services.Step', 'styles.BevelStyle', 'styles.ButtonFaceStyle', 'styles.ButtonStyle', 'styles.FillStyle', 'styles.GradientStyle', 'styles.RectangleStyle', 'styles.StrokeStyle']);
   
-  /*mapClasses.Polyline.fromEncoded = function(){
-   return callStaticFn('overlays.Polyline', 'fromEncoded', arguments);
-   };*/
   addStatics({
-    'overlays.Polyline': ['fromEncoded'],
+    'Alpha': ['OPAQUE', 'PERCENT_0', 'PERCENT_10', 'PERCENT_100', 'PERCENT_20', 'PERCENT_30', 'PERCENT_40', 'PERCENT_50', 'PERCENT_60', 'PERCENT_70', 'PERCENT_80', 'PERCENT_90', 'UNSEEN'],
+    'Color': ['BLACK', 'BLUE', 'CYAN', 'DEFAULTLINK', 'GRAY1', 'GRAY10', 'GRAY11', 'GRAY12', 'GRAY13', 'GRAY14', 'GRAY15', 'GRAY2', 'GRAY3', 'GRAY4', 'GRAY5', 'GRAY6', 'GRAY7', 'GRAY8', 'GRAY9', 'GREEN', 'MAGENTA', 'RED', 'WHITE', 'YELLOW', 'toHtml'],
+    'InfoWindowOptions': ['ALIGN_CENTER', 'ALIGN_LEFT', 'ALIGN_RIGHT', 'getDefaultOptions', 'setDefaultOptions'],
+    'LatLng': ['EARTH_RADIUS', 'fromRadians', 'fromUrlValue', 'wrapLatLng'],
+    'MapAction': ['ACTION_NOTHING', 'ACTION_PAN', 'ACTION_PAN_ZOOM_IN', 'ACTION_ZOOM_IN', 'DRAGMODE_CAMERA_YAW_PITCH', 'DRAGMODE_LATLNG', 'DRAGMODE_MAP_YAW_PITCH', 'DRAGMODE_PITCH', 'DRAGMODE_YAW'],
+    'MapAttitudeEvent': ['ATTITUDE_CHANGE_END', 'ATTITUDE_CHANGE_START', 'ATTITUDE_CHANGE_STEP'],
+    'MapEvent': ['CONTROL_ADDED', 'CONTROL_REMOVED', 'COPYRIGHTS_UPDATED', 'FLY_TO_CANCELED', 'FLY_TO_DONE', 'INFOWINDOW_CLOSED', 'INFOWINDOW_CLOSING', 'INFOWINDOW_OPENED', 'MAPTYPE_ADDED', 'MAPTYPE_CHANGED', 'MAPTYPE_REMOVED', 'MAP_PREINITIALIZE', 'MAP_READY', 'OVERLAY_BEFORE_REMOVED', 'OVERLAY_MOVED', 'OVERLAY_REMOVED', 'SIZE_CHANGED', 'TILES_LOADED', 'TILES_LOADED_PENDING', 'VIEW_CHANGED', 'VISIBILITY_CHANGED'],
+    'MapMouseEvent': ['CLICK', 'DOUBLE_CLICK', 'DRAG_END', 'DRAG_START', 'DRAG_STEP', 'MOUSE_DOWN', 'MOUSE_MOVE', 'MOUSE_UP', 'ROLL_OUT', 'ROLL_OVER'],
+    'MapMoveEvent': ['MOVE_END', 'MOVE_START', 'MOVE_STEP'],
+    'MapType': ['DEFAULT_MAP_TYPES', 'HYBRID_MAP_TYPE', 'NORMAL_MAP_TYPE', 'PHYSICAL_MAP_TYPE', 'SATELLITE_MAP_TYPE'],
+    'MapTypeOptions': ['getDefaultOptions', 'setDefaultOptions'],
+    'MapZoomEvent': ['CONTINUOUS_ZOOM_END', 'CONTINUOUS_ZOOM_START', 'CONTINUOUS_ZOOM_STEP', 'ZOOM_CHANGED', 'ZOOM_RANGE_CHANGED'],
+    'PaneId': ['PANE_FLOAT', 'PANE_MAP', 'PANE_MARKER', 'PANE_OVERLAYS'],
+    'View': ['VIEWMODE_2D', 'VIEWMODE_ORTHOGONAL', 'VIEWMODE_PERSPECTIVE'],
+    'controls.ControlPosition': ['ANCHOR_BOTTOM_LEFT', 'ANCHOR_BOTTOM_RIGHT', 'ANCHOR_TOP_LEFT', 'ANCHOR_TOP_RIGHT', 'AUTO_ALIGN_NONE', 'AUTO_ALIGN_X', 'AUTO_ALIGN_Y'],
+    'controls.MapTypeControlOptions': ['ALIGN_HORIZONTALLY', 'ALIGN_VERTICALLY'],
+    'controls.ScaleControlOptions': ['UNITS_BOTH', 'UNITS_BOTH_PREFER_IMPERIAL', 'UNITS_BOTH_PREFER_METRIC', 'UNITS_IMPERIAL_ONLY', 'UNITS_METRIC_ONLY', 'UNITS_SINGLE'],
+    'overlays.MarkerOptions': ['ALIGN_BOTTOM', 'ALIGN_HORIZONTAL_CENTER', 'ALIGN_LEFT', 'ALIGN_RIGHT', 'ALIGN_TOP', 'ALIGN_VERTICAL_CENTER', 'getDefaultOptions', 'setDefaultOptions'],
+    'overlays.GroundOverlayOptions': ['getDefaultOptions', 'setDefaultOptions'],
     'overlays.Polygon': ['fromEncoded'],
-    'MapType': ['NORMAL_MAP_TYPE', 'PHYSICAL_MAP_TYPE','HYBRID_MAP_TYPE']
+    'overlays.PolygonOptions': ['getDefaultOptions', 'setDefaultOptions'],
+    'overlays.Polyline': ['fromEncoded'],
+    'overlays.PolylineOptions': ['getDefaultOptions', 'setDefaultOptions'],
+    'services.DirectionsEvent': ['DIRECTIONS_ABORTED', 'DIRECTIONS_FAILURE', 'DIRECTIONS_SUCCESS'],
+    'services.DirectionsOptions': ['TRAVEL_MODE_DRIVING', 'TRAVEL_MODE_WALKING'],
+    'services.GeocodingEvent': ['GEOCODING_FAILURE', 'GEOCODING_SUCCESS'],
+    'services.ServiceStatus': ['GEO_ABORTED_REQUEST', 'GEO_BAD_KEY', 'GEO_BAD_REQUEST', 'GEO_BAD_STATUS_START', 'GEO_MISSING_ADDRESS', 'GEO_MISSING_QUERY', 'GEO_SERVER_ERROR', 'GEO_SUCCESS', 'GEO_TOO_MANY_QUERIES', 'GEO_UNAVAILABLE_ADDRESS', 'GEO_UNKNOWN_ADDRESS', 'GEO_UNKNOWN_DIRECTIONS'],
+    'styles.BevelStyle': ['BEVEL_LOWERED', 'BEVEL_NONE', 'BEVEL_RAISED'],
+    'styles.BevelStyle': ['mergeStyles'],
+    'styles.ButtonFaceStyle': ['mergeStyles'],
+    'styles.ButtonStyle': ['mergeStyles'],
+    'styles.FillStyle': ['mergeStyles'],
+    'styles.RectangleStyle': ['mergeStyles'],
+    'styles.StrokeStyle': ['mergeStyles']
   });
-  
   
   for (var x in mapClasses) {
     if (mapClasses.hasOwnProperty(x)) {

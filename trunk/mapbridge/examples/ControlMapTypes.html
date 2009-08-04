@@ -3,7 +3,7 @@
     <head>
         <title>MapBridge: JavaScript Bridge for Google Maps Flash API</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-        <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw">
+        <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxQGj0PqsCtxKvarsoS-iqLdqZSKfxRdmoPmGl7Y9335WLC36wIGYa6o5Q">
         </script>
         <script type="text/javascript">
             var map;
@@ -15,14 +15,15 @@
             }
             
             function onMapReady(e) {
-              map.setCenter(new LatLng(42.366662, -71.106262), 11, MapType.S('NORMAL_MAP_TYPE'));
-              map.removeMapType(MapType.S('HYBRID_MAP_TYPE'));
+              map.setCenter(new LatLng(42.366662, -71.106262), 11, MapType.NORMAL_MAP_TYPE());
+              map.removeMapType(MapType.HYBRID_MAP_TYPE());
               map.addControl(new MapTypeControl());
             }
         </script>
     </head>
     <body onload="init()">
-        <div id="map_canvas" style="width:100%;height:100%">
+      <div>Hybrid map type is removed and no longer in map type control.</div>
+        <div id="map_canvas" style="width:100%;height:90%">
         </div>
     </body>
 </html>

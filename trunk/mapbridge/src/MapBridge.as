@@ -30,7 +30,7 @@ package {
       externalBridge=new FABridge();
       externalBridge.rootObject=this;
     }
-
+ 
     // 
     /**
      * Dynamically construct class based on class name, a simple flavor of reflection.
@@ -89,34 +89,6 @@ package {
       return instance;
     }
 
-/*    public function staticVar(className:String, prop:String):* {
-      var val:Object;
-      try {
-        var c:Class=Class(ApplicationDomain.currentDomain.getDefinition(className));
-        val=c[prop];
-
-      } catch (e:Error) {
-        return "__FLASHERROR__" + "||" + e.message;
-      }
-      return val;
-    }
-
-    public function staticFn(className:String, fnName:String, args:Array = null):* {
-      
-      try {
-        var c:Class=Class(ApplicationDomain.currentDomain.getDefinition(className));
-        var fn:Function = c[fnName];
-        if (fn != null) {
-          return  fn.apply(this, args || []);
-        }
-        
-      } catch (e:Error) {
-        return "__FLASHERROR__" + "||" + e.message;
-      }
-      return null;
-    }
-  */ 
-  
      public function getStatic(className:String, fnVar:String, args:Array = null):* {
       var ret:*;
       try {

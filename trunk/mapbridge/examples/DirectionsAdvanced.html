@@ -3,7 +3,7 @@
     <head>
         <title>Directions Advanced</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-        <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw">
+        <script type="text/javascript" src="../src/mapbridge.js?key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxQGj0PqsCtxKvarsoS-iqLdqZSKfxRdmoPmGl7Y9335WLC36wIGYa6o5Q">
         </script>
         <script type="text/javascript">
             
@@ -13,7 +13,7 @@
             function init() {
               MapBridge.createMap(document.getElementById('map_canvas'), function(mp) {
                 map = mp;
-                map.addEventListener(MapEvent.S('MAP_READY'), onMapReady);//'mapevent_mapready'
+                map.addEventListener(MapEvent.MAP_READY(), onMapReady);//'mapevent_mapready'
               });
             }
             
@@ -22,8 +22,8 @@
               map.addControl(new NavigationControl());
               map.addControl(new MapTypeControl());
               dir = new Directions();
-              dir.addEventListener(DirectionsEvent.S('DIRECTIONS_SUCCESS'), onDirLoad);
-              dir.addEventListener(DirectionsEvent.S('DIRECTIONS_FAILURE'), onDirFail);
+              dir.addEventListener(DirectionsEvent.DIRECTIONS_SUCCESS(), onDirLoad);
+              dir.addEventListener(DirectionsEvent.DIRECTIONS_FAILURE(), onDirFail);
             }
             
             function $(id) {
@@ -56,12 +56,12 @@
               
               startMarker = new Marker(dir.getRoute(0).getStartGeocode().getPoint(), new MarkerOptions({
                 fillStyle: new FillStyle({
-                  color: Color.S('GREEN')
+                  color: Color.GREEN()
                 })
               }));
               endMarker = new Marker(dir.getRoute(0).getEndGeocode().getPoint(), new MarkerOptions({
                 fillStyle: new FillStyle({
-                  color: Color.S('BLUE')
+                  color: Color.BLUE()
                 })
               }));
               map.addOverlay(startMarker);
