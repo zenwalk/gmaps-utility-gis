@@ -170,7 +170,12 @@
     val = pa.map.staticFn(packageRoot + partName, fnName, pa.args);
     return val;
   }
-  
+  function callStaticVal(partName, valName, args) {
+    var val;
+    var pa = parseArgs(args);
+    val = pa.map.staticVal(packageRoot + partName, valName);
+    return val;
+  }
   /**
    * Create a class and insert into class collection.
    * @param {String} partial class name excluding com.google.maps., e.g  geom.Attitude.
@@ -193,26 +198,41 @@
     }
   }
   
-  function addStaticClsFn(partName, fnName) {
+  function addStaticFn(partName, fnName) {
     var key = partName.substring(partName.lastIndexOf('.') + 1);
     mapClasses[key][fnName] = function() {
-      return callStaticFn(partName, fnName, arguments);
-    }
+        return callStaticFn(partName, fnName, arguments);
+    };
   }
-  function addStaticClsFns(partName, fnNames) {
-    for (var i = 0; i < fnNames.length; i++) {
+  function addStaticVal(partName, varName) {
+    var key = partName.substring(partName.lastIndexOf('.') + 1);
+      mapClasses[key][varName] = function(map) {
+        
+        return (map || defaultMap).staticVar(packageRoot + partName, varName);
+      };
+    
+    
+  }
+  
+  function addStaticCls(isFn, partName, fnVals) {
+    for (var i = 0; i < fnVals.length; i++) {
       // must use function closure here.
-      addStaticClsFn(partName, fnNames[i]);
+      if (isFn){
+         addStaticFn(partName, fnVals[i]);
+      } else {
+        addStaticVal(partName, fnVals[i]);
+      }
+      
     }
   }
   /**
    * add static functions
    * @param {Object} cls: name = partClassName, value=Array of methods
    */
-  function addStaticFns(cls) {
+  function addStatics(isFn, cls) {
     for (var x in cls) {
       if (cls.hasOwnProperty(x)) {
-        addStaticClsFns(x, cls[x]);
+        addStaticCls(isFn, x, cls[x]);
       }
     }
   }
@@ -227,11 +247,13 @@
   /*mapClasses.Polyline.fromEncoded = function(){
    return callStaticFn('overlays.Polyline', 'fromEncoded', arguments);
    };*/
-  addStaticFns({
+  addStatics(true, {
     'overlays.Polyline': ['fromEncoded'],
     'overlays.Polygon': ['fromEncoded']
   });
-  
+  addStatics(false, {
+    'MapType': ['NORMAL_MAP_TYPE']
+  });
   
   for (var x in mapClasses) {
     if (mapClasses.hasOwnProperty(x)) {
