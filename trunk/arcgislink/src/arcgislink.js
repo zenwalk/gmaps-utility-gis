@@ -133,29 +133,27 @@
   // deal with the situation when user only loaded namespace.
   var W = window;
   var G = namespace('google.maps');
-  var NA = function(){}; // a dummy function for classes not available in V3 yet
-  var GEvent, GLatLng, GMap, GProjection, GTileLayer, GCopyrightCollection, 
-    GCopyright, GMapType, GMercatorProjection, G_MAP_OVERLAY_LAYER_PANE, 
-    GTileLayerOverlay, GInfoWindowTab, GLatLngBounds, GPolygon, GPolyline, 
-    OverlayView,  GMarker, GPoint;
+  var NA = function () {
+  }; // a dummy function for classes not available in V3 yet
+  var GEvent, GLatLng, GMap, GProjection, GTileLayer, GCopyrightCollection, GCopyright, GMapType, GMercatorProjection, G_MAP_OVERLAY_LAYER_PANE, GTileLayerOverlay, GInfoWindowTab, GLatLngBounds, GPolygon, GPolyline, OverlayView, GMarker, GPoint;
   GMap = G.Map;
   GEvent = G.event;
   GProjection = G.MapCanvasProjection;
-  GTileLayer =NA;// W.GTileLayer || G.TileLayer;
+  GTileLayer = NA;// W.GTileLayer || G.TileLayer;
   //GCopyrightCollection = W.CopyrightCollection || G.CopyrightCollection;
   //GCopyright = W.GCopyright || G.Copyright; 
   GMapType = NA;// avoid V3 error
   GMercatorProjection = NA;//W.GMercatorProjection || G.MercatorProjection;
   //G_MAP_OVERLAY_LAYER_PANE = W.G_MAP_OVERLAY_LAYER_PANE || 
   //  G.MAP_OVERLAY_LAYER_PANE; 
-  GTileLayerOverlay =NA;//} W.GTileLayerOverlay || G.TileLayerOverlay; 
+  GTileLayerOverlay = NA;//} W.GTileLayerOverlay || G.TileLayerOverlay; 
   //GInfoWindowTab = W.GInfoWindowTab || G.InfoWindowTab; 
-  GLatLngBounds = G.LatLngBounds; 
-  GPolygon =NA;// W.GPolygon || G.Polygon; 
-  GPolyline =NA;// W.GPolyline || G.Polyline;
-  OverlayView = G.OverlayView; 
+  GLatLngBounds = G.LatLngBounds;
+  GPolygon = NA;// W.GPolygon || G.Polygon; 
+  GPolyline = NA;// W.GPolyline || G.Polyline;
+  OverlayView = G.OverlayView;
   GLatLng = G.LatLng;
-  GPoint =  G.Point;
+  GPoint = G.Point;
   GMarker = G.Marker;
   
   /**
@@ -2307,7 +2305,7 @@
     }
   };
   ArcGISProjection.prototype.getWorldHeight  =  function (zoom) {
-   return Number.MAX_VALUE;
+    return Number.MAX_VALUE;
   };
   
   /**
@@ -2410,7 +2408,7 @@
   /**
    * Create Prototype
    */
- ArcGISTileLayer.prototype  =  new GTileLayer();
+  ArcGISTileLayer.prototype  =  new GTileLayer();
   
   /**
    * Initialize the tile layer from a loaded map service
@@ -2650,11 +2648,11 @@
     this.minZoom_  = opt_overlayOpts.minResolution;
     this.maxZoom_  = opt_overlayOpts.maxResolution;
     if (this.mapService_.hasLoaded()) {
-      this.init_( opt_overlayOpts);
+      this.init_(opt_overlayOpts);
     } else {
       var me  =  this;
       GEvent.addListener(this.mapService_, 'load', function () {
-        me.init_( opt_overlayOpts);
+        me.init_(opt_overlayOpts);
       });
     }
     
@@ -2793,23 +2791,23 @@
       this.redraw_  =  true;
       return;
     }
-    if (this.img_ !== null){//V3} && this.moveend_) {
+    if (this.img_) {//V3} && this.moveend_) {
       this.div_.removeChild(this.img_);
       this.img_  =  null;
     }
     if (this.isHidden()) {
       return;
     }
-    var bnds  = this.map_.get_bounds();
-    if (!bnds){
+    var bnds  = this.map_.getBounds();
+    if (!bnds) {
       return;// V3 have problem return a valid bounds consistently?
     }
-     var sr  = WEB_MERCATOR;//V3 this.map_.getCurrentMapType().getProjection().getSpatialReference();
+    var sr  = WEB_MERCATOR;//V3 this.map_.getCurrentMapType().getProjection().getSpatialReference();
     var me  =  this;
     var params  =  this.exportParams_;
     // V3 no map.getSize()
     var s = this.map_.getDiv();
-    params.size  =  '' + s.offsetWidth+ ',' + s.offsetHeight;
+    params.size  =  '' + s.offsetWidth + ',' + s.offsetHeight;
     //note: if GMapType's maxzoom is larger than any GTileLayer's maxZoom, GMap.getBounds return 0,0,0,0
    
     params.bbox  =  ArcGISUtil.fromLatLngBoundsToEnvelope(bnds, sr);
@@ -2832,7 +2830,7 @@
       var div = me.div_;
       if (json.href) {
         var bnds = ArcGISUtil.fromEnvelopeToLatLngBounds(json.extent);
-        var prj = me.get_projection();
+        var prj = me.getProjection();
         var wrapWidth = prj.getWorldWidth();
         var swpx = prj.fromLatLngToDivPixel(bnds.getSouthWest());
         var nepx = prj.fromLatLngToDivPixel(bnds.getNorthEast());
@@ -2872,7 +2870,7 @@
    */
   ArcGISMapOverlay.prototype.addToMap  =  function (map) {
     this.map_ = map;
-    this.set_map(map);//V3
+    this.setMap(map);//V3
     var me = this;
     this.moveEndListener_  =  GEvent.addListener(this.map_, "bounds_changed", function () {
       me.moveend_ = true;
@@ -2925,14 +2923,14 @@
    * @return {Boolean} visible
    */
   ArcGISMapOverlay.prototype.isHidden  =  function () {
-    return !(this.visible_ && this.isInZoomRange_());//V3 && this.getFullBounds().intersects(this.map_.get_bounds()));
+    return !(this.visible_ && this.isInZoomRange_());
   };
   /**
    * If this in zoom range
    * @return {Boolean}
    */
   ArcGISMapOverlay.prototype.isInZoomRange_  =  function () {
-    var z  = this.map_.get_zoom();
+    var z  = this.map_.getZoom();
     if ((this.minZoom_ !== undefined && z < this.minZoom_) || 
      (this.maxZoom_ !== undefined && z > this.maxZoom_)) {
       return false; 
@@ -2961,28 +2959,28 @@
    * @private
    * @param {Boolean} force
    */
-  ArcGISMapOverlay.prototype.draw  =  function () {
+  ArcGISMapOverlay.prototype.draw = function () {
     // do nothing. defered to onmove handler because Gmaps api 
     // does not pass 'force' parameter consistently to meet the need for this class;
-  if (!this.div_){
-    var div  =  document.createElement("div");
-    div.style.position  =  "absolute";
-    //map.getPane(G_MAP_OVERLAY_LAYER_PANE).appendChild(div);//
-    var panes = this.get_panes();
-    panes.overlayImage.appendChild(div);
-    //this.map_  =  map;
-    this.zoomLevel_  =  this.map_.get_zoom();
-    this.div_  =  div;
-    this.img_  =  null;
-   
-   //V3 this.mapTypeChangeListener_  =  GEvent.bind(this.map_, "maptypechanged", this, this.refresh);
-   //V3 this.mapTypeAddListener_  =  GEvent.bind(this.map_, "addmaptype", this, this.setupMapType_);
-    //V3this.map_.getArcGISOverlays().push(this);
-    if (this.hasLoaded()) {
-      //this.setupMapType_();
+    if (!this.div_) {
+      var div = document.createElement("div");
+      div.style.position = "absolute";
+      //map.getPane(G_MAP_OVERLAY_LAYER_PANE).appendChild(div);//
+      var panes = this.getPanes();
+      panes.overlayImage.appendChild(div);
+      //this.map_  =  map;
+      this.zoomLevel_ = this.map_.getZoom();
+      this.div_ = div;
+      this.img_ = null;
+      
+      //V3 this.mapTypeChangeListener_  =  GEvent.bind(this.map_, "maptypechanged", this, this.refresh);
+      //V3 this.mapTypeAddListener_  =  GEvent.bind(this.map_, "addmaptype", this, this.setupMapType_);
+      //V3this.map_.getArcGISOverlays().push(this);
+      if (this.hasLoaded()) {
+        //this.setupMapType_();
+      }
+      this.show();
     }
-    this.show();
-  } 
   };
   /**
    * Creates an ArcGISTileLayerOverlay. Params:
@@ -3081,13 +3079,6 @@
   };
   //start of add-on classes
   /**
-   * @name GMercatorProjection
-   * @class This is new method added to Google Maps API's
-   * <a href  = 'http://code.google.com/apis/maps/documentation/reference.html#GMercatorProjection'>GMercatorProjection</a>
-   * class.
-   */
-  function GMercatorProjection(){}// for V3
-  /**
    * Get the Spatial Reference used by GMercatorProjection.It's wkid  = 102113,
    * an instance of {@link ArcGISSphereMercator}.
    * @addon
@@ -3141,7 +3132,7 @@
   GMap.prototype.setBounds  =  function (bnds) {
     var center  = bnds.getCenter();
     var z  = this.getBoundsZoomLevel(bnds) + 1;
-    this.set_center(center, z);
+    this.setCenter(center, z);
   };
   
   
@@ -3707,13 +3698,11 @@
   var NS = namespace('google.maputils');
   NS.arcgis = arcgis;
   // if the user loaded global symbol, export all class with prefix ArcGIS to global.
- // if (window.GMap) {
-    for (var x in arcgis) {
-      if (arcgis.hasOwnProperty(x)) {
-        window['ArcGIS' + x] = arcgis[x];
-      }
+  for (var x in arcgis) {
+    if (arcgis.hasOwnProperty(x)) {
+      window['ArcGIS' + x] = arcgis[x];
     }
-    
+  }
   //}
 })();
 
