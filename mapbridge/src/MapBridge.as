@@ -5,7 +5,6 @@ package {
   import bridge.FABridge;
   
   import com.google.maps.Map3D;
-  import com.google.maps.overlays.*;
   
   import flash.system.ApplicationDomain;
 
