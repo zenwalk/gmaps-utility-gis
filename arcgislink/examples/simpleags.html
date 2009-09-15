@@ -31,7 +31,14 @@
              * Create a map overlay and add to map
              */
             function loadMapService() {
-              var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/'+document.getElementById('svc').value;
+                var el = document.getElementById('svc');
+                var svc = '';
+                for (var i = 0; i < el.options.length; i++) {
+                    if (el.options[i].selected) {
+                        svc = el.options[i].text;
+                    }
+                }
+              var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/'+svc;
               if (ov != null) {
                 ov.remove();
                 ov = null;
@@ -252,7 +259,7 @@
         <div>
         Switch to a different map service: 
         <select id="svc" onchange="loadMapService()">
-            <option>Specialty/ESRI_StateCityHighway_USA/MapServer</option>
+            <option selected="selected">Specialty/ESRI_StateCityHighway_USA/MapServer</option>
             <option>Specialty/ESRI_StatesCitiesRivers_USA/MapServer</option>
             <option>Demographics/ESRI_Census_USA/MapServer</option>
             <option>Portland/ESRI_LandBase_WebMercator/MapServer</option>
@@ -263,11 +270,11 @@
             <option>Petroleum/KGS_OilGasFields_Kansas/MapServer</option>
         </select>
         Map Opacity(0=transparent;1=opaque):
-        <select id="op" onchange="if (ov){ov.setOpacity(this.value)}">
+        <select id="op" onchange="if (ov){ov.setOpacity(this.options[this.selectedIndex].text)}">
          <option>0</option>
           <option>0.2</option>
            <option>0.5</option>
-            <option selected>0.8</option>
+            <option selected="selected">0.8</option>
              <option>1</option>
         </select>
         </div>
