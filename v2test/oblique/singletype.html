@@ -126,7 +126,7 @@
                           var u = u.replace('{C}', '' + c.lng() + ',' + c.lat()).replace('{H}', heading).replace('{B}', '' + Math.min(sw.lng(),ne.lng()) + ',' + Math.min(sw.lat(),ne.lat()) + ',' + Math.max(ne.lng(),sw.lng()) + ',' + Math.max(ne.lat(),sw.lat())).replace('{F}', this.file_);
                           var me = this;
                           this.getJSON(u, function(file) {
-                             GLog.write('back getNearestImage');
+                            // GLog.write('back getNearestImage');
                               if (file != me.file_) {
                                   var oldfile = me.file_;
                                   me.file_ = file;
