@@ -4,8 +4,18 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <title>Google Maps JavaScript API Example: Controls</title>
-    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGY8Xhrw1zw6Ia3dwUJVxKRTVDgad4Bvurg1SD7pTTN986X-SXRSKKVrETJW4qaW12HAV5dyl6wH7sw"
-            type="text/javascript"></script>
+    <script type="text/javascript">
+         //copy from http://gmaps-samples.googlecode.com/svn/trunk/versionchecker.html?v=2.86
+          function getURLParam(name) {
+            var regexS = "[\\?&]" + name + "=([^&#]*)";
+            var regex = new RegExp(regexS);
+            var results = regex.exec(window.location.href);
+            return (results === null ? "" : decodeURIComponent(results[1]));
+          }
+          var v = getURLParam('v')||'2';
+          document.write('<script src="http://maps.google.com/maps?file=api&amp;v='+v+'&amp;key=ABQIAAAAGY8Xhrw1zw6Ia3dwUJVxKRTVDgad4Bvurg1SD7pTTN986X-SXRSKKVrETJW4qaW12HAV5dyl6wH7sw" type="text/javascript"><'+ '/script>');
+        </script>
+
     <script type="text/javascript">
     function initialize() {
       if (GBrowserIsCompatible()) {
