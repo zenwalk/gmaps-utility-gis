@@ -1,0 +1,279 @@
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+        <title>Google Maps JavaScript API v3 Example: Custom Projection and Map Type</title>
+        <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false">
+        </script>
+        <script type="text/javascript">
+                        
+                        	/*
+                         	* This is an example of using customized projection and map type in Google Maps JS API V3.
+                         	* The examples uses Lambert Conic Conformal Projection(LCC), which is used by about 70% 
+                         	* of State Plane Coordinate Systems. 
+                         	* The Customized Map type is using map cache created by ArcGIS server.
+                         	* The code used an extra layer between Google's world coodinates (0-256) to 
+                         	* real world coorindates (survey units), in which Y value increases upwards. 
+                         	* @Author Nianwei Liu [nianwei at gmail.com]
+                         	*/
+                        	/**
+                         	* Reference: 
+                         	* http://pubs.er.usgs.gov/djvu/PP/PP_1395.pdf
+                         	* http://www.posc.org/Epicentre.2_2/DataModel/ExamplesofUsage/eu_cs34.html
+                         	* Each projection class is used to convert latlng from/to real world coord.
+                         	* Should implemented three methods:forward, inverse and circum 
+                         	*/
+                        	/*==========start LCC code ===============*/
+                         /**
+                          * Create a Lambert Conic Conformal Projection. 
+                          * This class converts lat lng from real world coordinates. 
+                         	* @param {Js Literal}. It should contain the following properties:
+                         	* -semi_major:  ellipsoidal semi-major axis 
+                         	* -unit: meters per unit
+                         	* -inverse_flattening: inverse of flattening of the ellipsoid where 1/f = a/(a - b)
+                         	* -standard_parallel_1: phi1 latitude of the first standard parallel
+                         	* -standard_parallel_2: phi2 latitude of the second standard parallel
+                         	* -latitude_of_origin: phiF latitude of the false origin
+                         	* -central_meridian: lamdaF longitude of the false origin  (with respect to the prime meridian)
+                         	* -false_easting:FE false easting, the Eastings value assigned to the natural origin 
+                         	* -false_northing: FN false northing, the Northings value assigned to the natural origin 
+                         	*/
+                        	function LCC(params){
+                            		/*=========parameters=================*/
+                            		params=params||{};
+                            		this.name=params.name||"LCC";
+                            		var _a = (params.semi_major ||6378137.0 )/(params.unit||0.3048006096012192);
+                            		var _f_i=params.inverse_flattening||298.257222101;//this.
+                            		var _phi1 = (params.standard_parallel_1||34.33333333333334) * (Math.PI / 180);
+                            		var _phi2 = (params.standard_parallel_2||36.16666666666666) * (Math.PI / 180);
+                            		var _phiF = (params.latitude_of_origin||33.75) * (Math.PI / 180);
+                            		var _lamdaF = (params.central_meridian||-79.0)* (Math.PI / 180);
+                            		var _FE = params.false_easting||2000000.002616666;//this.
+                            		var _FN = params.false_northing||0.0;//this.
+                            		/*========== functions to calc values, potentially can move outside as static methods=========*/
+                            		var calc_m = function(phi, es){
+                                		var sinphi = Math.sin(phi);
+                                		return Math.cos(phi) / Math.sqrt(1 - es * sinphi * sinphi);
+                            		};
+                            		var calc_t = function(phi, e){
+                                		var esinphi = e * Math.sin(phi);
+                                		return Math.tan(Math.PI / 4 - phi / 2) / Math.pow((1 - esinphi) / (1 + esinphi), e / 2);
+                            		};
+                            		var calc_r = function(a, F, t, n){
+                                		return a * F * Math.pow(t, n)
+                            		};
+                            		var calc_phi = function(t_i, e, phi){
+                                		var esinphi = e * Math.sin(phi);
+                               			return Math.PI / 2 - 2 * Math.atan(t_i * Math.pow((1 - esinphi) / (1 + esinphi), e / 2));
+                            		};
+                            
+                            		var solve_phi = function(t_i, e, init){
+                                		// iteration
+                               			 var i = 0;
+                                		var phi = init;
+                                		var newphi = calc_phi(t_i, e, phi);//this.
+                                		while (Math.abs(newphi - phi) > 0.000000001 && i < 10) {
+                                    			i++;
+                                    			phi = newphi;
+                                    			newphi = calc_phi(t_i, e, phi);//this.
+                                		}
+                                		return newphi;
+                            		}
+                        
+                        		/*=========shared, not point specific params or intermediate values========*/
+                            		var _f = 1.0 /_f_i;//this.
+                            		/*e: eccentricity of the ellipsoid where e^2 = 2f - f^2 */
+                            		var _es = 2 * _f - _f * _f;
+                            		var _e = Math.sqrt(_es);
+                            		var _m1 = calc_m(_phi1, _es);//this.
+                            		var _m2 = calc_m(_phi2, _es);//this.
+                            		var _tF = calc_t(_phiF, _e);//this.
+                            		var _t1 = calc_t(_phi1, _e);//this.
+                            		var _t2 = calc_t(_phi2, _e);//this.
+                            		var _n = Math.log(_m1 / _m2) / Math.log(_t1 / _t2);
+                            		var _F = _m1 / (_n * Math.pow(_t1, _n));
+                            		var _rF = calc_r(_a, _F, _tF, _n);//this.
+                            
+                               /**
+                                * convert lat lng to coordinates 
+                                * @param {Array<double>} latlng array with 2 double: [lng,lat]
+                                * @return {Array<double>} coords array with 2 double: [x,y]
+                                */
+                            		this.forward = function(latlng){
+                                		var phi = latlng[1] * (Math.PI / 180);
+                                		var lamda = latlng[0] * (Math.PI / 180);
+                                		var t = calc_t(phi, _e);//this.
+                                		var r = calc_r(_a, _F, t, _n);//this.
+                                		var theta = _n * (lamda - _lamdaF);
+                                		var E = _FE + r * Math.sin(theta);
+                                		var N = _FN + _rF - r * Math.cos(theta);
+                                		return [E, N];
+                            		};
+                            	 /**
+                                * convert  coordinates to lat lng 
+                                * @param  {Array<double>} coords array with 2 double: [x,y]
+                                * @return {Array<double>} latlng array with 2 double: [lng,lat]
+                                */
+                              	this.inverse = function(xy){
+                                		var E = xy[0];
+                                		var N = xy[1];
+                                		var theta_i = Math.atan((E - _FE) / (_rF - (N - _FN)));
+                                		var r_i = (_n > 0 ? 1 : -1) * Math.sqrt((E - _FE) * (E - _FE) + (_rF - (N - _FN)) * (_rF - (N - _FN)));
+                                		var t_i = Math.pow((r_i / (_a * _F)), 1 / _n);
+                                		var phi = solve_phi(t_i, _e, 0);//this.
+                                		var lamda = theta_i / _n + _lamdaF;
+                                		return [lamda * (180 / Math.PI), phi * (180 / Math.PI)];
+                            		};
+                                /**
+                                 * circum of earth in projected units. This is used in V2's wrap.
+                                 * @return double.
+                                 */
+                            		this.circum = function(){
+                                		return Math.PI * 2 * _a;
+                            		};
+                            
+                        	}
+                        	/*==========start  StatePlaneProjection code ==================*/ 
+                        	/**
+                         	* This is a class that implements Google Map API's google.maps.Projection interface
+                         	* It handles tile system transformation between pixel and latlng.
+                         	* @param {js literal} params: tile system parameters.
+                         	* it should contain the following properties:
+                         	* -zoomOffset:The approximate offset between ArcGIS Cache's Level of Detail and Google Map's zoom Level.
+                         	* -originalX: The tile orginal X in map units
+                         	* -originalY: The tile orginal Y in map units
+                         	* -projection: projection object that implements forward/inverse method
+                         	* -resolution:array of resolution values (units/pixel) for each level
+                         	* -bounds: (optional) {literal} object with minX, minY, maxX, maxY properties to set extent constraint.
+                        	*/
+                        	function StatePlaneProjection(params){
+                        		params = params||{};
+                         	  //	this.zoomOffset = params.zoomOffset||10;
+                            this.originX = params.originX || 0;
+                            this.originY = params.originY || 2000000;// pixel Y increase downwards. 
+                         		this.projection = params.projection||new LCC();
+                            //	this.resolutions = params.resolutions||[512,256,128,64,32,16,8,4,2,1] ; // units/pixel
+                        	}
+                          // note there is no google.maps.Projection
+                        	//StatePlaneProjection.prototype = new google.maps.Projection();
+                        	StatePlaneProjection.prototype.fromLatLngToPoint = function(latlng, opt_point){// 
+                            		if (latlng == null) 
+                                		return null;
+                            		var coords = this.projection.forward([latlng.lng(), latlng.lat()]);
+                            		var scale = this.projection.circum()/256;
+                                //var zoomInx = zoom - this.zoomOffset;
+                            		//var x = Math.round((coords[0] - this.originX) / this.resolutions[zoomInx]);
+                            		//var y = Math.round((this.originY - coords[1]) / this.resolutions[zoomInx]);
+                                var point = opt_point || new google.maps.Point(0, 0);
+                            		point.x = (coords[0])/scale;// - this.originX
+                            		point.y = (coords[1])/scale;//this.originY - 
+                                return point;
+                        	};
+                        	StatePlaneProjection.prototype.fromPointToLatLng = function(pixel){
+                            		if (pixel == null) 
+                                		return null;
+                            		var scale = this.projection.circum()/256;
+                                //var zoomInx = zoom - this.zoomOffset;
+                            		//var x = pixel.x * this.resolutions[zoomInx] + this.originX;
+                            		//var y = this.originY - pixel.y * this.resolutions[zoomInx];
+                            		var x = pixel.x * scale ;//+ this.originX;
+                            		var y = pixel.y * scale;//this.originY - 
+                            		var geo = this.projection.inverse([x, y]);
+                            		return new google.maps.LatLng(geo[1], geo[0]);
+                        	};
+                        
+                        	//==========end  StatePlaneProjection code ==================/ 
+                        
+                          function StatePlaneMapType(params){
+                             params = params || {};
+                             // set properties
+                             this.tileSize = params.tileSize || new google.maps.Size(256,256);
+                             this.projection = params.projection; 
+                             this.maxZoom  = params.maxZoom  || 19;
+                             this.minZoom  = params.minZoom  || 0;
+                             this.name = params.name;
+                             this.alt = params.alt;
+                          }
+                         // StatePlaneMapType.prototype = new google.maps.MapType();
+                          
+                          StatePlaneMapType.prototype.getTile = function(tileCoord, zoom, ownerDocument){
+                              var div = ownerDocument.createElement('DIV');
+                              div.innerHTML = coord;
+                              div.style.width = this.tileSize.width + 'px';
+                              div.style.height = this.tileSize.height + 'px';
+                              div.style.fontSize = '10';
+                              div.style.borderStyle = 'solid';
+                              div.style.borderWidth = '1px';
+                              div.style.borderColor = '#AAAAAA';
+                              return div;
+                           }
+            
+                        	function initialize() {
+                            var ncsp83 = new LCC({
+                                semi_major: 6378137.0,
+                                inverse_flattening: 298.257222101,
+                                standard_parallel_1: 34.33333333333334,
+                                standard_parallel_2: 36.16666666666666,
+                                central_meridian: -79.0,
+                                latitude_of_origin: 33.75,
+                                false_easting: 2000000.002616666,
+                                false_northing: 0,
+                                unit: 0.3048006096012192
+                            });
+                            
+                            var gprj = new StatePlaneProjection({
+                              originX: 0,
+                              originY: 2000000,
+                              projection: ncsp83
+                            });
+                        		var spType = new StatePlaneMapType({
+                              projection: gprj,
+                              name: 'NC_StatePlane83',
+                              minZoom:10,
+                              maxZoom:19,
+                              tileSize: new google.maps.Size(512,512)
+                            });
+                            spType.projection = gprj;
+                            //'NC_StatePlane83', 
+                            var charlotte = new google.maps.LatLng(35.227, -80.8431);
+                            var myOptions = {
+                                zoom: 16,
+                                center: charlotte,
+                                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                                mapTypeControlOptions: {
+                                    mapTypeIds: ['wm','sp',google.maps.MapTypeId.ROADMAP]
+                                }
+                            }
+                            var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+                            
+                            var wmType = new google.maps.ImageMapType({
+                              getTileUrl:function(coord, zoom) {
+                                  return "http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/CACHE/BaseMapWM/MapServer/tile/"+
+                                       zoom + "/" + coord.y + "/" + coord.x ;
+                              },
+                              tileSize: new google.maps.Size(256, 256),
+             	                isPng: true,
+                              name:'wmmap',
+                              minZoom:10,
+                              maxZoom:19
+                             });
+                            
+                             map.mapTypes.set('wm',wmType);
+                             map.mapTypes.set('sp',spType);
+                             //map.setMapTypeId('wm');
+
+
+            
+                           
+                            }
+                        
+                         
+                    
+        </script>
+    </head>
+    <body style="margin:0px; padding:0px;" onload="initialize()">
+        <div id="map_canvas" style="width:100%; height:100%">
+        </div>
+    </body>
+</html>
+</head>
