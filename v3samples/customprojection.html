@@ -162,7 +162,7 @@
                                         this.scale = Math.pow(2, this.zoomOffset) * this.resolution0;
                                      	}
                                      	StatePlaneProjection.prototype.fromLatLngToPoint = function(latlng, opt_point){// 
-                                        	console.log(latlng);
+                                        	// console.log(latlng);
                                           	if (latlng == null) 
                                             		return null;
                                          		var coords = this.projection.forward([latlng.lng(), latlng.lat()]);
