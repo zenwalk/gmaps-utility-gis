@@ -53,7 +53,7 @@
                                         		/*========== functions to calc values, potentially can move outside as static methods=========*/
                                         		var calc_m = function(phi, es){
                                             		var sinphi = Math.sin(phi);
-                                            		return Math.cos(phi) / Math.sqrt(1 - es * sinphi * sinphi);
+                                             		return Math.cos(phi) / Math.sqrt(1 - es * sinphi * sinphi);
                                         		};
                                         		var calc_t = function(phi, e){
                                             		var esinphi = e * Math.sin(phi);
@@ -167,15 +167,15 @@
                                             		return null;
                                          		var coords = this.projection.forward([latlng.lng(), latlng.lat()]);
                                         		var point = opt_point || new google.maps.Point(0, 0);
-                                        		point.x = (coords[0]+ this.originX)/this.scale;// - this.originX
-                                        		point.y = (this.originY - coords[1])/this.scale;// 
+                                        		point.x = (coords[0] - this.originX)/this.scale;
+                                        		point.y = (this.originY - coords[1])/this.scale; 
                                             return point;
                                     	};
                                     	StatePlaneProjection.prototype.fromPointToLatLng = function(pixel){
                                         		if (pixel == null) 
                                             		return null;
-                                        		var x = (pixel.x) * this.scale;// ;
-                                        		var y =  this.originY- pixel.y * this.scale;//
+                                        		var x = (pixel.x) * this.scale + this.originX;
+                                        		var y =  this.originY- pixel.y * this.scale;
                                         		var geo = this.projection.inverse([x, y]);
                                         		return new google.maps.LatLng(geo[1], geo[0]);
                                     	};
@@ -198,7 +198,9 @@
                                          var url = "http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/GET/BaseMap/MapServer/tile/"+
                                                     (zoom-this.projection.getZoomOffset()) + "/" + tileCoord.y + "/" + tileCoord.x ;
                                           img.src = url;
-                                          img.style.width = this.tileSize.width + 'px';
+                                          img.width = this.tileSize.width;
+                                          img.height = this.tileSize.height;
+
                                           return img;
                                        }
                         
