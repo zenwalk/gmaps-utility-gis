@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+                layout="absolute"
+                viewSourceURL="srcview/index.html">
+  <mx:Panel title="Custom Projection Sample"
+            width="100%"
+            height="100%">
+    <maps:Map xmlns:maps="com.google.maps.*"
+              id="map"
+              mapevent_mappreinitialize="onMapPreInitialize(event)"
+              mapevent_mapready="onMapReady(event)"
+              width="100%"
+              height="100%"
+              key="ABQIAAAA7QUChpcnvnmXxsjC7s1fCxQGj0PqsCtxKvarsoS-iqLdqZSKfxTd7Xf-2rEc_PC9o8IsJde80Wnj4g"/>
+
+  </mx:Panel>
+  <mx:Script>
+    <![CDATA[
+      import com.google.maps.controls.*;
+      import com.google.maps.*;
+      import com.google.maps.interfaces.*;
+
+      private function onMapPreInitialize(event:Event):void {
+        var myTileLayer:MyTileLayer=new MyTileLayer();
+        var myProjection:MyProjection=new MyProjection(5, false);
+        var myMapType:MapType=new MapType([myTileLayer], myProjection, "Pic", new MapTypeOptions({minResolution: 0, maxResolution:4}));
+        var opts:MapOptions=new MapOptions();
+        opts.zoom=2;
+        opts.center=new LatLng(0, 0);
+        opts.mapTypes=[myMapType];
+        map.setInitOptions(opts);
+        
+        
+      }
+
+      private function onMapReady(event:Event):void {
+        map.addControl(new MapTypeControl());
+        map.addControl(new NavigationControl());
+        map.enableScrollWheelZoom();
+        map.enableContinuousZoom();
+      }
+    ]]>
+  </mx:Script>
+</mx:Application>
