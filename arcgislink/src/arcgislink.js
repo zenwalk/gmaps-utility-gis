@@ -12,63 +12,57 @@
  * limitations under the License.
  */
 /**
- * @name ArcGIS Server Link for Google Maps Javascript API
- * @version 2.0 (for GMaps API v3)
- * @author: Nianwei Liu 
+ * @name ArcGIS Server Link for Google Maps JavaScript API V3
+ * @version 1.0
+ * @author: Nianwei Liu (nianwei at gmail dot com)
  * @fileoverview 
  *  <p><a href="concepts.html">Concepts</a>
  *  | <a href="examples.html">Examples</a>
  *   </p> 
- *  <p><b style="font-color:red">DOCUMENTTION is for V2, NOT UPDATED for V3 YET!</b>This library lets you add map resources accessible via 
- *    <a  href = 'http://resources.esri.com/help/9.3/arcgisserver/apis/rest/'> 
+ *  <p>This library lets you add map resources accessible via 
+ *    <a href = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/index.html'> 
  *    ESRI ArcGIS Server&#0153; REST API</a> into <a 
- *    href='http://code.google.com/apis/maps/documentation/reference.html'>
- *    Google Maps </a> and provide some additional support for map tiles created 
+ *    href='http://code.google.com/apis/maps/documentation/javascript/'>
+ *    Google Maps API V3</a> and provide some additional support for map tiles created 
  *    with different spatial reference and tiling scheme.</p>
- *    <p style='background-color:#E5ECF9'>All classes are available under 
- *    namespace <code>google.maputils.arcgis.*</code>. 
- *    You can replace the normal <code>ArcGIS</code> prefix with the namespace.
- *    <br/>
- *    For example, the <code>ArcGISTileLayer</code> can also be defined
- *    as <code>google.maputils.arcgis.TileLayer</code>. <br/>
  *    </p>.
  *    <table style = 'border:0px'>
  *    <tr>
- *    <td colspan=2 style='border:0px;'>Google Maps API related classes</td>
+ *    <td colspan=2 style='border:0px;'>Google Maps API V3 related classes</td>
  *    <td colspan=2 style='border:0px;'>REST API related classes</td>
  *    </tr>
  *    <tr>
  *    <td style = 'border:0px;width:200px'>
- *    {@link ArcGISTileLayer}<br/>
- *    {@link ArcGISTileLayerOptions}<br/>
- *    {@link ArcGISMapType}<br/>
- *    {@link ArcGISMapTypeOptions}<br/>
- *    {@link ArcGISTileLayerOverlay}<br/>
- *    {@link ArcGISMapOverlay}<br/>
- *    {@link ArcGISMapOverlayOptions}<br/>
+ *    {@link TileLayer}<br/>
+ *    {@link TileLayerOptions}<br/>
+ *    {@link MapType}<br/>
+ *    {@link MapTypeOptions}<br/>
+ *    {@link TileLayerOverlay}<br/>
+ *    {@link MapOverlay}<br/>
+ *    {@link MapOverlayOptions}<br/>
  *    </td>
  *    <td style = 'border:0px;width:200px'>
- *    {@link ArcGISProjection}<br/>
- *    {@link ArcGISUtil} <br/> 
- *    {@link ArcGISConfig} <br/> 
+ *    {@link Projection}<br/>
+ *    {@link Util} <br/> 
+ *    {@link Config} <br/> 
  *    <i> {@link GMercatorProjection}</i>  <br/>
  *    <i> {@link GMap} </i> <br/>
  *    <i> {@link GMapType}</i> <br/>
  *    </td>
  *    <td style = 'border:0px;width:200px'>
- *    {@link ArcGISMapService}<br/></b>
- *    {@link ArcGISLayer}<br/>
- *    {@link ArcGISGeocodeService}<br/>
- *    {@link ArcGISGeometryService}<br/>
+ *    {@link MapService}<br/></b>
+ *    {@link Layer}<br/>
+ *    {@link GeocodeService}<br/>
+ *    {@link GeometryService}<br/>
  *     <br/></td>
  *     <td style = 'border:0px;width:200px'>
- *    {@link ArcGISSpatialReference}<br/>
- *    {@link ArcGISSpatialReferences}<br/>
- *    {@link ArcGISGeographic}<br/>
- *    {@link ArcGISLambertConformalConic}<br/>
- *    {@link ArcGISTransverseMercator}<br/>
- *    {@link ArcGISSphereMercator}<br/>
- *    {@link ArcGISFlatSpatialReference}<br/>
+ *    {@link SpatialReference}<br/>
+ *    {@link SpatialReferences}<br/>
+ *    {@link Geographic}<br/>
+ *    {@link LambertConformalConic}<br/>
+ *    {@link TransverseMercator}<br/>
+ *    {@link SphereMercator}<br/>
+ *    {@link FlatSpatialReference}<br/>
  *     </td>
  *    </tr></table>
  *    <p> There are many objects used in the REST API that do not require 
@@ -77,37 +71,37 @@
  *    (note the name of the type does not matter for object literals)</p>
  *    <table style = 'border:0px'><tr>
  *    <td style = 'border:0px;width:200px'>
- *    {@link ArcGISField}<br/>
- *    {@link ArcGISTileInfo}<br/>
- *    {@link ArcGISLOD}<br/>
- *    {@link ArcGISExportMapParameters}<br/>
- *    {@link ArcGISMapImage}<br/>
- *    {@link ArcGISIdentifyParameters}<br/>
- *    {@link ArcGISIdentifyResults}<br/>
- *    {@link ArcGISIdentifyResult}<br/>
+ *    {@link Field}<br/>
+ *    {@link TileInfo}<br/>
+ *    {@link LOD}<br/>
+ *    {@link ExportMapParameters}<br/>
+ *    {@link MapImage}<br/>
+ *    {@link IdentifyParameters}<br/>
+ *    {@link IdentifyResults}<br/>
+ *    {@link IdentifyResult}<br/>
  *     <br/></td>
  *     <td style = 'border:0px;width:200px'>
- *    {@link ArcGISQueryParameters}<br/>
- *    {@link ArcGISResultSet}<br/>
- *    {@link ArcGISFeature}<br/>
- *    {@link ArcGISFindParameters}<br/>
- *    {@link ArcGISFindResults}<br/>
- *    {@link ArcGISFindResult}<br/>
+ *    {@link QueryParameters}<br/>
+ *    {@link ResultSet}<br/>
+ *    {@link Feature}<br/>
+ *    {@link FindParameters}<br/>
+ *    {@link FindResults}<br/>
+ *    {@link FindResult}<br/>
  *     </td>
  *     <td style = 'border:0px;width:200px'>
- *    {@link ArcGISGeocodeParameters}<br/>
- *    {@link ArcGISGeocodeResults}<br/>
- *    {@link ArcGISGeocodeResult}<br/>
- *    {@link ArcGISReverseGeocodeParameters}<br/>
- *    {@link ArcGISReverseGeocodeResult}<br/>
+ *    {@link GeocodeParameters}<br/>
+ *    {@link GeocodeResults}<br/>
+ *    {@link GeocodeResult}<br/>
+ *    {@link ReverseGeocodeParameters}<br/>
+ *    {@link ReverseGeocodeResult}<br/>
  *    </td>
  *     <td style = 'border:0px;width:200px'>
- *    {@link ArcGISGeometry}<br/>
- *    {@link ArcGISPoint}<br/>
- *    {@link ArcGISPolyline}<br/>
- *    {@link ArcGISPolygon}<br/>
- *    {@link ArcGISEnvelope}<br/>
- *    {@link ArcGISMultipoint}<br/>
+ *    {@link Geometry}<br/>
+ *    {@link Point}<br/>
+ *    {@link Polyline}<br/>
+ *    {@link Polygon}<br/>
+ *    {@link Envelope}<br/>
+ *    {@link Multipoint}<br/>
  *     </td>
  *    </tr></table>
  */
