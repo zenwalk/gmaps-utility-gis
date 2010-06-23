@@ -1,0 +1,4441 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>ArcGIS Server Link for Google Maps JavaScript API V3 v1.0 Reference</title>
+    <link rel="stylesheet" type="text/css" href="http://code.google.com/css/codesite.css"></link>
+    <link rel="stylesheet" type="text/css" href="../../util/docs/template/local_extensions.css"></link>
+  </head>
+  <body>
+    <h1>ArcGIS Server Link for Google Maps JavaScript API V3</h1>
+    <p>
+<p><a href="examples.html">Examples</a>  </p>  <p>This library lets you add map resources accessible via    <a href = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/index.html'>    ESRI ArcGIS Server&#0153; REST API</a> into <a    href='http://code.google.com/apis/maps/documentation/javascript/'>   Google Maps API V3</a> and provide some additional support for map tiles created    with different spatial reference and tiling scheme.</p>   </p>.   <table style = 'border:0px'>   <tr>   <td colspan=2 style='border:0px;'>Google Maps API V3 related classes</td>   <td colspan=2 style='border:0px;'>REST API related classes</td>   </tr>   <tr>   <td style = 'border:0px;width:200px'>   <code><a href="reference.html#TileLayer">TileLayer</a></code><br/>   <code><a href="reference.html#TileLayerOptions">TileLayerOptions</a></code><br/>   <code><a href="reference.html#MapType">MapType</a></code><br/>   <code><a href="reference.html#MapTypeOptions">MapTypeOptions</a></code><br/>   <code><a href="reference.html#MapOverlay">MapOverlay</a></code><br/>   <code><a href="reference.html#MapOverlayOptions">MapOverlayOptions</a></code><br/>   </td>   <td style = 'border:0px;width:200px'>   <code><a href="reference.html#Projection">Projection</a></code><br/>   <code>Util</code> <br/>    </td>   <td style = 'border:0px;width:200px'>   <code><a href="reference.html#Catalog">Catalog</a></code><br/>   <code><a href="reference.html#MapService">MapService</a></code><br/></b>   <code><a href="reference.html#Layer">Layer</a></code><br/>   <code><a href="reference.html#GeocodeService">GeocodeService</a></code><br/>   <code><a href="reference.html#GeometryService">GeometryService</a></code><br/>    <br/></td>    <td style = 'border:0px;width:200px'>   <code><a href="reference.html#SpatialReference">SpatialReference</a></code><br/>   <code><a href="reference.html#SpatialReferences">SpatialReferences</a></code><br/>   <code><a href="reference.html#Geographic">Geographic</a></code><br/>   <code><a href="reference.html#LambertConformalConic">LambertConformalConic</a></code><br/>   <code><a href="reference.html#TransverseMercator">TransverseMercator</a></code><br/>   <code><a href="reference.html#SphereMercator">SphereMercator</a></code><br/>   <code><a href="reference.html#FlatSpatialReference">FlatSpatialReference</a></code><br/>    </td>   </tr></table>   <p> There are many objects used in the REST API that do not require    a constructor and can be   used just as object literal in the operation:<br/>    (note the name of the type does not matter for object literals)</p>   <table style = 'border:0px'><tr>   <td style = 'border:0px;width:200px'>      <code><a href="reference.html#Field">Field</a></code><br/>   <code><a href="reference.html#TileInfo">TileInfo</a></code><br/>   <code><a href="reference.html#LOD">LOD</a></code><br/>   <code><a href="reference.html#TimeInfo">TimeInfo</a></code><br/>   <code><a href="reference.html#DrawingInfo">DrawingInfo</a></code><br/>   <code><a href="reference.html#ExportMapParameters">ExportMapParameters</a></code><br/>   <code><a href="reference.html#MapImage">MapImage</a></code><br/>   <code><a href="reference.html#IdentifyParameters">IdentifyParameters</a></code><br/>   <code><a href="reference.html#IdentifyResults">IdentifyResults</a></code><br/>   <code><a href="reference.html#IdentifyResult">IdentifyResult</a></code><br/>    <br/></td>    <td style = 'border:0px;width:200px'>   <code><a href="reference.html#QueryParameters">QueryParameters</a></code><br/>   <code><a href="reference.html#ResultSet">ResultSet</a></code><br/>      <code><a href="reference.html#FindParameters">FindParameters</a></code><br/>   <code><a href="reference.html#FindResults">FindResults</a></code><br/>   <code><a href="reference.html#FindResult">FindResult</a></code><br/>    </td>    <td style = 'border:0px;width:200px'>   <code><a href="reference.html#GeocodeParameters">GeocodeParameters</a></code><br/>   <code><a href="reference.html#GeocodeResults">GeocodeResults</a></code><br/>   <code><a href="reference.html#GeocodeResult">GeocodeResult</a></code><br/>   <code><a href="reference.html#ReverseGeocodeParameters">ReverseGeocodeParameters</a></code><br/>   <code><a href="reference.html#ReverseGeocodeResult">ReverseGeocodeResult</a></code><br/>   </td>    <td style = 'border:0px;width:200px'>   <code><a href="reference.html#Geometry">Geometry</a></code><br/>   <code><a href="reference.html#Point">Point</a></code><br/>   <code><a href="reference.html#Polyline">Polyline</a></code><br/>   <code><a href="reference.html#Polygon">Polygon</a></code><br/>   <code><a href="reference.html#Envelope">Envelope</a></code><br/>   <code><a href="reference.html#Multipoint">Multipoint</a></code><br/>   <code><a href="reference.html#Feature">Feature</a></code><br/>   <code><a href="reference.html#Domain">Domain</a></code><br/>   </td>   <td style = 'border:0px;width:200px'>   <code><a href="reference.html#Color">Color</a></code><br/>   <code><a href="reference.html#SimpleMarkerSymbol">SimpleMarkerSymbol</a></code><br/>   <code><a href="reference.html#SimpleLineSymbol">SimpleLineSymbol</a></code><br/>   <code><a href="reference.html#SimpleFillSymbol">SimpleFillSymbol</a></code><br/>   <code><a href="reference.html#PictureMarkerSymbol">PictureMarkerSymbol</a></code><br/>   <code><a href="reference.html#PictureFillSymbol">PictureFillSymbol</a></code><br/>   <code><a href="reference.html#TextSymbol">TextSymbol</a></code><br/>    </td>   </tr></table></p>
+    <p>For a description and examples of how to use this library, check out the <a href="examples.html">how-to</a>.</p>
+    
+      <h2><a name="ArcGISStyleOptions"></a>class ArcGISStyleOptions</h2>
+      <p>Instance of this classes are used in the style property of   <code>ArcGISArcGISClickOptions</code>, <code>ArcGISArcGISClickServiceOptions</code>. It specify how  the geometry features returned by ArcGIS server should be rendered in the browser.  It's properties have same meaning as <a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#PolyStyleOptions>GPolyStyleOptions</a>   in the core Google Maps API.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class ArcGISStyleOptions - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>fillColor</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>color of polygon fill.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>fillOpacity</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>opacity of the polygon fill.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>icon</code></td>
+                
+                  
+                    <td><code>GIcon</code></td>
+                  
+                
+                <td>an instance of <a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#Icon>GIcon</a>  in the core Google Maps API. This will be used as the icon   for rendering of point features.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>outlineColor</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>color of polygon outline.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>outlineOpacity</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>opacity of polygon outline</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>outlineWeight</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>weight of polygon outline</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>strokeColor</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>line features color in hex HTML color.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>strokeOpacity</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>This property specifies the opacity of the polyline as a fractional value between 0 (transparent) and 1 (opaque)</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>strokeWeight</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>The width of the line in pixels</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="ArcGISUtil"></a>namespace ArcGISUtil</h2>
+      <p>
+A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.</p>
+      
+    
+      <h2><a name="Catalog"></a>class Catalog</h2>
+      <p>The catalog resource is the root node and initial entry point into an ArcGIS Server host.This resource represents a catalog of folders and services published on the host.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class Catalog - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>Catalog(<span class="type">url:String</span>)</code></td>
+                
+                <td>Create a ArcGIS service catalog instance using it's url:<code> http://&lt;host>/&lt;instance>/rest/services</code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Properties</h3>
+        <table summary="class Catalog - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>currentVersion</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>currentVersion</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>folders</code></td>
+                
+                  
+                    <td><code>Array</code></td>
+                  
+                
+                <td>folders list</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>services</code></td>
+                
+                  
+                    <td><code>Array</code></td>
+                  
+                
+                <td>list of services. Each has <code>name, type</code> property.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Events</h3>
+        <table summary="class Catalog - Events" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Events</th>
+              
+                
+                  <th>Arguments</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>load</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>This event is fired when the catalog info is loaded.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="Color"></a>class Color</h2>
+      <p>Color is represented as a 4-element array. The 4 elements represent values for red, green, blue and alpha in that order. Values range from 0 through 255.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.Syntax:<pre>
+   [ &lt;red>, &lt;green>, &lt;blue>, &lt;alpha> ]</pre></p>
+      
+    
+      <h2><a name="Config"></a>class Config</h2>
+      <p>This is an object literal that sets common configuration values used across the lib.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class Config - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>maxPolyPoints</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>max number of points allowed in polyline's path or polygon's ring. If exceed, no overlay will be created.(for now)  The default value is <code> 1000</code>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>style</code></td>
+                
+                  
+                    <td><code>StyleOptions</code></td>
+                  
+                
+                <td>The default style used for OverlayViews.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="Domain"></a>class Domain</h2>
+      <p>This class represent JSON domain objects as returned by the REST API. Domains specify the set of valid values for a field.   There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/domain.html'>Domain Objects</a>.Syntax:<pre>
+    {
+      "type" : "range",
+      "name" : "&lt;domainName>",
+      "range" : [ minValue, maxValue ]
+    }
+    {
+      "type" : "codedValue",
+      "name" : "&lt;domainName>",
+      "codedValues" : [
+        { "name" : "codeName1", "code" : code1 },
+        { "name" : "codeName2", "code" : code2 }
+      ]
+    }</pre></p>
+      
+        <h3>Properties</h3>
+        <table summary="class Domain - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>codedValue</code></td>
+                
+                  
+                    <td><code>Array</code></td>
+                  
+                
+                <td>name-code pairs. only if type=codedValue.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>name</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>domain name.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>range</code></td>
+                
+                  
+                    <td><code>Array</code></td>
+                  
+                
+                <td>min,max values. only if type=codedValue.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>String</code></td>
+                
+                  
+                    <td><code>type</code></td>
+                  
+                
+                <td>range | codedValue</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="DrawingInfo"></a>class DrawingInfo</h2>
+      <p>Layer rendering infoSyntax:<pre>"drawingInfo" : {
+  "renderer" : &lt;renderer>,
+  "scaleSymbols" : &lt; true | false >,
+  "transparency" : &lt;transparency>,
+  "brightness" : &lt;brightness>,
+  "contrast" : &lt;contrast>,
+  "labelingInfo" : &lt;labelingInfo>
+}
+  </pre></p>
+      
+    
+      <h2><a name="Envelope"></a>class Envelope</h2>
+      <p>Instances of this class are used to represent an area with bounds.It is similar to <a href='http://code.google.com/apis/maps/documentation/javascript/reference.html#LatLngBounds'>GLatLngBounds</a>but the coordinates are in map units. <br/> There is no constructor for this class. Use javascript object literal. Example:<pre>
+    {
+    "xmin" : -109.55, "ymin" : 25.76, "xmax" : -86.39, "ymax" : 49.94,
+    "spatialReference" : {"wkid" : 4326}
+    }</pre></p>
+      
+        <h3>Properties</h3>
+        <table summary="class Envelope - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>spatialReference</code></td>
+                
+                  
+                    <td><code>SpatialReference</code></td>
+                  
+                
+                <td><b> wkid/wkt info only</b>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>xmax</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>maximal value of x.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>xmin</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>minimal value of x.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>ymax</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>maximal value of y.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>ymin</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>minimal value of y.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="ExportMapParameters"></a>class ExportMapParameters</h2>
+      <p>This class represent the parameters needed in an exportMap operation for a <code><a href="reference.html#MapService">MapService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href='http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/export.html'>Export Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class ExportMapParameters - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>format</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The format of the exported image. png | png8 | png24 | jpg | pdf | bmp | gif | svg  The default value is <code> png</code>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>height</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>height of image, ignored if <code>size</code> is specified;</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>imageSR</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>The well-known ID of the spatial reference of the exported image.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>layerDefs</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>Allows you to filter the features of individual layers in the exported map by specifying   definition expressions for those layers. Syntax: { "&lt;layerId1>" : "&lt;layerDef1>" , "&lt;layerId2>" : "&lt;layerDef2>" }  Example: 0:POP2000 &gt; 1000000;5:AREA &gt; 100000</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>layers</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>Syntax: [show | hide | include | exclude]:layerId1,layerId2</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>layerTimeOptions</code></td>
+                
+                  
+                    <td><code>Object</code></td>
+                  
+                
+                <td>layerTimeOptions The time options per layer. Users can indicate whether or not the layer should use the time extent specified by the time parameter or not, whether to draw the layer  features cumulatively or not and the time offsets for the layer. Syntax: <pre> {
+  "&lt;layerId1>" : {
+    //If true, use the time extent specified by the time parameter
+    "useTime" : &lt; true | false >,
+    //If true, draw all the features from the beginning of time for that data
+    "timeDataCumulative" : &lt; true | false >,
+    //Time offset for this layer so that it can be overlaid on the top of a previous or future time period
+    "timeOffset" : &lt;timeOffset1>,
+    "timeOffsetUnits" : "&lt;esriTimeUnitsCenturies | esriTimeUnitsDays | esriTimeUnitsDecades | 
+                             esriTimeUnitsHours | esriTimeUnitsMilliseconds | esriTimeUnitsMinutes | 
+                             esriTimeUnitsMonths | esriTimeUnitsSeconds | esriTimeUnitsWeeks | esriTimeUnitsYears |
+                             esriTimeUnitsUnknown>"
+  },
+  "&lt;layerId2>" : {
+    "useTime" : &lt; true | false >,
+    "timeDataCumulative" : &lt; true | false >,
+    "timeOffsetOffset" : &lt;timeOffset2>,
+    "timeOffsetUnits" : "&lt;timeOffsetUnits2>"
+  }
+}
+</pre></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>time</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>The time instant or the time extent of the exported map image. time=&lt;timeInstant> or time=&lt;startTime>, &lt;endTime>, e.g. time=1199145600000, 1230768000000 (1 Jan 2008 00:00:00 GMT to 1 Jan 2009 00:00:00 GMT)</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>transparent</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>If true, the image will be exported with  the background color of the map set as its transparent color. note the REST API default value is false.  The default value is <code> true</code>.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>width</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>width of image, ignored if <code>size</code> is specified;</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="Feature"></a>class Feature</h2>
+      <p>This class represent JSON feature object as returned by the REST API.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/feature.html'>Feature Object</a>.Syntax:<pre>
+{
+  "geometry" : &lt;geometry>,
+
+  "attributes" : {
+    "name1" : &lt;value1>,
+    "name2" : &lt;value2>,
+  }
+}</pre><p>Example:<pre>
+ {
+  "geometry" : {"x" : -118.15, "y" : 33.80},
+
+  "attributes" : {
+    "OWNER" : "Joe Smith",
+    "VALUE" : 94820.37,
+    "APPROVED" : true,
+    "LASTUPDATE" : 1227663551096
+  }
+}</pre></p>
+      
+        <h3>Properties</h3>
+        <table summary="class Feature - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>attributes</code></td>
+                
+                  
+                    <td><code>Object</code></td>
+                  
+                
+                <td>attributes as name-value JSON object.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>geometry</code></td>
+                
+                  
+                    <td><code>Geometry</code></td>
+                  
+                
+                <td>geometry</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="Field"></a>class Field</h2>
+      <p>This class represents a field in a <code><a href="reference.html#Layer">Layer</a></code>. It is accessed fromthe <code> fields</code> property. There is no constructor for this class, use Object Literal.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class Field - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>alias</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>field alias.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>domain</code></td>
+                
+                  
+                    <td><code>Domain</code></td>
+                  
+                
+                <td>domain</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>length</code></td>
+                
+                  
+                    <td><code>Int</code></td>
+                  
+                
+                <td>length.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>name</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>field Name</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>type</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>field type (esriFieldTypeOID|esriFieldTypeString|esriFieldTypeInteger|esriFieldTypeGeometry}.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="FindParameters"></a>class FindParameters</h2>
+      <p>This class represent the parameters needed in an find operation for a <code><a href="reference.html#MapService">MapService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/find.html'>Find Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class FindParameters - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>contains</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>If false, the operation searches for an exact match of  the searchText string. An exact match is case sensitive.  Otherwise, it searches for a value that contains the searchText provided.   This search is not case sensitive. The default is true.  The default value is <code> true</code>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>f</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The response format. html | json .  The default value is <code> json</code>.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>layers</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The layers to perform the find operation on. The layers to perform the find operation on.  The layers are specified as a comma-separated list of layer ids. <i>It can also be an array of layer NAMEs</i>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>maxAllowableOffset</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>This option can be used to specify the maximum allowable offset  to be used for generalizing            geometries returned by the find operation</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>returnGeometry</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>If true, the resultset will include the geometries associated with each result.  The default value is <code> true</code>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>searchFields</code></td>
+                
+                  
+                    <td><code>String|String[]</code></td>
+                  
+                
+                <td>The names of the fields to search. The fields are specified as a comma-separated list of field names.   If this parameter is not specified, all fields are searched.   <i>This can also be an array with field names </i>.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>searchText</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The search string. This is the text that is searched across the layers and the fields that the user specifies.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>sr</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>The well-known ID of the spatial reference of the output geometries.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="FindResult"></a>class FindResult</h2>
+      <p>This class represent one entry in the results of a find operation for a <code><a href="reference.html#MapService">MapService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/find.html'>Find Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class FindResult - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>attributes</code></td>
+                
+                  
+                    <td><code>Object</code></td>
+                  
+                
+                <td>attributes as name-value JSON object.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>displayFieldName</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>displayFieldName</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>foundFieldName</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>foundFieldName</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>geometry</code></td>
+                
+                  
+                    <td><code>Geometry</code></td>
+                  
+                
+                <td><code><a href="reference.html#Geometry">Geometry</a></code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>geometryType</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>layerId</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>layerId</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>layerName</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>layerName</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>value</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>value of the display field</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="FindResults"></a>class FindResults</h2>
+      <p>This class represent the results of a find operation for a <code><a href="reference.html#MapService">MapService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/find.html'>Find Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class FindResults - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>results</code></td>
+                
+                  
+                    <td><code>FindResult[]</code></td>
+                  
+                
+                <td>The find results as an array of <code><a href="reference.html#FindResult">FindResult</a></code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="FlatSpatialReference"></a>class FlatSpatialReference</h2>
+      <p>This class (<code>gmaps.ags.FlatSpatialReference</code>) is a special type of coordinate reference assuming lat/lng will increaseevenly as if earth is flat. Approximate for small regions without implementinga real projection.  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class FlatSpatialReference - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>FlatSpatialReference(<span class="type">params:Object</span>)</code></td>
+                
+                <td>Create a flat transform spatial reference. The <code>params</code> passed in constructor should have the following properties:<li><code>wkid</code>: wkid<li><code>latlng</code>:  <code><a href="reference.html#Envelope">Envelope</a></code> in latlng unit;<li><code>coords</code>: <code><a href="reference.html#Envelope">Envelope</a></code> in coords unit</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class FlatSpatialReference - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>forward(<span class="type">lnglat:Number[]</span>)</code></td>
+                
+                  
+                    <td><code>Number[]</code></td>
+                  
+                
+                <td>See <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>getCircumference()</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>See <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>reverse(<span class="type">coords:Number[]</span>)</code></td>
+                
+                  
+                    <td><code>Number[]</code></td>
+                  
+                
+                <td>See <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="GeocodeParameters"></a>class GeocodeParameters</h2>
+      <p>This class represent the parameters needed in a find address candidate operation on a <code><a href="reference.html#GeocodeService">GeocodeService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class GeocodeParameters - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>f</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The response format. html | json |kmz.  The default value is <code> json</code>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>inputs</code></td>
+                
+                  
+                    <td><code>Object</code></td>
+                  
+                
+                <td>an object literal with name-value pair of input values.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>outFields</code></td>
+                
+                  
+                    <td><code>String|String[]</code></td>
+                  
+                
+                <td>The list of fields to be included in the returned resultset.   This list can be a comma delimited String or an array of String.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>outSR</code></td>
+                
+                  
+                    <td><code>int|SpatialReference</code></td>
+                  
+                
+                <td></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="GeocodeResult"></a>class GeocodeResult</h2>
+      <p>This class represent one entry in the results of a find address operation for a <code><a href="reference.html#GeocodeService">GeocodeService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class GeocodeResult - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>address</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>matched address</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>attributes</code></td>
+                
+                  
+                    <td><code>Object</code></td>
+                  
+                
+                <td>attributes as name-value JSON object. e.g. <code>{"StreetName" : "MASON", "StreetType" : "ST"}</code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>location</code></td>
+                
+                  
+                    <td><code>Geometry</code></td>
+                  
+                
+                <td>matched location</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>score</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>matching score</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="GeocodeResults"></a>class GeocodeResults</h2>
+      <p>This class represent the results of an find address candidate operation for a  <code><a href="reference.html#GeocodeService">GeocodeService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class GeocodeResults - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>candidates</code></td>
+                
+                  
+                    <td><code>GeocodeResult[]</code></td>
+                  
+                
+                <td>The find address results as an array of <code><a href="reference.html#GeocodeResult">GeocodeResult</a></code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="GeocodeService"></a>class GeocodeService</h2>
+      <p>This class (<code>gmaps.ags.GeocodeService</code>) represent an ArcGIS <a href="http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geocodeserver.html">GeocodeServer</a> service.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class GeocodeService - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>GeocodeService(<span class="type">url:String</span>)</code></td>
+                
+                <td>Creates a GeocodeService class.Params:<li><code>url</code>: URL of service, syntax:<code>	http://{catalog-url}/{serviceName}/GeocodeServer</code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Properties</h3>
+        <table summary="class GeocodeService - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>addressFields</code></td>
+                
+                  
+                    <td><code>Field[]</code></td>
+                  
+                
+                <td>input fields.    Each entry is an object of type <code>ArcGISField</code>, plus <code>required(true|false)</code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>candidateFields</code></td>
+                
+                  
+                    <td><code>Field[]</code></td>
+                  
+                
+                <td>candidate Fields.    Each entry is an object of type <code>ArcGISField</code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>intersectionCandidateFields</code></td>
+                
+                  
+                    <td><code>Field[]</code></td>
+                  
+                
+                <td>intersectionCandidateFields   Each entry is an object of type <code>ArcGISField</code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>locatorProperties</code></td>
+                
+                  
+                    <td><code>Object</code></td>
+                  
+                
+                <td>an object with key-value pair that is specific to Locator type.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>serviceDescription</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>serviceDescription</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>spatialReference</code></td>
+                
+                  
+                    <td><code>SpatialReference</code></td>
+                  
+                
+                <td>spatialReference <b>wkid info only</b></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class GeocodeService - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>findAddressCandidates(<span class="type">params:GeocodeParameters</span>, <span class="type">callback:Function</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>The findAddressCandidates operation is performed on a geocode service resource. The result of this operation is a resource representing  the list of address candidates. This resource provides information  about candidates including the address, location, and score. param is an instance of <code><a href="reference.html#GeocodeParameters">GeocodeParameters</a></code>. An instance of <code><a href="reference.html#GeocodeResults">GeocodeResults</a></code> will be passed into callback function.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>geocode(<span class="type">params:GeocodeParameters</span>, <span class="type">callback:Function</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Alias of <code>GeocodeService.findAddressCandidates</code>;</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>reverseGeocode(<span class="type">params:ReverseGeocodeParameters</span>, <span class="type">callback:Function</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>The reverseGeocode operation is The reverseGeocode operation is performed on a geocode service resource. The result of this operation is a reverse geocoded address resource. param is an instance of <code><a href="reference.html#ReverseGeocodeParameters">ReverseGeocodeParameters</a></code>. An instance of <code><a href="reference.html#ReverseGeocodeResult">ReverseGeocodeResult</a></code> will be passed into callback function.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Events</h3>
+        <table summary="class GeocodeService - Events" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Events</th>
+              
+                
+                  <th>Arguments</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>load</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>This event is fired when the service and it's service info is loaded.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="Geographic"></a>class Geographic</h2>
+      <p>This class (<code>gmaps.ags.Geographic</code>) will simply retuns same LatLng as Coordinates.   The <code>param</code> should have wkid property. Any Geographic Coordinate Systems (eg. WGS84(4326)) can   use this class As-Is.   <br/>Note:<b> This class does not support datum transformation</b>.  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class Geographic - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>Geographic(<span class="type">params:Object</span>)</code></td>
+                
+                <td>Creates a Geographic Coordinate System. e.g.:<br/><code>var g  = new Geographic({"wkid":4326});<br/>var g2 = new gmaps.ags.Geographic({"wkid":4326});</code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="Geometry"></a>class Geometry</h2>
+      <p>This is the abstract class representing JSON geometry in the  REST API. The following types are supported: points, polylines, polygons and envelopes.for more information, see <a href = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geometry.html'> Geometry Objects</a>.  <br/> There is no constructor for this class. See subclasses.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class Geometry - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>spatialReference</code></td>
+                
+                  
+                    <td><code>SpatialReference</code></td>
+                  
+                
+                <td><b> wkid/wkt info only</b>.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="GeometryService"></a>class GeometryService</h2>
+      <p>This class (<code>gmaps.ags.GeometryService</code>) represent an ArcGIS <a href="http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geometryserver.html">Geometry</a> service.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class GeometryService - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>GeometryService(<span class="type">url:String</span>)</code></td>
+                
+                <td>Creates an GeometryService class.Params:<li><code>url</code>: URL of service, syntax:<code>	http://{catalog-url}/{serviceName}/GeometryServer</code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class GeometryService - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>project(<span class="type">params:ProjectParameters</span>, <span class="type">callback:Function</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>This resource projects an array of input geometries from an input spatial referenceto an output spatial reference</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="IdentifyParameters"></a>class IdentifyParameters</h2>
+      <p>This class represent the parameters needed in an identify operation for a <code><a href="reference.html#MapService">MapService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/identify.html'>Identify Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class IdentifyParameters - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>dpi</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>dpi of image, ignored if <code>imageDisplay</code> is specified;</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>f</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The response format. html | json .  The default value is <code> json</code>.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>geometry</code></td>
+                
+                  
+                    <td><code>Geometry</code></td>
+                  
+                
+                <td>The geometry to identify on.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>geometryType</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>height</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>height of image, ignored if <code>imageDisplay</code> is specified;</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>imageDisplay</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The screen image display parameters (width, height and DPI) of the map being currently viewed.  You can also specifiy width, height, dip separately.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>layers</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The layers to perform the identify operation on. There are three ways to do so, check REST API docs.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>mapExtent</code></td>
+                
+                  
+                    <td><code>Envelope</code></td>
+                  
+                
+                <td>The extent or bounding box of the map currently being viewed.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>maxAllowableOffset</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the identify operation</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>returnGeometry</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>If true, the resultset will include the geometries associated with each result.  The default value is <code> true</code>.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>sr</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>The well-known ID of the spatial reference of the input and output geometries as well as the mapEnvelope</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>tolerance</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>The distance in screen pixels from the specified geometry within which the identify should be performed</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>width</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>width of image, ignored if <code>imageDisplay</code> is specified;</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="IdentifyResult"></a>class IdentifyResult</h2>
+      <p>This class represent one entry in the results of an identify operation for a <code><a href="reference.html#MapService">MapService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/identify.html'>Identify Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class IdentifyResult - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>attributes</code></td>
+                
+                  
+                    <td><code>Object</code></td>
+                  
+                
+                <td>attributes as name-value JSON object.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>displayFieldName</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>displayFieldName</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>geometry</code></td>
+                
+                  
+                    <td><code>Geometry</code></td>
+                  
+                
+                <td><code><a href="reference.html#Geometry">Geometry</a></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>geometryType</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>layerId</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>layerId</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>layerName</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>layerName</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>value</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>value of the display field</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="IdentifyResults"></a>class IdentifyResults</h2>
+      <p>This class represent the results of an identify operation fora <code><a href="reference.html#MapService">MapService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/identify.html'>Identify Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class IdentifyResults - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>results</code></td>
+                
+                  
+                    <td><code>IdentifyResult[]</code></td>
+                  
+                
+                <td>The identify results as an array of <code>ArcGISIdentifyResult</code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="LambertConformalConic"></a>class LambertConformalConic</h2>
+      <p>This class (<code>gmaps.ags.LambertConformalConic</code>) represents a Spatial Reference System based on <a target  = wiki href  = 'http://en.wikipedia.org/wiki/Lambert_conformal_conic_projection'>Lambert Conformal Conic Projection</a>.  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class LambertConformalConic - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>LambertConformalConic(<span class="type">params:Object</span>)</code></td>
+                
+                <td>Create a Lambert Conformal Conic Projection based Spatial Reference. The <code>params</code> passed in construction shouldinclude the following properties:<code><br/>-wkid: well-known id<br/>-semi_major:  ellipsoidal semi-major axis in meter<br/>-unit: meters per unit<br/>-inverse_flattening: inverse of flattening of the ellipsoid where 1/f  =  a/(a - b)<br/>-standard_parallel_1: phi1, latitude of the first standard parallel<br/>-standard_parallel_2: phi2, latitude of the second standard parallel<br/>-latitude_of_origin: phiF, latitude of the false origin<br/>-central_meridian: lamdaF, longitude of the false origin  (with respect to the prime meridian)<br/>-false_easting: FE, false easting, the Eastings value assigned to the natural origin<br/>-false_northing: FN, false northing, the Northings value assigned to the natural origin</code><br/> e.g. North Carolina State Plane NAD83 Feet: <br/><code> var ncsp82  = new gmaps.ags.LambertConformalConic({wkid:2264, semi_major: 6378137.0,inverse_flattening: 298.257222101,  standard_parallel_1: 34.33333333333334, standard_parallel_2: 36.16666666666666,  central_meridian: -79.0, latitude_of_origin: 33.75,'false_easting': 2000000.002616666,  'false_northing': 0, unit: 0.3048006096012192 }); </code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class LambertConformalConic - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>forward(<span class="type">lnglat:Number[]</span>)</code></td>
+                
+                  
+                    <td><code>Number[]</code></td>
+                  
+                
+                <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>getCircumference()</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>reverse(<span class="type">coords:Number[]</span>)</code></td>
+                
+                  
+                    <td><code>Number[]</code></td>
+                  
+                
+                <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="Layer"></a>class Layer</h2>
+      <p>This class (<code>gmaps.ags.Layer</code>) The layer / table(v10+) resource represents a single layer / table in a map of a map service  published by ArcGIS Server.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class Layer - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>Layer(<span class="type">url:String</span>)</code></td>
+                
+                <td>Create a ArcGIS map Layer using it's url ( 	http://[mapservice-url]/[layerId])</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Properties</h3>
+        <table summary="class Layer - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>copyrightText</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>copyrightText, only available after load.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>defaultVisibility</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>defaultVisibility</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>definitionExpression</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>Layer definition.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>description</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>description</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>drawingInfo</code></td>
+                
+                  
+                    <td><code>DrawingInfo</code></td>
+                  
+                
+                <td>rendering info See <code><a href="reference.html#DrawingInfo">DrawingInfo</a></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>extent</code></td>
+                
+                  
+                    <td><code>Envelope</code></td>
+                  
+                
+                <td>extent</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>fields</code></td>
+                
+                  
+                    <td><code>Field[]</code></td>
+                  
+                
+                <td>fields, only available after load. See <code><a href="reference.html#Field">Field</a></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>geometryType</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>geometryType type(esriGeometryPoint|..), only available after load.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>hasAttachments</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>hasAttachments</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>id</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>layer ID</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>maxScale</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>maxScale</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>minScale</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>minScale</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>name</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>layer Name</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>parentLayer</code></td>
+                
+                  
+                    <td><code>Layer</code></td>
+                  
+                
+                <td>parent Layer <code>ArcGISLayer</code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>relationships</code></td>
+                
+                  
+                    <td><code>Array</code></td>
+                  
+                
+                <td>relationships (id, name, relatedTableId)</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>subLayers</code></td>
+                
+                  
+                    <td><code>Layer[]</code></td>
+                  
+                
+                <td>sub Layers. <code>ArcGISLayer</code>[].</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>timeInfo</code></td>
+                
+                  
+                    <td><code>TimeInfo</code></td>
+                  
+                
+                <td>timeInfo</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>type</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>Feature Layer|Image Layer</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>typeIdField</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>typeIdField</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>types</code></td>
+                
+                  
+                    <td><code>Array</code></td>
+                  
+                
+                <td>subtypes: id, name, domains.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>visibility</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>Visibility of this layer</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class Layer - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>isInScale(<span class="type">scale:Number</span>)</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>Whether the layer is viewable at given scale</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>query(<span class="type">params:QueryParameters</span>, <span class="type">callback:Function</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>The query operation is performed on a layer resource. The result of this operation is a resultset resource that will bepassed in the callback function. param is an instance of <code><a href="reference.html#QueryParameters">QueryParameters</a></code><br/>For more info see <a href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/query.html'>Query Operation</a>.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>queryRelatedRecords(<span class="type">params:QueryRelatedRecordsParameters</span>, <span class="type">callback:Function</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>The query related records operation is performed on a layer / table resource. The result of this operation are featuresets grouped by source layer / table object IDs. Each featureset contains Feature objects including the values for the fields requested by the user. For related layers, if you request geometry information, the geometry of each feature is also returned in the featureset. For related tables, the featureset does not include geometries.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="LOD"></a>class LOD</h2>
+      <p>This class contains information about one "Level Of Detail" for a cached map service.  It is the type of <code>ArcGISlods</code> property of <code><a href="reference.html#TileInfo">TileInfo</a></code>  <br/>There is no constructor for this class. Use as object literal.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class LOD - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>level</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>zoom level.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>resolution</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>map unit per pixel</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>scale</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>actual map scale. e.g a value of 5000 means 1:5000 scale.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="MapImage"></a>class MapImage</h2>
+      <p>This is the result of <code><a href="reference.html#MapService">MapService</a></code>.exportMap operation.  There is no constructor, use as JavaScript object literal.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class MapImage - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>extent</code></td>
+                
+                  
+                    <td><code>Envelope</code></td>
+                  
+                
+                <td>The <code><a href="reference.html#Envelope">Envelope</a></code> (bounding box) of the exported image.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>height</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>height of the exported image.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>href</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>URL of image</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>scale</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>scale of the exported image.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>width</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>width of the exported image.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="MapOverlay"></a>class MapOverlay</h2>
+      <p>This class (<code>gmaps.ags.MapOverlay</code>) extends the Google Maps API's<a href  = http://code.google.com/apis/maps/documentation/reference.html#OverlayView>OverlayView</a>that draws map images from data source on the fly. It is also known as "<b>Dynamic Maps</b>".It can be added to the map via <code>GMap.addOverlay </code> method.The similar class in the core GMap API is <a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#GroundOverlay>GGroundOverlay</a>,however, the instance of this class always cover the viewport exactly, and will redraw itself as map moves.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class MapOverlay - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>MapOverlay(<span class="type">service:String|MapService</span>, <span class="type">opt_overlayOpts:MapOverlayOptions</span>)</code></td>
+                
+                <td>Creates an Map Overlay using <code>url</code> of the map service and optional <code><a href="reference.html#MapOverlayOptions">MapOverlayOptions</a></code>.<li/> <code> service</code> (required) is url of the underline <code><a href="reference.html#MapService">MapService</a></code> or the MapService itself.<li/> <code>opt_overlayOpts</code> (optional) is an instance of <code><a href="reference.html#MapOverlayOptions">MapOverlayOptions</a></code>.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class MapOverlay - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>draw()</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>The API invokes a separate draw() method on the overlay whenever it needs to draw the overlay on the map (including when first added).Implement this method to draw or update the overlay. This method is called after onAdd() and when the position from projection.fromLatLngToPixel() would return a new value for a given LatLng. This can happen on change of zoom, center, or map type. It is not necessarily called on drag or resize.See OverlayView.draw.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>getFullBounds()</code></td>
+                
+                  
+                    <td><code>GLatLngBounds</code></td>
+                  
+                
+                <td>Get full bounds of the to the underline <code><a href="reference.html#MapService">MapService</a></code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>getInitialBounds()</code></td>
+                
+                  
+                    <td><code>GLatLngBounds</code></td>
+                  
+                
+                <td>Get initial bounds of the to the underline <code><a href="reference.html#MapService">MapService</a></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>getOpacity()</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>Gets Image Opacity. return <code>opacity</code> between 0-1.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>hide()</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Hide the overlay</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>isHidden()</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>Check if the overlay is visible, and within zoomzoom range and current map bounds intersects with it's fullbounds.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>onAdd()</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Handler when overlay is added. Interface method.This will be called after setMap(map) is called.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>onRemove()</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>refresh()</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Refresh the map image in current view port.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>setOpacity(<span class="type">opacity:Number</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Sets Image Opacity. parameter <code>opacity</code> between 0-1.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>show()</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Makes the overlay visible.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Events</h3>
+        <table summary="class MapOverlay - Events" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Events</th>
+              
+                
+                  <th>Arguments</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>drawend</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>This event is fired after the the drawing request was returned by server.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>drawstart</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>This event is fired before the the drawing request was sent to server.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="MapOverlayOptions"></a>class MapOverlayOptions</h2>
+      <p>Instance of this class are used in the <code>ArcGISopt_ovelayOpts</code> argument to the constructor of the <code><a href="reference.html#MapOverlay">MapOverlay</a></code> class.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class MapOverlayOptions - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>exportParams</code></td>
+                
+                  
+                    <td><code>ExportMapParameters</code></td>
+                  
+                
+                <td>See <code><a href="reference.html#ExportMapParameters">ExportMapParameters</a></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>map</code></td>
+                
+                  
+                    <td><code>google.maps.Map</code></td>
+                  
+                
+                <td>map to attach to.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>maxResolution</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>max zoom level.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>minResolution</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>min zoom level.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>name</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>name assigned to this <code><a href="reference.html#MapOverlay">MapOverlay</a></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>opacity</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>Opacity of map image from 0.0 (invisible) to 1.0 (opaque)  The default value is <code> 1.0</code>.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="MapService"></a>class MapService</h2>
+      <p>This class (<code>gmaps.ags.MapService</code>) is the core class for all map service operations.It represents an ArcGIS Server map service that offer access to map and layer content</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class MapService - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>MapService(<span class="type">url:String</span>)</code></td>
+                
+                <td>Creates a MapService objects that can be used by UI components.<ul><li> <code> url</code> (required) is the URL of the map servive, e.g. <code>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer</code>.<ul/> Note the spatial reference of the map service must already existsin the <code><a href="reference.html#SpatialReferences">SpatialReferences</a></code> if actual coordinates transformation is needed.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Properties</h3>
+        <table summary="class MapService - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>copyrightText</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>copyrightText</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>description</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>description</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>documentInfo</code></td>
+                
+                  
+                    <td><code>Object</code></td>
+                  
+                
+                <td>Object with the folloing properties: <code>Title, Author,Comments,Subject,Category,Keywords</code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>fullExtent</code></td>
+                
+                  
+                    <td><code>Envelope</code></td>
+                  
+                
+                <td>fullExtent, see <code><a href="reference.html#Envelope">Envelope</a></code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>initialExtent</code></td>
+                
+                  
+                    <td><code>Envelope</code></td>
+                  
+                
+                <td>initialExtent, see <code><a href="reference.html#Envelope">Envelope</a></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>layers</code></td>
+                
+                  
+                    <td><code>Array(Layer)</code></td>
+                  
+                
+                <td>array of Layers.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>loaded</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>if map service meta data is loaded.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>mapName</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>map frame Name inside the map document</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>serviceDescription</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>serviceDescription</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>singleFusedMapCache</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>if map cache is singleFused</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>spatialReference</code></td>
+                
+                  
+                    <td><code>SpatialReference</code></td>
+                  
+                
+                <td>spatialReference</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>supportedImageFormatTypes</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>supportedImageFormatTypes, comma delimited list.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>tables</code></td>
+                
+                  
+                    <td><code>Array(Layer)</code></td>
+                  
+                
+                <td>array of Tables.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>tileInfo</code></td>
+                
+                  
+                    <td><code>TileInfo</code></td>
+                  
+                
+                <td>See <code><a href="reference.html#TileInfo">TileInfo</a></code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>timeInfo</code></td>
+                
+                  
+                    <td><code>TimeInfo</code></td>
+                  
+                
+                <td>see <code><a href="reference.html#TimeInfo">TimeInfo</a></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>units</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>unit</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>url</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>map service URL</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class MapService - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>exportMap(<span class="type">params:ExportMapOptions</span>, <span class="type">callback:Function</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Export an image with given parameters.For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/export.html'>Export Operation</a>.<br/> The <code>params</code> is an instance of <code><a href="reference.html#ExportMapParameters">ExportMapParameters</a></code>.The following properties will be set automatically if not specified:...<br/> The <code>callback</code> is the callback function with argument ofan instance of <code><a href="reference.html#MapImage">MapImage</a></code>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>find(<span class="type">params:FindParameters</span>, <span class="type">callback:Function</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Find features using the <code><a href="reference.html#FindParameters">FindParameters</a></code> and process <code><a href="reference.html#FindResults">FindResults</a></code>using the <code>callback</code> function.For more info see <ahref  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/find.html'>Find Operation</a>.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>getLayer(<span class="type">nameOrId:String|Number</span>)</code></td>
+                
+                  
+                    <td><code>Layer</code></td>
+                  
+                
+                <td>Get a map layer by it's name(String) or id (Number), return <code><a href="reference.html#Layer">Layer</a></code>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>getLayerDefs()</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Get the layer def string. In 9.3 syntax</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>identify(<span class="type">params:IdentifyParameters</span>, <span class="type">callback:Function</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Identify features on a particular Geographic location, using <code>ArcGISIdenitfyParameters</code> andprocess <code><a href="reference.html#IdentifyResults">IdentifyResults</a></code> using the <code>callback</code> function.For more info see <ahref  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/identify.html'>Identify Operation</a>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>queryLayer(<span class="type">layerNameOrId:Number|String</span>, <span class="type">params:QueryParameters</span>, <span class="type">callback:Function</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Query a layer with given id or name using the <code><a href="reference.html#QueryParameters">QueryParameters</a></code> and process <code><a href="reference.html#ResultSet">ResultSet</a></code>using the <code>callback</code> function.See <code><a href="reference.html#Layer">Layer</a></code>.For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/query.html'>Query Layer Operation</a>.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Events</h3>
+        <table summary="class MapService - Events" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Events</th>
+              
+                
+                  <th>Arguments</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>load</code></td>
+                
+                  
+                    <td><code><span class="type">service:MapService</span></code></td>
+                  
+                
+                <td>This event is fired when the service and it's service info is loaded.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="MapType"></a>class MapType</h2>
+      <p>This class (<code>gmaps.ags.MapType</code>) extends the Google Maps API's<a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#MapType>GMapType</a>.It holds a list of <code><a href="reference.html#TileLayer">TileLayer</a></code>s.<p> Because all tileLayers are loaded asynchronously, and currently thecore API does not have method to refresh tiles on demand, if you do not load the defaultGoogle maps, you should either 1) add tomap after it "load" event is fired, or) trigger an map type change to force refresh.See <a href  = http://code.google.com/p/gmaps-api-issues/issues/detail?id  = 279&can  = 1&q  = refresh&colspec  = ID%20Type%20Status%20Introduced%20Fixed%20Summary%20Stars%20ApiType%20Internal>Issue 279</a></p><p> Note: all tiled layer in the same map type must use same spatial reference and tile scheme.</p></p>
+      
+        <h3>Constructor</h3>
+        <table summary="class MapType - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>MapType(<span class="type">tileLayers:String|TileLayer[]</span>, <span class="type">opt_typeOpts:MapTypeOptions</span>)</code></td>
+                
+                <td>Creates a MapType, with the following parameters:<li><code>tileLayers</code>: a array of <code><a href="reference.html#TileLayer">TileLayer</a></code>s,  or a single URL as shortcut.<li><code>opt_typeOpts</code>: optional. An instance of <code><a href="reference.html#MapTypeOptions">MapTypeOptions</a></code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class MapType - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>getTile(<span class="type">tileCoord:Point</span>, <span class="type">zoom:Number</span>, <span class="type">ownerDocument:</span>)</code></td>
+                
+                  
+                    <td><code>Node</code></td>
+                  
+                
+                <td>Get a tile for given tile coordinates Returns a tile for the given tile coordinate (x, y) and zoom level. This tile will be appended to the given ownerDocument.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>releaseTile(<span class="type">node:</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="MapTypeOptions"></a>class MapTypeOptions</h2>
+      <p>Instance of this class are used in the <code>opt_typeOpts</code> argument to the constructor of the <code><a href="reference.html#MapType">MapType</a></code> class. See  <a href=http://code.google.com/apis/maps/documentation/javascript/reference.html#MapType>google.maps.MapType</a>.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class MapTypeOptions - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>alt</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>Alt text to display when this MapType's button is hovered over in the MapTypeControl. Optional.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>map</code></td>
+                
+                  
+                    <td><code>google.maps.Map</code></td>
+                  
+                
+                <td>The map instance. Can be useful for copyright info.   May not need if API provides access to map instance later.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>maxZoom</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>The maximum zoom level for the map when displaying this MapType. Required for base MapTypes, ignored for overlay MapTypes.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>minZoom</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>The minimum zoom level for the map when displaying this MapType. Optional; defaults to 0.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>name</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>map type name</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>projection</code></td>
+                
+                  
+                    <td><code>Projection</code></td>
+                  
+                
+                <td>an instance of <code><a href="reference.html#Projection">Projection</a></code>.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>radius</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>Radius of the planet for the map, in meters. Optional; defaults to Earth's equatorial radius of 6378137 meters.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>tileSize</code></td>
+                
+                  
+                    <td><code>Size</code></td>
+                  
+                
+                <td>The dimensions of each tile. Required.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="Multipoint"></a>class Multipoint</h2>
+      <p>A multipoint contains an array of points and a spatialReference.<br/> There is no constructor for this class. Use javascript object literal. Example:<pre>
+    {
+    "points" : [ [-97.06138,32.837], [-97.06133,32.836], [-97.06124,32.834], 
+     [-97.06127,32.832] ],
+    "spatialReference" : {"wkid" : 4326}
+    }</pre></p>
+      
+        <h3>Properties</h3>
+        <table summary="class Multipoint - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>points</code></td>
+                
+                  
+                    <td><code>Number[][]</code></td>
+                  
+                
+                <td>coords of the Multipoint.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>spatialReference</code></td>
+                
+                  
+                    <td><code>SpatialReference</code></td>
+                  
+                
+                <td><b> wkid/wkt info only</b>.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="PictureFillSymbol"></a>class PictureFillSymbol</h2>
+      <p>Picture fill symbols can be used to symbolize polygon geometries. The type property for picture fill symbols is esriPFS. There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.Syntax:<pre>
+{
+"type" : "esriPFS",
+"url" : "&lt;pictureUrl>",
+"color" : &lt;color>,
+"outline" : &lt;simpleLineSymbol>, //if outline has been specified
+"width" : &lt;width>,
+"height" : &lt;height>,
+"angle" : &lt;angle>,
+"xoffset" : &lt;xoffset>,
+"yoffset" : &lt;yoffset>,
+"xscale": &lt;xscale>,
+"yscale": &lt;yscale>
+}</pre></p>
+      
+    
+      <h2><a name="PictureMarkerSymbol"></a>class PictureMarkerSymbol</h2>
+      <p>Picture marker symbols can be used to symbolize point geometries. The type property for picture marker symbols is esriPMS.   There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.Syntax:<pre>
+  {
+"type" : "esriPMS",
+"url" : "&lt;pictureUrl>",
+"color" : &lt;color>,
+"width" : &lt;width>,
+"height" : &lt;height>,
+"angle" : &lt;angle>,
+"xoffset" : &lt;xoffset>,
+"yoffset" : &lt;yoffset>
+}</pre></p>
+      
+    
+      <h2><a name="Point"></a>class Point</h2>
+      <p>A point contains x and y fields along with a spatialReference field.<br/> There is no constructor for this class. Use javascript object literal.Example:<pre>
+    {
+    "x" : -118.15, "y" : 33.80, "spatialReference" : {"wkid" : 4326}
+    }</pre></p>
+      
+        <h3>Properties</h3>
+        <table summary="class Point - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>spatialReference</code></td>
+                
+                  
+                    <td><code>SpatialReference</code></td>
+                  
+                
+                <td><b> wkid info only</b>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>x</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>value of x.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>y</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>value of y.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="Polygon"></a>class Polygon</h2>
+      <p>A polygon contains an array of rings and a spatialReference.<br/> There is no constructor for this class. Use javascript object literal. Example:<pre>
+    {
+    "rings" : [ 
+     [ [-97.06138,32.837], [-97.06133,32.836], [-97.06124,32.834], 
+     [-97.06127,32.832], [-97.06138,32.837] ], 
+     [ [-97.06326,32.759], [-97.06298,32.755], [-97.06153,32.749], 
+     [-97.06326,32.759] ]
+    ],
+    "spatialReference" : {"wkid" : 4326}
+    }</pre></p>
+      
+        <h3>Properties</h3>
+        <table summary="class Polygon - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>rings</code></td>
+                
+                  
+                    <td><code>Number[][][]</code></td>
+                  
+                
+                <td>coords of the Polygon.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>spatialReference</code></td>
+                
+                  
+                    <td><code>SpatialReference</code></td>
+                  
+                
+                <td><b> wkid/wkt info only</b>.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="Polyline"></a>class Polyline</h2>
+      <p>A polyline contains an array of paths and a spatialReference.<br/> There is no constructor for this class. Use javascript object literal. Example:<pre>
+    {
+    "paths" : [ 
+     [ [-97.06138,32.837], [-97.06133,32.836], [-97.06124,32.834] ], 
+     [ [-97.06326,32.759], [-97.06298,32.755] ]
+    ],
+    "spatialReference" : {"wkid" : 4326}
+    }</pre></p>
+      
+        <h3>Properties</h3>
+        <table summary="class Polyline - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>paths</code></td>
+                
+                  
+                    <td><code>Number[][][]</code></td>
+                  
+                
+                <td>coords of the polyline.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>spatialReference</code></td>
+                
+                  
+                    <td><code>SpatialReference</code></td>
+                  
+                
+                <td><b> wkid/wkt info only</b>.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="Projection"></a>class Projection</h2>
+      <p>This class (<code>gmaps.ags.Projection</code>) implements a custom<a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a> from the core Google Maps API.  It carries a real <code><a href="reference.html#SpatialReference">SpatialReference</a></code> object to convert LatLng from/to  map coordinates, and tiling scheme informations to convert  map coordinates from/to pixel coordinates.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class Projection - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>Projection(<span class="type">tileInfo:TileInfo</span>)</code></td>
+                
+                <td>Creates an ArcGIS Map Tiling Reference System.<ul><li><code>tileInfo</code> tiling information. An instance of <code><a href="reference.html#TileInfo">TileInfo</a></code><li><code>opt_fullExtent</code> full extent of the tiles. An instance of <code><a href="reference.html#Envelope">Envelope</a></code></ul>Applications normally do not create instances of this class directly.If needed, it can be accessed by <code>Map.getCurrentMapType().getProjection()</code>for customized <code>GMapType</code>s.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class Projection - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>fromLatLngToPixel(<span class="type">gLatLng:LatLng</span>, <span class="type">opt_point:Point</span>)</code></td>
+                
+                  
+                    <td><code>Point</code></td>
+                  
+                
+                <td>See <a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>fromPixelToLatLng(<span class="type">pixel:Point</span>, <span class="type">opt_nowrap:Boolean</span>)</code></td>
+                
+                  
+                    <td><code>LatLng</code></td>
+                  
+                
+                <td>See <a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a>.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>getScale(<span class="type">zoom:Number</span>)</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>Get the scale at given level;</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="ProjectParameters"></a>class ProjectParameters</h2>
+      <p>This class represent the parameters needed in an project operation for a <code><a href="reference.html#GeometryService">GeometryService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class ProjectParameters - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>f</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The response format. html | json .  The default value is <code> json</code>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>geometries</code></td>
+                
+                  
+                    <td><code>Geometry[]</code></td>
+                  
+                
+                <td>Array of <code><a href="reference.html#Geometry">Geometry</a></code> to project. In the case of points, the following syntax also works:  <code>geometries  = x1, y1, x2, y2, ..., xn, yn</code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>geometryType</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>inSR</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>The well-known ID of the spatial reference of the input geometries</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>outSR</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>The well-known ID of the spatial reference of the out geometries</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="QueryParameters"></a>class QueryParameters</h2>
+      <p>This class represent the parameters needed in an query operation for a <code><a href="reference.html#Layer">Layer</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/query.html'>Query Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class QueryParameters - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>f</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The response format. html | json | kmz .  The default value is <code> json</code>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>geometry</code></td>
+                
+                  
+                    <td><code>Geometry</code></td>
+                  
+                
+                <td>The geometry to apply as the spatial filter.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>geometryType</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolygon | esriGeometryPolyline</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>inSR</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>The well-known ID of the spatial reference of the input geometries</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>Number</code></td>
+                
+                  
+                    <td><code></code></td>
+                  
+                
+                <td>[returnIdsOnly] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the query operation</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>Number</code></td>
+                
+                  
+                    <td><code></code></td>
+                  
+                
+                <td>[maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the query operation</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>objectIds</code></td>
+                
+                  
+                    <td><code>Int|Int</code></td>
+                  
+                
+                <td>The object IDs of this layer / table to be queried</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>outFields</code></td>
+                
+                  
+                    <td><code>String|String[]</code></td>
+                  
+                
+                <td>The list of fields to be included in the returned resultset.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>relationParam</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The spatial relate function that can be applied while performing the query operation. An example for this spatial relate function is "FFFTTT***"</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>returnGeometry</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>If true, If true, the resultset will include the geometries associated with each result.  The default value is <code> true</code>.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>spatialRel</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The spatial relationship to be applied on the   input geometry while performing the query. The supported spatial relationships   include intersects, contains, envelope intersects, within, etc.   The default spatial relationship is intersects (esriSpatialRelIntersects).   esriSpatialRelIntersects | esriSpatialRelContains | esriSpatialRelCrosses
+   | esriSpatialRelEnvelopeIntersects | esriSpatialRelIndexIntersects
+   | esriSpatialRelOverlaps | esriSpatialRelTouches | esriSpatialRelWithin</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>String,</code></td>
+                
+                  
+                    <td><code></code></td>
+                  
+                
+                <td>[outFields] The list of fields to be included in the returned resultset. This list is a comma delimited list of field names.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>text</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>A literal search text. If the layer has a display field  associated with it, the server searches for this text in this field.  This parameter is a short hand for a where clause of:  where [displayField]like '%[text]%'. The text is case sensitive.  This parameter is ignored if the where parameter is specified.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>time</code></td>
+                
+                  
+                    <td><code>Number|Number</code></td>
+                  
+                
+                <td>The time instant or the time extent to query.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>where</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>A where clause for the query filter. Any legal SQL where clause operating on the fields in the layer is allowed.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="QueryRelatedRecordsParameters"></a>class QueryRelatedRecordsParameters</h2>
+      <p>This class represent the parameters needed in an query related records operation for a <code><a href="reference.html#Layer">Layer</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/queryrelatedrecords.html'>Query Related Records Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class QueryRelatedRecordsParameters - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>definitionExpression</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The definition expression to be applied to the related table / layer. From the list of objectIds, only those records that conform to this expression will be returned.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>f</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The response format. html | json | kmz .  The default value is <code> json</code>.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>Number</code></td>
+                
+                  
+                    <td><code></code></td>
+                  
+                
+                <td>[maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the query operation</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>objectIds</code></td>
+                
+                  
+                    <td><code>Int|Int</code></td>
+                  
+                
+                <td>The object IDs of this layer / table to be queried</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>outSR</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>The well-known ID of the spatial reference of the output geometries</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>relatioshipId</code></td>
+                
+                  
+                    <td><code>Int</code></td>
+                  
+                
+                <td>The ID of the relationship to be queried</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>returnGeometry</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>If true, If true, the resultset will include the geometries associated with each result.  The default value is <code> true</code>.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>String,</code></td>
+                
+                  
+                    <td><code></code></td>
+                  
+                
+                <td>[outFields] The list of fields to be included in the returned resultset. This list is a comma delimited list of field names.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="RelatedRecord"></a>class RelatedRecord</h2>
+      <p>This class represent the result of an query related records operation for a <code><a href="reference.html#Layer">Layer</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/queryrelatedrecords.html'>Query Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class RelatedRecord - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>objectId</code></td>
+                
+                  
+                    <td><code>int</code></td>
+                  
+                
+                <td>objectid of original record</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>relatedRecords</code></td>
+                
+                  
+                    <td><code>Array</code></td>
+                  
+                
+                <td>list of <code><a href="reference.html#Feature">Feature</a></code>s.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="RelatedRecords"></a>class RelatedRecords</h2>
+      <p>This class represent the results of an query related records operation for a <code><a href="reference.html#Layer">Layer</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/queryrelatedrecords.html'>Query Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class RelatedRecords - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>displayFieldName</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>display Field Name for layer</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>geometryType</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolygon | esriGeometryPolyline</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>relatedRecordGroups</code></td>
+                
+                  
+                    <td><code>Array</code></td>
+                  
+                
+                <td>list of related records</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>spatialReference</code></td>
+                
+                  
+                    <td><code>Object</code></td>
+                  
+                
+                <td>spatial Reference <b>wkid info only</b></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="ResultSet"></a>class ResultSet</h2>
+      <p>This class represent the results of an query operation for a <code><a href="reference.html#Layer">Layer</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/query.html'>Query Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class ResultSet - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>displayFieldName</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>display Field Name for layer</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>features</code></td>
+                
+                  
+                    <td><code>Features[]</code></td>
+                  
+                
+                <td>result as array of <code><a href="reference.html#Feature">Feature</a></code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>fieldAliases</code></td>
+                
+                  
+                    <td><code>Object</code></td>
+                  
+                
+                <td>Field Name's Aliases. key is field name, value is alias.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>geometryType</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolygon | esriGeometryPolyline</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>objectIdFieldName</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>objectIdFieldName when returnIdsOnly=true</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>objectIds</code></td>
+                
+                  
+                    <td><code>int[]</code></td>
+                  
+                
+                <td>objectIds when returnIdsOnly=true</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>spatialReference</code></td>
+                
+                  
+                    <td><code>Object</code></td>
+                  
+                
+                <td>spatial Reference <b>wkid info only</b></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="ReverseGeocodeParameters"></a>class ReverseGeocodeParameters</h2>
+      <p>This class represent the parameters needed in a reverseGeocode operation on a <code><a href="reference.html#GeocodeService">GeocodeService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/reverse.html'>Reverse Geocode Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class ReverseGeocodeParameters - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>distance</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>The distance in meters from the given location within which  a matching address should be searched.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>f</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>The response format. html | json |kmz.  The default value is <code> json</code>.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>location</code></td>
+                
+                  
+                    <td><code>Geometry|String</code></td>
+                  
+                
+                <td>an object literal of type <code>ArcGISPoint</code>. You can also use x,y string.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="ReverseGeocodeResult"></a>class ReverseGeocodeResult</h2>
+      <p>This class represent one entry in the results of a find address operation for a <code><a href="reference.html#GeocodeService">GeocodeService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/reverse.html'>Reverse Geocode Operation</a>.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class ReverseGeocodeResult - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>address</code></td>
+                
+                  
+                    <td><code>Object</code></td>
+                  
+                
+                <td>matched address, object literal with name-value address parts.  e.g.: <code>{  "Street" : "771 TUNNEL AVE",  "Zone" : "94005"  }</code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>location</code></td>
+                
+                  
+                    <td><code>Geometry</code></td>
+                  
+                
+                <td>matched location</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="SimpleFillSymbol"></a>class SimpleFillSymbol</h2>
+      <p>SimpleFillSymbol can be used to symbolize polygon geometries. The type property for simple line symbols is esriSFS.   There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.Syntax:<pre>
+   {
+"type" : "esriSFS",
+"style" : "&lt; esriSFSBackwardDiagonal | esriSFSCross | esriSFSDiagonalCross | esriSFSForwardDiagonal | esriSFSHorizontal | esriSFSNull | esriSFSSolid | esriSFSVertical >",
+"color" : &lt;color>,
+"outline" : &lt;simpleLineSymbol> //if outline has been specified
+}</pre></p>
+      
+    
+      <h2><a name="SimpleLineSymbol"></a>class SimpleLineSymbol</h2>
+      <p>Simple line symbols can be used to symbolize polyline geometries. The type property for simple line symbols is esriSLS.   There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.Syntax:<pre>
+   {
+"type" : "esriSLS",
+"style" : "&lt; esriSLSDash | esriSLSDashDotDot | esriSLSDot | esriSLSNull | esriSLSSolid >",
+"color" : &lt;color>,
+"width" : &lt;width>
+}</pre></p>
+      
+    
+      <h2><a name="SimpleMarkerSymbol"></a>class SimpleMarkerSymbol</h2>
+      <p>Simple marker symbols can be used to symbolize point geometries. The type property for simple marker symbols is esriSMS.   There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.Example:<pre>
+   {
+"type" : "esriSMS",
+"style" : "&lt;esriSMSCircle | esriSMSCross | esriSMSDiamond | esriSMSSquare | esriSMSX&gt;",
+"color" : &lt;color>,
+"size" : &lt;size>,
+"angle" : &lt;angle>,
+"xoffset" : &lt;xoffset>,
+"yoffset" : &lt;yoffset>,
+"outline" : { //if outline has been specified
+  "color" : &lt;color>,
+  "width" : &lt;width>
+}
+}</pre></p>
+      
+    
+      <h2><a name="SpatialReference"></a>class SpatialReference</h2>
+      <p>This  class (<code>gmaps.ags.SpatialReference</code>) is for coordinate systems that converts value between geographic and real-world coordinates. The following classes extend this class:   <code><a href="reference.html#Geographic">Geographic</a></code>, <code><a href="reference.html#SphereMercator">SphereMercator</a></code>, <code><a href="reference.html#LambertConformalConic">LambertConformalConic</a></code>, and <code><a href="reference.html#TransverseMercator">TransverseMercator</a></code>.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class SpatialReference - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>SpatialReference(<span class="type">params:Object</span>)</code></td>
+                
+                <td>Create A Generic Spatial Reference ObjectThe <code>params </code> passed in constructor is a javascript object literal and depends onthe type of Coordinate System to construct.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Properties</h3>
+        <table summary="class SpatialReference - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>wkid</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>well-known coodinate system id (EPSG code)</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>wkt</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>well-known coodinate system text (EPSG code)</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class SpatialReference - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>forward(<span class="type">lnglat:Number[]</span>)</code></td>
+                
+                  
+                    <td><code>Number[]</code></td>
+                  
+                
+                <td>Convert Lat Lng to real-world coordinates.Note both input and output are array of [x,y], although their values in different units.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>getCircumference()</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>Get the map the periodicity in x-direction, in map units NOT pixels</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>getKey()</code></td>
+                
+                  
+                    <td><code>wkid or wkt</code></td>
+                  
+                
+                <td>get wkid or wkt depending on which is available.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>reverse(<span class="type">coords:Number[]</span>)</code></td>
+                
+                  
+                    <td><code>Number[]</code></td>
+                  
+                
+                <td>Convert real-world coordinates  to Lat Lng.Note both input and output are are array of [x,y], although their values are different.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="SpatialReferences"></a>class SpatialReferences</h2>
+      <p>SpatialReferences has an internal collection of Spatial Refeneces supported in the application.The key of the collection is the wkid, and value is an instance of<code>ArcGISSpatialReference</code>.The <code><a href="reference.html#TileLayer">TileLayer</a></code>'s Spatial Refeneces <b>must be already added to collectionbefore it's constructor can be called</b>.The following ArcGISSpatialReference are added by default:<code><br/> 4326: WGS84 ArcGISGeographic Coordinate System;<br/> 102113: Web-Mercator used by Google Maps, Virtual Earth etc.</code><br/> The application can add a supported spatial references using static method<code>SpatialReferences.addSpatialReference(wkid,sr);</code></p>
+      
+        <h3>Static Methods</h3>
+        <table summary="class SpatialReferences - Static Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Static Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>addSpatialReference(<span class="type">wkid/wkt:String</span>, <span class="type">wktOrSR:Object</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Add A Spatial Reference to the collection of Spatial References.the <code>ArcGISwktOrSR</code> parameter can be String format of "well-known text" of theSpatial Reference, or an instance of <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.<br/><li> If passes in String WKT format, to be consistent, it should use the same format as listedin <a  href  = 'http://edndoc.esri.com/arcims/9.2/elements/pcs.htm'>ESRI documentation</a>. For example, add NC State Plane NAD83 as String:<br/><code>SpatialReferences.addSpatialReference('2264','PROJCS["NAD_1983_StatePlane_North_Carolina_FIPS_3200_Feet",GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Lambert_Conformal_Conic"],PARAMETER["False_Easting",2000000.002616666],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",-79.0],PARAMETER["Standard_Parallel_1",34.33333333333334],PARAMETER["Standard_Parallel_2",36.16666666666666],PARAMETER["Latitude_Of_Origin",33.75],UNIT["Foot_US",0.3048006096012192]]');<br/></code>Note: only <b>Lambert Conformal Conic</b> and <b>Transverse Mercator</b> Projectionbased Spatial References are supported if added via WKT String.<br/><li> If passes in an instance of <code><a href="reference.html#SpatialReference">SpatialReference</a></code>, it can be one of thebuilt in classes, or a class that extends SpatialReference. For example, add NC State Plane NAD83 as SR:<br/><code>SpatialReferences.addSpatialReference('2264': new LambertConformalConic({wkid: 2264,semi_major: 6378137.0,inverse_flattening: 298.257222101,standard_parallel_1: 34.33333333333334,standard_parallel_2: 36.16666666666666,central_meridian: -79.0,latitude_of_origin: 33.75,'false_easting': 2000000.002616666,'false_northing': 0,unit: 0.3048006096012192});<br/></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>getSpatialReference(<span class="type">wkid/wkt:String</span>)</code></td>
+                
+                  
+                    <td><code>SpatialReference</code></td>
+                  
+                
+                <td>Gets the <code><a href="reference.html#SpatialReference">SpatialReference</a></code> from the internal colection by well-known id. Returns undefined if not added.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="SphereMercator"></a>class SphereMercator</h2>
+      <p>This class (<code>gmaps.ags.SphereMercator</code>) is the Projection Default Google Maps uses. It is a special form of Mercator.  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class SphereMercator - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>SphereMercator(<span class="type">params:Object</span>)</code></td>
+                
+                <td>Creates a Spatial Reference based on Sphere Mercator Projection. The <code>params</code> passed in constructor should have the following properties:<code><br/>-wkid: wkid<br/>-semi_major:  ellipsoidal semi-major axis <br/>-unit: meters per unit<br/>-central_meridian: lamdaF, longitude of the false origin  (with respect to the prime meridian)</code><br/>e.g. The "Web Mercator" used in ArcGIS Server:<br/><code> var web_mercator  = new SphereMercator({wkid: 102113,  semi_major:6378137.0,  central_meridian:0, unit: 1 });</code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class SphereMercator - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>forward(<span class="type">lnglat:Number[]</span>)</code></td>
+                
+                  
+                    <td><code>Number[]</code></td>
+                  
+                
+                <td>See <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>getCircumference()</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>See <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>reverse(<span class="type">coords:Number[]</span>)</code></td>
+                
+                  
+                    <td><code>Number[]</code></td>
+                  
+                
+                <td>See <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="TextSymbol"></a>class TextSymbol</h2>
+      <p>Text symbols are used to add text to a feature (labeling). The type property for text symbols is esriTS.There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.Syntax:<pre>
+ {
+ "type" : "esriTS",
+ "color" : &lt;color>,
+ "backgroundColor" : &lt;color>,
+ "borderLineColor" : &lt;color>,
+ "verticalAlignment" : "&lt;baseline | top | middle | bottom>",
+ "horizontalAlignment" : "&lt;left | right | center | justify>",
+ "rightToLeft" : &lt;true | false>,
+ "angle" : &lt;angle>,
+ "xoffset" : &lt;xoffset>,
+ "yoffset" : &lt;yoffset>,
+ "kerning" : &lt;true | false>,
+ "font" : {
+ "family" : "&lt;fontFamily>",
+ "size" : &lt;fontSize>,
+ "style" : "&lt;italic | normal | oblique>",
+ "weight" : "&lt;bold | bolder | lighter | normal>",
+ "decoration" : "&lt;line-through | underline | none>"
+ }
+ }</pre></p>
+      
+    
+      <h2><a name="TileInfo"></a>class TileInfo</h2>
+      <p>This class contains information about map tile infornation for a cached map service.   It is the type of <code><a href="reference.html#TileInfo">TileInfo</a></code> property of <code>ArcGISArcGISTileReference</code>   <br/>There is no constructor for this class.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class TileInfo - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>cols</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>tile cols size,  e.g. 512, must be same as rows</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>compressionQuality</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>JPEG only.0-100.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>dpi</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>dot per inch for map tiles.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>format</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>PNG8 | PNG24 | PNG32 | GIF | JPEG</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>lods</code></td>
+                
+                  
+                    <td><code>LOD[]</code></td>
+                  
+                
+                <td>Array of Level of Details. See <code>ArcGISLOD</code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>origin</code></td>
+                
+                  
+                    <td><code>Point</code></td>
+                  
+                
+                <td>origin of tile system of type <code>ArcGISPoint</code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>rows</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>tile row size,  e.g. 512, must be same as cols</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>spatialReference</code></td>
+                
+                  
+                    <td><code>SpatialReference</code></td>
+                  
+                
+                <td>spatial reference.  <b>wkid info only</b>.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="TileLayer"></a>class TileLayer</h2>
+      <p>This class (<code>gmaps.ags.TileLayer</code>) provides access to a cached ArcGIS Server map service. There is no GTileLayer class in Google Maps API V3, but this class is kept to allowfiner control of zoom levels for each individual tile sets within a map type.<br/> This class can be used in <code><a href="reference.html#MapType">MapType</a></code></p>
+      
+        <h3>Constructor</h3>
+        <table summary="class TileLayer - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>TileLayer(<span class="type">service:MapService</span>, <span class="type">opt_layerOpts:TileLayerOptions</span>)</code></td>
+                
+                <td>Creates a tile layer from a cached by ArcGIS map service. <br/> <code> service</code> (required) is the underline <code><a href="reference.html#MapService">MapService</a></code><br/> <code>opt_layerOpts</code> (optional) is an instance of <code><a href="reference.html#TileLayerOptions">TileLayerOptions</a></code>.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="TileLayerOptions"></a>class TileLayerOptions</h2>
+      <p>Instances of this class are used in the <code>opt_layerOpts</code> argument  to the constructor of the <code><a href="reference.html#TileLayer">TileLayer</a></code> class.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class TileLayerOptions - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>hosts</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>host pattern of tile servers if they are numbered. Most browser  has default restrictions on how many concurrent connections can be made to  a single host. One technique to workaround this is to create multiple hosts and rotate them when  loading tiles.  The syntax is <code>prefix[<i>numberOfHosts</i>]suffix</code>, for example, <code>"mt[4].google.com"</code> means  rotate hosts in <code>mt0.google.com, mt1.google.com, mt2.google.com, mt3.google.com</code> (4 hosts).</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>maxZoom</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>max zoom level.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>minZoom</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>min zoom level.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>projection</code></td>
+                
+                  
+                    <td><code>Projection</code></td>
+                  
+                
+                <td>an instance of <code><a href="reference.html#Projection">Projection</a></code>. If this option is specified, you do not have to wait the 'load' event to use the TileLayer.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="TimeInfo"></a>class TimeInfo</h2>
+      <p>TimeInfo if the layer / table supports querying and exporting maps based on time.Syntax:<pre>"timeInfo" : {
+  "startTimeField" : "&lt;startTimeFieldName>",
+  "endTimeField" : "&lt;endTimeFieldName>",
+  "trackIdField" : "&lt;trackIdFieldName>",
+  "timeExtent" : [&lt;startTime>, &lt;endTime>],
+  "timeReference" : {
+    "timeZone" : "&lt;timeZone>",
+    "respectsDaylightSaving" : &lt;true | false>
+  },
+  "timeInterval" : &lt;timeInterval>,
+  "timeIntervalUnits" : "&lt;timeIntervalUnits>",
+  //the default time-related export options for this layer
+  "exportOptions" : { 
+    //If true, use the time extent specified by the time parameter
+    "useTime" : &lt; true | false >,
+    //If true, draw all the features from the beginning of time for that data
+    "timeDataCumulative" : &lt; true | false >,
+    //Time offset for this layer so that it can be overlaid on the top of a previous or future time period
+    "timeOffset" : &lt;timeOffset1>,
+    "timeOffsetUnits" : "&lt;esriTimeUnitsCenturies | esriTimeUnitsDays | esriTimeUnitsDecades | 
+                             esriTimeUnitsHours | esriTimeUnitsMilliseconds | esriTimeUnitsMinutes | 
+                             esriTimeUnitsMonths | esriTimeUnitsSeconds | esriTimeUnitsWeeks | esriTimeUnitsYears |
+                             esriTimeUnitsUnknown>"
+  }</pre></p>
+      
+    
+      <h2><a name="TransverseMercator"></a>class TransverseMercator</h2>
+      <p>This class (<code>gmaps.ags.TransverseMercator</code>) represents a Spatial Reference System based on <a target  = wiki href  = 'http://en.wikipedia.org/wiki/Transverse_Mercator_projection'>Transverse Mercator Projection</a>  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class TransverseMercator - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>TransverseMercator(<span class="type">params:Object</span>)</code></td>
+                
+                <td>Create a Transverse Mercator Projection. The <code>params</code> passed in constructor should contain the following properties: <br/><code><br/>-wkid: well-known id<br/>-semi_major:  ellipsoidal semi-major axis in meters<br/>-unit: meters per unit<br/>-inverse_flattening: inverse of flattening of the ellipsoid where 1/f  =  a/(a - b)<br/>-Scale Factor: scale factor at origin<br/>-latitude_of_origin: phiF, latitude of the false origin<br/>-central_meridian: lamdaF, longitude of the false origin  (with respect to the prime meridian)<br/>-false_easting: FE, false easting, the Eastings value assigned to the natural origin <br/>-false_northing: FN, false northing, the Northings value assigned to the natural origin </code><br/>e.g. Georgia West State Plane NAD83 Feet:  <br/><code> var gawsp83  = new gmaps.ags.TransverseMercator({wkid: 102667, semi_major:6378137.0, inverse_flattening:298.257222101,central_meridian:-84.16666666666667, latitude_of_origin: 30.0, scale_factor:0.9999,'false_easting':2296583.333333333, 'false_northing':0, unit: 0.3048006096012192}); </code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class TransverseMercator - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>forward(<span class="type">lnglat:Number[]</span>)</code></td>
+                
+                  
+                    <td><code>Number[]</code></td>
+                  
+                
+                <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>getCircumference()</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>reverse(<span class="type">coords:Number[]</span>)</code></td>
+                
+                  
+                    <td><code>Number[]</code></td>
+                  
+                
+                <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+    <script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      _uacct = "UA-964209-4";
+      urchinTracker();
+    </script> 
+  </body>
+</html>
