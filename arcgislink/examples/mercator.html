@@ -14,9 +14,9 @@
           var myOptions = {
             zoom: 15,
             center: new google.maps.LatLng(45.5, -122.7),
-            mapTypeId: 'arcgis',
+            mapTypeId: google.maps.MapTypeIds.ROADMAP,//'arcgis',
             mapTypeControlOptions: {
-              mapTypeIds: ['arcgis']
+              mapTypeIds: ['arcgis',google.maps.MapTypeIds.ROADMAP]
             },
             streetViewControl:true //my favorite feature in V3!
           }
@@ -24,7 +24,7 @@
           var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
           var agsType = new  gmaputils.ags.MapType(url,{name:'ArcGIS'});
           map.mapTypes.set('arcgis', agsType);
-          map.setMapTypeId('arcgis');
+         // map.setMapTypeId('arcgis');
         }
         </script>
     </head>
