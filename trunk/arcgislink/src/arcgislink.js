@@ -2336,7 +2336,7 @@
       if (zoom <= t.maxZoom && zoom >= t.minZoom) {
         var url = t.getTileUrl(tileCoord, zoom);
         if (url) {
-          var img = ownerDocument.createElement('div');//img
+          var img = ownerDocument.createElement('img');//img
           img.style.border = '0px none';
           img.style.margin = '0px';
           img.style.padding = '0px';
@@ -2346,8 +2346,8 @@
           img.style.left = '0px';
           img.style.width = '' + this.tileSize.width + 'px';
           img.style.height = '' + this.tileSize.height + 'px';
-          img.style.backgroundImage = 'url(' + url + ')';
-          //img.src = url;
+          //img.style.backgroundImage = 'url(' + url + ')';
+          img.src = url;
           div.appendChild(img);
         }
       }
