@@ -263,6 +263,7 @@
    * @param {Number} 0-1
    */
   var setOpacity = function (node, op) {
+    op = Math.min(Math.max(op, 0), 1);
     if (node) {
       var st = node.style;
       if (typeof st.opacity !== 'undefined') {
@@ -280,6 +281,11 @@
   var log = function (msg) {
     if (window.console) {
       console.log(msg);
+    } else {
+      var l = document.getElementById('_ags_log');
+      if (l) {
+        l.innerHTML = l.innerHTML + msg + '<br/>'
+      }
     }
   };
   
@@ -2173,8 +2179,7 @@
    *   rotate hosts in <code>mt0.google.com, mt1.google.com, mt2.google.com, mt3.google.com</code> (4 hosts).
    * @property {Number} [minZoom] min zoom level. 
    * @property {Number} [maxZoom] max zoom level.
-   * @property {Projection} [projection] an instance of {@link Projection}. If this option is 
-   * specified, you do not have to wait the 'load' event to use the TileLayer.
+   * @property {Number} [opacity] opacity (0-1).
    */
   
   /** Creates a tile layer from a cached by ArcGIS map service. 
@@ -2183,16 +2188,19 @@
    * @name TileLayer
    * @class This class (<code>gmaputils.ags.TileLayer</code>) provides access to a cached ArcGIS Server 
    * map service. There is no GTileLayer class in Google Maps API V3, but this class is kept to allow
-   * finer control of zoom levels for each individual tile sets within a map type.
+   * finer control of zoom levels for each individual tile sets within a map type, such as zoom level range and opacity.
    * <br/> This class can be used in {@link MapType} 
    * @param {MapService} service
    * @param {TileLayerOptions} opt_layerOpts
    */
   function TileLayer(service, opt_layerOpts) {
     opt_layerOpts  =  opt_layerOpts || {};
+    if (opt_layerOpts.opacity) {
+      this.opacity_ = opt_layerOpts.opacity;
+      delete opt_layerOpts.opacity;
+    }
     augmentObject(opt_layerOpts, this);
     this.mapService  =  (service instanceof MapService)?service:new MapService(service);
-   
     //In the format of mt[number].domain.com
     if (opt_layerOpts.hosts) {
       var pro  =  extractString(this.mapService.url, '', '://');
@@ -2203,6 +2211,7 @@
     }
     this.name = this.name || this.mapService.name;
     this.maxZoom = this.maxZoom || 19;
+    this.minZoom = this.minZoom || 0;
     if (this.mapService.loaded) {
       this.init_(opt_layerOpts);
     } else {
@@ -2211,6 +2220,7 @@
         me.init_(opt_layerOpts);
       });
     }
+    this.tiles = {};
   }
   
   
@@ -2235,17 +2245,31 @@
    */
   TileLayer.prototype.getTileUrl  =  function (tile, zoom) {
     var z  = zoom - (this.projection?this.projection.minZoom:this.minZoom);
+    var url = '';
     if (!isNaN(tile.x) && !isNaN(tile.y) && z >= 0 && tile.x >= 0 && tile.y >= 0) {
       var u  =  this.mapService.url;
       if (this.urlTemplate_) {
         u  =  this.urlTemplate_.replace('[' + this.numOfHosts_ + ']', '' + ((tile.y + tile.x) % this.numOfHosts_));
       }
-      return u + '/tile/' + z + '/' + tile.y + '/' + tile.x;
+      url = u + '/tile/' + z + '/' + tile.y + '/' + tile.x;
     }
-    return '';
+    //log('url=' + url);
+    return url;
   };
   
+  TileLayer.prototype.setOpacity  =  function (op) {
+    this.opacity_ = op;
+    var tiles = this.tiles;
+    for (var x in tiles){
+      if (tiles.hasOwnProperty(x)) {
+        setOpacity(tiles[x], op);
+      }
+    }
+  };
   
+  TileLayer.prototype.getOpacity  =  function () {
+    return this.opacity_;
+  };
   /**
    * @name MapTypeOptions
    * @class Instance of this class are used in the {@link opt_typeOpts} argument
@@ -2281,7 +2305,7 @@
    * @param {MapTypeOptions} opt_typeOpts
    */
   function MapType(tileLayers, opt_typeOpts) {
-    //TODO handle copyright info.
+    //TODO: handle copyright info.
     opt_typeOpts = opt_typeOpts || {};
     var i;
     if (opt_typeOpts.opacity) {
@@ -2301,6 +2325,7 @@
       }
     }
     this.tileLayers = layers;
+    this.tiles = {};
     this.map_ = opt_typeOpts.map;
     if (opt_typeOpts.maxZoom !== undefined) {
       this.maxZoom = opt_typeOpts.maxZoom;
@@ -2331,12 +2356,13 @@
    */
   MapType.prototype.getTile = function (tileCoord, zoom, ownerDocument) {
     var div = ownerDocument.createElement('div');
+    var tileId = '_' + tileCoord.x + '_' + tileCoord.y + '_' + zoom;
     for (var i = 0; i < this.tileLayers.length; i++) {
       var t = this.tileLayers[i];
       if (zoom <= t.maxZoom && zoom >= t.minZoom) {
         var url = t.getTileUrl(tileCoord, zoom);
         if (url) {
-          var img = ownerDocument.createElement('img');//img
+          var img = ownerDocument.createElement(document.all ? 'img' : 'div');//IE does not like img
           img.style.border = '0px none';
           img.style.margin = '0px';
           img.style.padding = '0px';
@@ -2346,20 +2372,61 @@
           img.style.left = '0px';
           img.style.width = '' + this.tileSize.width + 'px';
           img.style.height = '' + this.tileSize.height + 'px';
-          //img.style.backgroundImage = 'url(' + url + ')';
-          img.src = url;
+          log(url);
+          if (document.all) {
+            img.src = url;
+          } else {
+            img.style.backgroundImage = 'url(' + url + ')';
+          }
           div.appendChild(img);
+          t.tiles[tileId] = img;
+          if (t.opacity_ !== undefined) {
+            setOpacity(img, t.opacity_);
+          } else if (this.opacity_ !== undefined) {
+            // in FF it's OK to set parent div just once but IE does not like it.
+            setOpacity(img, this.opacity_);
+          }
         }
       }
     }
-    if (this.opacity_ !== undefined) {
-      setOpacity(div, this.opacity_);
-    }
+    div.setAttribute('tid', tileId);
+    this.tiles[tileId] = div;
     return div;
   };
+  /**
+   * Release tile and cleanup
+   * @param {Node} node
+   */
+  MapType.prototype.releaseTile = function(node) {
+    var tileId = node.getAttribute('tid');
+    if (tileId) {
+      if (this.tiles[tileId]) {
+        delete this.tiles[tileId];
+      }
+      for (var i = 0; i < this.tileLayers.length; i++) {
+        var t = this.tileLayers[i];
+        if (t.tiles[tileId]) {
+          delete t.tiles[tileId];
+        } 
+      }
+    }
+  };
   
-  MapType.prototype.releaseTile = function (node) {
-    //TODO ? maybe release referene to tiles for opacity/visibility settting?
+  MapType.prototype.setOpacity = function(op) {
+    this.opacity_ = op;
+    var tiles = this.tiles;
+    for (var x in tiles) {
+      if (tiles.hasOwnProperty(x)) {
+        var nodes = tiles[x].childNodes;
+        for (var i = 0; i < nodes.length; i++) {
+          setOpacity(nodes[i], op);
+        }
+      }
+    }
+  };
+  
+  MapType.prototype.getOpacity  =  function () {
+    return this.opacity_;
   };
   
   /**
@@ -2464,7 +2531,16 @@
   MapOverlay.prototype.getOpacity  =  function () {
     return this.opacity_;
   };
-  
+  /**
+   * Sets Image Opacity. parameter <code>opacity</code> between 0-1.
+   * @param {Number} opacity
+   */
+  MapOverlay.prototype.setOpacity = function (opacity) {
+    var op = Math.min(Math.max(opacity, 0), 1);
+    this.opacity_ = op;
+    var img = this.div_;
+    setOpacity(img, op);
+  };
   
   /**
    * Refresh the map image in current view port.
@@ -2540,7 +2616,7 @@
    * @return {GLatLngBounds}
    */
   MapOverlay.prototype.getFullBounds  =  function () {
-    this.fullBounds_  = this.fullBounds_ || Util.fromEnvelopeToLatLngBounds(this.mapService_.fullExtent);
+    this.fullBounds_  = this.fullBounds_ || Util.fromEnvelopeToLatLngBounds(this.mapService.fullExtent);
     return this.fullBounds_;
   };
   /**
@@ -2548,20 +2624,11 @@
    * @return {GLatLngBounds}
    */
   MapOverlay.prototype.getInitialBounds  =  function () {
-    this.initialBounds_  = this.initialBounds_ || Util.fromEnvelopeToLatLngBounds(this.mapService_.initialExtent);
+    this.initialBounds_  = this.initialBounds_ || Util.fromEnvelopeToLatLngBounds(this.mapService.initialExtent);
     return this.initialBounds_;
   };
  
-  /**
-   * Sets Image Opacity. parameter <code>opacity</code> between 0-1.
-   * @param {Number} opacity
-   */
-  MapOverlay.prototype.setOpacity = function (opacity) {
-    var op = Math.min(Math.max(opacity, 0), 1);
-    this.opacity_ = op;
-    var img = this.img_;
-    setOpacity(img, op);
-  };
+  
   
 
   
@@ -3061,7 +3128,6 @@
   };
   var NS = namespace('gmaputils');
   NS.ags = arcgis;
-  //augmentObject(arcgis, NS);
 })();
  /**
  * @name Geometry
