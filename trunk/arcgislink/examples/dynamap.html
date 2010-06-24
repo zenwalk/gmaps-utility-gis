@@ -18,7 +18,7 @@
               };
               var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
               var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer';
-              var dynamap = new gmaputils.ags.MapOverlay(url);
+              var dynamap = new gmaputils.ags.MapOverlay(url, { opacity: 0.5 });
               dynamap.setMap(map);
             }
         </script>
