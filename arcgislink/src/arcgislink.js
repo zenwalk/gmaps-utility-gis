@@ -135,7 +135,7 @@
     }
     return n;
   };
-  // deal with the situation when user only loaded namespace.
+
   var W = window;
   var G = namespace('google.maps');
  /**
@@ -284,7 +284,7 @@
     } else {
       var l = document.getElementById('_ags_log');
       if (l) {
-        l.innerHTML = l.innerHTML + msg + '<br/>'
+        l.innerHTML = l.innerHTML + msg + '<br/>';
       }
     }
   };
@@ -1553,6 +1553,13 @@
     return ret;
   };
   
+  MapService.prototype.getInitialBounds = function () {
+    if (this.initialExtent) {
+      return Util.fromEnvelopeToLatLngBounds(this.initialExtent);
+    }
+    return null;
+  }
+  
 /*@property {String} [size] Syntax: &lt;width&gt;, &lt;height&gt;. You can also set <code>width</code> and <code>height</code>.
   @property {Envelope} [bbox] The extent (bounding box) of the exported image. 
   @property {Number} [bboxSR] The well-known ID of the spatial reference of the bbox
@@ -2106,16 +2113,16 @@
     }
     // resolution (unit/pixel) at lod level 0. Due to changes from V2-V3, 
     // zoom is no longer defined in Projection. It is assumed that level's zoom factor is 2. 
-    this.resolition0_ = this.tileInfo_.lods[0].resolution;
-    this.minZoom  =  Math.floor(Math.log(this.spatialReference.getCircumference() / this.resolition0_ / 256) / Math.LN2 + 0.5);
+    this.resolution0_ = this.tileInfo_.lods[0].resolution;
+    this.minZoom  =  Math.floor(Math.log(this.spatialReference.getCircumference() / this.resolution0_ / 256) / Math.LN2 + 0.5);
     this.maxZoom = this.minZoom + this.tileInfo_.lods.length - 1;
     this.tileSize = new G.Size(this.tileInfo_.cols, this.tileInfo_.rows);  
     // Find out how the map units scaled to 1 tile at zoom 0. 
     // from V2-V3, coords must scaled to 256 pixel under Mercator at zoom 0.
     // scale can be considered under this SR, what's the actual pixel number to 256 to cover whole earth?
     this.scale_ = Math.pow(2, this.minZoom) * this.resolution0_;
-    this.orginX_ = this.tileInfo_.origin.x;        
-    this.orginY_ = this.tileInfo_.origin.y;        
+    this.originX_ = this.tileInfo_.origin.x;        
+    this.originY_ = this.tileInfo_.origin.y;        
  //   this.fullExtent_  =  opt_fullExtent;
   }
   
@@ -2131,7 +2138,7 @@
     }
     var coords  =  this.spatialReference.forward([latlng.lng(), latlng.lat()]);
     var point = opt_point || new G.Point(0, 0);
-    point.x = (coords[0] - this.orginX_) / this.scale_;
+    point.x = (coords[0] - this.originX_) / this.scale_;
     point.y = (this.originY_ - coords[1]) / this.scale_; 
     return point;
   };
@@ -2260,7 +2267,7 @@
   TileLayer.prototype.setOpacity  =  function (op) {
     this.opacity_ = op;
     var tiles = this.tiles;
-    for (var x in tiles){
+    for (var x in tiles) {
       if (tiles.hasOwnProperty(x)) {
         setOpacity(tiles[x], op);
       }
@@ -2326,7 +2333,7 @@
     }
     this.tileLayers = layers;
     this.tiles = {};
-    this.map_ = opt_typeOpts.map;
+    //this.map_ = opt_typeOpts.map;
     if (opt_typeOpts.maxZoom !== undefined) {
       this.maxZoom = opt_typeOpts.maxZoom;
     } else {
@@ -2338,6 +2345,7 @@
     }
     if (layers[0].projection) {
       this.tileSize = layers[0].projection.tileSize;
+      this.projection = layers[0].projection;
     } else {
       this.tileSize = new G.Size(256, 256);
     }
@@ -2397,7 +2405,7 @@
    * Release tile and cleanup
    * @param {Node} node
    */
-  MapType.prototype.releaseTile = function(node) {
+  MapType.prototype.releaseTile = function (node) {
     var tileId = node.getAttribute('tid');
     if (tileId) {
       if (this.tiles[tileId]) {
@@ -2412,7 +2420,7 @@
     }
   };
   
-  MapType.prototype.setOpacity = function(op) {
+  MapType.prototype.setOpacity = function (op) {
     this.opacity_ = op;
     var tiles = this.tiles;
     for (var x in tiles) {
