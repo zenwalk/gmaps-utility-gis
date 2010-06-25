@@ -24,9 +24,9 @@
           var baseUrl = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services';
           var wmUrl = baseUrl + '/Portland/ESRI_LandBase_WebMercator/MapServer';
           var dynaUrl = baseUrl + '/Demographics/ESRI_Census_USA/MapServer';
-          var agsType = new gmaputils.ags.MapType(wmUrl,{name:'ArcGIS'});
+          var agsType = new gmaps.ags.MapType(wmUrl,{name:'ArcGIS'});
           map.mapTypes.set('arcgis', agsType);
-          var dynamap = new gmaputils.ags.MapOverlay(dynaUrl);
+          var dynamap = new gmaps.ags.MapOverlay(dynaUrl);
           dynamap.setMap(map);
         }
         </script>

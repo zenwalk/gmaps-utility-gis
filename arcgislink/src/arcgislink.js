@@ -289,6 +289,122 @@
     }
   };
   
+  var getGeometryType = function (obj) {
+    if (obj instanceof G.LatLng || obj instanceof G.Marker) {
+      return C.esriGeometryPoint;
+    } else if (obj instanceof G.Polyline) {
+      return C.esriGeometryPolyline;
+    } else if (obj instanceof G.Polygon) {
+      return C.esriGeometryPolygon;
+    } 
+    return null;
+  };
+  
+  var fromGeometryToJSON = function (geom) {
+    function fromPointsToJSON(pts) {
+      var arr = [];
+      var latlng;
+      for (var i = 0, c = pts.getLength(); i < c; i++) {
+        latlng = pts.getAt(i);
+        arr.push('[' + latlng.lng() + ',' + latlng.lat() + ']');
+      }
+      return '[' + arr.join(',') + ']';
+    }
+    
+    var g = geom;
+    if (geom instanceof G.Marker) {
+      g = geom.getPosition();
+    }
+    var json = '{';
+    if (g instanceof G.LatLng) {
+      json += 'x:' + g.lng() + ',y:' + g.lat();
+    } else if (g instanceof G.LatLngBounds) {
+      json += 'xmin:' + g.getSouthWest().lng() + ',ymin:' + g.getSouthWest().lat() + ',xmax:' + g.getNorthEast().lng() + ',ymax:' + g.getNorthEast().lat();
+    } else if (g instanceof G.Polyline) {
+      json += 'paths:[' + fromPointsToJSON(g.getPath())+']';
+    } else if (g instanceof G.Polygon) {
+      var paths = g.getPaths();
+      var pjson = [];
+      for (var i = 0; i < paths.getLength(); i++) {
+        pjson.push(fromPointsToJSON(paths.getAt(i)));
+      }
+      json += 'rings:[' + pjson.join(',')+']';
+    }
+    json += ',spatialReference:{wkid:4326}';
+    json += '}';
+    return json;
+  };
+  
+  /**
+   * Convert a {@link Feature} or {@link IdentifyResult} or {@link FindResult} to core Google Maps API 
+   * overlays such as  {@link ArcGISGMarker}, 
+   * {@link ArcGISGPolyline}, or {@link ArcGISGPolygon}s.
+   * Note ArcGIS Geometry may have multiple parts, but the coresponding OverlayView 
+   * does not  support multi-parts, so the result is an array.
+   * <ul><li><code>feature</code>: an object returned by ArcGIS Server with at least <code>geometry</code> property of type {@link Geometry}. 
+   *  if it contains a name-value pair "attributes" property, it will be attached to the result overlays.
+   * <li><code>opt_sr</code>: optional {@link SpatialReference}. Can be object literal. 
+   * <li><code>opt_agsStyle</code> {@link ArcGISStyleOptions}. default is {@link ArcGISConfig}.style.
+   * <li><code>opt_displayName</code> optional field name used for title of feature. 
+   * @param {Feature} feature
+   * @param {SpatialReference} opt_sr
+   * @param {StyleOptions} opt_agsStyle
+   * @param {String} opt_displayName
+   * @return {OverlayView[]} 
+   */
+  var fromJSONToGeometry = function(geom, opts, opt_title) {
+    var ovs = [];
+    var sr = null;
+    var ov;
+    var x, i, ic, j, jc, parts, part, lnglat;
+    var title = '';
+    opts = opts || {};
+    if (geom.x) {
+      ov = new G.Marker(augmentObject(opts.marker, {
+        position: new G.LatLng(geom.y, geom.x)
+      }));
+      ovs.push(ov);
+    } else {
+      //mulpt, line and poly
+      parts = geom.points || geom.paths || geom.rings;
+      if (!parts) {
+        return ovs;
+      }
+      var rings = [];
+      for (i = 0, ic = parts.length; i < ic; i++) {
+        part = parts[i];
+        if (geom.points) {
+          // multipoint
+          ov = new G.Marker(augmentObject(opts.marker, {
+            position: new G.LatLng(part[1], part[0])
+          }));
+          ovs.push(ov);
+        } else {
+          latlngs = [];
+          for (j = 0, jc = part.length; j < jc; j++) {
+            lnglat = part[j];
+            latlngs.push(new G.LatLng(lnglat[1], lnglat[0]));
+          }
+          if (geom.paths) {
+            ov = new G.Polyline(augmentObject(opts.polyline, {
+              path: latlngs
+            }));
+            ovs.push(ov);
+          } else if (geom.rings) {
+            // V3 supports multiple rings
+            rings.push(latlngs);
+          }
+        }
+      }
+      if (geom.rings) {
+        ov = new G.Polygon(augmentObject(opts.polygon, {
+          paths: rings
+        }));
+        ovs.push(ov);
+      }
+    }
+    return ovs;
+  };
  /** Radius Per Degree
  * @private
  */
@@ -448,12 +564,12 @@
     return val;
   };
 */
-  /**
+  /*
    * convert Geometry to JSON String, optionally include SpatialReference info.
    * @param {Geometry} geoms
    * @param {Boolean} opt_includeSR
    * @return {String}
-   */
+   
   Util.fromGeometryToJSON = function (geom, opt_includeSR) {
     function fromPointsToJSON(pts) {
       var arr = [];
@@ -492,7 +608,7 @@
     json += '}';
     return json;
   };
-  
+  */
   /**
    * Some operations such as identify and find are operated against multiple layers.
    * The results are in a flat list. This method will group the result by layer and
@@ -617,7 +733,7 @@
    * The <code>params </code> passed in constructor is a javascript object literal and depends on
    * the type of Coordinate System to construct.
    * @name SpatialReference
-   * @class This  class (<code>gmaputils.ags.SpatialReference</code>) is for coordinate systems that converts value 
+   * @class This  class (<code>gmaps.ags.SpatialReference</code>) is for coordinate systems that converts value 
    * between geographic and real-world coordinates. The following classes extend this class:
    *    {@link Geographic}, {@link SphereMercator}, {@link LambertConformalConic}, and {@link TransverseMercator}.
    * @constructor
@@ -667,10 +783,10 @@
   /**
    * Creates a Geographic Coordinate System. e.g.:<br/>
    * <code>var g  = new Geographic({"wkid":4326});<br/>
-   * var g2 = new gmaputils.ags.Geographic({"wkid":4326});
+   * var g2 = new gmaps.ags.Geographic({"wkid":4326});
    * </code>
    * @name Geographic
-   * @class This class (<code>gmaputils.ags.Geographic</code>) will simply retuns same LatLng as Coordinates. 
+   * @class This class (<code>gmaps.ags.Geographic</code>) will simply retuns same LatLng as Coordinates. 
    *   The <code>param</code> should have wkid property. Any Geographic Coordinate Systems (eg. WGS84(4326)) can 
    *   use this class As-Is. 
    *   <br/>Note:<b> This class does not support datum transformation</b>.
@@ -698,12 +814,12 @@
  * <br/>-false_northing: FN, false northing, the Northings value assigned to the natural origin
  * </code>
  * <br/> e.g. North Carolina State Plane NAD83 Feet: <br/>
- * <code> var ncsp82  = new gmaputils.ags.LambertConformalConic({wkid:2264, semi_major: 6378137.0,inverse_flattening: 298.257222101,
+ * <code> var ncsp82  = new gmaps.ags.LambertConformalConic({wkid:2264, semi_major: 6378137.0,inverse_flattening: 298.257222101,
  *   standard_parallel_1: 34.33333333333334, standard_parallel_2: 36.16666666666666,
  *   central_meridian: -79.0, latitude_of_origin: 33.75,'false_easting': 2000000.002616666,
  *   'false_northing': 0, unit: 0.3048006096012192 }); </code>
  * @name LambertConformalConic
- * @class This class (<code>gmaputils.ags.LambertConformalConic</code>) represents a Spatial Reference System based on <a target  = wiki href  = 'http://en.wikipedia.org/wiki/Lambert_conformal_conic_projection'>Lambert Conformal Conic Projection</a>. 
+ * @class This class (<code>gmaps.ags.LambertConformalConic</code>) represents a Spatial Reference System based on <a target  = wiki href  = 'http://en.wikipedia.org/wiki/Lambert_conformal_conic_projection'>Lambert Conformal Conic Projection</a>. 
  * @extends SpatialReference
  * @constructor
  * @param {Object} params
@@ -848,13 +964,13 @@
  * <br/>-false_northing: FN, false northing, the Northings value assigned to the natural origin 
  * </code>
  * <br/>e.g. Georgia West State Plane NAD83 Feet:  
- * <br/><code> var gawsp83  = new gmaputils.ags.TransverseMercator({wkid: 102667, semi_major:6378137.0,
+ * <br/><code> var gawsp83  = new gmaps.ags.TransverseMercator({wkid: 102667, semi_major:6378137.0,
  *  inverse_flattening:298.257222101,central_meridian:-84.16666666666667, latitude_of_origin: 30.0,
  *  scale_factor:0.9999,'false_easting':2296583.333333333, 'false_northing':0, unit: 0.3048006096012192});
  *  </code>
  * @param {Object} params 
  * @name TransverseMercator
- * @class This class (<code>gmaputils.ags.TransverseMercator</code>) represents a Spatial Reference System based on 
+ * @class This class (<code>gmaps.ags.TransverseMercator</code>) represents a Spatial Reference System based on 
  * <a target  = wiki href  = 'http://en.wikipedia.org/wiki/Transverse_Mercator_projection'>Transverse Mercator Projection</a>
  * @extends SpatialReference
  */
@@ -952,7 +1068,7 @@
  * <code> var web_mercator  = new SphereMercator({wkid: 102113,  semi_major:6378137.0,  central_meridian:0, unit: 1 });
  * </code>
  * @name SphereMercator
- * @class This class (<code>gmaputils.ags.SphereMercator</code>) is the Projection Default Google Maps uses. It is a special form of Mercator.
+ * @class This class (<code>gmaps.ags.SphereMercator</code>) is the Projection Default Google Maps uses. It is a special form of Mercator.
  * @param {Object} params 
  * @extends SpatialReference
  */
@@ -1004,7 +1120,7 @@
    * <li><code>wkid</code>: wkid
    * <li><code>latlng</code>:  {@link Envelope} in latlng unit;
    * <li><code>coords</code>: {@link Envelope} in coords unit
-   * @class This class (<code>gmaputils.ags.FlatSpatialReference</code>) is a special type of coordinate reference assuming lat/lng will increase
+   * @class This class (<code>gmaps.ags.FlatSpatialReference</code>) is a special type of coordinate reference assuming lat/lng will increase
    * evenly as if earth is flat. Approximate for small regions without implementing
    * a real projection.
    * @name FlatSpatialReference
@@ -1214,7 +1330,7 @@
   /**
    * Create a ArcGIS map Layer using it's url ( 	http://[mapservice-url]/[layerId])
    * @name Layer
-   * @class This class (<code>gmaputils.ags.Layer</code>) The layer / table(v10+)
+   * @class This class (<code>gmaps.ags.Layer</code>) The layer / table(v10+)
    *  resource represents a single layer / table in a map of a map service 
    *  published by ArcGIS Server.
    * @param {String} url
@@ -1403,7 +1519,7 @@
    * <ul/> Note the spatial reference of the map service must already exists
    * in the {@link SpatialReferences} if actual coordinates transformation is needed.
    * @name MapService
-   * @class This class (<code>gmaputils.ags.MapService</code>) is the core class for all map service operations.
+   * @class This class (<code>gmaps.ags.MapService</code>) is the core class for all map service operations.
    * It represents an ArcGIS Server map service that offer access to map and layer content
    * @param {String} url
    * @property {String} [url] map service URL
@@ -1699,19 +1815,17 @@
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/identify.html'>Identify Operation</a>.
    * @property {String} [f  = json] The response format. html | json .
-   * @property {Geometry} [geometry] The geometry to identify on.
-   * @property {String} [geometryType] esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope
-   * @property {Number} [sr] The well-known ID of the spatial reference of the input and output geometries as well as the mapEnvelope
-   * @property {String} [layers] The layers to perform the identify operation on. There are three ways to do so, check REST API docs.
+   * @property {Geometry} [geometry] The geometry to identify on, <code>google.maps.LatLng</code>, <code>Polyline</code>, or <code>Polygon</code>.
+   * @property {Number[]} [layerIds] The layers to perform the identify operation on. 
+   * @property {String} [layerOption] The layers to perform the identify operation on. 'top|visible|all'. 
    * @property {Number} [tolerance] The distance in screen pixels from the specified geometry within which the identify should be performed
-   * @property {Envelope} [mapExtent] The extent or bounding box of the map currently being viewed.
-   * @property {String} [imageDisplay] The screen image display parameters (width, height and DPI) of the map being currently viewed.
-   *   You can also specifiy width, height, dip separately.
-   * @property {Number} [width] width of image, ignored if <code>imageDisplay</code> is specified;
-   * @property {Number} [height] height of image, ignored if <code>imageDisplay</code> is specified;
-   * @property {Number} [dpi] dpi of image, ignored if <code>imageDisplay</code> is specified;
+   * @property {google.maps.LatLngBounds} [bounds] The bounding box of the map currently being viewed.
+   * @property {Number} [width] width of image in pixel
+   * @property {Number} [height] height of image in pixel
+   * @property {Number} [dpi] dpi of image, default 96;
    * @property {Boolean} [returnGeometry  = true] If true, the resultset will include the geometries associated with each result.
    * @property {Number} [maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the identify operation
+   * @property {OverlayOptions} [overlayOptions] how results should be rendered.
    */
   /**
    * @name IdentifyResults
@@ -1730,9 +1844,7 @@
    * @property {String} [layerName] layerName
    * @property {String} [value] value of the display field
    * @property {String} [displayFieldName] displayFieldName
-   * @property {String} [geometryType] esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope
-   * @property {Geometry} [geometry] {@link Geometry}
-   * @property {Object} [attributes] attributes as name-value JSON object.
+   * @property {Feature} [features] {@link Feature}
    */
   /**
    * Identify features on a particular Geographic location, using {@link ArcGISIdenitfyParameters} and
@@ -1746,26 +1858,43 @@
     if (!iparams) {
       return;
     }
-    var params = augmentObject(iparams, {});
-    params.f = params.f || 'json';
-    if (!isString(params.geometry)) {
-      params.geometry = Util.fromGeometryToJSON(params.geometry);
+    var params = {};//augmentObject(iparams, );
+    params.geometry = fromGeometryToJSON(iparams.geometry);
+    params.geometryType = getGeometryType(iparams.geometry);
+    params.mapExtent = fromGeometryToJSON(iparams.bounds);
+    params.tolerance = iparams.tolerance || 2;
+    params.sr = 4326;
+    params.imageDisplay = '' + iparams.width + ',' + iparams.height + ',' + (iparams.dpi || 96);
+    params.layers = (iparams.layerOption || 'all') + ':' + (iparams.layerIds || this.getLayerIds()).join(',');
+    if (iparams.layerDefs) {
+      params.layerDefs = iparams.layerDefs;//TODO
     }
-    var ext = params.mapExtent;// maybe Extent or String
-    if (ext.xmin) {
-      params.mapExtent = '' + ext.xmin + ',' + ext.ymin + ',' + ext.xmax + ',' + ext.ymax;
-    } 
-    if (!params.imageDisplay) {
-      params.imageDisplay = '' + params.width + ',' + params.height + ',' + params.dpi;
-    } 
-    if (params.layers && !isString(params.layers)) {
-      params.layers = 'all:' + this.getLayerIds(params.layers).join(',');
-    }
-    if (!params.layerDefs) {
-      params.layerDefs = this.getLayerDefs();
-    }
-    params.returnGeometry = (params.returnGeometry === false ? false : true);
-    Util.getJSON(this.url + '/identify', params, 'callback', callback);
+    params.maxAllowableOffset = iparams.maxAllowableOffset;
+    params.returnGeometry = (iparams.returnGeometry === false ? false : true);
+    
+    Util.getJSON(this.url + '/identify', params, 'callback', function(json) {
+      // process results;
+      var rets = [];
+      var i, js, f, g;
+      if (json.results) {
+        for (i = 0; i < json.results.length; i++) {
+          js = json.results[i];
+          g = fromJSONToGeometry(js.geometry, iparams.overlayOptions);
+          rets.push ({
+            feature: {
+              geometry: g? g[0]:null, attributes: js.attributes, geometries: g
+            },
+            displayFieldName:js.displayFieldName,
+            layerId: js.layerId,
+            layerName: js.layerName,
+            value: js.value
+          });
+        }
+      }
+      callback({
+        results: rets
+      }, json.error);
+    });
   };
   /**
    * @name FindParameters
@@ -1858,7 +1987,7 @@
  * Creates an GeometryService class.
  * Params:<li><code>url</code>: URL of service, syntax:<code>	http://{catalog-url}/{serviceName}/GeometryServer</code>
  * @name GeometryService
- * @class This class (<code>gmaputils.ags.GeometryService</code>) represent an ArcGIS 
+ * @class This class (<code>gmaps.ags.GeometryService</code>) represent an ArcGIS 
  * <a href="http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geometryserver.html">Geometry</a>
  *  service.
  * @param {String} url
@@ -1917,7 +2046,7 @@
  * Creates a GeocodeService class.
  * Params:<li><code>url</code>: URL of service, syntax:<code>	http://{catalog-url}/{serviceName}/GeocodeServer</code>
  * @name GeocodeService
- * @class This class (<code>gmaputils.ags.GeocodeService</code>) represent an ArcGIS <a href="http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geocodeserver.html">GeocodeServer</a>
+ * @class This class (<code>gmaps.ags.GeocodeService</code>) represent an ArcGIS <a href="http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geocodeserver.html">GeocodeServer</a>
  *  service.
  * @param {String} url
  * @property {String} [serviceDescription] serviceDescription
@@ -2094,7 +2223,7 @@
    * If needed, it can be accessed by <code>Map.getCurrentMapType().getProjection()</code>
    * for customized <code>GMapType</code>s.
    * @name Projection
-   * @class This class (<code>gmaputils.ags.Projection</code>) implements a custom
+   * @class This class (<code>gmaps.ags.Projection</code>) implements a custom
    * <a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a> 
    * from the core Google Maps API.
    *   It carries a real {@link SpatialReference} object to convert LatLng from/to
@@ -2202,7 +2331,7 @@
    * <br/> <code> service</code> (required) is the underline {@link MapService}
    * <br/> <code>opt_layerOpts</code> (optional) is an instance of {@link TileLayerOptions}.
    * @name TileLayer
-   * @class This class (<code>gmaputils.ags.TileLayer</code>) provides access to a cached ArcGIS Server 
+   * @class This class (<code>gmaps.ags.TileLayer</code>) provides access to a cached ArcGIS Server 
    * map service. There is no GTileLayer class in Google Maps API V3, but this class is kept to allow
    * finer control of zoom levels for each individual tile sets within a map type, such as zoom level range and opacity.
    * <br/> This class can be used in {@link MapType} 
@@ -2307,7 +2436,7 @@
    *  or a single URL as shortcut.
    * <li><code>opt_typeOpts</code>: optional. An instance of {@link MapTypeOptions}
    * @name MapType
-   * @class This class (<code>gmaputils.ags.MapType</code>) extends the Google Maps API's
+   * @class This class (<code>gmaps.ags.MapType</code>) extends the Google Maps API's
    * <a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#MapType>GMapType</a>.
    * It holds a list of {@link TileLayer}s.
    * <p> Because all tileLayers are loaded asynchronously, and currently the
@@ -2463,7 +2592,7 @@
    * <li/> <code> service</code> (required) is url of the underline {@link MapService} or the MapService itself.
    * <li/> <code>opt_overlayOpts</code> (optional) is an instance of {@link MapOverlayOptions}.
    * @name MapOverlay
-   * @class This class (<code>gmaputils.ags.MapOverlay</code>) extends the Google Maps API's
+   * @class This class (<code>gmaps.ags.MapOverlay</code>) extends the Google Maps API's
    * <a href  = http://code.google.com/apis/maps/documentation/reference.html#OverlayView>OverlayView</a>
    * that draws map images from data source on the fly. It is also known as "<b>Dynamic Maps</b>".
    * It can be added to the map via <code>GMap.addOverlay </code> method.
@@ -2702,24 +2831,13 @@
   //start of add-on classes
   
   /**
-   * @name ArcGISStyleOptions
-   * @class Instance of this classes are used in the style property of 
-   *   {@link ArcGISArcGISClickOptions}, {@link ArcGISArcGISClickServiceOptions}. It specify how
+   * @name OverlayOptions
+   * @class Instance of this classes that specify how
    *   the geometry features returned by ArcGIS server should be rendered in the browser.
-   *   It's properties have same meaning as <a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#PolyStyleOptions>GPolyStyleOptions</a> 
-   *   in the core Google Maps API.
-   * @property {GIcon} [icon] an instance of <a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#Icon>GIcon</a>  in the core Google Maps API. This will be used as the icon
-   *    for rendering of point features.
-   * @property {String} [strokeColor] line features color in hex HTML color.
-   * @property {Number} [strokeWeight] The width of the line in pixels
-   * @property {Number} [strokeOpacity] This property specifies the opacity of the polyline as a fractional value between 0 (transparent) and 1 (opaque)
-   * @property {String} [outlineColor] color of polygon outline.
-   * @property {Number} [outlineWeight] weight of polygon outline
-   * @property {Number} [outlineOpacity] opacity of polygon outline
-   * @property {String} [fillColor] color of polygon fill.
-   * @property {Number} [fillOpacity] opacity of the polygon fill.
+   * @property {google.maps.MarkerOptions} [marker] style option for points.
+   * @property {google.maps.PolylineOptions} [polyline] style option for polylines. {@link http://code.google.com/apis/maps/documentation/javascript/reference.html#PolylineOptions}
+   * @property {google.maps.PolygonOptions} [polygon] style option for polygons {@link http://code.google.com/apis/maps/documentation/javascript/reference.html#PolygonOptions}
    */
-
    /*
    * @private for now. Maybe better leave off API?
    * @name ArcGISClickOptions
@@ -2775,7 +2893,7 @@
    * @property {StyleOptions} [styles] an instance of {@link ArcGISStyleOptions}. Specify how
    *   results should be drawn. Only the styles matching the feature class type will be used.
    */
-  /** TODO
+  /* TODO
    * Enable the Map Click operation for ArcGIS maps. The inforamtion about the
    * map feature will be displayed in a InfoWindow after a single click on the map.
    * The optional parameter <code>opt_clickOpts</code> is an instance of {@link ArcGISArcGISClickOptions}
@@ -2952,6 +3070,7 @@
  
   /**
    * Helper method to convert an {@link Envelope} object to <code>GLatLngBounds</code> 
+   * @private ?
    * @param {Envelope} extent
    * @return {GLatLngBounds} gLatLngBounds
    */
@@ -2963,14 +3082,14 @@
     return new G.LatLngBounds(new G.LatLng(sw[1], sw[0]), new G.LatLng(ne[1], ne[0]));
   };
   
-  /**
+  /*
    * Helper method to convert <code>GLatLngBounds</code> to an {@link Envelope} object
    *  with the given
    * {@link SpatialReference}
    * @param {GLatLngBounds} gLatLngBounds
    * @param {SpatialReference} spatialReference
    * @return {Envelope} extent
-   */
+   
   Util.fromLatLngBoundsToEnvelope  =  function (gLatLngBounds, spatialReference) {
     var sw  =  spatialReference.forward([gLatLngBounds.getSouthWest().lng(), gLatLngBounds.getSouthWest().lat()]);
     var ne  =  spatialReference.forward([gLatLngBounds.getNorthEast().lng(), gLatLngBounds.getNorthEast().lat()]);
@@ -2984,7 +3103,8 @@
       }
     };
   };
-   /**
+  */
+   /*
    * Helper method to convert an {@link ArcGISPoint} object to 
    * <code>GLatLng</code> .
    * <code>opt_sr</code> is required if the point itself does not carry SR info, such as
@@ -2992,7 +3112,7 @@
    * @param {Point} point
    * @param {SpatialReference} opt_sr
    * @return {GLatLng} 
-   */
+   
   Util.fromPointToLatLng  =  function (point, opt_sr) {
     var srid  = point.spatialReference || opt_sr;
     var sr  =  srid?SpatialReferences.getSpatialReference(srid.wkid):WGS84;
@@ -3001,17 +3121,17 @@
       return null;
     }
     var p  =  sr.reverse([point.x, point.y]);
-    return new GLatLng(p[1], p[0]);
+    return new G.LatLng(p[1], p[0]);
   };
-  
-  /**
+  */
+  /*
    * Helper method to convert <code>GLatLngBounds</code> to a {@link ArcGISPoint} 
    * object with the given {@link SpatialReference}. If SR not specified,
    *  it will be converted to WGS84.
-   * @param {GLatLng} gLatLng
+   * @param {google.maps.LatLng} gLatLng
    * @param {SpatialReference} opt_sr
    * @return {Point} 
-   */
+   
   Util.fromLatLngToPoint  =  function (gLatLng, opt_sr) {
     var sr  = null;
     if (opt_sr) {
@@ -3027,101 +3147,8 @@
       }
     };
   };
+  */
   
-  /**
-   * Convert a {@link Feature} or {@link IdentifyResult} or {@link FindResult} to core Google Maps API 
-   * overlays such as  {@link ArcGISGMarker}, 
-   * {@link ArcGISGPolyline}, or {@link ArcGISGPolygon}s.
-   * Note ArcGIS Geometry may have multiple parts, but the coresponding OverlayView 
-   * does not  support multi-parts, so the result is an array.
-   * <ul><li><code>feature</code>: an object returned by ArcGIS Server with at least <code>geometry</code> property of type {@link Geometry}. 
-   *  if it contains a name-value pair "attributes" property, it will be attached to the result overlays.
-   * <li><code>opt_sr</code>: optional {@link SpatialReference}. Can be object literal. 
-   * <li><code>opt_agsStyle</code> {@link ArcGISStyleOptions}. default is {@link ArcGISConfig}.style.
-   * <li><code>opt_displayName</code> optional field name used for title of feature. 
-   * @param {Feature} feature
-   * @param {SpatialReference} opt_sr
-   * @param {StyleOptions} opt_agsStyle
-   * @param {String} opt_displayName
-   * @return {OverlayView[]} 
-   */
-  Util.fromFeatureToOverlays  =  function (feature, opt_sr, opt_agsStyle, opt_displayName) {
-    var ovs  =  [];
-    var sr  =  null;
-    var ov;
-    var geom  =  feature.geometry;
-    if (opt_sr) {
-      if (opt_sr instanceof SpatialReference) {
-        sr  =  opt_sr;
-      } else {
-        sr  =  SpatialReferences.getSpatialReference(opt_sr.wkid);
-      }
-    } else {
-      sr  =  SpatialReferences.getSpatialReference(geom.spatialReference.wkid);
-    }
-    if (sr === null) {
-      return ovs;
-    }
-    var style  =  opt_agsStyle || {};
-    var x, i, ic, j, jc, parts, part, lnglat, glatlngs;
-    var title = '';
-    if (opt_displayName) {
-      title = feature.attributes[opt_displayName];
-    }
-    var html = '<table>';
-    for (x in feature.attributes) {
-      if (feature.attributes.hasOwnProperty(x)) {
-        html += '<tr><td class="ags-fieldname">' + x + '</td><td class="ags-fieldvalue">' + feature.attributes[x] + '</td></tr>';
-      } 
-    }
-    html += '</table>';
-    if (geom.x) {
-      //point
-      lnglat  =  sr.reverse([geom.x, geom.y]);
-      ov  =  new GMarker(new GLatLng(lnglat[1], lnglat[0]), {
-        icon: style.icon,
-        title: title
-      });
-      ov.attributes  =  feature.attributes;
-      ov.html = html;
-      ovs.push(ov);
-    } else {
-      //mulpt, line and poly
-      parts  =  geom.points || geom.paths || geom.rings;
-      if (!parts) {
-        return ovs;
-      }
-      for (i  =  0, ic  =  parts.length; i < ic; i++) {
-        part  =  parts[i];
-        if (geom.points) {
-          // multipoint
-          lnglat  =  sr.reverse(part);
-          ov  = new G.Marker(new GLatLng(lnglat[1], lnglat[0]), {
-            icon: style.icon
-          });
-        } else {
-          if (part.length > 1000) { //ArcGISConfig.maxPolyPoints) {
-            // TODO: do a simple point reduction 
-            continue;
-          }
-          glatlngs  =  [];
-          for (j  =  0, jc  =  part.length; j < jc; j++) {
-            lnglat  =  sr.reverse(part[j]);
-            glatlngs.push(new G.LatLng(lnglat[1], lnglat[0]));
-          }
-          if (geom.paths) {
-            ov  =  new G.Polyline(glatlngs, style.strokeColor, style.strokeWeight, style.strokeOpacity);
-          } else if (geom.rings) {
-            ov  = new G.Polygon(glatlngs, style.outlineColor, style.outlineWeight, style.outlineOpacity, style.fillColor, style.fillOpacity);
-          }
-        }
-        ov.attributes   =  feature.attributes;
-        ov.html = html;
-        ovs.push(ov);
-      }
-    }
-    return ovs;
-  };
   
   var arcgis = {
     'SpatialReference': SpatialReference,
@@ -3143,7 +3170,7 @@
     'MapOverlay': MapOverlay,
     'MapType': MapType
   };
-  var NS = namespace('gmaputils');
+  var NS = namespace('gmaps');
   NS.ags = arcgis;
 })();
  /**
@@ -3252,7 +3279,7 @@
  * Syntax:
  * <pre>
 {
-  "geometry" : &lt;geometry>,
+  "geometry[]" : &lt;geometry>,
 
   "attributes" : {
     "name1" : &lt;value1>,
@@ -3492,6 +3519,22 @@
                              esriTimeUnitsUnknown>"
   }
    * </pre>
+   */
+  /**@name Error
+   * @class Error returned from Server.
+   * Syntax:
+   * <pre>
+   * {
+   "error" : 
+  {
+    "code" : 500, 
+    "message" : "Object reference not set to an instance of an object.", 
+    "details" : [
+      "'geometry' parameter is invalid"
+    ]
+  }
+  }
+  </pre>
    */
   
 

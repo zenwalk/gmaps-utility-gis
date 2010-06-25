@@ -29,7 +29,7 @@
               for (var i = 0; i < urls.length; i++) {
                 urls[i] = 'http://services.arcgisonline.com/ArcGIS/rest/services/' + urls[i] + '/MapServer';
               }
-              agsTypes.push(new gmaputils.ags.MapType(urls, {name:x}));
+              agsTypes.push(new gmaps.ags.MapType(urls, {name:x}));
             }
           }
           var myOptions = {
