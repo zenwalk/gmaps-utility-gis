@@ -2132,7 +2132,7 @@
    * @param {Point} opt_point
    * @return {Point} pixel
    */
-  Projection.prototype.fromLatLngToPixel  =  function (latlng, opt_point) {
+  Projection.prototype.fromLatLngToPoint  =  function (latlng, opt_point) {
     if (!latlng || isNaN(latlng.lat()) || isNaN(latlng.lng())) {
       return null;
     }
@@ -2148,14 +2148,14 @@
    * @param {Boolean} opt_nowrap
    * @return {LatLng}
    */
-  Projection.prototype.fromPixelToLatLng = function (pixel, opt_nowrap) {
+  Projection.prototype.fromPointToLatLng = function (pixel, opt_nowrap) {
     //TODO: handle nowrap
     if (pixel === null) {
       return null;
     }
     var x = pixel.x * this.scale_ + this.originX_;
     var y = this.originY_ - pixel.y * this.scale_;
-    var geo = this.spatialReference.inverse([x, y]);
+    var geo = this.spatialReference.reverse([x, y]);
     return new G.LatLng(geo[1], geo[0]);
   };
   /**
@@ -2380,7 +2380,7 @@
           img.style.left = '0px';
           img.style.width = '' + this.tileSize.width + 'px';
           img.style.height = '' + this.tileSize.height + 'px';
-          log(url);
+          //log(url);
           if (document.all) {
             img.src = url;
           } else {

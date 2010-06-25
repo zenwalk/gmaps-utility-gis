@@ -11,8 +11,20 @@
         
         <script type="text/javascript" src='http://google-maps-utility-library-v3.googlecode.com/svn/tags/extdraggableobject/1.0/src/ExtDraggableObject.js'>
         </script>
-        
+        <style>
+        .btn {
+            border-style: outset;
+            background-color: white;
+            width: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+          
+        </style>
         <script type="text/javascript">
+          function showOp(op){
+            document.getElementById('opv').innerHTML = parseInt(op * 100);
+          }
         function init() {
           var myOptions = {
             zoom: 17,
@@ -29,19 +41,33 @@
           });
           map.overlayMapTypes.insertAt(0, agsType);
           
-          var slideContainer = document.getElementById('slideContainer');
-          var slideBar = document.getElementById("slideBar");
-          map.controls[google.maps.ControlPosition.TOP].push(slideContainer);
-          var opacSlider = new ExtDraggableObject(slideBar, {
-            restrictY: true,
-            container: slideContainer
-          });
-          var range = (parseInt(slideContainer.style.width)-parseInt(slideBar.style.width));
-          opacSlider.setValueX(range * opacity)
-          google.maps.event.addListener(opacSlider, 'drag', function(evt){
-             var op = opacSlider.left()/range;
+          var bar = document.getElementById("op");
+          var container = document.getElementById("opSlider");
+          var range = (parseInt(container.style.width)-parseInt(bar.style.width));
+          map.controls[google.maps.ControlPosition.TOP].push(document.getElementById('opContainer'));
+          var opSlider = new ExtDraggableObject(bar, {
+            restrictY:true, 
+            container:container});
+          opSlider.setValueX(range * opacity);
+          showOp(opacity);
+          
+          google.maps.event.addListener(opSlider, 'drag', function(evt){
+             var op = opSlider.left()/range;
              agsType.setOpacity(op);
-             document.getElementById('op').innerHTML = parseInt(op * 100);
+             showOp(op);
+          });
+         
+          google.maps.event.addDomListener(document.getElementById('less'), 'click', function(){
+             var op = Math.max(agsType.getOpacity()-0.1, 0);
+             agsType.setOpacity(op);
+             opSlider.setValueX(range * op);
+             showOp(op);
+          });
+           google.maps.event.addDomListener(document.getElementById('more'), 'click', function(){
+             var op = Math.min(agsType.getOpacity()+0.1, 1);
+             agsType.setOpacity(op);
+             opSlider.setValueX(range * op);
+             showOp(op);
           });
         }
         </script>
@@ -49,7 +75,20 @@
    <body style="margin:0px; padding:0px;" onload="init()">
         <div id="map_canvas" style="width:100%; height:100%">
         </div>
-        <div id="slideContainer" style="margin-top:20px; width:210px;height:20px;background-color:yellow;color:#AAAAAA;border-style:inset;">Drag knob to change.(<span id='op'></span>%)<div id="slideBar" style="top:0px;width:8px;height:20px;background-color:blue;" title='Drag me!'>&nbsp;</div>
+        <div id="opContainer" style="position:absolute; margin-top:20px; margin-left:-200px">
+            <div id="less" style="padding:0px; margin:0px;position:absolute;top:0px;left:0px;width:20px;height:20px;background-color: white;cursor:pointer;text-align:center;">
+                &nbsp;&lt;&nbsp;
+            </div>
+            <div id="opSlider" style="padding: 0px; margin:0px;position:absolute;top:0px;left:22px;overflow:hidden;background-color:yellow;width:160px;height:20px;color:#AAAAAA;font-size:0.9em">
+                &nbsp;Drag to Change (<span id='opv'></span>)%
+                <div id="op" title="Drag me!" style="padding: 0px; margin:0px;position:absolute;top:0px;left:0px;overflow:hidden;background-color:red;width:12px;height:20px;cursor:pointer;">
+                    &nbsp;
+                </div>
+            </div>
+            <div id="more" style="padding: 0px; margin:0px;position:absolute;top:0px;left:184px;overflow:hidden;background-color:white;width:20px;height:20px;cursor:pointer;text-align:center;">
+                &nbsp;&gt;&nbsp;
+            </div>
         </div>
+
     </body>
 </html>

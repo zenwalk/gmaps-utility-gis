@@ -82,13 +82,11 @@ hosted release version if you do not want to download the script.</p>
     constructs a new with only an ArcGIS map type and no Google map types.
 </p>
 <pre class="prettyprint">
-          var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
-          var agsType = new  gmaputils.ags.MapType(url,{name:'ArcGIS'});
-          map.mapTypes.set('arcgis', agsType);
-          map.setMapTypeId('arcgis');
-        }          
+    var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
+    var agsType = new  gmaputils.ags.MapType(url,{name:'ArcGIS'});
+    map.mapTypes.set('arcgis', agsType);
+    map.setMapTypeId('arcgis');
  </pre>
-
 <p>
 <a href="../examples/mercator.html">View example </a> |
 <a href="../examples/mercator.html?compressed">Compressed </a> |
@@ -102,17 +100,17 @@ hosted release version if you do not want to download the script.</p>
 <p> ArcGIS Server provides map services to generate map images on the fly, 
 also known as "dynamic map". Dynamic services are implemented as 
     <a href='reference.html#MapOverlay'>MapOverlay</a>,
- a subclass of <code>google.maps.OverlayView</code>, and hence can be
+ a subclass of <code>google.maps.OverlayView</code>, and can be
   added with <code>overlay.setMap(map)</code>. This class is similar 
 to the <code>google.maps.GoundOverlay</code> in the core API, as it essentially draws a 
-single image over the map. Any map service can be added as an MapOverlay, 
+single image over the map. However, it refreshes the image as bounds changed. Any map service can be added as an MapOverlay, 
 regardless of whether it's tiled or not.
 
 
 <pre class="prettyprint">
-   var url = &#39;http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer&#39;;
-   var dynamap = new gmaputils.ags.MapOverlay(url);
-   dynamap.setMap(map);
+    var url = &#39;http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer&#39;;
+    var dynamap = new gmaputils.ags.MapOverlay(url);
+    dynamap.setMap(map);
 </pre>
 
 <p>
@@ -127,12 +125,12 @@ regardless of whether it's tiled or not.
 <p>In many situations, it&#39;s ideal to combined a tiled map as a background, with a 
     dynamic map service that serves operational layers on top of it. </p>
 <pre class="prettyprint">
-          var wmUrl = baseUrl + '/Portland/ESRI_LandBase_WebMercator/MapServer';
-          var dynaUrl = baseUrl + '/Demographics/ESRI_Census_USA/MapServer';
-          var agsType = new gmaputils.ags.MapType(wmUrl,{name:'ArcGIS'});
-          map.mapTypes.set('arcgis', agsType);
-          var dynamap = new gmaputils.ags.MapOverlay(dynaUrl);
-          dynamap.setMap(map);   
+    var wmUrl = baseUrl + '/Portland/ESRI_LandBase_WebMercator/MapServer';
+    var dynaUrl = baseUrl + '/Demographics/ESRI_Census_USA/MapServer';
+    var agsType = new gmaputils.ags.MapType(wmUrl,{name:'ArcGIS'});
+    map.mapTypes.set('arcgis', agsType);
+    var dynamap = new gmaputils.ags.MapOverlay(dynaUrl);
+    dynamap.setMap(map);   
 </pre>
 <p>
 <a href="../examples/combined.html">View example </a> |
@@ -147,9 +145,9 @@ regardless of whether it's tiled or not.
 <p> Cached Map Service can also be added as Overlay, 
     and displays on top of all base map types. It&#39;s similar to V2&#39;s <code>GTileLayerOverlay</code>.
 <pre class="prettyprint">
-          var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
-          var agsType = new  gmaputils.ags.MapType(url,{name:'ArcGIS', opacity:0.5});
-          map.overlayMapTypes.insertAt(0, agsType);
+    var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
+    var agsType = new  gmaputils.ags.MapType(url,{name:'ArcGIS', opacity:0.5});
+    map.overlayMapTypes.insertAt(0, agsType);
 </pre>
 
 <p>
@@ -171,32 +169,32 @@ online geo-spatial service provided by
  before you use these services. </p>
 
 <pre class="prettyprint">
-          var services = {
-           'USA Topo' : ['USA_Topo_Maps']
-           ,'Streets' : ['World_Street_Map']
-           ,'World Topo': ['World_Topo_Map']
-           ,'Imagery':['World_Imagery']
-           ,'Labeled Imagery': ['World_Imagery','Reference/World_Boundaries_and_Places']
-           ,'Terrain' : ['World_Terrain_Base']
-           ,'Labeled Terrain' : ['World_Terrain_Base','Reference/World_Reference_Overlay']
-          };
-          var agsIds = [];
-          var agsTypes = [];
-          for (var x in services) {
-            if (services.hasOwnProperty(x)) {
-              agsIds.push(x);
-              var urls = services[x];
-              for (var i = 0; i < urls.length; i++) {
-                urls[i] = 'http://services.arcgisonline.com/ArcGIS/rest/services/' + urls[i] + '/MapServer';
-              }
-              agsTypes.push(new gmaputils.ags.MapType(urls, {name:x}));
-            }
-          }
-          ....
-          var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-          for (var i = 0; i < agsIds.length; i++) {
-            map.mapTypes.set(agsIds[i], agsTypes[i]);
-          }
+    var services = {
+     'USA Topo' : ['USA_Topo_Maps']
+     ,'Streets' : ['World_Street_Map']
+     ,'World Topo': ['World_Topo_Map']
+     ,'Imagery':['World_Imagery']
+     ,'Labeled Imagery': ['World_Imagery','Reference/World_Boundaries_and_Places']
+     ,'Terrain' : ['World_Terrain_Base']
+     ,'Labeled Terrain' : ['World_Terrain_Base','Reference/World_Reference_Overlay']
+    };
+    var agsIds = [];
+    var agsTypes = [];
+    for (var x in services) {
+      if (services.hasOwnProperty(x)) {
+        agsIds.push(x);
+        var urls = services[x];
+        for (var i = 0; i < urls.length; i++) {
+          urls[i] = 'http://services.arcgisonline.com/ArcGIS/rest/services/' + urls[i] + '/MapServer';
+        }
+        agsTypes.push(new gmaputils.ags.MapType(urls, {name:x}));
+      }
+    }
+    ....
+    var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+    for (var i = 0; i < agsIds.length; i++) {
+      map.mapTypes.set(agsIds[i], agsTypes[i]);
+    }
 </pre>
 
 <p>
@@ -209,26 +207,25 @@ online geo-spatial service provided by
 <div>
 <h2><a name="Opacity"></a>Map Opacity</h2>
 <p> In V3 the <code>google.maps.MapType.getTile</code> method offers greater flexibility to manipulate individual tiles, thus provides 
-the capability of setting opacity on the fly. Also, the one-many relationship between MapType and TileLayer is preserved for finer control of tile sets. For example, 
-Hybrid map type contains an image tile and a label tile. Opacity can be controled at tile layer level in addition to Map type level.
-The following example uses a slide to change the opacity of the top map type overlay. It's possible to built animation using historic image tiles. 
+the capability of setting opacity on the fly. Also, the one-many relationship between MapType and TileLayer from V2 is preserved for finer control of tile sets. For example, 
+Hybrid map type contains an image tile set and a label tile set. Opacity can be controled at tile layer level in addition to Map type level.
+The following example uses a slide to change the opacity of the top map type overlay. It's possible to built animation using historic image tiles with this feature. 
  </p>
 
 <pre class="prettyprint">
-          var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-          var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
-          var agsType = new gmaputils.ags.MapType(url, {
-            name: 'ArcGIS',
-            opacity: opacity
-          });
-          map.overlayMapTypes.insertAt(0, agsType);
-          
-          ....
-          google.maps.event.addListener(opacSlider, 'drag', function(evt){
-             var op = opacSlider.left()/range;
-             agsType.setOpacity(op);
-             document.getElementById('op').innerHTML = parseInt(op * 100);
-          });
+    var opacity = 0.5;
+    var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
+    var agsType = new gmaputils.ags.MapType(url, {
+      name: 'ArcGIS',
+      opacity: opacity
+    });
+    map.overlayMapTypes.insertAt(0, agsType);
+    
+    ....
+    google.maps.event.addListener(opacSlider, 'drag', function(evt){
+       var op = opacSlider.left()/range;
+       agsType.setOpacity(op);
+    });
 </pre>
 
 <p>
@@ -487,14 +484,14 @@ var params = {
   sr: 4326
 };
 service.find(params, processFindResults);
-            
+      
 function processFindResults(rs) {
   var fs = rs.results;
   for (var i = 0, c = fs.length; i &lt; c; i++) {
     processFindResult(fs[i]);
   }
 }
-          
+    
 function processFindResult(res) {
   var ovs = ArcGISUtil.fromFeatureToOverlays(res);
   gmap.addOverlays(ovs);
@@ -564,9 +561,9 @@ function reverseGeocode(latlng){
         var html = '';
         var attrs = result.address;
         for (var x in attrs) {
-          if (attrs.hasOwnProperty(x)) {
-            html += x +': '+ attrs[x] + '&lt;br/&gt;';
-          }
+    if (attrs.hasOwnProperty(x)) {
+      html += x +': '+ attrs[x] + '&lt;br/&gt;';
+    }
         }
         var loc=ArcGISUtil.fromPointToLatLng(result.location);
         marker.setLatLng(loc);
@@ -575,7 +572,7 @@ function reverseGeocode(latlng){
         alert('can not find address for point:'+latlng.toString());
       }
     });
-  }            
+  }      
 }
 </pre>
 
