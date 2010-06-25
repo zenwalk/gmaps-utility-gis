@@ -39,17 +39,12 @@
 <li><a href="#StatePlane">State Plane Coordinate System</a></li>
 <li><a href="#ArcGISOnline">ArcGISOnline Maps</a></li>
 <li><a href="#Opacity">Map Opacity</a></li>
-<li><a href="#MapClick">Enable Map Click</a></li>
-<li><a href="#Generic">Generic ArcGIS Viewer</a></li>
-<li><a href="#Namespace">Use Namespace</a></li>
-</ul>
+<li><a href="#Hosts">Rotating Hosts for Tiles</a></li>
 </ul>
     </td>
     <td style="border:0px">
-    Services:</br/>
    <ul>
-   <li><a href="#Hosts">Rotating Hosts for Tiles</a></li>
-   <li><a href="#Flat">&quot;Flat&quot; ArcGISSpatialReference</a></li>
+   <li><a href="#MapClick">Identify Map</a></li>
    <li><a href="#LayerDef">Layer Definition</a></li>
    <li><a href="#LayerVis">Layer Visibility (TOC)</a></li>
    <li><a href="#HourGlass">Show &quot;Hourglass&quot; using events</a></li>
@@ -57,6 +52,7 @@
    <li><a href="#Find">Find</a></li>
    <li><a href="#Geocode">Geocode</a></li>
    <li><a href="#ReverseGeocode">ReverseGeocode</a></li>
+   <li><a href="#Generic">Generic ArcGIS Viewer</a></li>
    </ul>
    </td>
   </tr>
@@ -66,7 +62,7 @@
 <h2><a name="HowTo"></a>Include Scripts</h2>
 <p>
 The first step is to include <code>arcgislink.js</code>  
-    or arcgislink_compressed.js</code> 
+    or <code>arcgislink_compressed.js</code> 
 in your document header, after the Google Maps API has loaded. You can use the 
 hosted release version if you do not want to download the script.</p>
 <pre class="prettyprint">
@@ -83,7 +79,7 @@ hosted release version if you do not want to download the script.</p>
 </p>
 <pre class="prettyprint">
     var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
-    var agsType = new  gmaputils.ags.MapType(url,{name:'ArcGIS'});
+    var agsType = new  gmaps.ags.MapType(url,{name:'ArcGIS'});
     map.mapTypes.set('arcgis', agsType);
     map.setMapTypeId('arcgis');
  </pre>
@@ -109,7 +105,7 @@ regardless of whether it's tiled or not.
 
 <pre class="prettyprint">
     var url = &#39;http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer&#39;;
-    var dynamap = new gmaputils.ags.MapOverlay(url);
+    var dynamap = new gmaps.ags.MapOverlay(url);
     dynamap.setMap(map);
 </pre>
 
@@ -127,9 +123,9 @@ regardless of whether it's tiled or not.
 <pre class="prettyprint">
     var wmUrl = baseUrl + '/Portland/ESRI_LandBase_WebMercator/MapServer';
     var dynaUrl = baseUrl + '/Demographics/ESRI_Census_USA/MapServer';
-    var agsType = new gmaputils.ags.MapType(wmUrl,{name:'ArcGIS'});
+    var agsType = new gmaps.ags.MapType(wmUrl,{name:'ArcGIS'});
     map.mapTypes.set('arcgis', agsType);
-    var dynamap = new gmaputils.ags.MapOverlay(dynaUrl);
+    var dynamap = new gmaps.ags.MapOverlay(dynaUrl);
     dynamap.setMap(map);   
 </pre>
 <p>
@@ -146,7 +142,7 @@ regardless of whether it's tiled or not.
     and displays on top of all base map types. It&#39;s similar to V2&#39;s <code>GTileLayerOverlay</code>.
 <pre class="prettyprint">
     var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
-    var agsType = new  gmaputils.ags.MapType(url,{name:'ArcGIS', opacity:0.5});
+    var agsType = new  gmaps.ags.MapType(url,{name:'ArcGIS', opacity:0.5});
     map.overlayMapTypes.insertAt(0, agsType);
 </pre>
 
@@ -183,15 +179,16 @@ ESRI documentation</a>. However, if the map services returns WKT, then it&#39;s 
     necessary to add the wkid. Spatial references based on other projections can be used 
 by implementing the 
 <a href="reference.html#SpatialReference">SpatialReference</a> 
-interface. In V3, zoom is removed from Projection interface, as a result, <b>the scale ratio between
-adjacent zoom levels must be exactly 2</b>. Also, the tile layer must be constructed after the 'load' event of the map service. </p>
+interface. </p>
+    <p>In V3, zoom is removed from <code>google.maps.Projection</code> interface, as a result, <b>the scale ratio between
+adjacent zoom levels must be exactly 2</b>. Also, the tile layer must be constructed after the 'load' event of the map service so the application knows the tile size and scales. </p>
 <pre class="prettyprint">
     var url = 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/GET/BaseMap/MapServer';
-    var svc = new gmaputils.ags.MapService(url);
+    var svc = new gmaps.ags.MapService(url);
     google.maps.event.addListenerOnce(svc, 'load', function() {
             try {
-              var tileLayer = new gmaputils.ags.TileLayer(svc);
-              var agsType = new gmaputils.ags.MapType([tileLayer], {
+              var tileLayer = new gmaps.ags.TileLayer(svc);
+              var agsType = new gmaps.ags.MapType([tileLayer], {
                 name: 'StatePlane'
               });
               var bnds = svc.getInitialBounds();
@@ -248,7 +245,7 @@ online geo-spatial service provided by
         for (var i = 0; i < urls.length; i++) {
           urls[i] = 'http://services.arcgisonline.com/ArcGIS/rest/services/' + urls[i] + '/MapServer';
         }
-        agsTypes.push(new gmaputils.ags.MapType(urls, {name:x}));
+        agsTypes.push(new gmaps.ags.MapType(urls, {name:x}));
       }
     }
     ....
@@ -270,21 +267,23 @@ online geo-spatial service provided by
 <p> In V3 the <code>google.maps.MapType.getTile</code> method offers greater flexibility to manipulate individual tiles, thus provides 
 the capability of setting opacity on the fly. Also, the one-many relationship between MapType and TileLayer from V2 is preserved for finer control of tile sets. For example, 
 Hybrid map type contains an image tile set and a label tile set. Opacity can be controled at tile layer level in addition to Map type level.
-The following example uses a slide to change the opacity of the top map type overlay. It's possible to built animation using historic image tiles with this feature. 
+The following example uses a 
+    <a href="http://google-maps-utility-library-v3.googlecode.com/svn/tags/extdraggableobject/1.0/">slider</a> 
+    from the V3 util lib to change the opacity of the top map type overlay. It's possible to built animation using historic image tiles with this feature. 
  </p>
 
 <pre class="prettyprint">
     var opacity = 0.5;
     var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
-    var agsType = new gmaputils.ags.MapType(url, {
+    var agsType = new gmaps.ags.MapType(url, {
       name: 'ArcGIS',
       opacity: opacity
     });
     map.overlayMapTypes.insertAt(0, agsType);
     
     ....
-    google.maps.event.addListener(opacSlider, 'drag', function(evt){
-       var op = opacSlider.left()/range;
+    google.maps.event.addListener(opSlider, 'drag', function(evt){
+       var op = opSlider.left()/range;
        agsType.setOpacity(op);
     });
 </pre>
@@ -303,61 +302,26 @@ The following example uses a slide to change the opacity of the top map type ove
 be made to a give host based on URL name, so that when many tiles are being 
 downloaded, some of them have to wait in the queue. One workaround for this 
 issue is to create multiple DNS names with numbers as suffix. 
-There is an option in the <code>ArcGISTileLayer</code> constructor to allow you 
+There is an option in the <code>gmaps.ags.TileLayer</code> constructor to allow you 
 to specify an 'host pattern', for example, "mt[4].google.com" means 
 to rotate hosts across mt0.google.com, mt1.google.com, mt2.google.com, 
 mt3.google.com (4 hosts) </p>
 <pre class="prettyprint">
-function init(){
-  var url = 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/GET/BaseMap/MapServer';
-  var agsLayer = new ArcGISTileLayer(url, {
-    hosts: "mt[4].ci.charlotte.nc.us"
-  });
-  var agsType = new ArcGISMapType([agsLayer]);
-  GEvent.addListener(agsType, 'load', function(){
-    var map = new GMap2(document.getElementById("map"), {
-    mapTypes: [agsType]
-  });
-}
+   var url = 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/GET/BaseMapWM/MapServer';
+   var tileLayer = new gmaps.ags.TileLayer(url, {
+      hosts:'mt[4].ci.charlotte.nc.us' 
+   })
+   var agsType = new  gmaps.ags.MapType([tileLayer],{name:'ArcGIS'});
+   map.mapTypes.set('arcgis', agsType);
+   map.setMapTypeId('arcgis');
 </pre>
 
 <p>
-<a href="../examples/stateplane.html">View example </a> |
-<a href="../examples/stateplane.html?compressed">Compressed </a> | 
+<a href="../examples/hosts.html">View example </a> |
+<a href="../examples/hosts.html?compressed">Compressed </a> | 
 <a href="#Top">Back to top</a>
 </p>
 </div>
-<div>
-<h2><a name="Flat"></a>Flat Spatial Reference</h2>
-<p> This library also include a simple class 
-<a href="reference.html#ArcGISFlatSpatialReference">FlatSpatialReference</a>. 
-Strictly speaking, this is not a true spatial reference, but can be used as a 
-workaround without implementing a real projection class. 
-This class assumes latitude and longitude values are increased evenly.
-The following example works as if the spatial reference 4326 is not added as an 
-instance of 
-<a href="reference.html#ArcGISLambertConformalConic">LambertConformalConic</a>. 
-You can add tiled maps service
-without actually doing anything with ArcGISSpatialReference.</p>
-<pre class="prettyprint">
-var url = 'http://.../MapServer';
-var agsLayer = new ArcGISTileLayer(url);
-var agsType = new ArcGISMapType([agsLayer]);
-GEvent.addListener(agsType, 'load', function(){
-  var map = new GMap2(document.getElementById("map"), {
-    mapTypes: [agsType]
-  });
-  map.setBounds(agsLayer.getInitialBounds());
-});
-</pre>
-
-<p>
-<a href="../examples/flat.html">View example </a> |
-<a href="../examples/flat.html?compressed">Compressed </a> | 
-<a href="#Top">Back to top</a>
-</p>
-</div>
-
 
 <div>
 <h2><a name="LayerDef"></a>Layer Definition</h2>
