@@ -927,7 +927,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="FlatSpatialReference"></a>class FlatSpatialReference</h2>
-      <p>This class (<code>gmaps.ags.FlatSpatialReference</code>) is a special type of coordinate reference assuming lat/lng will increaseevenly as if earth is flat. Approximate for small regions without implementinga real projection.  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
+      <p>This class (<code>gmaputils.ags.FlatSpatialReference</code>) is a special type of coordinate reference assuming lat/lng will increaseevenly as if earth is flat. Approximate for small regions without implementinga real projection.  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
       
         <h3>Constructor</h3>
         <table summary="class FlatSpatialReference - Constructor" width="90%">
@@ -1150,7 +1150,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="GeocodeService"></a>class GeocodeService</h2>
-      <p>This class (<code>gmaps.ags.GeocodeService</code>) represent an ArcGIS <a href="http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geocodeserver.html">GeocodeServer</a> service.</p>
+      <p>This class (<code>gmaputils.ags.GeocodeService</code>) represent an ArcGIS <a href="http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geocodeserver.html">GeocodeServer</a> service.</p>
       
         <h3>Constructor</h3>
         <table summary="class GeocodeService - Constructor" width="90%">
@@ -1324,7 +1324,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="Geographic"></a>class Geographic</h2>
-      <p>This class (<code>gmaps.ags.Geographic</code>) will simply retuns same LatLng as Coordinates.   The <code>param</code> should have wkid property. Any Geographic Coordinate Systems (eg. WGS84(4326)) can   use this class As-Is.   <br/>Note:<b> This class does not support datum transformation</b>.  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
+      <p>This class (<code>gmaputils.ags.Geographic</code>) will simply retuns same LatLng as Coordinates.   The <code>param</code> should have wkid property. Any Geographic Coordinate Systems (eg. WGS84(4326)) can   use this class As-Is.   <br/>Note:<b> This class does not support datum transformation</b>.  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
       
         <h3>Constructor</h3>
         <table summary="class Geographic - Constructor" width="90%">
@@ -1339,7 +1339,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
               <tr class="odd">
                 <td><code>Geographic(<span class="type">params:Object</span>)</code></td>
                 
-                <td>Creates a Geographic Coordinate System. e.g.:<br/><code>var g  = new Geographic({"wkid":4326});<br/>var g2 = new gmaps.ags.Geographic({"wkid":4326});</code></td>
+                <td>Creates a Geographic Coordinate System. e.g.:<br/><code>var g  = new Geographic({"wkid":4326});<br/>var g2 = new gmaputils.ags.Geographic({"wkid":4326});</code></td>
               </tr>
             
           </tbody>
@@ -1378,7 +1378,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="GeometryService"></a>class GeometryService</h2>
-      <p>This class (<code>gmaps.ags.GeometryService</code>) represent an ArcGIS <a href="http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geometryserver.html">Geometry</a> service.</p>
+      <p>This class (<code>gmaputils.ags.GeometryService</code>) represent an ArcGIS <a href="http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geometryserver.html">Geometry</a> service.</p>
       
         <h3>Constructor</h3>
         <table summary="class GeometryService - Constructor" width="90%">
@@ -1701,7 +1701,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="LambertConformalConic"></a>class LambertConformalConic</h2>
-      <p>This class (<code>gmaps.ags.LambertConformalConic</code>) represents a Spatial Reference System based on <a target  = wiki href  = 'http://en.wikipedia.org/wiki/Lambert_conformal_conic_projection'>Lambert Conformal Conic Projection</a>.  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
+      <p>This class (<code>gmaputils.ags.LambertConformalConic</code>) represents a Spatial Reference System based on <a target  = wiki href  = 'http://en.wikipedia.org/wiki/Lambert_conformal_conic_projection'>Lambert Conformal Conic Projection</a>.  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
       
         <h3>Constructor</h3>
         <table summary="class LambertConformalConic - Constructor" width="90%">
@@ -1716,7 +1716,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
               <tr class="odd">
                 <td><code>LambertConformalConic(<span class="type">params:Object</span>)</code></td>
                 
-                <td>Create a Lambert Conformal Conic Projection based Spatial Reference. The <code>params</code> passed in construction shouldinclude the following properties:<code><br/>-wkid: well-known id<br/>-semi_major:  ellipsoidal semi-major axis in meter<br/>-unit: meters per unit<br/>-inverse_flattening: inverse of flattening of the ellipsoid where 1/f  =  a/(a - b)<br/>-standard_parallel_1: phi1, latitude of the first standard parallel<br/>-standard_parallel_2: phi2, latitude of the second standard parallel<br/>-latitude_of_origin: phiF, latitude of the false origin<br/>-central_meridian: lamdaF, longitude of the false origin  (with respect to the prime meridian)<br/>-false_easting: FE, false easting, the Eastings value assigned to the natural origin<br/>-false_northing: FN, false northing, the Northings value assigned to the natural origin</code><br/> e.g. North Carolina State Plane NAD83 Feet: <br/><code> var ncsp82  = new gmaps.ags.LambertConformalConic({wkid:2264, semi_major: 6378137.0,inverse_flattening: 298.257222101,  standard_parallel_1: 34.33333333333334, standard_parallel_2: 36.16666666666666,  central_meridian: -79.0, latitude_of_origin: 33.75,'false_easting': 2000000.002616666,  'false_northing': 0, unit: 0.3048006096012192 }); </code></td>
+                <td>Create a Lambert Conformal Conic Projection based Spatial Reference. The <code>params</code> passed in construction shouldinclude the following properties:<code><br/>-wkid: well-known id<br/>-semi_major:  ellipsoidal semi-major axis in meter<br/>-unit: meters per unit<br/>-inverse_flattening: inverse of flattening of the ellipsoid where 1/f  =  a/(a - b)<br/>-standard_parallel_1: phi1, latitude of the first standard parallel<br/>-standard_parallel_2: phi2, latitude of the second standard parallel<br/>-latitude_of_origin: phiF, latitude of the false origin<br/>-central_meridian: lamdaF, longitude of the false origin  (with respect to the prime meridian)<br/>-false_easting: FE, false easting, the Eastings value assigned to the natural origin<br/>-false_northing: FN, false northing, the Northings value assigned to the natural origin</code><br/> e.g. North Carolina State Plane NAD83 Feet: <br/><code> var ncsp82  = new gmaputils.ags.LambertConformalConic({wkid:2264, semi_major: 6378137.0,inverse_flattening: 298.257222101,  standard_parallel_1: 34.33333333333334, standard_parallel_2: 36.16666666666666,  central_meridian: -79.0, latitude_of_origin: 33.75,'false_easting': 2000000.002616666,  'false_northing': 0, unit: 0.3048006096012192 }); </code></td>
               </tr>
             
           </tbody>
@@ -1771,7 +1771,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="Layer"></a>class Layer</h2>
-      <p>This class (<code>gmaps.ags.Layer</code>) The layer / table(v10+) resource represents a single layer / table in a map of a map service  published by ArcGIS Server.</p>
+      <p>This class (<code>gmaputils.ags.Layer</code>) The layer / table(v10+) resource represents a single layer / table in a map of a map service  published by ArcGIS Server.</p>
       
         <h3>Constructor</h3>
         <table summary="class Layer - Constructor" width="90%">
@@ -2190,7 +2190,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="MapOverlay"></a>class MapOverlay</h2>
-      <p>This class (<code>gmaps.ags.MapOverlay</code>) extends the Google Maps API's<a href  = http://code.google.com/apis/maps/documentation/reference.html#OverlayView>OverlayView</a>that draws map images from data source on the fly. It is also known as "<b>Dynamic Maps</b>".It can be added to the map via <code>GMap.addOverlay </code> method.The similar class in the core GMap API is <a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#GroundOverlay>GGroundOverlay</a>,however, the instance of this class always cover the viewport exactly, and will redraw itself as map moves.</p>
+      <p>This class (<code>gmaputils.ags.MapOverlay</code>) extends the Google Maps API's<a href  = http://code.google.com/apis/maps/documentation/reference.html#OverlayView>OverlayView</a>that draws map images from data source on the fly. It is also known as "<b>Dynamic Maps</b>".It can be added to the map via <code>GMap.addOverlay </code> method.The similar class in the core GMap API is <a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#GroundOverlay>GGroundOverlay</a>,however, the instance of this class always cover the viewport exactly, and will redraw itself as map moves.</p>
       
         <h3>Constructor</h3>
         <table summary="class MapOverlay - Constructor" width="90%">
@@ -2458,7 +2458,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="MapService"></a>class MapService</h2>
-      <p>This class (<code>gmaps.ags.MapService</code>) is the core class for all map service operations.It represents an ArcGIS Server map service that offer access to map and layer content</p>
+      <p>This class (<code>gmaputils.ags.MapService</code>) is the core class for all map service operations.It represents an ArcGIS Server map service that offer access to map and layer content</p>
       
         <h3>Constructor</h3>
         <table summary="class MapService - Constructor" width="90%">
@@ -2772,7 +2772,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="MapType"></a>class MapType</h2>
-      <p>This class (<code>gmaps.ags.MapType</code>) extends the Google Maps API's<a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#MapType>GMapType</a>.It holds a list of <code><a href="reference.html#TileLayer">TileLayer</a></code>s.<p> Because all tileLayers are loaded asynchronously, and currently thecore API does not have method to refresh tiles on demand, if you do not load the defaultGoogle maps, you should either 1) add tomap after it "load" event is fired, or) trigger an map type change to force refresh.See <a href  = http://code.google.com/p/gmaps-api-issues/issues/detail?id  = 279&can  = 1&q  = refresh&colspec  = ID%20Type%20Status%20Introduced%20Fixed%20Summary%20Stars%20ApiType%20Internal>Issue 279</a></p><p> Note: all tiled layer in the same map type must use same spatial reference and tile scheme.</p></p>
+      <p>This class (<code>gmaputils.ags.MapType</code>) extends the Google Maps API's<a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#MapType>GMapType</a>.It holds a list of <code><a href="reference.html#TileLayer">TileLayer</a></code>s.<p> Because all tileLayers are loaded asynchronously, and currently thecore API does not have method to refresh tiles on demand, if you do not load the defaultGoogle maps, you should either 1) add tomap after it "load" event is fired, or) trigger an map type change to force refresh.See <a href  = http://code.google.com/p/gmaps-api-issues/issues/detail?id  = 279&can  = 1&q  = refresh&colspec  = ID%20Type%20Status%20Introduced%20Fixed%20Summary%20Stars%20ApiType%20Internal>Issue 279</a></p><p> Note: all tiled layer in the same map type must use same spatial reference and tile scheme.</p></p>
       
         <h3>Constructor</h3>
         <table summary="class MapType - Constructor" width="90%">
@@ -2808,6 +2808,16 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
             </tr>
             
               <tr class="odd">
+                <td><code>getOpacity()</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td></td>
+              </tr>
+            
+              <tr class="even">
                 <td><code>getTile(<span class="type">tileCoord:Point</span>, <span class="type">zoom:Number</span>, <span class="type">ownerDocument:</span>)</code></td>
                 
                   
@@ -2817,8 +2827,18 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
                 <td>Get a tile for given tile coordinates Returns a tile for the given tile coordinate (x, y) and zoom level. This tile will be appended to the given ownerDocument.</td>
               </tr>
             
+              <tr class="odd">
+                <td><code>releaseTile(<span class="type">node:Node</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Release tile and cleanup</td>
+              </tr>
+            
               <tr class="even">
-                <td><code>releaseTile(<span class="type">node:</span>)</code></td>
+                <td><code>setOpacity(<span class="type">op:</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
@@ -3162,7 +3182,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="Projection"></a>class Projection</h2>
-      <p>This class (<code>gmaps.ags.Projection</code>) implements a custom<a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a> from the core Google Maps API.  It carries a real <code><a href="reference.html#SpatialReference">SpatialReference</a></code> object to convert LatLng from/to  map coordinates, and tiling scheme informations to convert  map coordinates from/to pixel coordinates.</p>
+      <p>This class (<code>gmaputils.ags.Projection</code>) implements a custom<a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a> from the core Google Maps API.  It carries a real <code><a href="reference.html#SpatialReference">SpatialReference</a></code> object to convert LatLng from/to  map coordinates, and tiling scheme informations to convert  map coordinates from/to pixel coordinates.</p>
       
         <h3>Constructor</h3>
         <table summary="class Projection - Constructor" width="90%">
@@ -3899,7 +3919,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="SpatialReference"></a>class SpatialReference</h2>
-      <p>This  class (<code>gmaps.ags.SpatialReference</code>) is for coordinate systems that converts value between geographic and real-world coordinates. The following classes extend this class:   <code><a href="reference.html#Geographic">Geographic</a></code>, <code><a href="reference.html#SphereMercator">SphereMercator</a></code>, <code><a href="reference.html#LambertConformalConic">LambertConformalConic</a></code>, and <code><a href="reference.html#TransverseMercator">TransverseMercator</a></code>.</p>
+      <p>This  class (<code>gmaputils.ags.SpatialReference</code>) is for coordinate systems that converts value between geographic and real-world coordinates. The following classes extend this class:   <code><a href="reference.html#Geographic">Geographic</a></code>, <code><a href="reference.html#SphereMercator">SphereMercator</a></code>, <code><a href="reference.html#LambertConformalConic">LambertConformalConic</a></code>, and <code><a href="reference.html#TransverseMercator">TransverseMercator</a></code>.</p>
       
         <h3>Constructor</h3>
         <table summary="class SpatialReference - Constructor" width="90%">
@@ -4057,7 +4077,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="SphereMercator"></a>class SphereMercator</h2>
-      <p>This class (<code>gmaps.ags.SphereMercator</code>) is the Projection Default Google Maps uses. It is a special form of Mercator.  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
+      <p>This class (<code>gmaputils.ags.SphereMercator</code>) is the Projection Default Google Maps uses. It is a special form of Mercator.  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
       
         <h3>Constructor</h3>
         <table summary="class SphereMercator - Constructor" width="90%">
@@ -4252,7 +4272,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="TileLayer"></a>class TileLayer</h2>
-      <p>This class (<code>gmaps.ags.TileLayer</code>) provides access to a cached ArcGIS Server map service. There is no GTileLayer class in Google Maps API V3, but this class is kept to allowfiner control of zoom levels for each individual tile sets within a map type.<br/> This class can be used in <code><a href="reference.html#MapType">MapType</a></code></p>
+      <p>This class (<code>gmaputils.ags.TileLayer</code>) provides access to a cached ArcGIS Server map service. There is no GTileLayer class in Google Maps API V3, but this class is kept to allowfiner control of zoom levels for each individual tile sets within a map type, such as zoom level range and opacity.<br/> This class can be used in <code><a href="reference.html#MapType">MapType</a></code></p>
       
         <h3>Constructor</h3>
         <table summary="class TileLayer - Constructor" width="90%">
@@ -4268,6 +4288,43 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
                 <td><code>TileLayer(<span class="type">service:MapService</span>, <span class="type">opt_layerOpts:TileLayerOptions</span>)</code></td>
                 
                 <td>Creates a tile layer from a cached by ArcGIS map service. <br/> <code> service</code> (required) is the underline <code><a href="reference.html#MapService">MapService</a></code><br/> <code>opt_layerOpts</code> (optional) is an instance of <code><a href="reference.html#TileLayerOptions">TileLayerOptions</a></code>.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class TileLayer - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>getOpacity()</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>setOpacity(<span class="type">op:</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td></td>
               </tr>
             
           </tbody>
@@ -4322,13 +4379,13 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
               </tr>
             
               <tr class="even">
-                <td><code>projection</code></td>
+                <td><code>opacity</code></td>
                 
                   
-                    <td><code>Projection</code></td>
+                    <td><code>Number</code></td>
                   
                 
-                <td>an instance of <code><a href="reference.html#Projection">Projection</a></code>. If this option is specified, you do not have to wait the 'load' event to use the TileLayer.</td>
+                <td>opacity (0-1).</td>
               </tr>
             
           </tbody>
@@ -4363,7 +4420,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
       
     
       <h2><a name="TransverseMercator"></a>class TransverseMercator</h2>
-      <p>This class (<code>gmaps.ags.TransverseMercator</code>) represents a Spatial Reference System based on <a target  = wiki href  = 'http://en.wikipedia.org/wiki/Transverse_Mercator_projection'>Transverse Mercator Projection</a>  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
+      <p>This class (<code>gmaputils.ags.TransverseMercator</code>) represents a Spatial Reference System based on <a target  = wiki href  = 'http://en.wikipedia.org/wiki/Transverse_Mercator_projection'>Transverse Mercator Projection</a>  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
       
         <h3>Constructor</h3>
         <table summary="class TransverseMercator - Constructor" width="90%">
@@ -4378,7 +4435,7 @@ A list of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.
               <tr class="odd">
                 <td><code>TransverseMercator(<span class="type">params:Object</span>)</code></td>
                 
-                <td>Create a Transverse Mercator Projection. The <code>params</code> passed in constructor should contain the following properties: <br/><code><br/>-wkid: well-known id<br/>-semi_major:  ellipsoidal semi-major axis in meters<br/>-unit: meters per unit<br/>-inverse_flattening: inverse of flattening of the ellipsoid where 1/f  =  a/(a - b)<br/>-Scale Factor: scale factor at origin<br/>-latitude_of_origin: phiF, latitude of the false origin<br/>-central_meridian: lamdaF, longitude of the false origin  (with respect to the prime meridian)<br/>-false_easting: FE, false easting, the Eastings value assigned to the natural origin <br/>-false_northing: FN, false northing, the Northings value assigned to the natural origin </code><br/>e.g. Georgia West State Plane NAD83 Feet:  <br/><code> var gawsp83  = new gmaps.ags.TransverseMercator({wkid: 102667, semi_major:6378137.0, inverse_flattening:298.257222101,central_meridian:-84.16666666666667, latitude_of_origin: 30.0, scale_factor:0.9999,'false_easting':2296583.333333333, 'false_northing':0, unit: 0.3048006096012192}); </code></td>
+                <td>Create a Transverse Mercator Projection. The <code>params</code> passed in constructor should contain the following properties: <br/><code><br/>-wkid: well-known id<br/>-semi_major:  ellipsoidal semi-major axis in meters<br/>-unit: meters per unit<br/>-inverse_flattening: inverse of flattening of the ellipsoid where 1/f  =  a/(a - b)<br/>-Scale Factor: scale factor at origin<br/>-latitude_of_origin: phiF, latitude of the false origin<br/>-central_meridian: lamdaF, longitude of the false origin  (with respect to the prime meridian)<br/>-false_easting: FE, false easting, the Eastings value assigned to the natural origin <br/>-false_northing: FN, false northing, the Northings value assigned to the natural origin </code><br/>e.g. Georgia West State Plane NAD83 Feet:  <br/><code> var gawsp83  = new gmaputils.ags.TransverseMercator({wkid: 102667, semi_major:6378137.0, inverse_flattening:298.257222101,central_meridian:-84.16666666666667, latitude_of_origin: 30.0, scale_factor:0.9999,'false_easting':2296583.333333333, 'false_northing':0, unit: 0.3048006096012192}); </code></td>
               </tr>
             
           </tbody>
