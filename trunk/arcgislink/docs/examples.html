@@ -36,6 +36,7 @@
 <li><a href="#Dyna">Dynamic Map Service</a></li>
 <li><a href="#Combined">Combining Cached and Dynamic Maps</a></li>
 <li><a href="#MapTypeOverlay">Cached Map as Overlay</a></li>
+<li><a href="#StatePlane">State Plane Coordinate System</a></li>
 <li><a href="#ArcGISOnline">ArcGISOnline Maps</a></li>
 <li><a href="#Opacity">Map Opacity</a></li>
 <li><a href="#MapClick">Enable Map Click</a></li>
@@ -47,7 +48,6 @@
     <td style="border:0px">
     Services:</br/>
    <ul>
-   <li><a href="#StatePlane">State Plane Coordinate System</a></li>
    <li><a href="#Hosts">Rotating Hosts for Tiles</a></li>
    <li><a href="#Flat">&quot;Flat&quot; ArcGISSpatialReference</a></li>
    <li><a href="#LayerDef">Layer Definition</a></li>
@@ -157,6 +157,67 @@ regardless of whether it's tiled or not.
 <a href="#Top">Back to top</a>
 </p>
 </div>
+<div>
+<h2><a name="StatePlane"></a>State Plane Coordinate System</h2>
+<p> Virtually all GIS data collected by State or Local Governments in 
+Unite States are stored in one of the 
+<a target="_blank" href="http://en.wikipedia.org/wiki/State_Plane_Coordinate_System">
+State Plane Coordinate Systems</a>. In real-world operations, many map services 
+(both tiled and dynamic) are published using the native
+coordinate system the data uses. </p>
+<p>When adding an <a href="reference.html#TileLayer">TileLayer</a> 
+from a tiled map service, the spatial reference of the map service must be loaded
+ into the internal 
+<a href="reference.html#SpatialReferences">SpatialReferences</a> collections
+before it can be used. The library has 4 built-in spatial references: 
+NAD GCS (4269), WGS84 (4326), "Web Mercator" (102113 & 102000). 
+It also supports any spatial references based on 
+<a target=wiki href='http://en.wikipedia.org/wiki/Lambert_conformal_conic_projection'>
+Lambert Conformal Conic Projection</a>
+or <a target=wiki href='http://en.wikipedia.org/wiki/Transverse_Mercator_projection'>
+Transverse Mercator Projection</a>. They can be added either with one line of 
+code by its Well_known_text format or constructed directly with correct 
+parameters. Please use the WKT value from 
+<a target=esri href='http://edndoc.esri.com/arcims/9.2/elements/pcs.htm'>
+ESRI documentation</a>. However, if the map services returns WKT, then it&#39;s not 
+    necessary to add the wkid. Spatial references based on other projections can be used 
+by implementing the 
+<a href="reference.html#SpatialReference">SpatialReference</a> 
+interface. In V3, zoom is removed from Projection interface, as a result, <b>the scale ratio between
+adjacent zoom levels must be exactly 2</b>. Also, the tile layer must be constructed after the 'load' event of the map service. </p>
+<pre class="prettyprint">
+    var url = 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/GET/BaseMap/MapServer';
+    var svc = new gmaputils.ags.MapService(url);
+    google.maps.event.addListenerOnce(svc, 'load', function() {
+            try {
+              var tileLayer = new gmaputils.ags.TileLayer(svc);
+              var agsType = new gmaputils.ags.MapType([tileLayer], {
+                name: 'StatePlane'
+              });
+              var bnds = svc.getInitialBounds();
+              var myOptions = {
+                zoom: 12,
+                center: bnds.getCenter(),
+                mapTypeId: 'stateplane',
+                mapTypeControlOptions: {
+                  mapTypeIds: ['stateplane', google.maps.MapTypeId.ROADMAP]
+                }
+              }
+              var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+              map.mapTypes.set('stateplane', agsType);
+            } catch (e) {
+              alert(e);
+            }
+          });
+          </pre>
+
+<p>
+<a href="../examples/stateplane.html">View example </a> |
+<a href="../examples/stateplane.html?compressed">Compressed </a> | 
+<a href="../examples/nexus.html?u=stateplane.html">Phone Size </a> |
+<a href="#Top">Back to top</a>
+</p>
+</div>
 
 <div>
 <h2><a name="ArcGISOnline"></a>ArcGISOnline Services</h2>
@@ -236,54 +297,6 @@ The following example uses a slide to change the opacity of the top map type ove
 </p>
 </div>
 
-<div>
-<h2><a name="StatePlane"></a>State Plane Coordinate System</h2>
-<p> Virtually all GIS data collected by State or Local Governments in 
-Unite States are stored in one of the 
-<a target="_blank" href="http://en.wikipedia.org/wiki/State_Plane_Coordinate_System">
-State Plane Coordinate Systems</a>. In real-world operations, map services 
-(both tiled and dynamic) are published using the native
-coordinate system the data uses. </p>
-<p>When adding an <a href="reference.html#TileLayer">TileLayer</a> 
-from a tiled map service, the spatial reference of the map service must be loaded
- into the internal 
-<a href="reference.html#SpatialReferences">SpatialReferences</a> collections
-before it can be used. The library has 4 built-in spatial references: 
-NAD GCS (4269), WGS84 (4326), "Web Mercator" (102113 & 102000). 
-It also supports any spatial references based on 
-<a target=wiki href='http://en.wikipedia.org/wiki/Lambert_conformal_conic_projection'>
-Lambert Conformal Conic Projection</a>
-or <a target=wiki href='http://en.wikipedia.org/wiki/Transverse_Mercator_projection'>
-Transverse Mercator Projection</a>. They can be added either with one line of 
-code by its Well_known_text format or constructed directly with correct 
-parameters. Please use the WKT value from 
-<a target=esri href='http://edndoc.esri.com/arcims/9.2/elements/pcs.htm'>
-ESRI documentation</a>. However, if the map services returns WKT, then it&#39;s not 
-    necessary to add the wkid. Spatial references based on other projections can be used 
-by implementing the 
-<a href="reference.html#SpatialReference">SpatialReference</a> 
-interface. in V3, zoom is removed from Projection interface, as a result, the scale ratio between
-adjacent zoom levels must be exactyly 2. Also, the tile layer must be constructed after the 'load' event of the map service. </p>
-<pre class="prettyprint">
- gmaputils.SpatialReferences.addSpatialReference(2264, 'PROJCS["NAD_1983_StatePlane_....UNIT["Foot_US",0.3048006096012192]]');
-function init(){
-  var url = 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/GET/BaseMap/MapServer';
-  var agsLayer = new ArcGISTileLayer(url);
-  var agsType = new ArcGISMapType([agsLayer]);
-  GEvent.addListener(agsType, 'load', function(){
-    var map = new GMap2(document.getElementById("map"), { mapTypes: [agsType]});
-    //this is a add-on method to use in place of GMap2.setCenter() without knowning the actual latlng;
-    map.setBounds(agsLayer.getInitialBounds());
-  });
-}
-</pre>
-
-<p>
-<a href="../examples/stateplane.html">View example </a> |
-<a href="../examples/stateplane.html?compressed">Compressed </a> | 
-<a href="#Top">Back to top</a>
-</p>
-</div>
 <div>
 <h2><a name="Hosts"></a>Rotating Hosts for Tiles</h2>
 <p> Some browsers has default limitations on how many concurrent connections can 

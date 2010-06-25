@@ -2123,7 +2123,16 @@
     this.scale_ = Math.pow(2, this.minZoom) * this.resolution0_;
     this.originX_ = this.tileInfo_.origin.x;        
     this.originY_ = this.tileInfo_.origin.y;        
- //   this.fullExtent_  =  opt_fullExtent;
+    // validation check
+    var ratio;
+    for (var i = 0; i < tileInfo.lods.length -1; i++) {
+      ratio = tileInfo.lods[i].resolution / tileInfo.lods[i + 1].resolution;
+      if (ratio > 2.001 || ratio < 1.999) {
+        throw new Error('This type of map cache is not supported in V3. \nScale ratio between zoom levels must be 2');
+        return;
+      }
+    }
+    
   }
   
   /**
