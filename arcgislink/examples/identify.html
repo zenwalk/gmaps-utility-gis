@@ -39,6 +39,7 @@
             zoom: 17,
             center: new google.maps.LatLng(45.5, -122.7),
             mapTypeId: google.maps.MapTypeId.HYBRID,
+            draggableCursor: 'pointer', // every pixel is clickable.
             streetViewControl: true //my favorite feature in V3!
           }
           map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
@@ -171,10 +172,10 @@
           clearOverlays();
           var idResult  = layers[layerId][index];
           var f = idResult.feature;
-          if (f.geometries) {
-            for (var i = 0; i < f.geometries.length; i++) {
-              ovs.push(f.geometries[i]);
-              f.geometries[i].setMap(map);
+          if (f.geometry) {
+            for (var i = 0; i < f.geometry.length; i++) {
+              ovs.push(f.geometry[i]);
+              f.geometry[i].setMap(map);
             }
           }
         }
