@@ -57,7 +57,7 @@
  *    {@link LambertConformalConic}<br/>
  *    {@link TransverseMercator}<br/>
  *    {@link SphereMercator}<br/>
- *    {@link FlatSpatialReference}<br/>
+ *    {@link SpatialRelationship}<br/>
  *     </td>
  *    </tr></table>
  *    <p> There are many objects used in the REST API that do not require 
@@ -72,14 +72,14 @@
  *    {@link LOD}<br/>
  *    {@link TimeInfo}<br/>
  *    {@link DrawingInfo}<br/>
- *    {@link ExportMapParameters}<br/>
+ *    {@link ExportMapOptions}<br/>
  *    {@link MapImage}<br/>
- *    {@link IdentifyParameters}<br/>
+ *    {@link IdentifyOptions}<br/>
  *    {@link IdentifyResults}<br/>
  *    {@link IdentifyResult}<br/>
  *     <br/></td>
  *     <td style = 'border:0px;width:200px'>
- *    {@link QueryParameters}<br/>
+ *    {@link QueryOptions}<br/>
  *    {@link ResultSet}<br/>
  *    
  *    {@link FindParameters}<br/>
@@ -256,7 +256,21 @@
       G.event.trigger.apply(this, arguments);
     }
   };
-  
+  /**
+   * get REST format for 2 time
+   * @param {Date} time
+   * @param {Date} endTime
+   */
+  var getTimeString = function (time, endTime) {
+    var ret = '';
+    if (time) {
+      ret +=  (time.getTime() - time.getTimezoneOffset() * 60000);
+    }
+    if (endTime) {
+      ret += ', ' + (endTime.getTime() - endTime.getTimezoneOffset() * 60000);
+    } 
+    return ret;
+  }
   /**
    * Set opacity of a node.
    * @param {Node} node
@@ -289,176 +303,15 @@
     }
   };
   
-  var getGeometryType = function (obj) {
-    if (obj instanceof G.LatLng || obj instanceof G.Marker) {
-      return C.esriGeometryPoint;
-    } else if (obj instanceof G.Polyline) {
-      return C.esriGeometryPolyline;
-    } else if (obj instanceof G.Polygon) {
-      return C.esriGeometryPolygon;
-    } 
-    return null;
-  };
-  
-  var fromGeometryToJSON = function (geom) {
-    function fromPointsToJSON(pts) {
-      var arr = [];
-      var latlng;
-      for (var i = 0, c = pts.getLength(); i < c; i++) {
-        latlng = pts.getAt(i);
-        arr.push('[' + latlng.lng() + ',' + latlng.lat() + ']');
-      }
-      return '[' + arr.join(',') + ']';
-    }
-    
-    var g = geom;
-    if (geom instanceof G.Marker) {
-      g = geom.getPosition();
-    }
-    var json = '{';
-    if (g instanceof G.LatLng) {
-      json += 'x:' + g.lng() + ',y:' + g.lat();
-    } else if (g instanceof G.LatLngBounds) {
-      json += 'xmin:' + g.getSouthWest().lng() + ',ymin:' + g.getSouthWest().lat() + ',xmax:' + g.getNorthEast().lng() + ',ymax:' + g.getNorthEast().lat();
-    } else if (g instanceof G.Polyline) {
-      json += 'paths:[' + fromPointsToJSON(g.getPath())+']';
-    } else if (g instanceof G.Polygon) {
-      var paths = g.getPaths();
-      var pjson = [];
-      for (var i = 0; i < paths.getLength(); i++) {
-        pjson.push(fromPointsToJSON(paths.getAt(i)));
-      }
-      json += 'rings:[' + pjson.join(',')+']';
-    }
-    json += ',spatialReference:{wkid:4326}';
-    json += '}';
-    return json;
-  };
-  
-  /**
-   * Convert a {@link Feature} or {@link IdentifyResult} or {@link FindResult} to core Google Maps API 
-   * overlays such as  {@link ArcGISGMarker}, 
-   * {@link ArcGISGPolyline}, or {@link ArcGISGPolygon}s.
-   * Note ArcGIS Geometry may have multiple parts, but the coresponding OverlayView 
-   * does not  support multi-parts, so the result is an array.
-   * <ul><li><code>feature</code>: an object returned by ArcGIS Server with at least <code>geometry</code> property of type {@link Geometry}. 
-   *  if it contains a name-value pair "attributes" property, it will be attached to the result overlays.
-   * <li><code>opt_sr</code>: optional {@link SpatialReference}. Can be object literal. 
-   * <li><code>opt_agsStyle</code> {@link ArcGISStyleOptions}. default is {@link ArcGISConfig}.style.
-   * <li><code>opt_displayName</code> optional field name used for title of feature. 
-   * @param {Feature} feature
-   * @param {SpatialReference} opt_sr
-   * @param {StyleOptions} opt_agsStyle
-   * @param {String} opt_displayName
-   * @return {OverlayView[]} 
-   */
-  var fromJSONToGeometry = function(geom, opts, opt_title) {
-    var ovs = [];
-    var sr = null;
-    var ov;
-    var x, i, ic, j, jc, parts, part, lnglat;
-    var title = '';
-    opts = opts || {};
-    if (geom.x) {
-      ov = new G.Marker(augmentObject(opts.marker, {
-        position: new G.LatLng(geom.y, geom.x)
-      }));
-      ovs.push(ov);
-    } else {
-      //mulpt, line and poly
-      parts = geom.points || geom.paths || geom.rings;
-      if (!parts) {
-        return ovs;
-      }
-      var rings = [];
-      for (i = 0, ic = parts.length; i < ic; i++) {
-        part = parts[i];
-        if (geom.points) {
-          // multipoint
-          ov = new G.Marker(augmentObject(opts.marker, {
-            position: new G.LatLng(part[1], part[0])
-          }));
-          ovs.push(ov);
-        } else {
-          latlngs = [];
-          for (j = 0, jc = part.length; j < jc; j++) {
-            lnglat = part[j];
-            latlngs.push(new G.LatLng(lnglat[1], lnglat[0]));
-          }
-          if (geom.paths) {
-            ov = new G.Polyline(augmentObject(opts.polyline, {
-              path: latlngs
-            }));
-            ovs.push(ov);
-          } else if (geom.rings) {
-            // V3 supports multiple rings
-            rings.push(latlngs);
-          }
-        }
-      }
-      if (geom.rings) {
-        ov = new G.Polygon(augmentObject(opts.polygon, {
-          paths: rings
-        }));
-        ovs.push(ov);
-      }
-    }
-    return ovs;
-  };
+ 
  /** Radius Per Degree
  * @private
  */
   var RAD_DEG  =  Math.PI / 180;
  
   // The JSDOC tool not work with enums yet?
+  
   /*
-   * @name ArcGISESRIGeometryTypes
-   * @private
-   * @class This is actually a list of constants that represent geometry types. 
-   * They should be used directly, e.g.:  
-   * <code> var param = {geometryType:ESRI_GEOMETRY_POINT}</code>
-   * 
-   * @property {String} [ESRI_GEOMETRY_POINT] esriGeometryPoint
-   * @property {String} [ESRI_GEOMETRY_POLYLINE] esriGeometryPolyline
-   * @property {String} [ESRI_GEOMETRY_POLYGON] esriGeometryPolygon
-   * @property {String} [ESRI_GEOMETRY_MULTIPOINT] esriGeometryMultipoint
-   * @property {String} [ESRI_GEOMETRY_ENVELOPE] esriGeometryEnvelope
-   *
-  var ESRI_GEOMETRY_POINT  =  "esriGeometryPoint";
-  var ESRI_GEOMETRY_POLYLINE  =  "esriGeometryPolyline";
-  var ESRI_GEOMETRY_POLYGON  =  "esriGeometryPolygon";
-  var ESRI_GEOMETRY_MULTIPOINT  =  "esriGeometryMultipoint";
-  var ESRI_GEOMETRY_ENVELOPE  =  "esriGeometryEnvelope";
-
-  
-   * @name ArcGISESRISpatialRelTypes
-   * @private
-   * @class This is actually a list of constants that represent spatial 
-   * relationship types. They should be used directly. e.g.:  
-   * <code> var param = {spatialRel:ESRI_SPATIALREL_INTERSECTS}</code>
-   * @property {String} [ESRI_SPATIALREL_INTERSECTS] esriSpatialRelIntersects 
-   * @property {String} [ESRI_SPATIALREL_CONTAINS] esriSpatialRelContains
-   * @property {String} [ESRI_SPATIALREL_CROSSES] esriSpatialRelCrosses
-   * @property {String} [ESRI_SPATIALREL_ENVELOPEINTERSECTS] esriSpatialRelEnvelopeIntersects
-   * @property {String} [ESRI_SPATIALREL_INDEXINTERSECTS] esriSpatialRelIndexIntersects
-   * @property {String} [ESRI_SPATIALREL_OVERLAPS] esriSpatialRelOverlaps
-   * @property {String} [ESRI_SPATIALREL_TOUCHES] esriSpatialRelTouches
-   * @property {String} [ESRI_SPATIALREL_WITHIN] esriSpatialRelWithin
-   *
-  var ESRI_SPATIALREL_INTERSECTS  =  "esriSpatialRelIntersects";
-  var ESRI_SPATIALREL_CONTAINS  =  "esriSpatialRelContains";
-  var ESRI_SPATIALREL_CROSSES  =  "esriSpatialRelCrosses";
-  var ESRI_SPATIALREL_ENVELOPEINTERSECTS  =  "esriSpatialRelEnvelopeIntersects";
-  var ESRI_SPATIALREL_INDEXINTERSECTS  =  "esriSpatialRelIndexIntersects";
-  var ESRI_SPATIALREL_OVERLAPS  =  "esriSpatialRelOverlaps";
-  var ESRI_SPATIALREL_TOUCHES  =  "esriSpatialRelTouches";
-  var ESRI_SPATIALREL_WITHIN  =  "esriSpatialRelWithin";
- */
-
-
-  
- 
-  /**
    * A list of utilities ((<code>gmaps.gis.Util</code>) 
    * for commonly used functions.
    * @name ArcGISUtil
@@ -471,12 +324,7 @@
   var xdc = window.ags_jsonp;
   var C = {
     json: 'json',
-    callback: 'callback',
-    esriGeometryPoint: 'esriGeometryPoint',
-    esriGeometryMultipoint: 'esriGeometryMultipoint',
-    esriGeometryPolyline: 'esriGeometryPolyline',
-    esriGeometryPolygon: 'esriGeometryPolygon',
-    esriGeometryEnvelope: 'esriGeometryEnvelope'
+    callback: 'callback'
   };
   
   /**
@@ -564,51 +412,7 @@
     return val;
   };
 */
-  /*
-   * convert Geometry to JSON String, optionally include SpatialReference info.
-   * @param {Geometry} geoms
-   * @param {Boolean} opt_includeSR
-   * @return {String}
-   
-  Util.fromGeometryToJSON = function (geom, opt_includeSR) {
-    function fromPointsToJSON(pts) {
-      var arr = [];
-      for (var i = 0, c = pts.length; i < c; i++) {
-        arr.push('[' + pts[i][0] + ',' + pts[i][1] + ']');
-      }
-      return '[' + arr.join(',') + ']';
-    }
-    function fromLinesToJSON(lines) {
-      var arr = [];
-      for (var i = 0, c = lines.length; i < c; i++) {
-        arr.push(fromPointsToJSON(lines[i]));
-      }
-      return '[' + arr.join(',') + ']';
-    }
-    
-    var json = '{';
-    if (geom.x) {
-      json += 'x:' + geom.x + ',y:' + geom.y;
-    } else if (geom.xmin) {
-      json += 'xmin:' + geom.xmin + ',ymin:' + geom.ymin + ',xmax:' + geom.xmax + ',ymax:' + geom.ymax;
-    } else if (geom.points) {
-      json += 'points:' + fromPointsToJSON(geom.points);
-    } else if (geom.paths) {
-      json += 'paths:' + fromLinesToJSON(geom.paths);
-    } else if (geom.rings) {
-      json += 'rings:' + fromLinesToJSON(geom.rings);
-    }
-    if (opt_includeSR && geom.spatialReference) {
-      if (geom.spatialReference.wkid) {
-        json += ',spatialReference:{wkid:' + geom.spatialReference.wkid + '}';
-      } else if (geom.spatialReference.wkt) {
-        json += ',spatialReference:{wkt:' + geom.spatialReference.wkt + '}';
-      }
-    }
-    json += '}';
-    return json;
-  };
-  */
+  
   /**
    * Some operations such as identify and find are operated against multiple layers.
    * The results are in a flat list. This method will group the result by layer and
@@ -1300,8 +1104,208 @@
     return this['' + wkidt];
   };	
   //end of projection related code//
-
   
+  /**
+   * @name GeometryType
+   * @class List of Geometry type supported by ArcGIS server.
+   * @property {String} [POINT] esriGeometryPoint 
+   * @property {String} [MULTIPOINT] esriGeometryMultipoint
+   * @property {String} [POLYLINE] esriGeometryPolyline
+   * @property {String} [POLYGON] esriGeometryPolygon
+   * @property {String} [ENVELOPE] esriGeometryEnvelope
+   */
+  var GeometryType = {
+    POINT: 'esriGeometryPoint',
+    MULTIPOINT: 'esriGeometryMultipoint',
+    POLYLINE: 'esriGeometryPolyline',
+    POLYGON: 'esriGeometryPolygon',
+    ENVELOPE: 'esriGeometryEnvelope'
+  };
+  var getGeometryType = function (obj) {
+    var o = obj;
+    if (isArray(obj) && obj.length > 0) {
+      o = obj[0];
+    }
+    if (o instanceof G.LatLng || o instanceof G.Marker) {
+      if (isArray(obj) && obj.length > 1) {
+        return GeometryType.MULTIPOINT;
+      } else {
+        return GeometryType.POINT;
+      }
+    } else if (o instanceof G.Polyline) {
+      return GeometryType.POLYLINE;
+    } else if (o instanceof G.Polygon) {
+      return GeometryType.POLYGON;
+    } else if (o instanceof G.LatLngBounds) {
+      return GeometryType.ENVELOPE;
+    }
+    return null;
+  };
+  /**
+   * 
+   * @param {MVCArray.&lt;LatLng>} pts
+   */
+  var fromPointsToJSON = function (pts) {
+    var arr = [];
+    var latlng;
+    for (var i = 0, c = pts.getLength(); i < c; i++) {
+      latlng = pts.getAt(i);
+      arr.push('[' + latlng.lng() + ',' + latlng.lat() + ']');
+    }
+    return arr.join(',');
+  };
+  /**
+   * Convert overlays (Marker, Polyline, Polygons) to JSON string in AGS format.
+   * @param {OverlayView|OverlayView[]} geom 
+   */
+  var fromOverlaysToJSON = function (geom) {
+    var gtype = getGeometryType(geom);
+    var g, gs, i, pts;
+    var json = '{';
+    switch (gtype) {
+    case GeometryType.POINT:
+      g = isArray(geom) ? geom[0] : geom;
+      if (g instanceof G.Marker) {
+        g = g.getPosition();
+      }
+      json += 'x:' + g.lng() + ',y:' + g.lat();
+      break;
+    case GeometryType.MULTIPOINT:
+      pts = [];
+      for (i = 0; i < geom.length; i++) {
+        if (geom[i] instanceof G.Marker) {
+          g = geom[i].getPosition();
+        } else {
+          g = geom[i];
+        }
+        pts.push('[' + g.lng() + ',' + g.lat() + ']');
+      }
+      json += 'points: [' + pts.join(',') + ']';
+      break;
+    case GeometryType.POLYLINE:
+      // V3 does not support multiple paths yet
+      pts = [];
+      gs = isArray(geom) ? geom : [geom];
+      for (i = 0; i < gs.length; i++) {
+        pts.push('[' + fromPointsToJSON(gs[i].getPath()) + ']');
+      }
+      json += 'paths: [' + pts.join(',') + ']';
+      break;
+    case GeometryType.POLYGON:
+      pts = [];
+      g = isArray(geom) ? geom[0] : geom;
+      var paths = g.getPaths();
+      for (i = 0; i < paths.getLength(); i++) {
+        pts.push('[' + fromPointsToJSON(paths.getAt(i)) + ']');
+      }
+      json += 'rings:[' + pts.join(',') + ']';
+      
+      break;
+    case GeometryType.ENVELOPE:
+      g = isArray(geom) ? geom[0] : geom;
+      json += 'xmin:' + g.getSouthWest().lng() + ',ymin:' + g.getSouthWest().lat() + ',xmax:' + g.getNorthEast().lng() + ',ymax:' + g.getNorthEast().lat();
+      break;
+    }
+    json += ', spatialReference:{wkid:4326}';
+    json += '}';
+    return json;
+  };
+  
+  /**
+   * Helper method to convert an Envelope object to <code>google.maps.LatLngBounds</code> 
+   * @private 
+   * @param {Envelope} extent
+   * @return {google.maps.LatLngBounds} gLatLngBounds
+   */
+  var fromEnvelopeToLatLngBounds  =  function (extent) {
+    var sr  =  SpatialReferences.getSpatialReference(extent.spatialReference.wkid || extent.spatialReference.wkt);
+    sr  =  sr || SpatialReferences.WGS84;
+    var sw  =  sr.reverse([extent.xmin, extent.ymin]);
+    var ne  =  sr.reverse([extent.xmax, extent.ymax]);
+    return new G.LatLngBounds(new G.LatLng(sw[1], sw[0]), new G.LatLng(ne[1], ne[0]));
+  };
+  
+  
+  /**
+   * Convert a ArcGIS Geometry JSON object to core Google Maps API 
+   * overlays such as  <code>google.maps.Marker</code>, <code>google.maps.Polyline</code> or <code>google.maps.Polygon</code>
+   * Note ArcGIS Geometry may have multiple parts, but the coresponding OverlayView 
+   * may (Polygon) or may not (Polyline) support multi-parts, so the result is an array for consistency.
+   * @param {Object} json geometry
+   * @param {OverlayOptions} opts see {@link OverlayOptions}
+   * @param {String} opt_displayName
+   * @return {OverlayView[]} 
+   */
+  var fromJSONToOverlays = function (geom, opts, opt_title) {
+    var ovs = [];
+    var sr = null;
+    var ov;
+    var x, i, ic, j, jc, parts, part, lnglat, latlngs;
+    var title = '';
+    opts = opts || {};
+    if (geom.x) {
+      ov = new G.Marker(augmentObject(opts.marker, {
+        position: new G.LatLng(geom.y, geom.x)
+      }));
+      ovs.push(ov);
+    } else {
+      //mulpt, line and poly
+      parts = geom.points || geom.paths || geom.rings;
+      if (!parts) {
+        return ovs;
+      }
+      var rings = [];
+      for (i = 0, ic = parts.length; i < ic; i++) {
+        part = parts[i];
+        if (geom.points) {
+          // multipoint
+          ov = new G.Marker(augmentObject(opts.marker, {
+            position: new G.LatLng(part[1], part[0])
+          }));
+          ovs.push(ov);
+        } else {
+          latlngs = [];
+          for (j = 0, jc = part.length; j < jc; j++) {
+            lnglat = part[j];
+            latlngs.push(new G.LatLng(lnglat[1], lnglat[0]));
+          }
+          if (geom.paths) {
+            ov = new G.Polyline(augmentObject(opts.polyline, {
+              path: latlngs
+            }));
+            ovs.push(ov);
+          } else if (geom.rings) {
+            // V3 supports multiple rings
+            rings.push(latlngs);
+          }
+        }
+      }
+      if (geom.rings) {
+        ov = new G.Polygon(augmentObject(opts.polygon, {
+          paths: rings
+        }));
+        ovs.push(ov);
+      }
+    }
+    return ovs;
+  };
+  
+  /**@name Error
+   * @class Error returned from Server.
+   * Syntax:
+   * <pre>
+   * {
+   "error" : 
+  {
+    "code" : 500, 
+    "message" : "Object reference not set to an instance of an object.", 
+    "details" : [
+      "'geometry' parameter is invalid"
+    ]
+  }
+  }
+  </pre>
+   */
   /**
    * Create a ArcGIS service catalog instance using it's url:<code> http://&lt;host>/&lt;instance>/rest/services</code>
    * @name Catalog
@@ -1388,38 +1392,55 @@
     }
     return true;
   };
- 
+ // * @property {String} [geometryType]  esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolygon | esriGeometryPolyline
   /**
-   * @name QueryParameters
+   * @name SpatialRelationship
+   * @class This is actually a list of constants that represent spatial 
+   * relationship types. 
+   * @property {String} [INTERSECTS] esriSpatialRelIntersects 
+   * @property {String} [CONTAINS] esriSpatialRelContains
+   * @property {String} [CROSSES] esriSpatialRelCrosses
+   * @property {String} [ENVELOPE_INTERSECTS] esriSpatialRelEnvelopeIntersects
+   * @property {String} [INDEX_INTERSECTS] esriSpatialRelIndexIntersects
+   * @property {String} [OVERLAPS] esriSpatialRelOverlaps
+   * @property {String} [TOUCHES] esriSpatialRelTouches
+   * @property {String} [WITHIN] esriSpatialRelWithin
+  */
+  var SpatialRelationship = {
+    INTERSECTS: 'esriSpatialRelIntersects',
+    CONTAINS: 'esriSpatialRelContains',
+    CROSSES: 'esriSpatialRelCrosses',
+    ENVELOPE_INTERSECTS: 'esriSpatialRelEnvelopeIntersects',
+    INDEX_INTERSECTS: 'esriSpatialRelIndexIntersects',
+    OVERLAPS: 'esriSpatialRelOverlaps',
+    TOUCHES: 'esriSpatialRelTouches',
+    WITHIN: 'esriSpatialRelWithin'
+  };
+ //  * @property {Number|SpatialReference} [inSR] The well-known ID of the spatial reference of the input geometries
+   /**
+   * @name QueryOptions
    * @class This class represent the parameters needed in an query operation for a {@link Layer}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/query.html'>Query Operation</a>.
-   * @property {String} [f  = json] The response format. html | json | kmz .
    * @property {String} [text]  A literal search text. If the layer has a display field
    *   associated with it, the server searches for this text in this field.
    *   This parameter is a short hand for a where clause of:
    *   where [displayField]like '%[text]%'. The text is case sensitive.
    *   This parameter is ignored if the where parameter is specified.
-   * @property {Geometry} [geometry] The geometry to apply as the spatial filter.
-   * @property {String} [geometryType]  esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolygon | esriGeometryPolyline
-   * @property {Number} [inSR] The well-known ID of the spatial reference of the input geometries
-   * @property {String} [spatialRel] The spatial relationship to be applied on the
+   * @property {OverlayView|OverlayView[]} [geometry] The geometry to apply as the spatial filter.
+   * @property {SpatialRelationship} [spatialRelationship] The spatial relationship to be applied on the
    *    input geometry while performing the query. The supported spatial relationships
    *    include intersects, contains, envelope intersects, within, etc.
-   *    The default spatial relationship is intersects (esriSpatialRelIntersects).
-   *    esriSpatialRelIntersects | esriSpatialRelContains | esriSpatialRelCrosses
-   | esriSpatialRelEnvelopeIntersects | esriSpatialRelIndexIntersects
-   | esriSpatialRelOverlaps | esriSpatialRelTouches | esriSpatialRelWithin
+   *    The default spatial relationship is intersects. See {@link SpatialRelationship}
    * @property {String} [where] A where clause for the query filter. Any legal SQL where clause operating on the fields in the layer is allowed.
-   * @property {String|String[]} [outFields] The list of fields to be included in the returned resultset.
+   * @property {String[]} [outFields] The list of fields to be included in the returned resultset.
    * @property {Boolean} [returnGeometry  = true] If true, If true, the resultset will include the geometries associated with each result.
-   * @property {String} [relationParam] The spatial relate function that can be applied while performing the query operation. An example for this spatial relate function is "FFFTTT***"
-   * @property {Int,Int} [objectIds] The object IDs of this layer / table to be queried
-   * @property {Number,Number} [time] The time instant or the time extent to query.
-   * @property [String,] [outFields] The list of fields to be included in the returned resultset. This list is a comma delimited list of field names.
+   * @property {Int[]} [objectIds] The object IDs of this layer / table to be queried
+   * @property [String[]] [outFields] The list of fields to be included in the returned resultset. This list is a comma delimited list of field names.
    * @property [Number] [maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the query operation
-   * @property [Number] [returnIdsOnly] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the query operation
-  */
+   * @property [Boolean] [returnIdsOnly] If true, the response only includes an array of object IDs. Otherwise the response is a feature set. The default is false. 
+   * @property [OverlayOptions] [overlayOptions] See {@link OverlayOptions}
+   */
   /**
    * @name ResultSet
    * @class This class represent the results of an query operation for a {@link Layer}.
@@ -1427,37 +1448,58 @@
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/query.html'>Query Operation</a>.
    * @property {String} [displayFieldName] display Field Name for layer
    * @property {Object} [fieldAliases] Field Name's Aliases. key is field name, value is alias.
-   * @property {String} [geometryType] esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolygon | esriGeometryPolyline
-   * @property {Object} [spatialReference] spatial Reference <b>wkid info only</b>
+   * @property {GemetryType} [geometryType] esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolygon | esriGeometryPolyline
    * @property {Features[]} [features] result as array of {@link Feature}
    * @property {String} [objectIdFieldName] objectIdFieldName when returnIdsOnly=true
    * @property {int[]} [objectIds] objectIds when returnIdsOnly=true
    */
   /**
    * The query operation is performed on a layer resource. The result of this operation is a resultset resource that will be
-   * passed in the callback function. param is an instance of {@link QueryParameters}
+   * passed in the callback function. param is an instance of {@link QueryOptions}
    * <br/>For more info see <a href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/query.html'>Query Operation</a>.
-   * @param {QueryParameters} params
+   * @param {QueryOptions} params
    * @param {Function} callback
    */
-  Layer.prototype.query = function (qparams, callback) {
-    if (!qparams) {
-      return;
-    } 
-    var params = augmentObject(qparams, {});
-    params.f = params.f || 'json';
-    if (params.geometry && !isString(params.geometry)) {
-      params.geometry = Util.fromGeometryToJSON(params.geometry);
-    }
-    if (params.geometry) {
-      params.spatialRel = params.spatialRel || 'esriSpatialRelIntersects';
-    }
-    if (params.outFields && !isString(params.outFields)) {
-      params.outFields = params.outFields.join(',');
-    }
-    params.returnGeometry = params.returnGeometry === false ? false : true;
-    Util.getJSON(this.url + '/query', params, 'callback', callback);
-  };
+ Layer.prototype.query = function (p, callback) {
+   if (!p) {
+     return;
+   }
+   // handle text, where, relationParam, objectIds, maxAllowableOffset
+   var params = augmentObject(p, {});
+   if (p.geometry && !isString(p.geometry)) {
+     params.geometry = fromOverlaysToJSON(p.geometry);
+     params.geometryType = getGeometryType(p.geometry);
+     params.inSR = 4326;
+   }
+   if (p.spatialRelationship) {
+     params.spatialRel = p.spatialRelationship;
+     delete params.spatialRelationship;
+   }
+   if (p.outFields && !isArray(p.outFields)) {
+     params.outFields = p.outFields.join(',');
+   }
+   if (p.objectIds) {
+     params.objectIds = p.objectIds.join(',');
+   }
+   if (p.time) {
+     params.time = getTimeString(p.time, p.endTime);
+   }
+   params.outSR = 4326;
+   params.returnGeometry = p.returnGeometry === false ? false : true;
+   params.returnIdsOnly = p.returnIdsOnly === true ? true : false;
+   Util.getJSON(this.url + '/query', params, 'callback', function(json) {
+     var i, f;
+     if (json.features) {
+       for (i = 0; i < json.features.length; i++) {
+         f = json.features[i];
+         if (f.geometry) {
+           f.geometry = fromJSONToOverlays(f.geometry, p.overlayOptions);
+         }
+       }
+     }
+     callback(json, json.error);
+   });
+ };
  /**
    * @name QueryRelatedRecordsParameters
    * @class This class represent the parameters needed in an query related records operation for a {@link Layer}.
@@ -1650,19 +1692,47 @@
   };
 
 /**
- * Get the layer def string. In 9.3 syntax
+ * Get the layer definitions.
+ * @return {Object} key as id, value as string of definition expression. 
  */
-
   MapService.prototype.getLayerDefs = function () {
-    var ret = null;
+    var ret = {};
     if (this.layers) {
       for (var i = 0, c = this.layers.length; i < c; i++) {
         var layer = this.layers[i];
         if (layer.definition) {
-          if (ret.length > 0) {
-            ret += ';';
+          ret[String(layer.id)] = layer.definition;
+        }
+      }
+    }
+    return ret;
+  };
+  /**
+   * get a  list of visible layer's Ids
+   * @return {Number[]}
+   */
+  MapService.prototype.getVisibleLayerIds = function () {
+    var ret = [];
+    if (this.layers) { // in case service not loaded
+      var layer;
+      // a special behavior of REST (as of 9.3.1): 
+      // if partial group then parent must be off
+      var i, c;
+      for (i = 0, c = this.layers.length; i < c; i++) {
+        layer = this.layers[i];
+        if (layer.subLayers) {
+          for (var j = 0, jc = layer.subLayers.length; j < jc; j++) {
+            if (layer.subLayers[j].visible === false) {
+              layer.visible = false;
+              break;
+            }
           }
-          ret += String(layer.id) + ':' + layer.definition;
+        }
+      }
+      for (i = 0, c = this.layers.length; i < c; i++) {
+        layer = this.layers[i];
+        if (layer.visible === true) {
+          ret.push(layer.id);
         }
       }
     }
@@ -1671,32 +1741,31 @@
   
   MapService.prototype.getInitialBounds = function () {
     if (this.initialExtent) {
-      return Util.fromEnvelopeToLatLngBounds(this.initialExtent);
+      return fromEnvelopeToLatLngBounds(this.initialExtent);
     }
     return null;
-  }
+  };
   
-/*@property {String} [size] Syntax: &lt;width&gt;, &lt;height&gt;. You can also set <code>width</code> and <code>height</code>.
-  @property {Envelope} [bbox] The extent (bounding box) of the exported image. 
-  @property {Number} [bboxSR] The well-known ID of the spatial reference of the bbox
-  @property {String} [f = html] The response format. html | json | image | kmz.
- */
 /**
- * @name ExportMapParameters
+ * @name ExportMapOptions
  * @class This class represent the parameters needed in an exportMap operation for a {@link MapService}.
  *   There is no constructor, use JavaScript object literal.
  * <br/>For more info see <a  href='http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/export.html'>Export Operation</a>.
  * @property {Number} [width] width of image, ignored if <code>size</code> is specified;
  * @property {Number} [height] height of image, ignored if <code>size</code> is specified;
- * @property {Number} [imageSR] The well-known ID of the spatial reference of the exported image.
+ * @property {SpatialReference} [imageSR] The well-known ID of the spatial reference of the exported image or instance of {@link SpatialReference}.
  * @property {String} [format  = png] The format of the exported image. png | png8 | png24 | jpg | pdf | bmp | gif | svg
- * @property {String} [layerDefs] Allows you to filter the features of individual layers in the exported map by specifying 
+ * @property {Number} [dpi] The dpi of the exported image, default 96
+ * @property {Object} [layerDefinitions] Allows you to filter the features of individual layers in the exported map by specifying 
  *   definition expressions for those layers. Syntax: { "&lt;layerId1>" : "&lt;layerDef1>" , "&lt;layerId2>" : "&lt;layerDef2>" }
- *   Example: 0:POP2000 &gt; 1000000;5:AREA &gt; 100000
- * @property {String} [layers] Syntax: [show | hide | include | exclude]:layerId1,layerId2
+ *   key is layerId returned by server, value is definition for that layer.
+ * @property {Number[]} [layerIds] list of layer ids. If not specified along with layerOptions, show list of visible layers. 
+ * @property {String} [layerOptions] show | hide | include | exclude. If not specified with along layerIds, show list of visible layers. 
  * @property {Boolean} [transparent  = true] If true, the image will be exported with 
  *  the background color of the map set as its transparent color. note the REST API default value is false.
- * @property {Number} [time] The time instant or the time extent of the exported map image.
+ * @property {LatLngBounds} [bounds] bounds of map
+ * @property {Date} [time] The time instant the exported map image if the service supports time (since AGS10).
+ * @property {Date} [endTime] The end time instant the exported map image if the service supports time (since AGS10).
  *  time=&lt;timeInstant> or time=&lt;startTime>, &lt;endTime>, e.g. time=1199145600000, 1230768000000 (1 Jan 2008 00:00:00 GMT to 1 Jan 2009 00:00:00 GMT) 
  * @property {Object} [layerTimeOptions] layerTimeOptions The time options per layer. Users can indicate whether or not the layer should use the time extent
  *  specified by the time parameter or not, whether to draw the layer 
@@ -1729,7 +1798,7 @@
  * @class This is the result of {@link MapService}.exportMap operation.
  *   There is no constructor, use as JavaScript object literal.
  * @property {String} [href] URL of image
- * @property {Envelope} [extent] The {@link Envelope} (bounding box) of the exported image. 
+ * @property {LatLngBounds} [bounds] The bounding box of the exported image. 
  * @property {Number} [width] width of the exported image.
  * @property {Number} [height] height of the exported image.
  * @property {Number} [scale] scale of the exported image.
@@ -1738,7 +1807,7 @@
   /**
    * Export an image with given parameters.
    * For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/export.html'>Export Operation</a>.
-   * <br/> The <code>params</code> is an instance of {@link ExportMapParameters}.
+   * <br/> The <code>params</code> is an instance of {@link ExportMapOptions}.
    * The following properties will be set automatically if not specified:...
    * <br/> The <code>callback</code> is the callback function with argument of
    * an instance of {@link MapImage}.
@@ -1750,67 +1819,93 @@
       return;
     }
     // note: dynamic map may overlay on top of maptypes with different projection
-    var params = augmentObject(eparams, {});
-    params.f = params.f || 'json';
-    var bnds = params.bounds;
+    var params = {f: 'json'};// augmentObject(eparams, );
+    var bnds = eparams.bounds;
     params.bbox = '' + bnds.getSouthWest().lng() + ',' + '' + bnds.getSouthWest().lat() + ',' +
     bnds.getNorthEast().lng() +
     ',' +
     '' +
     bnds.getNorthEast().lat();
-    params.bboxSR = '4326';
-    delete params.bounds;
-    if (params.imageSR) {
-      if (params.imageSR.wkid) {
-        params.imageSR = params.imageSR.wkid;
+    //delete params.bounds;
+    
+    params.size = '' + eparams.width + ',' + eparams.height;
+    params.dpi = eparams.dpi;
+    
+    if (eparams.imageSR) {
+      if (eparams.imageSR.wkid) {
+        params.imageSR = eparams.imageSR.wkid;
       } else {
-        params.imageSR = '{wkt:' + params.imageSR.wkt + '}';
+        params.imageSR = '{wkt:' + eparams.imageSR.wkt + '}';
       }
     }
-    params.size = params.size || '' + params.width + ',' + params.height;
-    params.transparent = (params.transparent === false ? false : true);
-    var vlayers = [];//visible layers
-    if (this.layers) { // in case service not loaded
-      var changed = false; // has the layers changed from their default setting?
-      var layer;
-      // a special behavior of REST: if partial group then parent must be off
-      var i, c;
-      for (i = 0, c = this.layers.length; i < c; i++) {
-        layer = this.layers[i];
-        if (layer.subLayers) {
-          for (var j = 0, jc = layer.subLayers.length; j < jc; j++) {
-            if (layer.subLayers[j].visible === false) {
-              layer.visible = false;
-              break;
-            }
-          }
+    params.bboxSR = '4326';
+    params.format = eparams.format;
+    var defs = eparams.layerDefinitions;
+    // there is a slightly difference between {} and undefined
+    // if do not want use def at all, pass in {}, if want to use 
+    // in service, do not pass in anything.
+    if (defs === undefined) {
+      defs = this.getLayerDefs();
+    } 
+    // for 9.3 compatibility:
+    var strDefs = '';
+    for (var x in defs) {
+      if (defs.hasOwnProperty(x)) {
+        if (strDefs.length > 0) {
+          strDefs += ';';
         }
-      }
-      for (i = 0, c = this.layers.length; i < c; i++) {
-        layer = this.layers[i];
-        if (layer.visible !== layer.defaultVisibility) {
-          changed = true;
-        }
-        if (layer.visible === true) {
-          vlayers.push(layer.id);
-        }
-      }
-      if (changed === true) {
-        if (!params.layers || !isString(params.layers)) {
-          params.layers = 'show:' + vlayers.join(',');
-        }
-      }
-      if (!params.layerDefs) {
-        params.layerDefs = this.getLayerDefs();
+        strDefs += (x + ':' + defs[x]);
       }
     }
+    params.layerDefs = strDefs;
+    var vlayers = eparams.layerIds;
+    var layerOpt = eparams.layerOption || 'show';   
+    if (vlayers === undefined) {
+      vlayers = this.getVisibleLayerIds();
+    }
+    if (vlayers.length > 0) {
+      params.layers =  layerOpt + ':' + vlayers.join(',');
+    } else {
+      // no layers visible, no need to go to server
+      callback({
+        href: null
+      });
+      return;
+    }
+    params.transparent = (eparams.transparent === false ? false : true);
+    if (eparams.time) {
+      params.time = getTimeString(eparams.time, eparams.endTime);
+    }
+    //TODO: finish once v10 released
+    params.layerTimeOptions = eparams.layerTimeOptions;
+    
     Util.getJSON(this.url + '/export', params, 'callback', function (json) {
-      json.bounds = Util.fromEnvelopeToLatLngBounds(json.extent);
+      json.bounds = fromEnvelopeToLatLngBounds(json.extent);
+      delete json.extent;
       callback(json); //callback.apply(null,json);
     });
   };
+ /**
+ * @name Feature
+ * @class This class represent JSON feature object as returned by the REST API.
+ *   There is no constructor, use JavaScript object literal.
+ * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/feature.html'>Feature Object</a>.
+ * Syntax:
+ * <pre>
+{
+  "geometry" : &lt;overlays>,
+
+  "attributes" : {
+    "name1" : &lt;value1>,
+    "name2" : &lt;value2>,
+  }
+}
+ * </pre>
+ * @property {Marker[]|Polyline[]|Polygon[]} [geometry] geometry
+ * @property {Object} [attributes] attributes as name-value JSON object.
+ */
   /**
-   * @name IdentifyParameters
+   * @name IdentifyOptions
    * @class This class represent the parameters needed in an identify operation for a {@link MapService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/identify.html'>Identify Operation</a>.
@@ -1825,7 +1920,7 @@
    * @property {Number} [dpi] dpi of image, default 96;
    * @property {Boolean} [returnGeometry  = true] If true, the resultset will include the geometries associated with each result.
    * @property {Number} [maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the identify operation
-   * @property {OverlayOptions} [overlayOptions] how results should be rendered.
+   * @property {OverlayOptions} [overlayOptions] how results should be rendered. See {@link OverlayOptions}
    */
   /**
    * @name IdentifyResults
@@ -1851,7 +1946,7 @@
    * process {@link IdentifyResults} using the <code>callback</code> function.
    * For more info see <a
    * href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/identify.html'>Identify Operation</a>.
-   * @param {IdentifyParameters} params
+   * @param {IdentifyOptions} params
    * @param {Function} callback
    */
   MapService.prototype.identify = function (iparams, callback) {
@@ -1859,9 +1954,9 @@
       return;
     }
     var params = {};//augmentObject(iparams, );
-    params.geometry = fromGeometryToJSON(iparams.geometry);
+    params.geometry = fromOverlaysToJSON(iparams.geometry);
     params.geometryType = getGeometryType(iparams.geometry);
-    params.mapExtent = fromGeometryToJSON(iparams.bounds);
+    params.mapExtent = fromOverlaysToJSON(iparams.bounds);
     params.tolerance = iparams.tolerance || 2;
     params.sr = 4326;
     params.imageDisplay = '' + iparams.width + ',' + iparams.height + ',' + (iparams.dpi || 96);
@@ -1872,19 +1967,22 @@
     params.maxAllowableOffset = iparams.maxAllowableOffset;
     params.returnGeometry = (iparams.returnGeometry === false ? false : true);
     
-    Util.getJSON(this.url + '/identify', params, 'callback', function(json) {
+    Util.getJSON(this.url + '/identify', params, 'callback', function (json) {
       // process results;
-      var rets = [];
+      var rets = null;
       var i, js, f, g;
+      
       if (json.results) {
+        rets = [];
         for (i = 0; i < json.results.length; i++) {
           js = json.results[i];
-          g = fromJSONToGeometry(js.geometry, iparams.overlayOptions);
-          rets.push ({
+          g = fromJSONToOverlays(js.geometry, iparams.overlayOptions);
+          rets.push({
             feature: {
-              geometry: g? g[0]:null, attributes: js.attributes, geometries: g
+              geometry: g,
+              attributes: js.attributes
             },
-            displayFieldName:js.displayFieldName,
+            displayFieldName: js.displayFieldName,
             layerId: js.layerId,
             layerName: js.layerName,
             value: js.value
@@ -1967,12 +2065,12 @@
   };
   
   /**
-   * Query a layer with given id or name using the {@link QueryParameters} and process {@link ResultSet}
+   * Query a layer with given id or name using the {@link QueryOptions} and process {@link ResultSet}
    * using the <code>callback</code> function.
    * See {@link Layer}.
    * For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/query.html'>Query Layer Operation</a>.
    * @param {Number|String} layerNameOrId
-   * @param {QueryParameters} params
+   * @param {QueryOptions} params
    * @param {Function} callback
    */
   MapService.prototype.queryLayer = function (layerNameOrId, params, callback) {
@@ -2035,7 +2133,7 @@
             gt = C.esriGeometryEnvelope;
           }
         }
-        json.push(Util.fromGeometryToJSON(g, false));
+        json.push(Util.fromOverlaysToJSON(g, false));
       }
       params.geometries = '{ geometryType:' + gt + ', geometries:[' + json.join(',') + ']}';
     }
@@ -2183,7 +2281,7 @@
   GeocodeService.prototype.reverseGeocode = function (params, callback) {
     params.f = params.f || 'json';
     if (!isString(params.location)) {
-      params.location = Util.fromGeometryToJSON(params.location);
+      params.location = fromOverlaysToJSON(params.location);
     }
     Util.getJSON(this.url + '/reverseGeocode', params, 'callback', callback);
   };
@@ -2243,6 +2341,7 @@
     // resolution (unit/pixel) at lod level 0. Due to changes from V2-V3, 
     // zoom is no longer defined in Projection. It is assumed that level's zoom factor is 2. 
     this.resolution0_ = this.tileInfo_.lods[0].resolution;
+    // zoom offset of this tileinfo's zoom 0 to Google's zoom0
     this.minZoom  =  Math.floor(Math.log(this.spatialReference.getCircumference() / this.resolution0_ / 256) / Math.LN2 + 0.5);
     this.maxZoom = this.minZoom + this.tileInfo_.lods.length - 1;
     this.tileSize = new G.Size(this.tileInfo_.cols, this.tileInfo_.rows);  
@@ -2254,11 +2353,10 @@
     this.originY_ = this.tileInfo_.origin.y;        
     // validation check
     var ratio;
-    for (var i = 0; i < tileInfo.lods.length -1; i++) {
+    for (var i = 0; i < tileInfo.lods.length - 1; i++) {
       ratio = tileInfo.lods[i].resolution / tileInfo.lods[i + 1].resolution;
       if (ratio > 2.001 || ratio < 1.999) {
         throw new Error('This type of map cache is not supported in V3. \nScale ratio between zoom levels must be 2');
-        return;
       }
     }
     
@@ -2532,6 +2630,8 @@
             // in FF it's OK to set parent div just once but IE does not like it.
             setOpacity(img, this.opacity_);
           }
+        } else {
+          // TODO: use a div to display NoData
         }
       }
     }
@@ -2580,7 +2680,7 @@
    * @class Instance of this class are used in the {@link ArcGISopt_ovelayOpts} argument
    *  to the constructor of the {@link MapOverlay} class.
    * @property {Number} [opacity  = 1.0] Opacity of map image from 0.0 (invisible) to 1.0 (opaque)
-   * @property {ExportMapParameters} [exportParams] See {@link ExportMapParameters}
+   * @property {ExportMapOptions} [exportOptions] See {@link ExportMapOptions}
    * @property {String} [name] name assigned to this {@link MapOverlay}
    * @property {Number} [minResolution] min zoom level.
    * @property {Number} [maxResolution] max zoom level.
@@ -2609,7 +2709,7 @@
     this.minZoom  = opt_overlayOpts.minZoom;
     this.maxZoom  = opt_overlayOpts.maxZoom;
     this.opacity_  =  opt_overlayOpts.opacity || 1;
-    this.exportParams_  = opt_overlayOpts.exportParams || {};
+    this.exportOptions_  = opt_overlayOpts.exportOptions || {};
     this.drawing_ = false;
     // do we need another refresh. Normally happens bounds changed before server returns image.
     this.needsNewRefresh_ = false;
@@ -2702,12 +2802,13 @@
     if (!bnds) {
       return;
     }
-    var params = this.exportParams_;
+    var params = this.exportOptions_;
     params.bounds = bnds;
     var sr = WEB_MERCATOR;
     // V3 no map.getSize()
     var s = m.getDiv();
-    params.size = '' + s.offsetWidth + ',' + s.offsetHeight;
+    params.width = s.offsetWidth; 
+    params.height = s.offsetHeight;
     var prj = m.getProjection(); // note this is not same as this.getProjection which returns MapCanvasProjection
     if (prj && prj instanceof Projection) {
       sr = prj.spatialReference;
@@ -2762,7 +2863,7 @@
    * @return {GLatLngBounds}
    */
   MapOverlay.prototype.getFullBounds  =  function () {
-    this.fullBounds_  = this.fullBounds_ || Util.fromEnvelopeToLatLngBounds(this.mapService.fullExtent);
+    this.fullBounds_  = this.fullBounds_ || fromEnvelopeToLatLngBounds(this.mapService.fullExtent);
     return this.fullBounds_;
   };
   /**
@@ -2770,7 +2871,7 @@
    * @return {GLatLngBounds}
    */
   MapOverlay.prototype.getInitialBounds  =  function () {
-    this.initialBounds_  = this.initialBounds_ || Util.fromEnvelopeToLatLngBounds(this.mapService.initialExtent);
+    this.initialBounds_  = this.initialBounds_ || fromEnvelopeToLatLngBounds(this.mapService.initialExtent);
     return this.initialBounds_;
   };
  
@@ -2838,316 +2939,6 @@
    * @property {google.maps.PolylineOptions} [polyline] style option for polylines. {@link http://code.google.com/apis/maps/documentation/javascript/reference.html#PolylineOptions}
    * @property {google.maps.PolygonOptions} [polygon] style option for polygons {@link http://code.google.com/apis/maps/documentation/javascript/reference.html#PolygonOptions}
    */
-   /*
-   * @private for now. Maybe better leave off API?
-   * @name ArcGISClickOptions
-   * @class Instance of this class are used in the {@link ArcGISopt_clickOpts} argument
-   *  to the {@link ArcGISGMap2.enableArcGISClick} method. Some of the properties such as 
-   *   <code>tolerance, returnGeometry</code> are used in  {@link IdentifyParameters} in 
-   *   request while other properties such as <code>styles</code> are used to control how results are processed. 
-   *  @property {String[]} [excludes] Array of Map Service Names to exclude from click action.
-   *   Some services do not support click action, or do you not need to click for information. 
-   *   Each map service has a default name, but can be assigned by the <code>name</code> in the optional
-   *   parameter passed in the constructor of {@link TileLayer} or {@link MapOverlay}.
-   * @property {String[]} [services] Array of Map Service Names to include from click action, if they are visible.
-   * @property {Boolean} [returnGeometry] whether to return geometry of the map feature clicked. If true, 
-   *   the clicked feature will be highlighted as an overlay
-   * @property {Boolean} [topOnly  = false] If true, only query the top map 
-   *   service that returns one or more features. Otherwise all visible map services will be queried.
-   *   Results of each service will dislay as a tab in the info window. 
-   * @property {Number} [tolerance] number of pixels as click tolenrance.
-   * @property {StyleOptions} [style] an instance of {@link ArcGISStyleOptions}. Specify how
-   *   results should be drawn. This is used as default for all services. applicable only if 
-   *   <code>returnGeometry  = true</code>
-   * @property {Object} [serviceOptions] <b>The options for each individual map services</b>. 
-   *   This options gives finer level of controls over the click action. This object is 
-   *   an object with key as service name, value as an javascript object literal of 
-   *   type {@link ArcGISArcGISClickServiceOptions}.
-   * @property {Function} [onServiceCompleteCallback] This property specifies a callback function 
-   *   to be invoked when the map service finishes querying and the query completes.
-   *   It is passed the map service name (String) and {@link IdentifyResults}. 
-   *   This callback function is called after each service query completes, if specified, the default 
-   *   result process function will NOT be called, so this function is basically a customize handler.
-   */
-  /*
-   * @private for now. Maybe better leave off API?
-   * @name ArcGISClickServiceOptions
-   * @class Instance of this class are used in the {@link ArcGISserviceOptions} property of
-   *   the {@link ArcGISArcGISClickOptions} class. The primary goal of this class is to provide finer
-   *   control of click behavior at individual service level.       
-   * @property {Boolean} [returnGeometry] whether to return geometry of the map feature clicked. If true, 
-   *   the clicked feature will be highlighted as an overlay
-   * @property {Number} [tolerance] number of pixels as click tolenrance.
-   * @property {Object} [layerOptions] <b>The options for each individual map layer inside a map service</b>. 
-   *   This options gives finer level of controls over the results. This is an object literal 
-   *   with key as layer name, and value as an instance of {@link ArcGISArcGISClickLayerOptions}
-   * @property {StyleOptions} [style] an instance of {@link ArcGISStyleOptions}. Specify how
-   *   results should be drawn. This is used as default for all layers.
-   */
-  /*
-   * @private for now. Maybe better leave off API?
-   * @name ArcGISClickLayerOptions
-   * @class Instance of this class are used in the {@link LayerOptions} property of
-   *   the {@link ArcGISArcGISClickServiceOptions} class. The primary goal of this class is to provide finer
-   *   control of click behavior at individual layer level inside an map service.   
-   * @property {StyleOptions} [styles] an instance of {@link ArcGISStyleOptions}. Specify how
-   *   results should be drawn. Only the styles matching the feature class type will be used.
-   */
-  /* TODO
-   * Enable the Map Click operation for ArcGIS maps. The inforamtion about the
-   * map feature will be displayed in a InfoWindow after a single click on the map.
-   * The optional parameter <code>opt_clickOpts</code> is an instance of {@link ArcGISArcGISClickOptions}
-   *
-  GMap.prototype.enableArcGISClick  =  function () {
-    this.agsClickListener_  = this.agsClickListener_ || G.event.addListener(this, 'click', this.doArcGISIdentify_);
-  };
-  **
-   * If identify operation onclick map is enabled.
-   * @return {Boolean}
-   *
-  GMap.prototype.arcgisClickEnabled  =  function () {
-    return this.agsClickListener_ !== null;
-  };
-  
-  **
-   * Disable click identify capability
-   *
-  GMap.prototype.disableArcGISClick  =  function () {
-    if (this.agsClickListener_) {
-      G.event.removeListener(this.agsClickListener_);
-      this.agsClickListener_  =  null;
-    }
-  };
-  **
-   * @private for now. Should this be in the API or left the application do these?
-   * 
-   *
-  GMap.prototype.setArcGISClickOptions  =  function (opts) {
-    this.agsClickOpts_  = opts || {};
-  };
-  **
-   * Get the spatial data at the clicked location.
-   * @param {Object} overlay
-   * @param {Object} latlng
-   * @param {Object} overlaylatlng
-   *
-  GMap.prototype.doArcGISIdentify_  =  function (overlay, latlng, overlaylatlng) {
-    var me  =  this;
-    var opts  =  this.agsClickOpts_ || {};
-    var services;
-    var serviceIdx;
-    var dpi  = 96;
-    function processIdentifyResults(service, json) {
-      var html  = '';
-      if (json.results) {
-        for (var i  =  0, c  =  json.results.length; i < c; i++) {
-          var r  =  json.results[i];
-          if (i > 0) {
-            html += '<hr/>';
-          }
-          html +=  '<div><table>';
-          html +=  '<tr><td class="ags-layername">' + r.layerName + '</td></tr>';
-          html +=  '<tr><td><table>';
-          var a  =  r.attributes;
-          var odd  =  true;
-          for (var x in a) {
-            if (a.hasOwnProperty(x)) {
-              //if (ignoreFields && indexOf(ignoreFields, x, true) !== -1) continue;
-              odd  =  !odd;
-              html +=  '<tr class="ags-row-' + (odd ? 'odd' : 'even') + '">';
-              html +=  '<td class="ags-fieldname">' + x + '</td>';
-              var val  =  a[x];
-              val = (val === null || typeof val === 'undefined') ? '' : '' + val;
-              html += '<td class="ags-fieldvalue">' + val + '</td></tr>';
-            }
-          }
-          html +=  '</table></td></tr></table></div>';
-          if (r.geometry) {
-            var style  =  Util.getOptionValue(ArcGISConfig.defaultStyle, opts, 'style', service.name, r.layerName);
-            var ovs  =  Util.fromFeatureToOverlays(r, null, style);
-            for (var j  =  0; j < ovs.length; j++) {
-              ovs[j].html  =  html;
-              me.agsResults_.push(ovs[j]);
-              me.addOverlay(ovs[j]);
-            }
-          }
-        }
-      } else if (json.error) {
-        html  =  '<div class  =  "ags-error">' + 'error code: ' + json.error.code +
-        ' <br/>message:' +
-        json.error.message +
-        '<br/>details:' +
-        json.error.details.join(';') +
-        '</div>';
-      }
-      if (html.length > 0) {
-        var tabs  =  me.getInfoWindow().getTabs();
-        var tab  =  new GInfoWindowTab(service.name, '<div class  =  "ags-infowindow">' + html + '</div>');
-        tabs.push(tab);
-        me.openInfoWindowTabsHtml(latlng, tabs);
-      }
-    }
-    function identifyService(service) {
-      var sid  =  me.agsSessionID_;
-      var sr  =  service.getSpatialReference();
-      var bnds  =  me.getBounds();
-      var ext  = Util.fromLatLngBoundsToEnvelope(bnds, sr);
-      var size  =  me.getSize();
-      var pt  = Util.fromLatLngToPoint(latlng, sr);
-      var idParams  =  {
-        geometry: '' + pt.x + ',' + pt.y,
-        geometryType: ESRI_GEOMETRY_POINT,
-        sr: sr.wkid,
-        layers: opts.layers || 'top',
-        tolerance: opts.tolerance || 5,//pixel
-        mapExtent: ext,
-        imageDisplay: '' + size.width + ',' + size.height + ',' + dpi, 
-        returnGeometry: opts.returnGeometry  ===  true
-      };
-      var params  =  idParams;
-      if (opts.serviceOptions && opts.serviceOptions[service.name]) {
-        params  =  augmentObject(opts.serviceOptions[service.name], idParams, true);
-      }
-      service.identify(params, function (json) {
-        if (sid  ===  me.agsSessionID_) {
-          processIdentifyResults(service, json);
-        } else {
-          //ignore. This means user clicked again before previous result is returned.
-        }
-      });
-    }
-
-    function getIdentifyServices() {
-      var svc  =  null, i, tile;
-      var svcs  =  [];
-      var agsOvs  =  me.getArcGISOverlays();
-      for (i  =  0; i < agsOvs.length; i++) {
-        if (!agsOvs[i].isHidden()) {
-          if (agsOvs[i] instanceof MapOverlay) {
-            if (agsOvs[i].getFullBounds().containsLatLng(latlng)) {
-              svcs.push(agsOvs[i].getMapService());
-            }
-          } else if (agsOvs[i] instanceof TileLayerOverlay) {
-            tile  = agsOvs[i].getTileLayer();
-            if (tile.getFullBounds().containsLatLng(latlng)) {
-              svcs.push(tile.getMapService());
-            }
-          }
-        }
-      }
-      var tp  =  me.getCurrentMapType();
-      if (tp instanceof MapType) {
-        var layers  =  tp.getTileLayers();
-        for (i  =  0; i < layers.length; i++) {
-          tile  = layers[i];
-          if (i === 0) {
-            dpi = tile.getMapService().tileInfo.dpi;
-          }
-          if (tile.getFullBounds().containsLatLng(latlng)) {
-            svcs.push(tile.getMapService());
-          }
-        }
-      }
-      return svcs;
-    }
-    
-    if (overlay  ===  null && latlng) {
-     
-      this.getInfoWindow().getTabs().length  =  0;
-      this.clearArcGISResults();
-      this.agsSessionID_  =  Math.floor(Math.random() * 100000);
-      services  =  getIdentifyServices();
-      for (var i  =  0; i < services.length; i++) {
-        identifyService(services[i]);
-      }
-    } else if (overlaylatlng && overlay.html) {
-      this.openInfoWindowHtml(overlaylatlng, '<div class  = "ags-infowindow">' + overlay.html + '</div>');
-    }
-  };
-
-  */
-    
- 
-  /**
-   * Helper method to convert an {@link Envelope} object to <code>GLatLngBounds</code> 
-   * @private ?
-   * @param {Envelope} extent
-   * @return {GLatLngBounds} gLatLngBounds
-   */
-  Util.fromEnvelopeToLatLngBounds  =  function (extent) {
-    var sr  =  SpatialReferences.getSpatialReference(extent.spatialReference.wkid || extent.spatialReference.wkt);
-    sr  =  sr || WGS84;
-    var sw  =  sr.reverse([extent.xmin, extent.ymin]);
-    var ne  =  sr.reverse([extent.xmax, extent.ymax]);
-    return new G.LatLngBounds(new G.LatLng(sw[1], sw[0]), new G.LatLng(ne[1], ne[0]));
-  };
-  
-  /*
-   * Helper method to convert <code>GLatLngBounds</code> to an {@link Envelope} object
-   *  with the given
-   * {@link SpatialReference}
-   * @param {GLatLngBounds} gLatLngBounds
-   * @param {SpatialReference} spatialReference
-   * @return {Envelope} extent
-   
-  Util.fromLatLngBoundsToEnvelope  =  function (gLatLngBounds, spatialReference) {
-    var sw  =  spatialReference.forward([gLatLngBounds.getSouthWest().lng(), gLatLngBounds.getSouthWest().lat()]);
-    var ne  =  spatialReference.forward([gLatLngBounds.getNorthEast().lng(), gLatLngBounds.getNorthEast().lat()]);
-    return {
-      xmin: sw[0],
-      ymin: sw[1],
-      xmax: ne[0],
-      ymax: ne[1],
-      spatialReference: {
-        wkid: spatialReference.wkid
-      }
-    };
-  };
-  */
-   /*
-   * Helper method to convert an {@link ArcGISPoint} object to 
-   * <code>GLatLng</code> .
-   * <code>opt_sr</code> is required if the point itself does not carry SR info, such as
-   * the case of geocode or query result. 
-   * @param {Point} point
-   * @param {SpatialReference} opt_sr
-   * @return {GLatLng} 
-   
-  Util.fromPointToLatLng  =  function (point, opt_sr) {
-    var srid  = point.spatialReference || opt_sr;
-    var sr  =  srid?SpatialReferences.getSpatialReference(srid.wkid):WGS84;
-    sr  = sr || WGS84;
-    if (isNaN(point.x) || isNaN(point.y)) {
-      return null;
-    }
-    var p  =  sr.reverse([point.x, point.y]);
-    return new G.LatLng(p[1], p[0]);
-  };
-  */
-  /*
-   * Helper method to convert <code>GLatLngBounds</code> to a {@link ArcGISPoint} 
-   * object with the given {@link SpatialReference}. If SR not specified,
-   *  it will be converted to WGS84.
-   * @param {google.maps.LatLng} gLatLng
-   * @param {SpatialReference} opt_sr
-   * @return {Point} 
-   
-  Util.fromLatLngToPoint  =  function (gLatLng, opt_sr) {
-    var sr  = null;
-    if (opt_sr) {
-      sr  = (opt_sr instanceof SpatialReference)?opt_sr:SpatialReferences.getSpatialReference(opt_sr.wkid);
-    } 
-    sr  = sr || WGS84;
-    var p  =  sr.forward([gLatLng.lng(), gLatLng.lat()]);
-    return {
-      x: p[0],
-      y: p[1],
-      spatialReference: {
-        wkid: sr.wkid
-      }
-    };
-  };
-  */
   
   
   var arcgis = {
@@ -3158,6 +2949,8 @@
     'TransverseMercator': TransverseMercator,
     'FlatSpatialReference': FlatSpatialReference,
     'SpatialReferences': SpatialReferences,
+    'SpatialRelationship': SpatialRelationship,
+    'GeometryType': GeometryType,
     'Catalog': Catalog,
     'MapService': MapService,
     'Layer': Layer,
@@ -3173,137 +2966,9 @@
   var NS = namespace('gmaps');
   NS.ags = arcgis;
 })();
- /**
- * @name Geometry
- * @class This is the abstract class representing JSON geometry in the 
- *  REST API. 
- * The following types are supported: points, polylines, polygons and envelopes.
- * for more information, see <a href = 
- * 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geometry.html'>
- *  Geometry Objects</a>.
- *   <br/> There is no constructor for this class. See subclasses.
- * @property {SpatialReference} [spatialReference]  <b> wkid/wkt info only</b>.
- */	
-/**
- * @name Point
- * @class A point contains x and y fields along with a spatialReference field.
- * <br/> There is no constructor for this class. Use javascript object literal.
- * Example:
- * <pre>
-    {
-    "x" : -118.15, "y" : 33.80, "spatialReference" : {"wkid" : 4326}
-    }
- * </pre>
- * @property {Number} [x] value of x.
- * @property {Number} [y] value of y.
- * @property {SpatialReference} [spatialReference]  <b> wkid info only</b>.
- */	
-/**
- * @name Polyline
- * @class A polyline contains an array of paths and a spatialReference.
- * <br/> There is no constructor for this class. Use javascript object literal. 
- * Example:
- * <pre>
-    {
-    "paths" : [ 
-     [ [-97.06138,32.837], [-97.06133,32.836], [-97.06124,32.834] ], 
-     [ [-97.06326,32.759], [-97.06298,32.755] ]
-    ],
-    "spatialReference" : {"wkid" : 4326}
-    }
- * </pre>
- * 
- * @property {Number[][][]} [paths] coords of the polyline.
- * @property {SpatialReference} [spatialReference]  <b> wkid/wkt info only</b>.
- */	
- /**
- * @name Polygon
- * @class A polygon contains an array of rings and a spatialReference.
- * <br/> There is no constructor for this class. Use javascript object literal. 
- * Example:
- * <pre>
-    {
-    "rings" : [ 
-     [ [-97.06138,32.837], [-97.06133,32.836], [-97.06124,32.834], 
-     [-97.06127,32.832], [-97.06138,32.837] ], 
-     [ [-97.06326,32.759], [-97.06298,32.755], [-97.06153,32.749], 
-     [-97.06326,32.759] ]
-    ],
-    "spatialReference" : {"wkid" : 4326}
-    }
- * </pre>
- * 
- * @property {Number[][][]} [rings] coords of the Polygon.
- * @property {SpatialReference} [spatialReference]  <b> wkid/wkt info only</b>.
- */	
- /**
- * @name Multipoint
- * @class A multipoint contains an array of points and a spatialReference.
- * <br/> There is no constructor for this class. Use javascript object literal. 
- * Example:
- * <pre>
-    {
-    "points" : [ [-97.06138,32.837], [-97.06133,32.836], [-97.06124,32.834], 
-     [-97.06127,32.832] ],
-    "spatialReference" : {"wkid" : 4326}
-    }
- * </pre>
- * 
- * @property {Number[][]} [points] coords of the Multipoint.
- * @property {SpatialReference} [spatialReference]  <b> wkid/wkt info only</b>.
- */	
- /**
- * @name Envelope
- * @class Instances of this class are used to represent an area with bounds.
- * It is similar to <a href='http://code.google.com/apis/maps/documentation/javascript/reference.html#LatLngBounds'>GLatLngBounds</a>
- * but the coordinates are in map units. 
- * <br/> There is no constructor for this class. Use javascript object literal. 
- * Example:
- * <pre>
-    {
-    "xmin" : -109.55, "ymin" : 25.76, "xmax" : -86.39, "ymax" : 49.94,
-    "spatialReference" : {"wkid" : 4326}
-    }
- * </pre>
- * @property {Number} [xmin] minimal value of x.
- * @property {Number} [ymin] minimal value of y.
- * @property {Number} [xmax] maximal value of x.
- * @property {Number} [ymax] maximal value of y.
- * @property {SpatialReference} [spatialReference]  <b> wkid/wkt info only</b>.
- */	
-/**
- * @name Feature
- * @class This class represent JSON feature object as returned by the REST API.
- *   There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/feature.html'>Feature Object</a>.
- * Syntax:
- * <pre>
-{
-  "geometry[]" : &lt;geometry>,
+ 
 
-  "attributes" : {
-    "name1" : &lt;value1>,
-    "name2" : &lt;value2>,
-  }
-}
- * </pre>
- * <p>Example:
- * <pre>
- {
-  "geometry" : {"x" : -118.15, "y" : 33.80},
-
-  "attributes" : {
-    "OWNER" : "Joe Smith",
-    "VALUE" : 94820.37,
-    "APPROVED" : true,
-    "LASTUPDATE" : 1227663551096
-  }
-}
- * </pre>
- * @property {Geometry} [geometry] geometry
- * @property {Object} [attributes] attributes as name-value JSON object.
- */
- /**
+ /* *
  * @name Domain
  * @class This class represent JSON domain objects as returned by the REST API. Domains specify the set of valid values for a field. 
  *   There is no constructor, use JavaScript object literal.
@@ -3329,7 +2994,7 @@
  * @property {Array} [codedValue] name-code pairs. only if type=codedValue.
  * @property {Array} [range] min,max values. only if type=codedValue.
  */ 
-/**
+/* *
  * @name Color
  * @class Color is represented as a 4-element array. The 4 elements represent values for red, green, blue and alpha in that order. Values range from 0 through 255.
  *   There is no constructor, use JavaScript object literal.
@@ -3339,7 +3004,7 @@
    [ &lt;red>, &lt;green>, &lt;blue>, &lt;alpha> ]
  * </pre>
  */ 
-/**
+/* *
  * @name SimpleMarkerSymbol
  * @class Simple marker symbols can be used to symbolize point geometries. The type property for simple marker symbols is esriSMS. 
  *   There is no constructor, use JavaScript object literal.
@@ -3362,7 +3027,7 @@
 
  * </pre>
  */ 
-/**
+/* *
  * @name SimpleLineSymbol
  * @class Simple line symbols can be used to symbolize polyline geometries. The type property for simple line symbols is esriSLS. 
  *   There is no constructor, use JavaScript object literal.
@@ -3378,7 +3043,7 @@
 
  * </pre>
  */ 
-/**
+/* *
  * @name SimpleFillSymbol
  * @class SimpleFillSymbol can be used to symbolize polygon geometries. The type property for simple line symbols is esriSFS. 
  *   There is no constructor, use JavaScript object literal.
@@ -3394,7 +3059,7 @@
 
  * </pre>
  */ 
-/**
+/* *
  * @name PictureMarkerSymbol
  * @class Picture marker symbols can be used to symbolize point geometries. The type property for picture marker symbols is esriPMS.  
  *  There is no constructor, use JavaScript object literal.
@@ -3413,7 +3078,7 @@
 }
  * </pre>
  */ 
-/**
+/* *
  * @name PictureFillSymbol
  * @class Picture fill symbols can be used to symbolize polygon geometries. The type property for picture fill symbols is esriPFS. 
  * There is no constructor, use JavaScript object literal.
@@ -3435,7 +3100,7 @@
 }
  * </pre>
  */ 
-/**
+/* *
  * @name TextSymbol
  * @class Text symbols are used to add text to a feature (labeling). The type property for text symbols is esriTS.
  * There is no constructor, use JavaScript object literal.
@@ -3464,7 +3129,7 @@
  }
  * </pre>
  */
-/**
+/* *
    * @name Field
    * @class This class represents a field in a {@link Layer}. It is accessed from
    * the <code> fields</code> property. There is no constructor for this class,
@@ -3475,7 +3140,7 @@
    * @property {Domain} [domain] domain
    * @property {Int} [length] length.
    */
-  /**
+  /* *
    * @name DrawingInfo
    * @class Layer rendering info
    * Syntax:<pre>
@@ -3489,7 +3154,7 @@
 }
   </pre>
   */
-  /**
+  /* *
    * @name TimeInfo
    * @class TimeInfo if the layer / table supports querying and exporting maps based on time.
    * Syntax:
@@ -3520,21 +3185,6 @@
   }
    * </pre>
    */
-  /**@name Error
-   * @class Error returned from Server.
-   * Syntax:
-   * <pre>
-   * {
-   "error" : 
-  {
-    "code" : 500, 
-    "message" : "Object reference not set to an instance of an object.", 
-    "details" : [
-      "'geometry' parameter is invalid"
-    ]
-  }
-  }
-  </pre>
-   */
+  
   
 

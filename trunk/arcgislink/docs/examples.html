@@ -325,10 +325,48 @@ mt3.google.com (4 hosts) </p>
 <div>
 <h2><a name="Identify"></a>Identify Map Feature</h2>
 <p> ArcGIS Map services support identify operation. The server will return feature behind map for any location. 
-Normally this is done via handling the 'click' event on map.
+Normally this is done via handling the 'click' event on map, then perform Identify 
+    opertion on a MapService.
 </p>
 <pre class="prettyprint">
-   
+    var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
+    svc = new gmaps.ags.MapService(url);
+    var agsType = new gmaps.ags.MapType([new gmaps.ags.TileLayer(svc)], {
+            opacity: 0.5
+    });
+    map.overlayMapTypes.insertAt(0, agsType);
+    google.maps.event.addListener(map, 'click', identify);
+    ..
+    
+    .. svc.identify({
+            geometry : evt.latLng,
+            tolerance : 3,
+            layerIds : [ 2, 3, 4 ],
+            layerOption : 'all',
+            bounds : map.getBounds(),
+            width: map.getDiv().offsetWidth,
+            height: map.getDiv().offsetHeight,
+            overlayOptions: ovOptions
+          }, function (results, err){
+            if (err) {
+              alert(err.message + err.details.join('\n'));
+            } else {
+              addResultToMap(results, evt.latLng);
+            }
+          });
+          ...
+          if (!iw) {
+              iw = new google.maps.InfoWindow({
+                content: container,
+                position: latlng
+              });
+            } else {
+              iw.setContent(container);
+              iw.setPosition(latlng);
+            }
+            iw.open(map);
+
+          
 </pre>
 
 <p>
@@ -342,35 +380,70 @@ Normally this is done via handling the 'click' event on map.
 <div>
 <h2><a name="LayerDef"></a>Layer Definition</h2>
 <p>You can draw a subset of a feature layer inside a dynamic map service 
-(<a href="reference.html#ArcGISMapOverlay">ArcGISMapOverlay</a>) by setting a 
-SQL expression as  its <code>definition</code> property. 
-You will have to use the <a href="reference.html#ArcGISLayer">ArcGISLayer</a> 
-class in the REST part of the libarary.</p>
+(<a href="reference.html#MapOverlay">MapOverlay</a>) by setting a 
+SQL expression as  its <code>definition</code> property. If you want to dynamically get the layer
+ ids, you should listen to the 'load' event of the underline map service. 
+    You can also set it by passing exportOption property in the MapOverlay 
+    constructor.</p>
 <pre class="prettyprint">
-var service = dynaLayer.getMapService();
-service.getLayer("Coarse Counties").definition="STATE_NAME='Kansas' and POP2007 &gt; 25000";
-service.getLayer("Detailed Counties").definition="STATE_NAME='Kansas' and POP2007 &gt; 25000";
-service.getLayer("states").definition="STATE_NAME='Kansas'";
+   var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer';
+    dynamap = new gmaps.ags.MapOverlay(url);
+    // set definition after map service load event.
+    google.maps.event.addListenerOnce(dynamap.mapService, 'load', function(){
+      var service = dynamap.mapService;
+      service.getLayer("Coarse Counties").definition = "STATE_NAME='Kansas' and POP2007>25000";
+      service.getLayer("Detailed Counties").definition = "STATE_NAME='Kansas' and POP2007>25000";
+      service.getLayer("states").definition = "STATE_NAME='Kansas'";
+      dynamap.setMap(map);
+    });
+    
+    // set definitions in constructor, hard coded layer ids.
+    dynamap2 = new gmaps.ags.MapOverlay(url, {
+      exportOptions: {
+        layerIds:[5,4,3],
+        layerOption: 'show',
+        layerDefinitions: {
+          '5': "STATE_NAME='New Mexico'",
+          '4': "STATE_NAME='New Mexico' and POP2007>25000",
+          '3': "STATE_NAME='New Mexico' and POP2007>25000"
+        }
+      }
+    });
+    dynamap2.setMap(map);
 </pre>
 
 <p>
 <a href="../examples/layerdef.html">View example </a> |
 <a href="../examples/layerdef.html?compressed">Compressed </a> | 
+<a href="../examples/nexus.html?u=layerdef.html">Phone Size </a> | 
 <a href="#Top">Back to top</a>
 </p>
 </div>
 <div>
 <h2><a name="LayerVis"></a>Layer Visibility (TOC)</h2>
 <p> You can control visibility of a layer inside a dynamic map service
- (<a href="reference.html#ArcGISMapOverlay">ArcGISMapOverlay</a>)
- by setting its <code>visible</code> property. There are some limitations on 
-the scale threshold on layers in the REST API. 
-You will have to load the layer resource individually if you
-want to do a TOC that handles scales. 
+ (<a href="reference.html#MapOverlay">MapOverlay</a>)
+ by setting its <code>visible</code> property.
  <pre class="prettyprint">
-var service = dynaLayer.getMapService();
-service.getLayer("states").visible = true;
-dynaLayer.refresh();
+   function init(){
+     ....
+     var toc = '';
+     for (var i = 0; i < service.layers.length; i++) {
+       toc += '&lt;input type="checkbox" id="layer' + service.layers[i].id + '"';
+       if (service.layers[i].visible) toc += ' checked="checked"';
+        toc += ' onclick="setVis()">' + service.layers[i].name + '&lt;br/>';
+     }
+     document.getElementById('toc').innerHTML = toc;
+   } 
+    
+   function setVis() {
+     var service = dynamap.mapService;
+     for (var i = 0; i &lt; service.layers.length; i++) {
+       var el = document.getElementById('layer' + service.layers[i].id);
+       service.layers[i].visible = (el.checked === true);
+     }
+     dynamap.refresh();
+   }
 </pre>
 
 <p>
@@ -388,27 +461,24 @@ background, it's helpful to let the user know about it.
 You can display some sort of hourglass animation image or simply a
 message such as "loading...". 
 You can accomplish this by handling different "<code>***start</code>" 
-and "<code>***end</code>" events, or use <code>ArcGISUtil#jsonpstart</code> 
-and <code>ArcGISUtil#jsonpend</code> event to monitor all server requests
-</p> 
+and "<code>***end</code>&quot; events.</p> 
 <pre class="prettyprint">
-GEvent.addListener(dynaLayer, 'drawstart', function(){
-  document.getElementById('drawing').style.visibility = 'visible';
-});
-GEvent.addListener(dynaLayer, 'drawend', function(){
-  document.getElementById('drawing').style.visibility = 'hidden';
-});
-GEvent.addListener(ArcGISUtil, 'jsonpstart', function(){
-  document.getElementById('working').innerHTML = "working....";
-});
-GEvent.addListener(ArcGISUtil, 'jsonpend', function(){
-  document.getElementById('working').innerHTML = '';
-});
+  var dynamap = new gmaps.ags.MapOverlay(url);//, { opacity: 0.5 });
+  
+  google.maps.event.addListener(dynamap, 'drawstart', function(){
+    document.getElementById('drawing').style.visibility = 'visible';
+  });
+  google.maps.event.addListener(dynamap, 'drawend', function(){
+    document.getElementById('drawing').style.visibility = 'hidden';
+  });
+  dynamap.setMap(map);
+
 </pre>
 
 <p>
 <a href="../examples/hourglass.html">View example </a> |
 <a href="../examples/hourglass.html?compressed">Compressed </a> | 
+<a href="../examples/nexus.html?u=hourglass.html">Phone Size </a> | 
 <a href="#Top">Back to top</a>
 </p>
 </div>
