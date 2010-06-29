@@ -114,11 +114,10 @@
             
             function highlight(g, html, latlng){
               if (highlighted) {
-			  	alert('a');
 			  	highlighted.setOptions(style);
               }
-              highlighted = g;
               g.setOptions(hStyle);
+              highlighted = g;
               if (!iw) {
                 iw = new google.maps.InfoWindow({
                   content: html,
