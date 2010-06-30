@@ -28,13 +28,16 @@
         caches built using Google/Bing scheme to get the more stable and reliable 
         behavior. </p>
 <table style='border:0px'>
+<tr>
+<th>Map</th><th>Data/Geocode</th>
+</tr>
   <tr>
-    <td style='border:0px'>
+    <td>
        
       <ul>
 <li><a href="#Mercator">Cached Map (Web Mercator</a>)</li>
 <li><a href="#Dyna">Dynamic Map Service</a></li>
-<li><a href="#Combined">Combining Cached and Dynamic Maps</a></li>
+<li><a href="#Combined">Combining Cached and Dynamic</a></li>
 <li><a href="#MapTypeOverlay">Cached Map as Overlay</a></li>
 <li><a href="#StatePlane">State Plane Coordinate System</a></li>
 <li><a href="#ArcGISOnline">ArcGISOnline Maps</a></li>
@@ -42,17 +45,17 @@
 <li><a href="#Hosts">Rotating Hosts for Tiles</a></li>
 </ul>
     </td>
-    <td style="border:0px">
+    <td>
    <ul>
    <li><a href="#Identify">Identify Map</a></li>
    <li><a href="#LayerDef">Layer Definition</a></li>
    <li><a href="#LayerVis">Layer Visibility (TOC)</a></li>
    <li><a href="#HourGlass">Show &quot;Hourglass&quot; using events</a></li>
-   <li><a href="#LayerQuery">Layer Query / Mouseover</a></li>
+   <li><a href="#LayerQuery">Layer Query w/ Mouseover</a></li>
    <li><a href="#Find">Find</a></li>
    <li><a href="#Geocode">Geocode</a></li>
    <li><a href="#ReverseGeocode">ReverseGeocode</a></li>
-   <li><a href="#Generic">Generic ArcGIS Viewer</a></li>
+   <li><a href="#Overlay">Dynamic Service Viewer</a></li>
    </ul>
    </td>
   </tr>
@@ -490,40 +493,50 @@ You can also attach mouse events to those overlays to
 make the application more interactive.
 </p> 
 <pre class="prettyprint">
-function initFunctionality(){
-  var layer = dyna.getMapService().getLayer(3);
-  var params = {
-    returnGeometry: true,
-    where: "STATE_NAME = 'South Carolina'",
-    outFields: ["NAME", "POP2000", "POP2007", "POP00_SQMI", "POP07_SQMI"],
-    outSR: 4326
-  };
-  layer.query(params, processResultSet);
-}
-
-function processResultSet(rs){
-  var fs = rs.features;
-  for (var i = 0, c = fs.length; i &lt; c; i++) {
-    var ovs = createGPolys(fs[i], rs.spatialReference);
-    for (var j = 0; j &lt; ovs.length; j++) {
-      gmap.addOverlay(ovs[j]);
+...
+    var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer';
+    var layer = new gmaps.ags.Layer(url + '/3');
+    var params = {
+      returnGeometry: true,
+      where: "STATE_NAME = 'Wyoming'",
+      outFields: ["NAME", "POP2000", "POP2007", "POP00_SQMI", "POP07_SQMI"],
+      overlayOptions: {
+        polygon: style
+      }
+    };
+    layer.query(params, processResultSet);
     }
-  }
-}
-
-function createGPolys(feat, sr){
-  var ovs = ArcGISUtil.fromFeatureToOverlays(feat,sr, style);
-  var ov = ovs[j];
-  GEvent.addListener(ov, 'mouseover', function(){
-    for (var i = 0, ic = ovs.length; i &lt; ic; i++) {
-      ovs[i].setStrokeStyle({color: hStyle.outlineColor,weight: hStyle.outlineWeight});
-      ovs[i].setFillStyle({ color: hStyle.fillColor,opacity: hStyle.fillOpacity});
+    
+    function processResultSet(rs) {
+      var fs = rs.features;
+      for (var i = 0, c = fs.length; i &lt; c; i++) {
+        setupFeature(fs[i]);
+      }
     }
-    var latlng = ov.getBounds().getCenter();
-    gmap.openInfoWindowHtml(latlng, html);
-  }); 
-  return ovs;
-}
+    
+    function setupFeature(feat) {
+        var a = feat.attributes;
+        var html = "&lt;div id='iwdiv' style='font-size:12px'>&lt;b>" + a['NAME'] + "&lt;/b>&lt;hr/>" +
+        "&lt;b>2000 Population: &lt;/b>" +
+        ...;
+        var g = feat.geometry[0];//V3 supports multiple rings, so should have only 1 element
+        var latlng = getSimpleCenter(g);
+        g.setMap(map);
+        google.maps.event.addListener(g, 'mouseover', function() {
+          highlight(g, html, latlng);
+        });
+        google.maps.event.addListener(g, 'mouseout', function() {
+          g.setOptions(style);
+          if (iw) { iw.close(); }
+        });
+        google.maps.event.addListener(g, 'click', function() {
+          highlight(g, html, latlng);
+        });
+    }
+    
+    ...
+    
+    
 </pre>
 
 <p>
@@ -538,27 +551,29 @@ function createGPolys(feat, sr){
 single String. It will search the attribute columns
 of the map layers inside the map service and return matching features.</p>
 <pre class="prettyprint">
-var params = {
-  returnGeometry: true,
-  searchText: q,
-  contains:!exact,
-  layers:['Cities','Rivers','States'],
-  searchFields:["CITY_NAME","NAME","SYSTEM","STATE_ABBR","STATE_NAME"],
-  sr: 4326
-};
-service.find(params, processFindResults);
-      
-function processFindResults(rs) {
-  var fs = rs.results;
-  for (var i = 0, c = fs.length; i &lt; c; i++) {
-    processFindResult(fs[i]);
-  }
-}
+    function find(q) {
+      removeOverlays();
+      if (iw) iw.close();
+      document.getElementById('results').innerHTML = '';
+      var exact = document.getElementById('exact').checked;
+      var params = {
+        returnGeometry: true,
+        searchText: q,
+        contains: !exact,
+        layerIds: [0,2], // city, state
+        searchFields: ["CITY_NAME", "NAME", "SYSTEM", "STATE_ABBR", "STATE_NAME"],
+        sr: 4326
+      };
+      service.find(params, processFindResults);
+    }
     
-function processFindResult(res) {
-  var ovs = ArcGISUtil.fromFeatureToOverlays(res);
-  gmap.addOverlays(ovs);
-}
+    
+    function processFindResults(rs) {
+      var fs = rs.results;
+      for (var i = 0, c = fs.length; i < c; i++) {
+        processFindResult(fs[i]);
+      }
+    }
 </pre>
 
 <p>
@@ -571,32 +586,46 @@ function processFindResult(res) {
 <h2><a name="Geocode"></a>Geocode</h2>
 <p>You can get the coordinates of a location by passing itss address 
 or other descriptions. You can use 
-<a href="reference.html#ArcGISGeocodeService">ArcGISGeocodeService</a>'s 
+<a href="reference.html#GeocodeService">GeocodeService</a>'s 
 <code>findAddressCandidates</code> method. You can dynamically construct 
 an input form based on the meta data of the GeocodeService such as 
-'addressFields' property.</p> 
+'addressFields' property after it's <b>load</b> event.</p> 
  
 <pre class="prettyprint">
-var inputs = { };
-var fields=geocoder.addressFields;
-for (var i=0; i &lt; fields.length; i++){
-  inputs[fields[i].name]=document.getElementById(fields[i].name).value;
-}
-geocoder.findAddressCandidates({inputs: inputs}, function(results) {
-  var markers = [];
-  if (results.candidates) {
-    for (var i = 0, c = results.candidates.length; i &lt; c; i++) {
-      var marker=createMarker(results.candidates[i]);
-      map.addOverlay(marker);
-      markers.push(marker);
-      if (i == 0) {
-        map.setCenter(marker.getLatLng(),15);
-        GEvent.trigger(marker, 'click');
-      }
-    }
-  }
-});
-</pre>
+  geocoder = new gmaps.ags.GeocodeService('http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Locators/ESRI_Geocode_USA/GeocodeServer');
+ ...    
+      geocoder.findAddressCandidates({
+        inputs: {
+          Address: '380 new york st',
+          State: 'CA',
+          City: 'redlands',
+          Zip: '92373'
+        }
+      }, function(results) {
+        if (results.candidates) {
+          for (var i = 0, c = results.candidates.length; i < c; i++) {
+            var marker = createMarker(results.candidates[i]);
+            marker.setMap(map);
+            ...
+          }
+        }
+      });
+   ...
+  function createMarker(gc) {
+    var html = 'Matched Address:' + gc.address;
+    var latlng = gc.location;
+    var marker = new google.maps.Marker({
+      title: gc.address,
+      position: latlng
+    });
+    google.maps.event.addListener(marker, 'click', function() {
+      iw.setContent(html);
+      iw.setPosition(latlng);
+      iw.open(map);
+    });
+    return marker;
+  } 
+  </pre>
 
 <p>
 <a href="../examples/geocode.html">View example </a> |
@@ -604,39 +633,49 @@ geocoder.findAddressCandidates({inputs: inputs}, function(results) {
 <a href="#Top">Back to top</a>
 </p>
 </div>
-<div>
-  <div>
+ <div>
 <h2><a name="ReverseGeocode"></a>Reverse Geocode</h2>
 <p>You can also find the address of a given geographic coordinates 
 (reverse geocode), using 
 <a href="reference.html#GeocodeService">GeocodeService</a>'s 
-<code>reverseGeocode</code> method.</p> 
+<code>reverseGeocode</code> method. In the following example, when user clicked map 
+    or dragged marker, the location is passed into a reverse geocode operation for 
+    address. </p> 
 <pre class="prettyprint">
-function reverseGeocode(latlng){
-  if (latlng){
-    var point = ArcGISUtil.fromLatLngToPoint(latlng);
-    var params = {
-      location: point,
-      distance: 100
-    };
-    geocoder.reverseGeocode(params, function(result) {
-      if (result.address) {
-        var html = '';
-        var attrs = result.address;
-        for (var x in attrs) {
-    if (attrs.hasOwnProperty(x)) {
-      html += x +': '+ attrs[x] + '&lt;br/&gt;';
-    }
-        }
-        var loc=ArcGISUtil.fromPointToLatLng(result.location);
-        marker.setLatLng(loc);
-        marker.openInfoWindowHtml(html);
-      } else { 
-        alert('can not find address for point:'+latlng.toString());
-      }
+geocoder = new gmaps.ags.GeocodeService('http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Locators/ESRI_Geocode_USA/GeocodeServer');
+   ...
+    google.maps.event.addListener(map, 'click', function(evt) {
+      reverseGeocode(evt.latLng);
     });
-  }      
-}
+    google.maps.event.addListener(marker, 'dragend', function(evt) {
+      reverseGeocode(evt.latLng);
+    });
+   ...
+   function reverseGeocode(latlng) {
+    if (latlng) {
+      var params = {
+        location: latlng,
+        distance: 100
+      }
+      geocoder.reverseGeocode(params, function(result) {
+        if (result.address) {
+          var html = '';
+          var attrs = result.address;
+          for (var x in attrs) {
+            if (attrs.hasOwnProperty(x)) {
+              html += x + ': ' + attrs[x] + '&lt;br/>';
+            }
+          }
+          marker.setPosition(result.location);
+          iw.setContent(html);
+          iw.open(map);
+        } else {
+          alert('can not find address for point:' + latlng.toString());
+        }
+      });
+    }
+    
+ }
 </pre>
 
 <p>
@@ -645,7 +684,59 @@ function reverseGeocode(latlng){
 <a href="#Top">Back to top</a>
 </p>
 </div>
+ <div>
+<h2><a name="Overlay"></a>Dynamic Service Viewer</h2>
+<p>The following example combines several tools together. It loads a map service, add it as an overlay. 
+There is a table of contents (TOC) that lists layers, and gray out them if not visible at current scale. 
+The map click is also wired to identify operation with layer options (top most, all etc).
+ </p> 
+<pre class="prettyprint">
+    var map, ov, iw, marker;
+    function init() {
+      var myOptions = {
+        zoom: 4,
+        center: new google.maps.LatLng(40, -100),
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        draggableCursor: 'default'
+      }
+      map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+      loadMapService();
+      google.maps.event.addListener(map, 'click', function(e) {
+        doIdentify(e.latLng);
+      });
+      google.maps.event.addListener(map, 'zoom_changed', updateTOC);
+      
+    }
+    function loadMapService() {
+    ...
+      ov = new gmaps.ags.MapOverlay(url, {
+        opacity: document.getElementById('op').value
+      });
+      google.maps.event.addListener(ov.mapService, 'load', function() {
+       ...
+      });
+    }
+    
+    function updateTOC() {
+     ...
+    }
+    function setLayerVisibility() {
+     ...   ov.refresh();
+    }
+    function doIdentify(location) {
+    ..
+    }
+    function processIdentifyResults(res, ll) {
+    ..  
+    }
+</pre>
 
+<p>
+<a href="../examples/simpleags.html">View example </a> |
+<a href="../examples/simpleags.html?compressed">Compressed </a> | 
+<a href="#Top">Back to top</a>
+</p>
+</div>
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
