@@ -10,7 +10,7 @@
         </script>
         <script type="text/javascript">
             var map = null;
-			// keep track of highlight for devices without mouse
+            // keep track of highlight for devices without mouse
             var highlighted = null;
             var iw = null;
             
@@ -31,12 +31,11 @@
               strokeOpacity: 1,
               zIndex: 0
             };
-            function init(){
+            function init() {
               var myOptions = {
                 zoom: 6,
                 center: new google.maps.LatLng(43, -106),
-                mapTypeId: google.maps.MapTypeId.ROADMAP,
-                streetViewControl: true //my favorite feature in V3!
+                mapTypeId: google.maps.MapTypeId.ROADMAP
               };
               map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
               var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer';
@@ -52,14 +51,14 @@
               layer.query(params, processResultSet);
             }
             
-            function processResultSet(rs){
+            function processResultSet(rs) {
               var fs = rs.features;
               for (var i = 0, c = fs.length; i < c; i++) {
                 setupFeature(fs[i]);
               }
             }
             
-            function setupFeature(feat){
+            function setupFeature(feat) {
               var a = feat.attributes;
               var html = "<div id='iwdiv' style='font-size:12px'><b>" + a['NAME'] + "</b><hr/>" +
               "<b>2000 Population: </b>" +
@@ -75,23 +74,23 @@
               a['POP07_SQMI'] +
               '</div>';
               var g = feat.geometry[0];//V3 supports multiple rings, so should have only 1 element
-              var latlng = getSimpleCenter(g);
+              var latlng = getPolyCenter(g);
               g.setMap(map);
-              google.maps.event.addListener(g, 'mouseover', function(){
+              google.maps.event.addListener(g, 'mouseover', function() {
                 highlight(g, html, latlng);
               });
-              google.maps.event.addListener(g, 'mouseout', function(){
+              google.maps.event.addListener(g, 'mouseout', function() {
                 g.setOptions(style);
                 if (iw) {
                   iw.close();
                 }
               });
-              google.maps.event.addListener(g, 'click', function(){
+              google.maps.event.addListener(g, 'click', function() {
                 highlight(g, html, latlng);
               });
             }
             
-            function getSimpleCenter(poly){
+            function getPolyCenter(poly) {
               var paths, path, latlng;
               var lat = 0;
               var lng = 0;
@@ -112,9 +111,9 @@
               return null;
             }
             
-            function highlight(g, html, latlng){
+            function highlight(g, html, latlng) {
               if (highlighted) {
-			  	highlighted.setOptions(style);
+                highlighted.setOptions(style);
               }
               g.setOptions(hStyle);
               highlighted = g;
@@ -124,8 +123,7 @@
                   position: latlng,
                   maxWidth: 240
                 });
-              }
-              else {
+              } else {
                 iw.setContent(html);
                 iw.setPosition(latlng);
               }

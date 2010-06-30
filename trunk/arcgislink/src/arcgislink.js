@@ -87,10 +87,10 @@
  *    {@link FindResult}<br/>
  *     </td>
  *     <td style = 'border:0px;width:200px'>
- *    {@link GeocodeParameters}<br/>
+ *    {@link GeocodeOptions}<br/>
  *    {@link GeocodeResults}<br/>
  *    {@link GeocodeResult}<br/>
- *    {@link ReverseGeocodeParameters}<br/>
+ *    {@link ReverseGeocodeOptions}<br/>
  *    {@link ReverseGeocodeResult}<br/>
  *    </td>
  *     <td style = 'border:0px;width:200px'>
@@ -270,7 +270,7 @@
       ret += ', ' + (endTime.getTime() - endTime.getTimezoneOffset() * 60000);
     } 
     return ret;
-  }
+  };
   /**
    * Set opacity of a node.
    * @param {Node} node
@@ -292,6 +292,18 @@
     }
   };
   
+  var getLayerDefsString = function (defs) {
+    var strDefs = '';
+    for (var x in defs) {
+      if (defs.hasOwnProperty(x)) {
+        if (strDefs.length > 0) {
+          strDefs += ';';
+        }
+        strDefs += (x + ':' + defs[x]);
+      }
+    }
+    return strDefs;
+  }; 
   var log = function (msg) {
     if (window.console) {
       console.log(msg);
@@ -309,12 +321,10 @@
  */
   var RAD_DEG  =  Math.PI / 180;
  
-  // The JSDOC tool not work with enums yet?
-  
-  /*
-   * A list of utilities ((<code>gmaps.gis.Util</code>) 
+  /**
+   * A set of utilities ((<code>gmaps.gis.Util</code>) 
    * for commonly used functions.
-   * @name ArcGISUtil
+   * @name Util
    * @namespace
    */
   var Util = {};
@@ -384,116 +394,6 @@
      */
     triggerEvent(Util, 'jsonpstart', sid);
     return sid;
-  };
-  /**
-   * @private for now.
-   * Get the computed value of a property in an option Hierarchy: root, serviceOptions, layerOptions, etc.
-   * passing default value, option object
-   * @param {Object} defaultValue
-   * @param {Object} options
-   * @param {String} propName
-   * @param {String} opt_serviceName
-   * @param {String} opt_layerName
-   * @return {Object}
-   
-  Util.getOptionValue = function (defaultValue, options, propName, opt_serviceName, opt_layerName) {
-    var val = augmentObject(defaultValue, {});
-    if (options) {
-      val = augmentObject(options[propName], val, true);
-      if (opt_serviceName && options.serviceOptions && options.serviceOptions[opt_serviceName]) {
-        var svcOpts = options.serviceOptions[opt_serviceName];
-        val = augmentObject(svcOpts[propName], val, true);
-        if (opt_layerName && svcOpts.layerOptions && svcOpts.layerOptions[opt_layerName]) {
-          var layOpts = svcOpts.layerOptions[opt_layerName];
-          val = augmentObject(layOpts[propName], val, true);
-        }
-      }
-    }
-    return val;
-  };
-*/
-  
-  /**
-   * Some operations such as identify and find are operated against multiple layers.
-   * The results are in a flat list. This method will group the result by layer and
-   * return an object with key as layer name, value as a {@link ResultSet}.
-   * @param {IdentifyResults|FindResults} results
-   * @return {Object}
-   */
-  Util.groupResultsByLayer = function (json) {
-    var ret = {};
-    var res, layerName;
-    var results = json.results;
-    if (results) {
-      for (var i = 0, c = results.length; i < c; i++) {
-        res = results[i];
-        layerName = res.layerName;
-        if (!ret[layerName]) {
-          var fieldAliases = {};//[];
-          for (var x in res.attributes) {
-            if (res.attributes.hasOwnProperty(x)) {
-             // fields.push(x);
-              fieldAliases[x] = x;
-            }
-          }
-          var set = {
-            displayFieldName: res.displayFieldName,
-            spatialReference: res.geometry ? res.geometry.spatialReference : null,
-            geometryType: res.geometryType,
-            fieldAliases: fieldAliases,
-            features: []
-          };
-          ret[layerName] = set;
-        }
-        // more than we need but no need to remove them.
-        ret[layerName].features.push(res);
-      }
-    }
-    return ret;
-  };
-  /**
-   * @private for now
-   * Get html for a resultset
-   * @param {Object} res
-   * @param {Boolean} vertical
-   */
-  Util.getResultSetHtml = function (res, style) {
-    var html = '<table class="ags-resultset">';
-    var i, j, c, d;
-    style = style || (res.features.length === 1? 'v' : 'h');
-    var fields = [];
-    for (var x in res.fieldAliases) {
-      if (res.fieldAliases.hasOwnProperty(x)) {
-        fields.push(x);
-      }
-    }
-    if (style === 'h') {
-      html += '<tr>';
-      for (i = 0, c = fields.length; i < c; i++) {
-        html += '<th class="ags-fieldname">' + res.fieldAliases[fields[i]] + '</th>';
-      }
-      html += '</tr>';
-    }
-    for (i = 0, c = res.features.length; i < c; i++) {
-      var atts = res.features[i].attributes;
-      if (style === 'h') {
-        html += '<tr>';
-      } else if (i > 0) {
-        html += '<tr><td colspan="2"><hr/></td></tr>';
-      }
-      for (j = 0, d = fields.length; j < d; j++) {
-        if (style === 'h') {
-          html += '<td class="ags-fieldvalue">' + atts[fields[j]] + '</td>';
-        } else {
-          html += '<tr><td class="ags-fieldname">' + res.fieldAliases[fields[j]] + '</td><td class="ags-fieldvalue">' + atts[fields[j]] + '</td></tr>';
-        }
-      }
-      if (style === 'h') {
-        html += '</tr>';
-      }
-    }
-    html += '</table>';
-    return html;
   };
   /**
    * @name Config
@@ -1237,56 +1137,60 @@
    * @return {OverlayView[]} 
    */
   var fromJSONToOverlays = function (geom, opts, opt_title) {
-    var ovs = [];
+    var ovs = null;
     var sr = null;
     var ov;
     var x, i, ic, j, jc, parts, part, lnglat, latlngs;
     var title = '';
     opts = opts || {};
-    if (geom.x) {
-      ov = new G.Marker(augmentObject(opts.marker, {
-        position: new G.LatLng(geom.y, geom.x)
-      }));
-      ovs.push(ov);
-    } else {
-      //mulpt, line and poly
-      parts = geom.points || geom.paths || geom.rings;
-      if (!parts) {
-        return ovs;
-      }
-      var rings = [];
-      for (i = 0, ic = parts.length; i < ic; i++) {
-        part = parts[i];
-        if (geom.points) {
-          // multipoint
-          ov = new G.Marker(augmentObject(opts.marker, {
-            position: new G.LatLng(part[1], part[0])
-          }));
-          ovs.push(ov);
-        } else {
-          latlngs = [];
-          for (j = 0, jc = part.length; j < jc; j++) {
-            lnglat = part[j];
-            latlngs.push(new G.LatLng(lnglat[1], lnglat[0]));
-          }
-          if (geom.paths) {
-            ov = new G.Polyline(augmentObject(opts.polyline, {
-              path: latlngs
-            }));
-            ovs.push(ov);
-          } else if (geom.rings) {
-            // V3 supports multiple rings
-            rings.push(latlngs);
-          }
-        }
-      }
-      if (geom.rings) {
-        ov = new G.Polygon(augmentObject(opts.polygon, {
-          paths: rings
+    if (geom) {
+      ovs = [];
+      if (geom.x) {
+        ov = new G.Marker(augmentObject(opts.marker, {
+          position: new G.LatLng(geom.y, geom.x)
         }));
         ovs.push(ov);
+      } else {
+        //mulpt, line and poly
+        parts = geom.points || geom.paths || geom.rings;
+        if (!parts) {
+          return ovs;
+        }
+        var rings = [];
+        for (i = 0, ic = parts.length; i < ic; i++) {
+          part = parts[i];
+          if (geom.points) {
+            // multipoint
+            ov = new G.Marker(augmentObject(opts.marker, {
+              position: new G.LatLng(part[1], part[0])
+            }));
+            ovs.push(ov);
+          } else {
+            latlngs = [];
+            for (j = 0, jc = part.length; j < jc; j++) {
+              lnglat = part[j];
+              latlngs.push(new G.LatLng(lnglat[1], lnglat[0]));
+            }
+            if (geom.paths) {
+              ov = new G.Polyline(augmentObject(opts.polyline, {
+                path: latlngs
+              }));
+              ovs.push(ov);
+            } else if (geom.rings) {
+              // V3 supports multiple rings
+              rings.push(latlngs);
+            }
+          }
+        }
+        if (geom.rings) {
+          ov = new G.Polygon(augmentObject(opts.polygon, {
+            paths: rings
+          }));
+          ovs.push(ov);
+        }
       }
     }
+    
     return ovs;
   };
   
@@ -1365,6 +1269,25 @@
     this.definition = null;
   }
   /**
+   * Load extra information such as it's fields from layer resource.
+   * If opt_callback function will be called after it is loaded
+   * @param {Function} opt_callback
+   */
+  Layer.prototype.loadInfo = function (opt_callback) {
+    var me = this;
+    if (this.loaded) {
+      return;
+    }
+    Util.getJSON(this.url, {}, 'callback', function(json) {
+      augmentObject(json, me);
+      me.loaded = true;
+      if (opt_callback) {
+        opt_callback();
+      }
+    });
+  };
+
+  /**
    * Returns all field names
    * @return {String[]}
   Layer.prototype.getFieldNames = function () {
@@ -1416,7 +1339,6 @@
     TOUCHES: 'esriSpatialRelTouches',
     WITHIN: 'esriSpatialRelWithin'
   };
- //  * @property {Number|SpatialReference} [inSR] The well-known ID of the spatial reference of the input geometries
    /**
    * @name QueryOptions
    * @class This class represent the parameters needed in an query operation for a {@link Layer}.
@@ -1449,7 +1371,7 @@
    * @property {String} [displayFieldName] display Field Name for layer
    * @property {Object} [fieldAliases] Field Name's Aliases. key is field name, value is alias.
    * @property {GemetryType} [geometryType] esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolygon | esriGeometryPolyline
-   * @property {Features[]} [features] result as array of {@link Feature}
+   * @property {Feature[]} [features] result as array of {@link Feature}
    * @property {String} [objectIdFieldName] objectIdFieldName when returnIdsOnly=true
    * @property {int[]} [objectIds] objectIds when returnIdsOnly=true
    */
@@ -1460,47 +1382,47 @@
    * @param {QueryOptions} params
    * @param {Function} callback
    */
- Layer.prototype.query = function (p, callback) {
-   if (!p) {
-     return;
-   }
-   // handle text, where, relationParam, objectIds, maxAllowableOffset
-   var params = augmentObject(p, {});
-   if (p.geometry && !isString(p.geometry)) {
-     params.geometry = fromOverlaysToJSON(p.geometry);
-     params.geometryType = getGeometryType(p.geometry);
-     params.inSR = 4326;
-   }
-   if (p.spatialRelationship) {
-     params.spatialRel = p.spatialRelationship;
-     delete params.spatialRelationship;
-   }
-   if (p.outFields && !isArray(p.outFields)) {
-     params.outFields = p.outFields.join(',');
-   }
-   if (p.objectIds) {
-     params.objectIds = p.objectIds.join(',');
-   }
-   if (p.time) {
-     params.time = getTimeString(p.time, p.endTime);
-   }
-   params.outSR = 4326;
-   params.returnGeometry = p.returnGeometry === false ? false : true;
-   params.returnIdsOnly = p.returnIdsOnly === true ? true : false;
-   Util.getJSON(this.url + '/query', params, 'callback', function(json) {
-     var i, f;
-     if (json.features) {
-       for (i = 0; i < json.features.length; i++) {
-         f = json.features[i];
-         if (f.geometry) {
-           f.geometry = fromJSONToOverlays(f.geometry, p.overlayOptions);
-         }
-       }
-     }
-     callback(json, json.error);
-   });
- };
- /**
+  Layer.prototype.query = function (p, callback) {
+    if (!p) {
+      return;
+    }
+    // handle text, where, relationParam, objectIds, maxAllowableOffset
+    var params = augmentObject(p, {});
+    if (p.geometry && !isString(p.geometry)) {
+      params.geometry = fromOverlaysToJSON(p.geometry);
+      params.geometryType = getGeometryType(p.geometry);
+      params.inSR = 4326;
+    }
+    if (p.spatialRelationship) {
+      params.spatialRel = p.spatialRelationship;
+      delete params.spatialRelationship;
+    }
+    if (p.outFields && !isArray(p.outFields)) {
+      params.outFields = p.outFields.join(',');
+    }
+    if (p.objectIds) {
+      params.objectIds = p.objectIds.join(',');
+    }
+    if (p.time) {
+      params.time = getTimeString(p.time, p.endTime);
+    }
+    params.outSR = 4326;
+    params.returnGeometry = p.returnGeometry === false ? false : true;
+    params.returnIdsOnly = p.returnIdsOnly === true ? true : false;
+    Util.getJSON(this.url + '/query', params, 'callback', function (json) {
+      var i, f;
+      if (json.features) {
+        for (i = 0; i < json.features.length; i++) {
+          f = json.features[i];
+          if (f.geometry) {
+            f.geometry = fromJSONToOverlays(f.geometry, p.overlayOptions);
+          }
+        }
+      }
+      callback(json, json.error);
+    });
+  };
+  /**
    * @name QueryRelatedRecordsParameters
    * @class This class represent the parameters needed in an query related records operation for a {@link Layer}.
    *   There is no constructor, use JavaScript object literal.
@@ -1848,16 +1770,7 @@
       defs = this.getLayerDefs();
     } 
     // for 9.3 compatibility:
-    var strDefs = '';
-    for (var x in defs) {
-      if (defs.hasOwnProperty(x)) {
-        if (strDefs.length > 0) {
-          strDefs += ';';
-        }
-        strDefs += (x + ':' + defs[x]);
-      }
-    }
-    params.layerDefs = strDefs;
+    params.layerDefs = getLayerDefsString(defs);
     var vlayers = eparams.layerIds;
     var layerOpt = eparams.layerOption || 'show';   
     if (vlayers === undefined) {
@@ -1960,9 +1873,12 @@
     params.tolerance = iparams.tolerance || 2;
     params.sr = 4326;
     params.imageDisplay = '' + iparams.width + ',' + iparams.height + ',' + (iparams.dpi || 96);
-    params.layers = (iparams.layerOption || 'all') + ':' + (iparams.layerIds || this.getLayerIds()).join(',');
+    params.layers = (iparams.layerOption || 'all');
+    if (iparams.layerIds) {
+      params.layers += ':' + iparams.layerIds.join(',');
+    }
     if (iparams.layerDefs) {
-      params.layerDefs = iparams.layerDefs;//TODO
+      params.layerDefs = getLayerDefsString(iparams.layerDefs);//TODO
     }
     params.maxAllowableOffset = iparams.maxAllowableOffset;
     params.returnGeometry = (iparams.returnGeometry === false ? false : true);
@@ -1995,21 +1911,19 @@
     });
   };
   /**
-   * @name FindParameters
+   * @name FindOptions
    * @class This class represent the parameters needed in an find operation for a {@link MapService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/find.html'>Find Operation</a>.
-   * @property {String} [f  = json] The response format. html | json .
    * @property {String} [searchText] The search string. This is the text that is searched across the layers and the fields that the user specifies.
    * @property {Boolean} [contains  = true] If false, the operation searches for an exact match of
    *   the searchText string. An exact match is case sensitive.
    *   Otherwise, it searches for a value that contains the searchText provided.
    *    This search is not case sensitive. The default is true.
-   * @property {String|String[]} [searchFields] The names of the fields to search. The fields are specified as a comma-separated list of field names.
+   * @property {String[]} [searchFields] The names of the fields to search. The fields are specified as a comma-separated list of field names.
    *    If this parameter is not specified, all fields are searched.
    *    <i>This can also be an array with field names </i>.
-   * @property {Number} [sr] The well-known ID of the spatial reference of the output geometries.
-   * @property {String} [layers] The layers to perform the find operation on. The layers to perform the find operation on.
+   * @property {Number[]} [layerIds] The layers to perform the find operation on. The layers to perform the find operation on.
    *   The layers are specified as a comma-separated list of layer ids. <i>It can also be an array of layer NAMEs</i>.
    * @property {Boolean} [returnGeometry  = true] If true, the resultset will include the geometries associated with each result.
    * @property {Number} [maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing
@@ -2033,35 +1947,61 @@
    * @property {String} [displayFieldName] displayFieldName
    * @property {String} [foundFieldName] foundFieldName
    * @property {String} [geometryType] esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope
-   * @property {Geometry} [geometry] {@link Geometry}
-   * @property {Object} [attributes] attributes as name-value JSON object.
+   * @property {Feature} [feature] {@link Feature}
    */
   /**
-   * Find features using the {@link FindParameters} and process {@link FindResults}
+   * Find features using the {@link FindOptions} and process {@link FindResults}
    * using the <code>callback</code> function.
    * For more info see <a
    * href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/find.html'>Find Operation</a>.
-   * @param {FindParameters} params
+   * @param {FindOptions} opts
    * @param {Function} callback
    */
-  MapService.prototype.find = function (fparams, callback) {
-    if (!fparams) {
+  MapService.prototype.find = function (opts, callback) {
+    if (!opts) {
       return;
     }
-    var params = augmentObject(fparams, {});
-    params.f = params.f || 'json';
-    if (params.layers && !isString(params.layers)) {
-      params.layers = this.getLayerIds(params.layers).join(',');
+    // handle searchText, contains, maxAllowableOffset
+    var params = augmentObject(opts, {});
+    if (opts.layerIds) {
+      params.layers = opts.layerIds.join(',');
+      delete params.layerIds;
     }
-    if (params.searchFields && !isString(params.searchFields)) {
-      params.searchFields = params.searchFields.join(',');
+    if (opts.searchFields) {
+      params.searchFields = opts.searchFields.join(',');
     }
-    params.contains = (params.contains === false ? false : true);
-    if (!params.layerDefs) {
-      params.layerDefs = this.getLayerDefs();
+    params.contains = (opts.contains === false ? false : true);
+    if (opts.layerDefinitions) {
+      params.layerDefs = getLayerDefsString(opts.layerDefinitions);
+      delete params.layerDefinitions;
     }
-    params.returnGeometry = (params.returnGeometry === false ? false : true);
-    Util.getJSON(this.url + '/find', params, 'callback', callback);
+    params.sr = 4326;
+    params.returnGeometry = (opts.returnGeometry === false ? false : true);
+    Util.getJSON(this.url + '/find', params, 'callback', function (json) {
+      var rets = null;
+      var i, js, f, g;
+      if (json.results) {
+        rets = [];
+        for (i = 0; i < json.results.length; i++) {
+          js = json.results[i];
+          g = fromJSONToOverlays(js.geometry, opts.overlayOptions);
+          rets.push({
+            feature: {
+              geometry: g,
+              attributes: js.attributes
+            },
+            displayFieldName: js.displayFieldName,
+            layerId: js.layerId,
+            layerName: js.layerName,
+            foundFieldName: js.foundFieldName,
+            value: js.value
+          });
+        }
+      }
+      callback({
+        results: rets
+      }, json.error);
+    });
   };
   
   /**
@@ -2154,7 +2094,7 @@
  *    Each entry is an object of type {@link ArcGISField}
  * @property {Field[]} [intersectionCandidateFields] intersectionCandidateFields
  *    Each entry is an object of type {@link ArcGISField}
- * @property {SpatialReference} [spatialReference] spatialReference <b>wkid info only</b>
+ * @property {SpatialReference} [spatialReference] spatialReference
  * @property {Object} [locatorProperties] an object with key-value pair that is specific to Locator type.
  */
   function GeocodeService(url) {
@@ -2174,6 +2114,9 @@
    */
   GeocodeService.prototype.init_ = function (json) {
     augmentObject(json, this);
+    if (json.spatialReference) {
+      this.spatialReference = SpatialReferences.getSpatialReference(json.spatialReference.wkid || json.spatialReference.wkt) || WGS84;
+    }
     this.loaded = true;
     /**
      * This event is fired when the service and it's service info is loaded.
@@ -2185,15 +2128,13 @@
   
   
 /**
- * @name GeocodeParameters
+ * @name GeocodeOptions
  * @class This class represent the parameters needed in a find address candidate operation
  *  on a {@link GeocodeService}.
  *   There is no constructor, use JavaScript object literal.
  * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.
- * @property {String} [f  = json] The response format. html | json |kmz.
  * @property {Object} [inputs] an object literal with name-value pair of input values.
  * @property {String|String[]} [outFields] The list of fields to be included in the returned resultset. 
- *   This list can be a comma delimited String or an array of String.
  * @property {int|SpatialReference} [outSR] 
  */
 /**
@@ -2212,7 +2153,7 @@
  *   There is no constructor, use JavaScript object literal.
  * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.
  * @property {String} [address] matched address
- * @property {Geometry} [location] matched location
+ * @property {google.maps.LatLng} [location] matched location
  * @property {Number} [score] matching score
  * @property {Object} [attributes] attributes as name-value JSON object. 
  * e.g. <code>{"StreetName" : "MASON", "StreetType" : "ST"}</code>
@@ -2222,14 +2163,13 @@
  *  resource. The result of this operation is a resource representing 
  *  the list of address candidates. This resource provides information 
  *  about candidates including the address, location, and score.
- *  param is an instance of {@link GeocodeParameters}. An instance of
+ *  param is an instance of {@link GeocodeOptions}. An instance of
  *  {@link GeocodeResults} will be passed into callback function.
- * @param {GeocodeParameters} params
+ * @param {GeocodeOptions} params
  * @param {Function} callback
  */
   GeocodeService.prototype.findAddressCandidates = function (gparams, callback) {
     var params = augmentObject(gparams, {});
-    params.f = params.f || 'json';
     if (params.inputs) {
       augmentObject(params.inputs, params);
       delete params.inputs;
@@ -2237,11 +2177,34 @@
     if (isArray(params.outFields)) {
       params.outFields = params.outFields.join(',');
     }
-    Util.getJSON(this.url + '/findAddressCandidates', params, 'callback', callback);
+    params.outSR = 4326;
+    var me = this;
+    Util.getJSON(this.url + '/findAddressCandidates', params, 'callback', function (json) {
+      var ret = null; 
+      if (json.candidates) {
+        var res, loc;
+        for (var i = 0; i < json.candidates.length; i++) {
+          ret = ret || [];
+          res = json.candidates[i];
+          loc = res.location;
+          if (!isNaN(loc.x) &&  !isNaN(loc.y)) {
+            var ll = [loc.x, loc.y];
+            if (me.spatialReference) {
+              ll = me.spatialReference.reverse(ll);
+            }
+            res.location = new G.LatLng(ll[1], ll[0]);
+            ret.push(res);
+          }
+        }
+      }
+      callback({
+        candidates: ret
+      }, json.error);
+    });
   };
   /**
    * Alias of <code>GeocodeService.findAddressCandidates</code>;
-   * @param {GeocodeParameters} params
+   * @param {GeocodeOptions} params
    * @param {Function} callback
    */
   GeocodeService.prototype.geocode = function (params, callback) {
@@ -2249,7 +2212,7 @@
   };
 
 /**
- * @name ReverseGeocodeParameters
+ * @name ReverseGeocodeOptions
  * @class This class represent the parameters needed in a reverseGeocode operation
  *  on a {@link GeocodeService}.
  *   There is no constructor, use JavaScript object literal.
@@ -2273,17 +2236,31 @@
 /**
  * The reverseGeocode operation is The reverseGeocode operation is performed on a geocode service resource. 
  * The result of this operation is a reverse geocoded address resource.
- *  param is an instance of {@link ReverseGeocodeParameters}. An instance of
+ *  param is an instance of {@link ReverseGeocodeOptions}. An instance of
  *  {@link ReverseGeocodeResult} will be passed into callback function.
- * @param {ReverseGeocodeParameters} params
+ * @param {ReverseGeocodeOptions} params
  * @param {Function} callback
  */
   GeocodeService.prototype.reverseGeocode = function (params, callback) {
-    params.f = params.f || 'json';
     if (!isString(params.location)) {
       params.location = fromOverlaysToJSON(params.location);
     }
-    Util.getJSON(this.url + '/reverseGeocode', params, 'callback', callback);
+    params.f = 'json';
+    params.outSR = 4326;
+    var me = this;
+    Util.getJSON(this.url + '/reverseGeocode', params, 'callback', function(json) {
+      if (json.location) {
+        var loc = json.location;
+        if (!isNaN(loc.x) && !isNaN(loc.y)) {
+          var ll = [loc.x, loc.y];
+          if (me.spatialReference) {
+            ll = me.spatialReference.reverse(ll);
+          }
+          json.location = new G.LatLng(ll[1], ll[0]);
+        }
+      }
+      callback(json, json.error);
+    });
   };
  
   
@@ -2558,6 +2535,8 @@
     augmentObject(opt_typeOpts, this);
     var layers = tileLayers;
     if (isString(tileLayers)) {
+      layers = [new TileLayer(tileLayers)];
+    } else if (tileLayers instanceof MapService) {
       layers = [new TileLayer(tileLayers)];
     } else if (tileLayers instanceof TileLayer) {
       layers = [tileLayers];
@@ -2858,25 +2837,7 @@
     });
   };
 
-  /**
-   * Get full bounds of the to the underline {@link MapService}
-   * @return {GLatLngBounds}
-   */
-  MapOverlay.prototype.getFullBounds  =  function () {
-    this.fullBounds_  = this.fullBounds_ || fromEnvelopeToLatLngBounds(this.mapService.fullExtent);
-    return this.fullBounds_;
-  };
-  /**
-   * Get initial bounds of the to the underline {@link MapService}
-   * @return {GLatLngBounds}
-   */
-  MapOverlay.prototype.getInitialBounds  =  function () {
-    this.initialBounds_  = this.initialBounds_ || fromEnvelopeToLatLngBounds(this.mapService.initialExtent);
-    return this.initialBounds_;
-  };
  
-  
-  
 
   
   /**

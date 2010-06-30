@@ -9,7 +9,7 @@
             document.write('<script type="text/javascript" src="../src/arcgislink' + (document.location.search.indexOf('packed') > -1 ? '_packed' : '') + '.js"><' + '/script>');
         </script>
         <script type="text/javascript">
-            var map, ov, marker;
+            var map, ov, iw, service, marker;
             function init() {
               var myOptions = {
                 zoom: 4,
@@ -19,45 +19,53 @@
               }
               map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
               loadMapService();
-              google.maps.event.addListener(map, 'click', function(evt) {
-                if (evt.latLng) {
-                  doIdentify(evt.latLng);
-                }
+              google.maps.event.addListener(map, 'click', function(e) {
+                doIdentify(e.latLng);
               });
               google.maps.event.addListener(map, 'zoom_changed', updateTOC);
+              
             }
             
             /**
              * Create a map overlay and add to map
              */
             function loadMapService() {
-                var el = document.getElementById('svc');
-                var svc = '';
-                for (var i = 0; i < el.options.length; i++) {
-                    if (el.options[i].selected) {
-                        svc = el.options[i].text;
-                    }
-                }
-              var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/'+svc;
+              var el = document.getElementById('svc');
+              var svc = el.options[el.selectedIndex].text;
+              var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/' + svc;
               if (ov != null) {
-                ov.remove();
+                if (ov instanceof gmaps.ags.MapOverlay) {
+                  ov.setMap(null);
+                } else if (ov instanceof gmaps.ags.MapType) {
+                  map.overlayMapTypes.removeAt(0);
+                }
                 ov = null;
               }
-              
-              ov = new ArcGISMapOverlay(url, {
-                opacity: document.getElementById('op').value
-              });
-              google.maps.event.addListener(ov, 'load', function() {
-                var bnds = ov.getFullBounds();
-                ov.addToMap(map);
-                if (bnds.getSouthWest().lng() > bnds.getNorthEast().lng()) {
-                  // let's not worry about span greenwich for now 
-                  map.set_center(new google.maps.LatLng(40, -100));
-                  map.set_zoom(4);
-                } else {
-                  map.fitBounds(bnds);
+              service = new gmaps.ags.MapService(url);
+              google.maps.event.addListener(service, 'load', function() {
+                var bnds = service.getInitialBounds();
+                if (bnds) {
+                  if (bnds.getSouthWest().lng() > bnds.getNorthEast().lng()) {
+                    map.setCenter(new google.maps.LatLng(40, -100));
+                    map.setZoom(4);
+                  } else {
+                    map.fitBounds(bnds);
+                  }
                 }
-                var service = ov.getMapService();
+                var op = document.getElementById('op').value;
+                if (service.singleFusedMapCache) {
+                  ov = new gmaps.ags.MapType(service, {
+                    opacity: op
+                  });
+                  map.overlayMapTypes.insertAt(0, ov);
+                } else {
+                  ov = new gmaps.ags.MapOverlay(service, {
+                    opacity: op
+                  });
+                  ov.setMap(map);
+                }
+                
+                
                 var svcInfo = 'This is a <b>dynamic</b> map service. You can turn on/off individual layers using the check box.'
                 if (service.singleFusedMapCache) {
                   svcInfo = 'This is a <b>cached</b> map service. You can <b>NOT</b> turn on/off individual layers.'
@@ -68,7 +76,7 @@
                 clickOpts += '<option value="top">&lt;Top-most layer&gt;</option>';
                 clickOpts += '<option value="visible">&lt;Visible layers&gt;</option>';
                 clickOpts += '<option value="all">&lt;All layers&gt;</option>';
-                var layers = service.getLayers();
+                var layers = service.layers;
                 for (var i = 0; i < layers.length; i++) {
                   var layer = layers[i];
                   // now fetch the scale info for each layer.
@@ -86,16 +94,14 @@
              * Create layer list.
              */
             function updateTOC() {
-              if (ov && ov.getMapService().hasLoaded()) {
-                var service = ov.getMapService();
+              if (ov && service.loaded) {
                 var toc = '';
-                var scale = 591657527.591555 / (Math.pow(2, map.get_zoom()));//591657527.591555 is the scale at level 0
-                var layers = service.getLayers();
+                var scale = 591657527.591555 / (Math.pow(2, map.getZoom()));//591657527.591555 is the scale at level 0
+                var layers = service.layers;
                 for (var i = 0; i < layers.length; i++) {
                   var layer = layers[i];
                   var inScale = layer.isInScale(scale);
                   toc += '<div style="color:' + (inScale ? 'black' : 'gray') + '">';
-                  
                   if (layer.subLayerIds) {
                     toc += layer.name + '(group)<br/>';
                   } else {
@@ -122,14 +128,12 @@
              * Check the visibility of layers and refresh map
              */
             function setLayerVisibility() {
-              var service = ov.getMapService();
-              var layers = service.getLayers();
+              var layers = service.layers;
               for (var i = 0; i < layers.length; i++) {
                 var el = document.getElementById('layer' + layers[i].id);
                 if (el) {
                   layers[i].visible = (el.checked === true);
                 }
-                
               }
               ov.refresh();
             }
@@ -137,62 +141,47 @@
             
             function onClickOptionChanged() {
               if (marker != null) {
-                doIdentify(marker.get_position());
+                doIdentify(marker.getPosition());
               }
             }
             
-            /**
-             * Handler function for map click event
-             * @param {google.maps.LatLng} ll
-             */
-            function doIdentify(ll) {
-              var layers = document.getElementById('clickOpts').value;
-              if (ov && ov.getMapService().hasLoaded()) {
-              
-                var bnds = map.get_bounds();
-                var sw = bnds.getSouthWest();
-                var ne = bnds.getNorthEast();
-                var div = map.getDiv();
-                var service = ov.getMapService();
+            function doIdentify(location) {
+              if (!location) 
+                return;
+              var layerOpt = document.getElementById('clickOpts').value;
+              if (ov && service.loaded) {
                 var params = {
-                  geometry: '' + ll.lng() + ',' + ll.lat(),
-                  geometryType: 'esriGeometryPoint',
-                  sr: 4326,//use lat lng for demo simplicity 
-                  layers: layers || 'top',
-                  tolerance: 5,//pixel
-                  mapExtent: '' + sw.lng() + ',' + sw.lat() + ',' + ne.lng() + ',' + ne.lat(),
-                  imageDisplay: '' + div.offsetWidth + ',' + div.offsetHeight + ',' + 96, //dpi
+                  geometry: location,
+                  layerOption: layerOpt || 'top',
+                  tolerance: 5,
+                  bounds: map.getBounds(),
+                  width: map.getDiv().offsetWidth,
+                  height: map.getDiv().offsetHeight,
                   returnGeometry: false
                 };
-                service.identify(params, function(json) {
-                  if (json) {
-                    if (json.error) {
-                      alert(json.error.message + '\n' + json.error.details.join('\n'));
-                    } else if (json.results) {
-                      processIdentifyResults(json, ll);
-                    }
-                    
+                service.identify(params, function(res, err) {
+                  if (err) {
+                    alert(err.message + '\n' + err.details.join('\n'));
+                  } else if (res.results) {
+                    processIdentifyResults(res, location);
                   }
                 });
-                
-                
               }
-              
             }
             
-            function processIdentifyResults(json, ll) {
+            function processIdentifyResults(res, ll) {
               var html = '';
-              if (json.results) {
-                html += 'Total # of Results:' + json.results.length;
-                for (var i = 0, c = json.results.length; i < c; i++) {
-                  var r = json.results[i];
+              if (res.results) {
+                html += 'Total # of Results:' + res.results.length;
+                for (var i = 0, c = res.results.length; i < c; i++) {
+                  var r = res.results[i];
                   if (i > 0) {
                     html += '<hr/>';
                   }
-                  html += '<div>Result #' + (i+1) + ': <i>' + r.value + '</i><br/><table>';
+                  html += '<div>Result #' + (i + 1) + ': <i>' + r.value + '</i><br/><table>';
                   html += '<tr><td>From layer: <b>' + r.layerName + '</b></td></tr>';
                   html += '<tr><td > <table style="font-size:9pt">';
-                  var a = r.attributes;
+                  var a = r.feature.attributes;
                   for (var x in a) {
                     if (a.hasOwnProperty(x)) {
                       html += '<tr>';
@@ -205,28 +194,30 @@
                   html += '</table></td></tr></table></div>';
                   
                 }
+                document.getElementById('info').innerHTML = html;
+                if (marker == null) {
+                  marker = new google.maps.Marker({
+                    position: ll,
+                    map: map
+                  })
+                } else {
+                  marker.setPosition(ll);
+                }
+                
               }
-              document.getElementById('info').innerHTML = html;
-              if (marker == null) {
-                marker = new google.maps.Marker({
-                  position: ll,
-                  map: map
-                })
-              } else {
-                marker.set_position(ll);
-              }
+              
             }
-           
         </script>
     </head>
     <body onload="init()">
         This sample is the initial port of library <a href='http://gmaps-utility-library-dev.googlecode.com/svn/trunk/arcgislink/docs/examples.html' target='_blank'>ArcGIS Server Link</a>
-        to Google Maps API V3. The sample map services used are from <a href="http://www.arcgisonline.com" target="_blank">ArcGISOnline</a><br/>
+        to Google Maps API V3. The sample map services used are from <a href="http://www.arcgisonline.com" target="_blank">ArcGISOnline</a>
+        <br/>
         It has the basic functions of a GIS system: 
-        <br/>1) A table of contents(TOC) to allow layers turn on/off, layers visiblity controled by map scale and reflected on TOC. 
-        <br/>2) Allow click on map to do spatial query, with options to choose layers.
-        <hr/>
-        
+        <br/>
+        1) A table of contents(TOC) to allow layers turn on/off, layers visiblity controled by map scale and reflected on TOC. 
+        <br/>
+        2) Allow click on map to do spatial query, with options to choose layers.<hr/>
         <table>
             <tr>
                 <td valign="top">
@@ -255,31 +246,30 @@
                 </td>
             </tr>
         </table>
-        
         <div>
-        Switch to a different map service: 
-        <select id="svc" onchange="loadMapService()">
-            <option selected="selected">Specialty/ESRI_StateCityHighway_USA/MapServer</option>
-            <option>Specialty/ESRI_StatesCitiesRivers_USA/MapServer</option>
-            <option>Demographics/ESRI_Census_USA/MapServer</option>
-            <option>Portland/ESRI_LandBase_WebMercator/MapServer</option>
-            <option>Portland/Portland_ESRI_LandBase_AGO/MapServer</option>
-            <option>Portland/Portland_ESRI_Neighborhoods_AGO/MapServer</option>
-            <option>Louisville/LOJIC_LandRecords_Louisville/MapServer</option>
-            <option>Louisville/LOJIC_PublicSafety_Louisville/MapServer</option>
-            <option>Petroleum/KGS_OilGasFields_Kansas/MapServer</option>
-        </select>
-        Map Opacity(0=transparent;1=opaque):
-        <select id="op" onchange="if (ov){ov.setOpacity(this.options[this.selectedIndex].text)}">
-         <option>0</option>
-          <option>0.2</option>
-           <option>0.5</option>
-            <option selected="selected">0.8</option>
-             <option>1</option>
-        </select>
+            Switch to a different map service: 
+            <select id="svc" onchange="loadMapService()">
+                <option selected="selected">Specialty/ESRI_StateCityHighway_USA/MapServer</option>
+                <option>Specialty/ESRI_StatesCitiesRivers_USA/MapServer</option>
+                <option selected="selected">Demographics/ESRI_Census_USA/MapServer</option>
+                <option>Portland/ESRI_LandBase_WebMercator/MapServer</option>
+                <option>Louisville/LOJIC_LandRecords_Louisville/MapServer</option>
+                <option>Louisville/LOJIC_PublicSafety_Louisville/MapServer</option>
+                <option>Petroleum/KGS_OilGasFields_Kansas/MapServer</option>
+            </select>
+            Map Opacity(0=transparent;1=opaque):
+            <select id="op" onchange="if (ov){ov.setOpacity(this.options[this.selectedIndex].text)}">
+                <option>0</option>
+                <option>0.2</option>
+                <option>0.5</option>
+                <option selected="selected">0.8</option>
+                <option>1</option>
+            </select>
         </div>
         <div id="svcDesc" style="border:1px solid red; width:1000px">
         </div>
-        <div>comments to nianwei at gmail dot com</div>
+        <div>
+            comments to nianwei at gmail dot com
+        </div>
     </body>
 </html>
