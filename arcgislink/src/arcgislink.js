@@ -165,8 +165,12 @@
   var isArray = function (o) {
     return o && o.splice;
   };
-
-  /**
+  
+  var isNumber = function (o) {
+    return typeof o === 'number';
+  }
+ 
+   /**
    * Add the property of the source object to destination object 
    * if not already exists.
    * @param {Object} dest
@@ -398,34 +402,22 @@
   /**
    * @name Config
    * @class This is an object literal that sets common configuration values used across the lib.
-   * @property {Number} [maxPolyPoints  = 1000] max number of points allowed in polyline's path or polygon's ring. If exceed, no overlay will be created.(for now)
-   * @property {StyleOptions} [style] The default style used for OverlayViews.
    */
   var Config = {
-    maxPolyPoints: 1000,
-    style: {
-      icon: null,
-      strokeColor: "#FFFF00",
-      strokeWeight: 8,
-      strokeOpacity: 0.5,
-      outlineColor: "#FF0000",
-      outlineWeight: 2,
-      outlineOpacity: 0.5,
-      fillColor: "#FFFF00",
-      fillOpacity: 0.5
-    }
+    proxyUrl: null  
   };
   /**
    * @name SpatialReferences
    * @class SpatialReferences has an internal collection of Spatial Refeneces supported in the application.
    * The key of the collection is the wkid, and value is an instance of
-   * {@link ArcGISSpatialReference}.
+   * {@link SpatialReference}.
    * The {@link TileLayer}'s Spatial Refeneces <b>must be already added to collection
    * before it's constructor can be called</b>.
-   * The following ArcGISSpatialReference are added by default:
+   * The following SpatialReference are added by default:
    * <code>
-   * <br/> 4326: WGS84 ArcGISGeographic Coordinate System;
+   * <br/> 4326: WGS84 SGeographic Coordinate System;
    * <br/> 102113: Web-Mercator used by Google Maps, Virtual Earth etc.
+   * <br/> 102100: Web-Mercator with datum transformation.
    * </code>
    * <br/> The application can add a supported spatial references using static method
    * <code>SpatialReferences.addSpatialReference(wkid,sr);</code>
@@ -483,7 +475,12 @@
   SpatialReference.prototype.getCircumference  =  function () {
     return 360;
   };
-
+  /**
+   * To JSON String
+   */
+  SpatialReference.prototype.toJSON  =  function () {
+    return '{' + (this.wkid ? ' wkid:' + this.wkid : 'wkt: \''+ this.wkt + '\'') + '}';
+  };
   /**
    * Creates a Geographic Coordinate System. e.g.:<br/>
    * <code>var g  = new Geographic({"wkid":4326});<br/>
@@ -902,7 +899,7 @@
   };
   /**
    * Add A Spatial Reference to the collection of Spatial References.
-   * the {@link ArcGISwktOrSR} parameter can be String format of "well-known text" of the
+   * the <code>wktOrSR</code> parameter can be String format of "well-known text" of the
    * Spatial Reference, or an instance of {@link SpatialReference}.
    * <br/><li> If passes in String WKT format, to be consistent, it should use the same format as listed
    * in <a  href  = 'http://edndoc.esri.com/arcims/9.2/elements/pcs.htm'>
@@ -1038,27 +1035,55 @@
       return GeometryType.POLYGON;
     } else if (o instanceof G.LatLngBounds) {
       return GeometryType.ENVELOPE;
+    } else if (o.x !== undefined && o.y !== undefined) {
+      return GeometryType.POINT;
+    } else if (o.points) {
+      return GeometryType.MULTIPOINT;
+    } else if (o.paths) {
+      return GeometryType.POLYLINE;
+    } else if (o.rings) {
+      return GeometryType.POLYGON;
     }
     return null;
   };
   /**
-   * 
-   * @param {MVCArray.&lt;LatLng>} pts
+   * Is the object an Google Overlay?
+   * @param {Object} obj
    */
-  var fromPointsToJSON = function (pts) {
-    var arr = [];
-    var latlng;
-    for (var i = 0, c = pts.getLength(); i < c; i++) {
-      latlng = pts.getAt(i);
-      arr.push('[' + latlng.lng() + ',' + latlng.lat() + ']');
+  var isOverlay = function (obj){
+    var o = obj;
+    if (isArray(obj) && obj.length > 0) {
+      o = obj[0];
     }
-    return arr.join(',');
-  };
+    if (isArray(o) && o.length > 0) {
+      o = o[0];
+    }
+    if (o instanceof G.LatLng || o instanceof G.Marker || 
+      o instanceof G.Polyline || o instanceof G.Polygon ||
+      o instanceof G.LatLngBounds) {
+      return true;
+    } 
+    return false;
+  }
+  
+  
   /**
    * Convert overlays (Marker, Polyline, Polygons) to JSON string in AGS format.
    * @param {OverlayView|OverlayView[]} geom 
    */
   var fromOverlaysToJSON = function (geom) {
+    /**
+    * @param {MVCArray.&lt;LatLng>} pts
+    */
+    function fromLatLngsToJSON(pts) {
+      var arr = [];
+      var latlng;
+      for (var i = 0, c = pts.getLength(); i < c; i++) {
+        latlng = pts.getAt(i);
+        arr.push('[' + latlng.lng() + ',' + latlng.lat() + ']');
+      }
+      return arr.join(',');
+    }
     var gtype = getGeometryType(geom);
     var g, gs, i, pts;
     var json = '{';
@@ -1087,7 +1112,7 @@
       pts = [];
       gs = isArray(geom) ? geom : [geom];
       for (i = 0; i < gs.length; i++) {
-        pts.push('[' + fromPointsToJSON(gs[i].getPath()) + ']');
+        pts.push('[' + fromLatLngsToJSON(gs[i].getPath()) + ']');
       }
       json += 'paths: [' + pts.join(',') + ']';
       break;
@@ -1096,7 +1121,7 @@
       g = isArray(geom) ? geom[0] : geom;
       var paths = g.getPaths();
       for (i = 0; i < paths.getLength(); i++) {
-        pts.push('[' + fromPointsToJSON(paths.getAt(i)) + ']');
+        pts.push('[' + fromLatLngsToJSON(paths.getAt(i)) + ']');
       }
       json += 'rings:[' + pts.join(',') + ']';
       
@@ -1111,6 +1136,42 @@
     return json;
   };
   
+  /**
+   * From ESRI geometry format to JSON String, primarily used in Geometry service
+   * @param {Object} geom
+   */
+  var fromGeometryToJSON = function (geom) {
+      function fromPointsToJSON(pts) {
+        var arr = [];
+        for (var i = 0, c = pts.length; i < c; i++) {
+          arr.push('[' + pts[i][0] + ',' + pts[i][1] + ']');
+        }
+        return '[' + arr.join(',') + ']';
+      }
+      function fromLinesToJSON(lines) {
+        var arr = [];
+        for (var i = 0, c = lines.length; i < c; i++) {
+          arr.push(fromPointsToJSON(lines[i]));
+        }
+        return '[' + arr.join(',') + ']';
+      }
+      
+      var json = '{';
+      if (geom.x) {
+        json += 'x:' + geom.x + ',y:' + geom.y;
+      } else if (geom.xmin) {
+        json += 'xmin:' + geom.xmin + ',ymin:' + geom.ymin + ',xmax:' + geom.xmax + ',ymax:' + geom.ymax;
+      } else if (geom.points) {
+        json += 'points:' + fromPointsToJSON(geom.points);
+      } else if (geom.paths) {
+        json += 'paths:' + fromLinesToJSON(geom.paths);
+      } else if (geom.rings) {
+        json += 'rings:' + fromLinesToJSON(geom.rings);
+      }
+      json += '}';
+      return json;
+    };
+
   /**
    * Helper method to convert an Envelope object to <code>google.maps.LatLngBounds</code> 
    * @private 
@@ -1136,7 +1197,7 @@
    * @param {String} opt_displayName
    * @return {OverlayView[]} 
    */
-  var fromJSONToOverlays = function (geom, opts, opt_title) {
+  var fromJSONToOverlays = function (geom, opts) {
     var ovs = null;
     var sr = null;
     var ov;
@@ -1146,7 +1207,7 @@
     if (geom) {
       ovs = [];
       if (geom.x) {
-        ov = new G.Marker(augmentObject(opts.marker, {
+        ov = new G.Marker(augmentObject(opts.markerOptions || opts , {
           position: new G.LatLng(geom.y, geom.x)
         }));
         ovs.push(ov);
@@ -1161,7 +1222,7 @@
           part = parts[i];
           if (geom.points) {
             // multipoint
-            ov = new G.Marker(augmentObject(opts.marker, {
+            ov = new G.Marker(augmentObject(opts.markerOptions || opts, {
               position: new G.LatLng(part[1], part[0])
             }));
             ovs.push(ov);
@@ -1172,7 +1233,7 @@
               latlngs.push(new G.LatLng(lnglat[1], lnglat[0]));
             }
             if (geom.paths) {
-              ov = new G.Polyline(augmentObject(opts.polyline, {
+              ov = new G.Polyline(augmentObject(opts.polylineOptions || opts, {
                 path: latlngs
               }));
               ovs.push(ov);
@@ -1183,7 +1244,7 @@
           }
         }
         if (geom.rings) {
-          ov = new G.Polygon(augmentObject(opts.polygon, {
+          ov = new G.Polygon(augmentObject(opts.polygonOptions || opts, {
             paths: rings
           }));
           ovs.push(ov);
@@ -1249,9 +1310,9 @@
    * @property {String} [definitionExpression] Layer definition.
    * @property {String} [geometryType] geometryType type(esriGeometryPoint|..), only available after load.
    * @property {String} [copyrightText] copyrightText, only available after load.
-   * @property {Layer} [parentLayer] parent Layer {@link ArcGISLayer}
+   * @property {Layer} [parentLayer] parent Layer {@link Layer}
    * @property {Boolean} [defaultVisibility] defaultVisibility
-   * @property {Layer[]} [subLayers] sub Layers. {@link ArcGISLayer}[].
+   * @property {Layer[]} [subLayers] sub Layers. {@link Layer}[].
    * @property {Boolean} [visibility] Visibility of this layer
    * @property {Number} [minScale] minScale
    * @property {Number} [maxScale] maxScale
@@ -1841,7 +1902,7 @@
    * a {@link MapService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/identify.html'>Identify Operation</a>.
-   * @property {IdentifyResult[]} [results] The identify results as an array of {@link ArcGISIdentifyResult}
+   * @property {IdentifyResult[]} [results] The identify results as an array of {@link IdentifyResult}
    */
   /**
    * @name IdentifyResult
@@ -1855,7 +1916,7 @@
    * @property {Feature} [features] {@link Feature}
    */
   /**
-   * Identify features on a particular Geographic location, using {@link ArcGISIdenitfyParameters} and
+   * Identify features on a particular Geographic location, using {@link IdentifyOptions} and
    * process {@link IdentifyResults} using the <code>callback</code> function.
    * For more info see <a
    * href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/identify.html'>Identify Operation</a>.
@@ -2021,65 +2082,6 @@
   };
   
  
- /**
- * Creates an GeometryService class.
- * Params:<li><code>url</code>: URL of service, syntax:<code>	http://{catalog-url}/{serviceName}/GeometryServer</code>
- * @name GeometryService
- * @class This class (<code>gmaps.ags.GeometryService</code>) represent an ArcGIS 
- * <a href="http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geometryserver.html">Geometry</a>
- *  service.
- * @param {String} url
- */
-  function GeometryService(url) {
-    this.url  = url;
-  }
-  /**
-   * @name ProjectParameters
-   * @class This class represent the parameters needed in an project operation
-   *  for a {@link GeometryService}.
-   *   There is no constructor, use JavaScript object literal.
-   * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {String} [f  = json] The response format. html | json .
-   * @property {Geometry[]} [geometries] Array of {@link Geometry} to project. In the case of points, the following syntax also works:
-   *   <code>geometries  = x1, y1, x2, y2, ..., xn, yn</code>
-   * @property {String} [geometryType] esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope
-   * @property {Number} [inSR] The well-known ID of the spatial reference of the input geometries
-   * @property {Number} [outSR] The well-known ID of the spatial reference of the out geometries
-   */
-  /**
-   * This resource projects an array of input geometries from an input spatial reference
-   * to an output spatial reference
-   * @param {ProjectParameters} params
-   * @param {Function} callback
-   */
-  GeometryService.prototype.project = function (params, callback) {
-    if (!params) {
-      return;
-    }
-    params.f = params.f || 'json';
-    if (!isString(params.geometries)) {
-      var gt = C.esriGeometryPoint;
-      var json = [];
-      for (var i = 0, c = params.geometries.length; i < c; i++) {
-        var g = params.geometries[i];
-        if (i === 0) {
-          if (g.points) {
-            gt = C.esriGeometryMultipoint;
-          } else if (g.paths) {
-            gt = C.esriGeometryPolyline;
-          } else if (g.rings) {
-            gt = C.esriGeometryPolygon;
-          } else if (g.xmin) {
-            gt = C.esriGeometryEnvelope;
-          }
-        }
-        json.push(Util.fromOverlaysToJSON(g, false));
-      }
-      params.geometries = '{ geometryType:' + gt + ', geometries:[' + json.join(',') + ']}';
-    }
-    Util.getJSON(this.url + '/project', params, "callback", callback);
-  };
-
   /**
  * Creates a GeocodeService class.
  * Params:<li><code>url</code>: URL of service, syntax:<code>	http://{catalog-url}/{serviceName}/GeocodeServer</code>
@@ -2089,11 +2091,11 @@
  * @param {String} url
  * @property {String} [serviceDescription] serviceDescription
  * @property {Field[]} [addressFields] input fields. 
- *    Each entry is an object of type {@link ArcGISField}, plus <code>required(true|false)</code>
+ *    Each entry is an object of type {@link Field}, plus <code>required(true|false)</code>
  * @property {Field[]} [candidateFields] candidate Fields. 
- *    Each entry is an object of type {@link ArcGISField}
+ *    Each entry is an object of type {@link Field}
  * @property {Field[]} [intersectionCandidateFields] intersectionCandidateFields
- *    Each entry is an object of type {@link ArcGISField}
+ *    Each entry is an object of type {@link Field}
  * @property {SpatialReference} [spatialReference] spatialReference
  * @property {Object} [locatorProperties] an object with key-value pair that is specific to Locator type.
  */
@@ -2217,8 +2219,7 @@
  *  on a {@link GeocodeService}.
  *   There is no constructor, use JavaScript object literal.
  * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/reverse.html'>Reverse Geocode Operation</a>.
- * @property {String} [f  = json] The response format. html | json |kmz.
- * @property {Geometry|String} [location] an object literal of type {@link ArcGISPoint}. You can also use x,y string.
+ * @property {google.maps.LatLng} [location] an object literal of LatLng. 
  * @property {Number} [distance] The distance in meters from the given location within which 
  *  a matching address should be searched.
  */
@@ -2231,7 +2232,7 @@
  * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/reverse.html'>Reverse Geocode Operation</a>.
  * @property {Object} [address] matched address, object literal with name-value address parts. 
  *  e.g.: <code>{  "Street" : "771 TUNNEL AVE",  "Zone" : "94005"  }</code>
- * @property {Geometry} [location] matched location
+ * @property {google.maps.LatLng} [location] matched location
  */
 /**
  * The reverseGeocode operation is The reverseGeocode operation is performed on a geocode service resource. 
@@ -2263,27 +2264,23 @@
     });
   };
  
-  
-
-// end of REST API stuff
    /**
    * @name TileInfo
    * @class This class contains information about map tile infornation for a cached map service.
-   *    It is the type of {@link TileInfo} property of {@link ArcGISArcGISTileReference}
    *    <br/>There is no constructor for this class.
    * @property {Number} [rows] tile row size,  e.g. 512, must be same as cols
    * @property {Number} [cols] tile cols size,  e.g. 512, must be same as rows
    * @property {Number} [dpi] dot per inch for map tiles.
    * @property {String} [format] PNG8 | PNG24 | PNG32 | GIF | JPEG
    * @property {Number} [compressionQuality] JPEG only.0-100.
-   * @property {Point} [origin] origin of tile system of type {@link ArcGISPoint}
+   * @property {Point} [origin] origin of tile system of type 
    * @property {SpatialReference} [spatialReference] spatial reference.  <b>wkid info only</b>.
-   * @property {LOD[]} [lods] Array of Level of Details. See {@link ArcGISLOD}
+   * @property {LOD[]} [lods] Array of Level of Details. See {@link LOD}
    */
   /**
    * @name LOD
    * @class This class contains information about one "Level Of Detail" for a cached map service.
-   *   It is the type of {@link ArcGISlods} property of {@link TileInfo}
+   *   It is the type of {@link lods} property of {@link TileInfo}
    *   <br/>There is no constructor for this class. Use as object literal.
    * @property {Number} [level] zoom level.
    * @property {Number} [resolution] map unit per pixel
@@ -2293,10 +2290,7 @@
    * Creates an ArcGIS Map Tiling Reference System.
    * <ul>
    * <li><code>tileInfo</code> tiling information. An instance of {@link TileInfo}
-   * <li><code>opt_fullExtent</code> full extent of the tiles. An instance of {@link Envelope}
    * </ul>Applications normally do not create instances of this class directly.
-   * If needed, it can be accessed by <code>Map.getCurrentMapType().getProjection()</code>
-   * for customized <code>GMapType</code>s.
    * @name Projection
    * @class This class (<code>gmaps.ags.Projection</code>) implements a custom
    * <a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a> 
@@ -2336,8 +2330,7 @@
         throw new Error('This type of map cache is not supported in V3. \nScale ratio between zoom levels must be 2');
       }
     }
-    
-  }
+   }
   
   /**
    * See <a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a>.
@@ -2656,7 +2649,7 @@
   
   /**
    * @name MapOverlayOptions
-   * @class Instance of this class are used in the {@link ArcGISopt_ovelayOpts} argument
+   * @class Instance of this class are used in the {@link opt_ovelayOpts} argument
    *  to the constructor of the {@link MapOverlay} class.
    * @property {Number} [opacity  = 1.0] Opacity of map image from 0.0 (invisible) to 1.0 (opaque)
    * @property {ExportMapOptions} [exportOptions] See {@link ExportMapOptions}
@@ -2888,20 +2881,106 @@
     this.div_.style.visibility  =  'hidden';
   };
   
+  //TODO: implement more Geometry operations
+ /**
+ * Creates an GeometryService class.
+ * Params:<li><code>url</code>: URL of service, syntax:<code>	http://{catalog-url}/{serviceName}/GeometryServer</code>
+ * @name GeometryService
+ * @class This class (<code>gmaps.ags.GeometryService</code>) represent an ArcGIS 
+ * <a href="http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geometryserver.html">Geometry</a>
+ *  service.
+ * @param {String} url
+ */
+  function GeometryService(url) {
+    this.url  = url;
+  }
+  /**
+   * @name ProjectOptions
+   * @class This class represent the parameters needed in an project operation
+   *  for a {@link GeometryService}.
+   *   There is no constructor, use JavaScript object literal.
+   * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
+   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   * @property {GeometryType} [geometryType] esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope
+   * @property {SpatialReference} [inSpatialReference] The well-known ID of or the spatial reference of the input geometries
+   * @property {SpatialReference} [outSpatialReference] The well-known ID of or the spatial reference of the out geometries
+   */
+  /**
+   * @name ProjectResults
+   * @class This class represent the parameters needed in an project operation
+   *  for a {@link GeometryService}.
+   *   There is no constructor, use JavaScript object literal.
+   * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
+   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   * @property {GeometryType} [geometryType] esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope
+   * @property {SpatialReference} [inSR] The well-known ID of or the spatial reference of the input geometries
+   * @property {SpatialReference} [outSR] The well-known ID of or the spatial reference of the out geometries
+   */
+  /**
+   * This resource projects an array of input geometries from an input spatial reference
+   * to an output spatial reference. Result of type {@link ProjectResult} is passed in callback function.
+   * @param {ProjectOptions} params
+   * @param {Function} callback
+   */
+  GeometryService.prototype.project = function(p, callback) {
+    if (!p) {
+      return;
+    }
+    var params = {};
+    var json = [];
+    var g, isOv;
+    if (p.geometries && p.geometries.length > 0) {
+      g = p.geometries[0];
+      isOv = isOverlay(g);
+      for (var i = 0, c = p.geometries.length; i < c; i++) {
+        if (isOv) {
+          json.push(fromOverlaysToJSON(p.geometries[i]));
+        } else {
+          json.push(fromGeometryToJSON(p.geometries[i]));
+        }
+      }
+    }
+    if (!p.geometryType) {
+      p.geometryType = getGeometryType(g);
+    }
+    if (isOv) {
+      params.inSR = WGS84.wkid;
+    } else if (p.inSpatialReference) {
+      params.inSR = isNumber(p.inSpatialReference)? p.inSpatialReference : p.inSpatialReference.toJSON();
+    }
+    if (p.outSpatialReference) {
+      params.outSR = isNumber(p.outSpatialReference)? p.outSpatialReference : p.outSpatialReference.toJSON();
+    }
+    params.geometries = '{ geometryType:"' + p.geometryType + '", geometries:[' + json.join(',') + ']}';
+    Util.getJSON(this.url + '/project', params, "callback", function(json) {
+      var geom = [];
+      if (p.outSpatialReference === 4326 || p.outSpatialReference.wkid === 4326) {
+        for (var i = 0, c = json.geometries.length; i < c; i++) {
+          geom.push(fromJSONToOverlays(json.geometries[i]));
+        }
+        json.geometries = geom;
+      }
+      callback(json, json.error);
+    });
+  };
+
   
-  
-  //start of add-on classes
+
   
   /**
    * @name OverlayOptions
    * @class Instance of this classes that specify how
    *   the geometry features returned by ArcGIS server should be rendered in the browser.
-   * @property {google.maps.MarkerOptions} [marker] style option for points.
-   * @property {google.maps.PolylineOptions} [polyline] style option for polylines. {@link http://code.google.com/apis/maps/documentation/javascript/reference.html#PolylineOptions}
-   * @property {google.maps.PolygonOptions} [polygon] style option for polygons {@link http://code.google.com/apis/maps/documentation/javascript/reference.html#PolygonOptions}
+   * @property {google.maps.MarkerOptions} [markerOptions] style option for points.
+   * @property {google.maps.PolylineOptions} [polylineOptions] style option for polylines. {@link http://code.google.com/apis/maps/documentation/javascript/reference.html#PolylineOptions}
+   * @property {google.maps.PolygonOptions} [polygonOptions] style option for polygons {@link http://code.google.com/apis/maps/documentation/javascript/reference.html#PolygonOptions}
+   * @property {Number} [strokeOpacity] The stroke opacity between 0.0 and 1.0
+   * @property {String} [strokeColor] The stroke color in HTML hex style, ie. "#FFAA00"
+   * @property {Number} [strokeWeight] The stroke width in pixels.
+   * @property {Number} [zIndex] The zIndex compared to other overlays.
+   * @property {String|MarkerImage} {icon} Icon for the foreground
+   * @property {String|MarkerImage} {shadow} Shadow image
    */
-  
-  
   var arcgis = {
     'SpatialReference': SpatialReference,
     'Geographic': Geographic,

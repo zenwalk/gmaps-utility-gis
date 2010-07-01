@@ -18,25 +18,27 @@
               }
               map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
               geocoder = new gmaps.ags.GeocodeService('http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Locators/ESRI_Geocode_USA/GeocodeServer');
-              iw = new google.maps.InfoWindow({
-                maxWidth: 180
-              });
+              
               marker = new google.maps.Marker({
                 position: map.getCenter(),
                 draggable: true
               });
               marker.setMap(map);
-              iw.bindTo('position', marker, 'position');
               google.maps.event.addListener(map, 'click', function(evt) {
                 reverseGeocode(evt.latLng);
               });
               google.maps.event.addListener(marker, 'dragend', function(evt) {
                 reverseGeocode(evt.latLng);
               });
-              var text = document.createElement('div');
-              text.innerHTML = 'click map or drag marker';
-              text.style.backgroundColor = 'white';
-              map.controls[google.maps.ControlPosition.TOP].push(text);
+              google.maps.event.addListener(marker, 'dragstart', function(evt) {
+                iw.close();
+              });
+              iw = new google.maps.InfoWindow({
+                maxWidth: 180,
+                content: 'Click map or drag marker to get the address of the location'
+              });
+              iw.bindTo('position', marker, 'position');
+              iw.open(map);
             }
             
             function reverseGeocode(latlng) {
