@@ -23,12 +23,14 @@
                 doIdentify(e.latLng);
               });
               google.maps.event.addListener(map, 'zoom_changed', updateTOC);
-              
+              google.maps.event.addListener(gmaps.ags.Util, 'jsonpstart', function(){
+                document.getElementById('working').style.visibility = 'visible';
+              });
+              google.maps.event.addListener(gmaps.ags.Util, 'jsonpend', function(){
+                document.getElementById('working').style.visibility = 'hidden';
+              });
             }
             
-            /**
-             * Create a map overlay and add to map
-             */
             function loadMapService() {
               var el = document.getElementById('svc');
               var svc = el.options[el.selectedIndex].text;
@@ -199,7 +201,7 @@
                   marker = new google.maps.Marker({
                     position: ll,
                     map: map
-                  })
+                  });
                 } else {
                   marker.setPosition(ll);
                 }
@@ -210,10 +212,7 @@
         </script>
     </head>
     <body onload="init()">
-        This sample is the initial port of library <a href='http://gmaps-utility-library-dev.googlecode.com/svn/trunk/arcgislink/docs/examples.html' target='_blank'>ArcGIS Server Link</a>
-        to Google Maps API V3. The sample map services used are from <a href="http://www.arcgisonline.com" target="_blank">ArcGISOnline</a>
-        <br/>
-        It has the basic functions of a GIS system: 
+        This sample has the basic functions of a GIS application: 
         <br/>
         1) A table of contents(TOC) to allow layers turn on/off, layers visiblity controled by map scale and reflected on TOC. 
         <br/>
@@ -236,8 +235,14 @@
                     </div>
                 </td>
                 <td>
+                  
                     <div id="map_canvas" style="width:600px; height:400px; border:1px solid #000;">
+                   
                     </div>
+                     <div id="working" style="width:150px;height:100px;visibility:hidden;position:absolute;top:250px;left:450px;background-color:yellow">
+                    Working....
+                    </div>
+                    
                 </td>
                 <td valign="top" width="200">
                     Map data at clicked location:
@@ -268,8 +273,6 @@
         </div>
         <div id="svcDesc" style="border:1px solid red; width:1000px">
         </div>
-        <div>
-            comments to nianwei at gmail dot com
-        </div>
+        
     </body>
 </html>
