@@ -308,6 +308,25 @@
     }
     return strDefs;
   }; 
+  var getXmlHttp = function() {
+    if (typeof XMLHttpRequest === "undefined") {
+      try {
+        return new ActiveXObject("Msxml2.XMLHTTP.6.0");
+      } catch (e) {
+      }
+      try {
+        return new ActiveXObject("Msxml2.XMLHTTP.3.0");
+      } catch (e) {
+      }
+      try {
+        return new ActiveXObject("Msxml2.XMLHTTP");
+      } catch (e) {
+      }
+      throw new Error("This browser does not support XMLHttpRequest.");
+    } else {
+      return new XMLHttpRequest();
+    }
+  };
   var log = function (msg) {
     if (window.console) {
       console.log(msg);
@@ -358,26 +377,27 @@
    */
   Util.getJSON = function (url, params, callbackName, callbackFn) {
     var sid = 'ags_jsonp' + (jsonpID_++) + '_' + Math.floor(Math.random() * 1000000);
-    var full = url + (url.indexOf('?') === -1 ? '?' : '&');
+    var script = null;
+    var query = '';
     if (params) {
       params.f = params.f || 'json';
       for (var x in params) {
         if (params.hasOwnProperty(x) && params[x] !== null && params[x] !== undefined) { // wont sent undefined.
           //jslint complaint about escape cause NN does not support it.
-          full += (x + '=' + (escape?escape(params[x]):encodeURIComponent(params[x])) + '&');
+          query += (x + '=' + (escape ? escape(params[x]) : encodeURIComponent(params[x])) + '&');
         }
       }
     }
+    query += callbackName + '=ags_jsonp.' + sid;
     var head = document.getElementsByTagName("head")[0];
     if (!head) {
       throw new Error("document must have header tag");
     }
-    var script = document.createElement("script");
-    script.src = full + callbackName + '=ags_jsonp.' + sid;
-    script.id = sid;
-    var jsonpcallback = function () {
+    var jsonpcallback = function() {
       delete xdc[sid];
-      head.removeChild(script);
+      if (script) {
+        head.removeChild(script);
+      }
       script = null;
       callbackFn.apply(null, arguments);
       /**
@@ -389,7 +409,38 @@
       triggerEvent(Util, 'jsonpend', sid);
     };
     xdc[sid] = jsonpcallback;
-    head.appendChild(script);
+    
+    if ((query + url).length < 2000 && !Config.alwaysUseProxy) {
+      script = document.createElement("script");
+      script.src = url + (url.indexOf('?') === -1 ? '?' : '&') + query;
+      script.id = sid;
+      head.appendChild(script);
+    } else {
+      // check if same host
+      var loc = window.location;
+      var dom = loc.protocol + '//' + loc.hostname + (!(loc.port) || loc.port === 80 ? '' : ':' + loc.port) + '/';
+      var useProxy = true;
+      if (url.toLowerCase().indexOf(dom.toLowerCase()) != -1) {
+        useProxy = false;
+      }
+      if (Config.alwaysUseProxy) {
+        useProxy = true;
+      }
+      if (useProxy && !Config.proxyUrl) {
+        throw new Error('No Config.proxyUrl defined');
+      }
+      var xmlhttp = getXmlHttp();
+      xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4) {
+          if (xmlhttp.status == 200) 
+            eval(xmlhttp.responseText);
+          else throw new Error("Error code " + xmlhttp.status);
+        }
+      };
+      xmlhttp.open('POST', useProxy ? Config.proxyUrl + '?' + url : url, true);
+      xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xmlhttp.send(query);
+    }
     /**
      * This event is fired before a REST request sent to server.
      * @name Util#jsonpstart
@@ -402,9 +453,12 @@
   /**
    * @name Config
    * @class This is an object literal that sets common configuration values used across the lib.
+   * @property {String} [proxyUrl] The URL to the web proxy page used in case the length of the URL request to an ArcGIS Server REST resource exceeds 2000 characters.
+   * @property {Boolean} [alwaysUseProxy] The URL to the web proxy page used in case the length of the URL request to an ArcGIS Server REST resource exceeds 2000 characters.
    */
   var Config = {
-    proxyUrl: null  
+    proxyUrl: null,
+    alwaysUseProxy: false 
   };
   /**
    * @name SpatialReferences
@@ -2894,39 +2948,11 @@
   function GeometryService(url) {
     this.url  = url;
   }
-  /**
-   * @name ProjectOptions
-   * @class This class represent the parameters needed in an project operation
-   *  for a {@link GeometryService}.
-   *   There is no constructor, use JavaScript object literal.
-   * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
-   * @property {GeometryType} [geometryType] esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope
-   * @property {SpatialReference} [inSpatialReference] The well-known ID of or the spatial reference of the input geometries
-   * @property {SpatialReference} [outSpatialReference] The well-known ID of or the spatial reference of the out geometries
-   */
-  /**
-   * @name ProjectResults
-   * @class This class represent the parameters needed in an project operation
-   *  for a {@link GeometryService}.
-   *   There is no constructor, use JavaScript object literal.
-   * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
-   * @property {GeometryType} [geometryType] esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope
-   * @property {SpatialReference} [inSR] The well-known ID of or the spatial reference of the input geometries
-   * @property {SpatialReference} [outSR] The well-known ID of or the spatial reference of the out geometries
-   */
-  /**
-   * This resource projects an array of input geometries from an input spatial reference
-   * to an output spatial reference. Result of type {@link ProjectResult} is passed in callback function.
-   * @param {ProjectOptions} params
-   * @param {Function} callback
-   */
-  GeometryService.prototype.project = function(p, callback) {
-    if (!p) {
-      return;
-    }
+  function prepareGeometryParams(p){
     var params = {};
+    if (!p) {
+      return null;
+    }
     var json = [];
     var g, isOv;
     if (p.geometries && p.geometries.length > 0) {
@@ -2951,7 +2977,36 @@
     if (p.outSpatialReference) {
       params.outSR = isNumber(p.outSpatialReference)? p.outSpatialReference : p.outSpatialReference.toJSON();
     }
-    params.geometries = '{ geometryType:"' + p.geometryType + '", geometries:[' + json.join(',') + ']}';
+    params.geometries = '{geometryType:"' + p.geometryType + '", geometries:[' + json.join(',') + ']}';
+    return params;
+  }
+  /**
+   * @name ProjectOptions
+   * @class This class represent the parameters needed in an project operation
+   *  for a {@link GeometryService}.
+   *   There is no constructor, use JavaScript object literal.
+   * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
+   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   * @property {GeometryType} [geometryType] esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope
+   * @property {SpatialReference} [inSpatialReference] The well-known ID of or the spatial reference of the input geometries
+   * @property {SpatialReference} [outSpatialReference] The well-known ID of or the spatial reference of the out geometries
+   */
+  /**
+   * @name ProjectResults
+   * @class This class represent the parameters needed in an project operation
+   *  for a {@link GeometryService}.
+   *   There is no constructor, use JavaScript object literal.
+   * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
+   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+    */
+  /**
+   * This resource projects an array of input geometries from an input spatial reference
+   * to an output spatial reference. Result of type {@link ProjectResults} is passed in callback function.
+   * @param {ProjectOptions} params
+   * @param {Function} callback
+   */
+  GeometryService.prototype.project = function(p, callback) {
+    var params = prepareGeometryParams(p);
     Util.getJSON(this.url + '/project', params, "callback", function(json) {
       var geom = [];
       if (p.outSpatialReference === 4326 || p.outSpatialReference.wkid === 4326) {
@@ -2963,7 +3018,55 @@
       callback(json, json.error);
     });
   };
-
+  
+  /**
+   * @name BufferOptions
+   * @class This class represent the parameters needed in an buffer operation
+   *  for a {@link GeometryService}.
+   *   There is no constructor, use JavaScript object literal.
+   * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
+   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   * @property {SpatialReference} [bufferSpatialReference] The well-known ID of or the spatial reference of the out geometries
+   * @property {Number[]} [distances] The distances the input geometries are buffered.
+   * @property {Number} [unit] see <a href='http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnitType.htm>esriSRUnitType Constants </a> .
+   * @property {Boolean} [unionResults] If true, all geometries buffered at a given distance are unioned into a single (possibly multipart) polygon, and the unioned geometry is placed in the output array.
+   */
+  /**
+   * @name BufferResults
+   * @class This class represent the parameters needed in an project operation
+   *  for a {@link GeometryService}.
+   *   There is no constructor, use JavaScript object literal.
+   * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
+   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   */
+  /**
+   * This resource projects an array of input geometries from an input spatial reference
+   * to an output spatial reference. Result of type {@link BufferResults} is passed in callback function.
+   * @param {BufferOptions} params
+   * @param {Function} callback. 
+   */
+  GeometryService.prototype.buffer = function(p, callback) {
+    var params = prepareGeometryParams(p);
+    if (p.bufferSpatialReference) {
+      params.bufferSR = isNumber(p.bufferSpatialReference) ? p.bufferSpatialReference : p.bufferSpatialReference.toJSON();
+    }
+    params.outSR = 4326;
+    params.distance = p.distance.join(',');
+    if (p.unit) {
+      params.unit = p.unit;
+    }
+    Util.getJSON(this.url + '/buffer', params, "callback", function(json) {
+      var geom = [];
+      if (json.geometries) {
+        for (var i = 0, c = json.geometries.length; i < c; i++) {
+          geom.push(fromJSONToOverlays(json.geometries[i]));
+        }
+      }
+      
+      json.geometries = geom;
+      callback(json, json.error);
+    });
+  };
   
 
   
