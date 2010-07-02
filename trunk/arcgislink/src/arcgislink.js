@@ -951,6 +951,22 @@
     '102113': WEB_MERCATOR,
     '102100': WEB_MERCATOR_AUX
   };
+  
+  /**
+   * @name SpatialReferenceId
+   * wkid of common spatial references
+   * @property {Number} [WGS84] 4326
+   * @property {Number} [NAD83] 4269
+   * @property {Number} [WEB_MERCATOR] 102113
+   * @property {Number} [WEB_MERCATOR_AUX] 102100
+   */
+  SpatialReferenceId = {
+    'WGS84':4326,
+    'NAD83':4269,
+    'WEB_MERCATOR': 102113,
+    'WEB_MERCATOR_AUX' :102100 
+  };
+    
   /**
    * Add A Spatial Reference to the collection of Spatial References.
    * the <code>wktOrSR</code> parameter can be String format of "well-known text" of the
@@ -3018,7 +3034,29 @@
       callback(json, json.error);
     });
   };
-  
+ 
+ /**
+  * Common units code in SpatialReferences. Used in buffer operation.
+  * This only has the most common units, for a full list of supported units, see 
+  * <a href=http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnitType.htm>esriSRUnitType</a>
+  * and <a href=http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnit2Type.htm>esriSRUnit2Type</a>
+  * @property {Number} [METER] 9001 International meter.
+  * @property {Number} [FOOT] 9002 International meter.
+  * @property {Number} [SURVEY_FOOT] 9003 	US survey foot.
+  * @property {Number} [SURVEY_MILE] 9035 US survey mile.
+  * @property {Number} [KILLOMETER] 9036 killometer.
+  * @property {Number} [RADIAN] 9101 radian.
+  * @property {Number} [DEGREE] 9102 degree.
+  */
+  var SRUnit = {
+    METER: 9001,
+    FOOT: 9002,
+    SURVEY_FOOT: 9003,
+    SURVEY_MILE: 9035,
+    KILLOMETER: 9036,
+    RADIAN: 9101,
+    DEGREE: 9102
+  }
   /**
    * @name BufferOptions
    * @class This class represent the parameters needed in an buffer operation
@@ -3051,7 +3089,7 @@
       params.bufferSR = isNumber(p.bufferSpatialReference) ? p.bufferSpatialReference : p.bufferSpatialReference.toJSON();
     }
     params.outSR = 4326;
-    params.distance = p.distance.join(',');
+    params.distances = p.distances.join(',');
     if (p.unit) {
       params.unit = p.unit;
     }
@@ -3092,8 +3130,10 @@
     'TransverseMercator': TransverseMercator,
     'FlatSpatialReference': FlatSpatialReference,
     'SpatialReferences': SpatialReferences,
+    'SpatialReferenceId':SpatialReferenceId,
     'SpatialRelationship': SpatialRelationship,
     'GeometryType': GeometryType,
+    'SRUnit' : SRUnit,
     'Catalog': Catalog,
     'MapService': MapService,
     'Layer': Layer,
