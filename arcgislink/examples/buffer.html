@@ -15,13 +15,13 @@
             var buffers = [];
             var path = new google.maps.MVCArray;
             // If very complex geometry then it's a good idea to set up your proxy.
-            gmaps.ags.Config.proxyUrl = '/proxy/proxy.ashx';
-            gmaps.ags.Config.alwaysUseProxy = true;
+            //gmaps.ags.Config.proxyUrl = '/proxy/proxy.ashx';
             
+              
             function init() {
               var myOptions = {
-                zoom: 5,
-                center: new google.maps.LatLng(65.712557, -154.423828),
+                zoom: 15,
+                center: new google.maps.LatLng(35.23,-80.84),
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 mapTypeControlOptions: {
                   mapTypeIds: [google.maps.MapTypeId.ROADMAP]
@@ -52,6 +52,10 @@
             
             function addPoint(event) {
               // maybe a V3 bug: map click event should not triger by poly click
+              if (iw) {
+                iw.close();
+                iw = null;
+              }
               if (skip) {
                 skip = false;
                 return;
@@ -75,6 +79,7 @@
                     break;
                   }
                 }
+                doBuffer();
               });
               
               google.maps.event.addListener(marker, 'dragend', function() {
@@ -84,7 +89,7 @@
                      break;
                   }
                 }
-               
+                doBuffer();
               });
             }
             
@@ -96,8 +101,8 @@
               buffers.length = 0;
               var params = {
                 geometries: [poly],
-                bufferSpatialReference:102113,
-                distance: [500,1000],
+                bufferSpatialReference:gmaps.ags.SpatialReferences.WEB_MERCATOR,
+                distances: [500,1000],
                 unit: 9001,
                 unionResults: true
               };
