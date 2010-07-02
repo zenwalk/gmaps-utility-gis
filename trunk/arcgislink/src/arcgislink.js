@@ -49,6 +49,8 @@
  *    {@link Layer}<br/>
  *    {@link GeocodeService}<br/>
  *    {@link GeometryService}<br/>
+ *    {@link GPService}<br/>
+ *    {@link GPTask}<br/>
  *     <br/></td>
  *     <td style = 'border:0px;width:200px'>
  *    {@link SpatialReference}<br/>
@@ -65,12 +67,9 @@
  *    (note the name of the type does not matter for object literals)</p>
  *    <table style = 'border:0px'><tr>
  *    <td style = 'border:0px;width:200px'>
- *    
  *    {@link Field}<br/>
  *    {@link TileInfo}<br/>
  *    {@link LOD}<br/>
- *    {@link TimeInfo}<br/>
- *    {@link DrawingInfo}<br/>
  *    {@link ExportMapOptions}<br/>
  *    {@link MapImage}<br/>
  *    {@link IdentifyOptions}<br/>
@@ -80,10 +79,10 @@
  *     <td style = 'border:0px;width:200px'>
  *    {@link QueryOptions}<br/>
  *    {@link ResultSet}<br/>
- *    
- *    {@link FindParameters}<br/>
+ *    {@link FindOptions}<br/>
  *    {@link FindResults}<br/>
  *    {@link FindResult}<br/>
+ *    {@link Feature}<br/>
  *     </td>
  *     <td style = 'border:0px;width:200px'>
  *    {@link GeocodeOptions}<br/>
@@ -92,31 +91,12 @@
  *    {@link ReverseGeocodeOptions}<br/>
  *    {@link ReverseGeocodeResult}<br/>
  *    </td>
- *     <td style = 'border:0px;width:200px'>
- *    {@link Geometry}<br/>
- *    {@link Point}<br/>
- *    {@link Polyline}<br/>
- *    {@link Polygon}<br/>
- *    {@link Envelope}<br/>
- *    {@link Multipoint}<br/>
- *    {@link Feature}<br/>
- *    {@link Domain}<br/>
- *    </td>
- *    <td style = 'border:0px;width:200px'>
- *    {@link Color}<br/>
- *    {@link SimpleMarkerSymbol}<br/>
- *    {@link SimpleLineSymbol}<br/>
- *    {@link SimpleFillSymbol}<br/>
- *    {@link PictureMarkerSymbol}<br/>
- *    {@link PictureFillSymbol}<br/>
- *    {@link TextSymbol}<br/>
- *     </td>
  *    </tr></table>
  */
 (function () {
 
-  /*jslint browser:true */
-  /*global escape */
+  /*jslint browser:true, evil: true */
+  /*global escape ActiveXObject */
   
 
   //======= utility/helper functions ==========//
@@ -137,6 +117,33 @@
 
   var W = window;
   var G = namespace('google.maps');
+    /**
+   * @name Config
+   * @class This is an object literal that sets common configuration values used across the lib.
+   * @property {String} [proxyUrl] The URL to the web proxy page used in case the length of the URL request to an ArcGIS Server REST resource exceeds 2000 characters.
+   * @property {Boolean} [alwaysUseProxy] The URL to the web proxy page used in case the length of the URL request to an ArcGIS Server REST resource exceeds 2000 characters.
+   */
+  var Config = {
+    proxyUrl: null,
+    alwaysUseProxy: false 
+  };
+  var WGS84, NAD83, WEB_MERCATOR, WEB_MERCATOR_AUX;
+  /*
+   * an internal collection of Spatial Refeneces supported in the application.
+   * The key of the collection is the wkid, and value is an instance of
+   * {@link SpatialReference}.
+   * The {@link TileLayer}'s Spatial Refeneces <b>must be already added to collection
+   * before it's constructor can be called</b>.
+   * The following SpatialReference are added by default:
+   * <code>
+   * <br/> 4326: WGS84 SGeographic Coordinate System;
+   * <br/> 102113: Web-Mercator used by Google Maps, Virtual Earth etc.
+   * <br/> 102100: Web-Mercator with datum transformation.
+   * </code>
+   * <br/> The application can add a supported spatial references using static method
+   * <code>SpatialReference.register(wkid,sr);</code>
+   */
+  var spatialReferences = {};
  /**
    * Extract the substring from full string, between start string and end string
    * @param {String} full
@@ -167,7 +174,7 @@
   
   var isNumber = function (o) {
     return typeof o === 'number';
-  }
+  };
  
    /**
    * Add the property of the source object to destination object 
@@ -307,7 +314,7 @@
     }
     return strDefs;
   }; 
-  var getXmlHttp = function() {
+  var getXmlHttp = function () {
     if (typeof XMLHttpRequest === "undefined") {
       try {
         return new ActiveXObject("Msxml2.XMLHTTP.6.0");
@@ -315,16 +322,311 @@
       }
       try {
         return new ActiveXObject("Msxml2.XMLHTTP.3.0");
-      } catch (e) {
+      } catch (e1) {
       }
       try {
         return new ActiveXObject("Msxml2.XMLHTTP");
-      } catch (e) {
+      } catch (e2) {
       }
       throw new Error("This browser does not support XMLHttpRequest.");
     } else {
       return new XMLHttpRequest();
     }
+  };
+  /**
+   * @name GeometryType
+   * @class List of Geometry type supported by ArcGIS server.
+   * @property {String} [POINT] esriGeometryPoint 
+   * @property {String} [MULTIPOINT] esriGeometryMultipoint
+   * @property {String} [POLYLINE] esriGeometryPolyline
+   * @property {String} [POLYGON] esriGeometryPolygon
+   * @property {String} [ENVELOPE] esriGeometryEnvelope
+   */
+  var GeometryType = {
+    POINT: 'esriGeometryPoint',
+    MULTIPOINT: 'esriGeometryMultipoint',
+    POLYLINE: 'esriGeometryPolyline',
+    POLYGON: 'esriGeometryPolygon',
+    ENVELOPE: 'esriGeometryEnvelope'
+  };
+  var getGeometryType = function (obj) {
+    var o = obj;
+    if (isArray(obj) && obj.length > 0) {
+      o = obj[0];
+    }
+    if (o instanceof G.LatLng || o instanceof G.Marker) {
+      if (isArray(obj) && obj.length > 1) {
+        return GeometryType.MULTIPOINT;
+      } else {
+        return GeometryType.POINT;
+      }
+    } else if (o instanceof G.Polyline) {
+      return GeometryType.POLYLINE;
+    } else if (o instanceof G.Polygon) {
+      return GeometryType.POLYGON;
+    } else if (o instanceof G.LatLngBounds) {
+      return GeometryType.ENVELOPE;
+    } else if (o.x !== undefined && o.y !== undefined) {
+      return GeometryType.POINT;
+    } else if (o.points) {
+      return GeometryType.MULTIPOINT;
+    } else if (o.paths) {
+      return GeometryType.POLYLINE;
+    } else if (o.rings) {
+      return GeometryType.POLYGON;
+    }
+    return null;
+  };
+  /**
+   * Is the object an Google Overlay?
+   * @param {Object} obj
+   */
+  var isOverlay = function (obj) {
+    var o = obj;
+    if (isArray(obj) && obj.length > 0) {
+      o = obj[0];
+    }
+    if (isArray(o) && o.length > 0) {
+      o = o[0];
+    }
+    if (o instanceof G.LatLng || o instanceof G.Marker || 
+      o instanceof G.Polyline || o instanceof G.Polygon ||
+      o instanceof G.LatLngBounds) {
+      return true;
+    } 
+    return false;
+  };
+  
+  var getSRParam = function (sr) {
+    if (!sr) {
+      return null;
+    }
+    // for 9.3 compatibility, return wkid if possible.
+    return isNumber(sr)? sr : sr.wkid? sr.wkid : sr.toJSON();
+  };
+  
+  
+  /**
+   * Convert overlays (Marker, Polyline, Polygons) to JSON string in AGS format.
+   * @param {OverlayView|OverlayView[]} geom 
+   */
+  var fromOverlaysToJSON = function (geom) {
+    /**
+    * @param {MVCArray.&lt;LatLng>} pts
+    */
+    function fromLatLngsToJSON(pts, close) {
+      var arr = [];
+      var latlng;
+      for (var i = 0, c = pts.getLength(); i < c; i++) {
+        latlng = pts.getAt(i);
+        arr.push('[' + latlng.lng() + ',' + latlng.lat() + ']');
+      }
+      if (close && arr.length > 0) {
+        arr.push('[' + pts.getAt(0).lng() + ',' + pts.getAt(0).lat() + ']');
+      }
+      return arr.join(',');
+    }
+    var gtype = getGeometryType(geom);
+    var g, gs, i, pts;
+    var json = '{';
+    switch (gtype) {
+    case GeometryType.POINT:
+      g = isArray(geom) ? geom[0] : geom;
+      if (g instanceof G.Marker) {
+        g = g.getPosition();
+      }
+      json += 'x:' + g.lng() + ',y:' + g.lat();
+      break;
+    case GeometryType.MULTIPOINT:
+      pts = [];
+      for (i = 0; i < geom.length; i++) {
+        if (geom[i] instanceof G.Marker) {
+          g = geom[i].getPosition();
+        } else {
+          g = geom[i];
+        }
+        pts.push('[' + g.lng() + ',' + g.lat() + ']');
+      }
+      json += 'points: [' + pts.join(',') + ']';
+      break;
+    case GeometryType.POLYLINE:
+      // V3 does not support multiple paths yet
+      pts = [];
+      gs = isArray(geom) ? geom : [geom];
+      for (i = 0; i < gs.length; i++) {
+        pts.push('[' + fromLatLngsToJSON(gs[i].getPath()) + ']');
+      }
+      json += 'paths:[' + pts.join(',') + ']';
+      break;
+    case GeometryType.POLYGON:
+      pts = [];
+      g = isArray(geom) ? geom[0] : geom;
+      var paths = g.getPaths();
+      for (i = 0; i < paths.getLength(); i++) {
+        pts.push('[' + fromLatLngsToJSON(paths.getAt(i), true) + ']');
+      }
+      json += 'rings:[' + pts.join(',') + ']';
+      
+      break;
+    case GeometryType.ENVELOPE:
+      g = isArray(geom) ? geom[0] : geom;
+      json += 'xmin:' + g.getSouthWest().lng() + ',ymin:' + g.getSouthWest().lat() + ',xmax:' + g.getNorthEast().lng() + ',ymax:' + g.getNorthEast().lat();
+      break;
+    }
+    json += ', spatialReference:{wkid:4326}';
+    json += '}';
+    return json;
+  };
+  
+  /**
+   * From ESRI geometry format to JSON String, primarily used in Geometry service
+   * @param {Object} geom
+   */
+  var fromGeometryToJSON = function (geom) {
+      function fromPointsToJSON(pts) {
+        var arr = [];
+        for (var i = 0, c = pts.length; i < c; i++) {
+          arr.push('[' + pts[i][0] + ',' + pts[i][1] + ']');
+        }
+        return '[' + arr.join(',') + ']';
+      }
+      function fromLinesToJSON(lines) {
+        var arr = [];
+        for (var i = 0, c = lines.length; i < c; i++) {
+          arr.push(fromPointsToJSON(lines[i]));
+        }
+        return '[' + arr.join(',') + ']';
+      }
+      
+      var json = '{';
+      if (geom.x) {
+        json += 'x:' + geom.x + ',y:' + geom.y;
+      } else if (geom.xmin) {
+        json += 'xmin:' + geom.xmin + ',ymin:' + geom.ymin + ',xmax:' + geom.xmax + ',ymax:' + geom.ymax;
+      } else if (geom.points) {
+        json += 'points:' + fromPointsToJSON(geom.points);
+      } else if (geom.paths) {
+        json += 'paths:' + fromLinesToJSON(geom.paths);
+      } else if (geom.rings) {
+        json += 'rings:' + fromLinesToJSON(geom.rings);
+      }
+      json += '}';
+      return json;
+    };
+
+  /**
+   * Helper method to convert an Envelope object to <code>google.maps.LatLngBounds</code> 
+   * @private 
+   * @param {Envelope} extent
+   * @return {google.maps.LatLngBounds} gLatLngBounds
+   */
+  var fromEnvelopeToLatLngBounds  =  function (extent) {
+    var sr  =  spatialReferences[extent.spatialReference.wkid || extent.spatialReference.wkt];
+    sr  =  sr || WGS84;
+    var sw  =  sr.reverse([extent.xmin, extent.ymin]);
+    var ne  =  sr.reverse([extent.xmax, extent.ymax]);
+    return new G.LatLngBounds(new G.LatLng(sw[1], sw[0]), new G.LatLng(ne[1], ne[0]));
+  };
+  
+  
+  /**
+   * Convert a ArcGIS Geometry JSON object to core Google Maps API 
+   * overlays such as  <code>google.maps.Marker</code>, <code>google.maps.Polyline</code> or <code>google.maps.Polygon</code>
+   * Note ArcGIS Geometry may have multiple parts, but the coresponding OverlayView 
+   * may (Polygon) or may not (Polyline) support multi-parts, so the result is an array for consistency.
+   * @param {Object} json geometry
+   * @param {OverlayOptions} opts see {@link OverlayOptions}
+   * @param {String} opt_displayName
+   * @return {OverlayView[]} 
+   */
+  var fromJSONToOverlays = function (geom, opts) {
+    var ovs = null;
+    var sr = null;
+    var ov;
+    var x, i, ic, j, jc, parts, part, lnglat, latlngs;
+    var title = '';
+    opts = opts || {};
+    if (geom) {
+      ovs = [];
+      if (geom.x) {
+        ov = new G.Marker(augmentObject(opts.markerOptions || opts , {
+          position: new G.LatLng(geom.y, geom.x)
+        }));
+        ovs.push(ov);
+      } else {
+        //mulpt, line and poly
+        parts = geom.points || geom.paths || geom.rings;
+        if (!parts) {
+          return ovs;
+        }
+        var rings = [];
+        for (i = 0, ic = parts.length; i < ic; i++) {
+          part = parts[i];
+          if (geom.points) {
+            // multipoint
+            ov = new G.Marker(augmentObject(opts.markerOptions || opts, {
+              position: new G.LatLng(part[1], part[0])
+            }));
+            ovs.push(ov);
+          } else {
+            latlngs = [];
+            for (j = 0, jc = part.length; j < jc; j++) {
+              lnglat = part[j];
+              latlngs.push(new G.LatLng(lnglat[1], lnglat[0]));
+            }
+            if (geom.paths) {
+              ov = new G.Polyline(augmentObject(opts.polylineOptions || opts, {
+                path: latlngs
+              }));
+              ovs.push(ov);
+            } else if (geom.rings) {
+              // V3 supports multiple rings
+              rings.push(latlngs);
+            }
+          }
+        }
+        if (geom.rings) {
+          ov = new G.Polygon(augmentObject(opts.polygonOptions || opts, {
+            paths: rings
+          }));
+          ovs.push(ov);
+        }
+      }
+    }
+    
+    return ovs;
+  };
+  /**
+   * get string as rest parameter
+   * @param {Object} o
+   */
+  var formatRequestString = function (o) {
+    var ret;
+    if (typeof o === 'object') {
+      if (isArray(o)) {
+        ret = [];
+        for (var i = 0, I = o.length; i < I; i++) {
+          ret.push(formatRequestString(o[i]));
+        }
+        return '[' + ret.join(',') + ']';
+      } else if (isOverlay(o)) {
+        return fromOverlaysToJSON(o);
+      } else if (o.toJSON) {
+        return o.toJSON();
+      } else {
+        ret = '';
+        for (var x in o) {
+          if (o.hasOwnProperty(x)) {
+            if (ret.length > 0) {
+              ret += ', ';
+            }
+            ret += x + ':' + formatRequestString(o[x]);
+          }
+        }
+        return '{' + ret + '}';
+      }
+    }
+    return o.toString();
   };
   var log = function (msg) {
     if (window.console) {
@@ -383,7 +685,8 @@
       for (var x in params) {
         if (params.hasOwnProperty(x) && params[x] !== null && params[x] !== undefined) { // wont sent undefined.
           //jslint complaint about escape cause NN does not support it.
-          query += (x + '=' + (escape ? escape(params[x]) : encodeURIComponent(params[x])) + '&');
+          var val = formatRequestString(params[x]);
+          query += (x + '=' + (escape ? escape(val) : encodeURIComponent(val)) + '&');
         }
       }
     }
@@ -392,7 +695,7 @@
     if (!head) {
       throw new Error("document must have header tag");
     }
-    var jsonpcallback = function() {
+    var jsonpcallback = function () {
       delete xdc[sid];
       if (script) {
         head.removeChild(script);
@@ -417,9 +720,9 @@
     } else {
       // check if same host
       var loc = window.location;
-      var dom = loc.protocol + '//' + loc.hostname + (!(loc.port) || loc.port === 80 ? '' : ':' + loc.port) + '/';
+      var dom = loc.protocol + '//' + loc.hostname + (!loc.port || loc.port === 80) ? '' : ':' + loc.port + '/';
       var useProxy = true;
-      if (url.toLowerCase().indexOf(dom.toLowerCase()) != -1) {
+      if (url.toLowerCase().indexOf(dom.toLowerCase()) !== -1) {
         useProxy = false;
       }
       if (Config.alwaysUseProxy) {
@@ -429,11 +732,13 @@
         throw new Error('No Config.proxyUrl defined');
       }
       var xmlhttp = getXmlHttp();
-      xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4) {
-          if (xmlhttp.status == 200) 
+      xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState === 4) {
+          if (xmlhttp.status === 200) {
             eval(xmlhttp.responseText);
-          else throw new Error("Error code " + xmlhttp.status);
+          } else {
+            throw new Error("Error code " + xmlhttp.status);
+          }
         }
       };
       xmlhttp.open('POST', useProxy ? Config.proxyUrl + '?' + url : url, true);
@@ -449,32 +754,7 @@
     triggerEvent(Util, 'jsonpstart', sid);
     return sid;
   };
-  /**
-   * @name Config
-   * @class This is an object literal that sets common configuration values used across the lib.
-   * @property {String} [proxyUrl] The URL to the web proxy page used in case the length of the URL request to an ArcGIS Server REST resource exceeds 2000 characters.
-   * @property {Boolean} [alwaysUseProxy] The URL to the web proxy page used in case the length of the URL request to an ArcGIS Server REST resource exceeds 2000 characters.
-   */
-  var Config = {
-    proxyUrl: null,
-    alwaysUseProxy: false 
-  };
-  /*
-   * an internal collection of Spatial Refeneces supported in the application.
-   * The key of the collection is the wkid, and value is an instance of
-   * {@link SpatialReference}.
-   * The {@link TileLayer}'s Spatial Refeneces <b>must be already added to collection
-   * before it's constructor can be called</b>.
-   * The following SpatialReference are added by default:
-   * <code>
-   * <br/> 4326: WGS84 SGeographic Coordinate System;
-   * <br/> 102113: Web-Mercator used by Google Maps, Virtual Earth etc.
-   * <br/> 102100: Web-Mercator with datum transformation.
-   * </code>
-   * <br/> The application can add a supported spatial references using static method
-   * <code>SpatialReference.register(wkid,sr);</code>
-   */
-  var spatialReferences = {};
+
   
   /**
    * Create A Generic Spatial Reference Object
@@ -525,7 +805,7 @@
    * @return String
    */
   SpatialReference.prototype.toJSON  =  function () {
-    return '{' + (this.wkid ? ' wkid:' + this.wkid : 'wkt: \''+ this.wkt + '\'') + '}';
+    return '{' + (this.wkid ? ' wkid:' + this.wkid : 'wkt: \'' + this.wkt + '\'') + '}';
   };
   /**
    * Creates a Geographic Coordinate System. e.g.:<br/>
@@ -917,19 +1197,19 @@
   };
 
 
-  var WGS84 = new Geographic({
+  WGS84 = new Geographic({
     wkid: 4326
   });
-  var NAD83 = new Geographic({
+  NAD83 = new Geographic({
     wkid: 4269
   });
-  var WEB_MERCATOR = new SphereMercator({
+  WEB_MERCATOR = new SphereMercator({
     wkid: 102113,
     semi_major: 6378137.0,
     central_meridian: 0,
     unit: 1
   });
-  var WEB_MERCATOR_AUX = new SphereMercator({
+  WEB_MERCATOR_AUX = new SphereMercator({
       wkid: 102100,
       semi_major: 6378137.0,
       central_meridian: 0,
@@ -1063,269 +1343,7 @@
   
   //end of projection related code//
   
-  /**
-   * @name GeometryType
-   * @class List of Geometry type supported by ArcGIS server.
-   * @property {String} [POINT] esriGeometryPoint 
-   * @property {String} [MULTIPOINT] esriGeometryMultipoint
-   * @property {String} [POLYLINE] esriGeometryPolyline
-   * @property {String} [POLYGON] esriGeometryPolygon
-   * @property {String} [ENVELOPE] esriGeometryEnvelope
-   */
-  var GeometryType = {
-    POINT: 'esriGeometryPoint',
-    MULTIPOINT: 'esriGeometryMultipoint',
-    POLYLINE: 'esriGeometryPolyline',
-    POLYGON: 'esriGeometryPolygon',
-    ENVELOPE: 'esriGeometryEnvelope'
-  };
-  var getGeometryType = function (obj) {
-    var o = obj;
-    if (isArray(obj) && obj.length > 0) {
-      o = obj[0];
-    }
-    if (o instanceof G.LatLng || o instanceof G.Marker) {
-      if (isArray(obj) && obj.length > 1) {
-        return GeometryType.MULTIPOINT;
-      } else {
-        return GeometryType.POINT;
-      }
-    } else if (o instanceof G.Polyline) {
-      return GeometryType.POLYLINE;
-    } else if (o instanceof G.Polygon) {
-      return GeometryType.POLYGON;
-    } else if (o instanceof G.LatLngBounds) {
-      return GeometryType.ENVELOPE;
-    } else if (o.x !== undefined && o.y !== undefined) {
-      return GeometryType.POINT;
-    } else if (o.points) {
-      return GeometryType.MULTIPOINT;
-    } else if (o.paths) {
-      return GeometryType.POLYLINE;
-    } else if (o.rings) {
-      return GeometryType.POLYGON;
-    }
-    return null;
-  };
-  /**
-   * Is the object an Google Overlay?
-   * @param {Object} obj
-   */
-  var isOverlay = function (obj){
-    var o = obj;
-    if (isArray(obj) && obj.length > 0) {
-      o = obj[0];
-    }
-    if (isArray(o) && o.length > 0) {
-      o = o[0];
-    }
-    if (o instanceof G.LatLng || o instanceof G.Marker || 
-      o instanceof G.Polyline || o instanceof G.Polygon ||
-      o instanceof G.LatLngBounds) {
-      return true;
-    } 
-    return false;
-  }
   
-  var getSRParam = function (sr) {
-    if (!sr) {
-      return null;
-    }
-    // for 9.3 compatibility, return wkid if possible.
-    return isNumber(sr)? sr : sr.wkid? sr.wkid : sr.toJSON();
-  }
-  
-  
-  /**
-   * Convert overlays (Marker, Polyline, Polygons) to JSON string in AGS format.
-   * @param {OverlayView|OverlayView[]} geom 
-   */
-  var fromOverlaysToJSON = function (geom) {
-    /**
-    * @param {MVCArray.&lt;LatLng>} pts
-    */
-    function fromLatLngsToJSON(pts, close) {
-      var arr = [];
-      var latlng;
-      for (var i = 0, c = pts.getLength(); i < c; i++) {
-        latlng = pts.getAt(i);
-        arr.push('[' + latlng.lng() + ',' + latlng.lat() + ']');
-      }
-      if (close && arr.length > 0) {
-        arr.push('[' + pts.getAt(0).lng() + ',' + pts.getAt(0).lat() + ']');
-      }
-      return arr.join(',');
-    }
-    var gtype = getGeometryType(geom);
-    var g, gs, i, pts;
-    var json = '{';
-    switch (gtype) {
-    case GeometryType.POINT:
-      g = isArray(geom) ? geom[0] : geom;
-      if (g instanceof G.Marker) {
-        g = g.getPosition();
-      }
-      json += 'x:' + g.lng() + ',y:' + g.lat();
-      break;
-    case GeometryType.MULTIPOINT:
-      pts = [];
-      for (i = 0; i < geom.length; i++) {
-        if (geom[i] instanceof G.Marker) {
-          g = geom[i].getPosition();
-        } else {
-          g = geom[i];
-        }
-        pts.push('[' + g.lng() + ',' + g.lat() + ']');
-      }
-      json += 'points: [' + pts.join(',') + ']';
-      break;
-    case GeometryType.POLYLINE:
-      // V3 does not support multiple paths yet
-      pts = [];
-      gs = isArray(geom) ? geom : [geom];
-      for (i = 0; i < gs.length; i++) {
-        pts.push('[' + fromLatLngsToJSON(gs[i].getPath()) + ']');
-      }
-      json += 'paths:[' + pts.join(',') + ']';
-      break;
-    case GeometryType.POLYGON:
-      pts = [];
-      g = isArray(geom) ? geom[0] : geom;
-      var paths = g.getPaths();
-      for (i = 0; i < paths.getLength(); i++) {
-        pts.push('[' + fromLatLngsToJSON(paths.getAt(i), true) + ']');
-      }
-      json += 'rings:[' + pts.join(',') + ']';
-      
-      break;
-    case GeometryType.ENVELOPE:
-      g = isArray(geom) ? geom[0] : geom;
-      json += 'xmin:' + g.getSouthWest().lng() + ',ymin:' + g.getSouthWest().lat() + ',xmax:' + g.getNorthEast().lng() + ',ymax:' + g.getNorthEast().lat();
-      break;
-    }
-    json += ', spatialReference:{wkid:4326}';
-    json += '}';
-    return json;
-  };
-  
-  /**
-   * From ESRI geometry format to JSON String, primarily used in Geometry service
-   * @param {Object} geom
-   */
-  var fromGeometryToJSON = function (geom) {
-      function fromPointsToJSON(pts) {
-        var arr = [];
-        for (var i = 0, c = pts.length; i < c; i++) {
-          arr.push('[' + pts[i][0] + ',' + pts[i][1] + ']');
-        }
-        return '[' + arr.join(',') + ']';
-      }
-      function fromLinesToJSON(lines) {
-        var arr = [];
-        for (var i = 0, c = lines.length; i < c; i++) {
-          arr.push(fromPointsToJSON(lines[i]));
-        }
-        return '[' + arr.join(',') + ']';
-      }
-      
-      var json = '{';
-      if (geom.x) {
-        json += 'x:' + geom.x + ',y:' + geom.y;
-      } else if (geom.xmin) {
-        json += 'xmin:' + geom.xmin + ',ymin:' + geom.ymin + ',xmax:' + geom.xmax + ',ymax:' + geom.ymax;
-      } else if (geom.points) {
-        json += 'points:' + fromPointsToJSON(geom.points);
-      } else if (geom.paths) {
-        json += 'paths:' + fromLinesToJSON(geom.paths);
-      } else if (geom.rings) {
-        json += 'rings:' + fromLinesToJSON(geom.rings);
-      }
-      json += '}';
-      return json;
-    };
-
-  /**
-   * Helper method to convert an Envelope object to <code>google.maps.LatLngBounds</code> 
-   * @private 
-   * @param {Envelope} extent
-   * @return {google.maps.LatLngBounds} gLatLngBounds
-   */
-  var fromEnvelopeToLatLngBounds  =  function (extent) {
-    var sr  =  spatialReferences[extent.spatialReference.wkid || extent.spatialReference.wkt];
-    sr  =  sr || WGS84;
-    var sw  =  sr.reverse([extent.xmin, extent.ymin]);
-    var ne  =  sr.reverse([extent.xmax, extent.ymax]);
-    return new G.LatLngBounds(new G.LatLng(sw[1], sw[0]), new G.LatLng(ne[1], ne[0]));
-  };
-  
-  
-  /**
-   * Convert a ArcGIS Geometry JSON object to core Google Maps API 
-   * overlays such as  <code>google.maps.Marker</code>, <code>google.maps.Polyline</code> or <code>google.maps.Polygon</code>
-   * Note ArcGIS Geometry may have multiple parts, but the coresponding OverlayView 
-   * may (Polygon) or may not (Polyline) support multi-parts, so the result is an array for consistency.
-   * @param {Object} json geometry
-   * @param {OverlayOptions} opts see {@link OverlayOptions}
-   * @param {String} opt_displayName
-   * @return {OverlayView[]} 
-   */
-  var fromJSONToOverlays = function (geom, opts) {
-    var ovs = null;
-    var sr = null;
-    var ov;
-    var x, i, ic, j, jc, parts, part, lnglat, latlngs;
-    var title = '';
-    opts = opts || {};
-    if (geom) {
-      ovs = [];
-      if (geom.x) {
-        ov = new G.Marker(augmentObject(opts.markerOptions || opts , {
-          position: new G.LatLng(geom.y, geom.x)
-        }));
-        ovs.push(ov);
-      } else {
-        //mulpt, line and poly
-        parts = geom.points || geom.paths || geom.rings;
-        if (!parts) {
-          return ovs;
-        }
-        var rings = [];
-        for (i = 0, ic = parts.length; i < ic; i++) {
-          part = parts[i];
-          if (geom.points) {
-            // multipoint
-            ov = new G.Marker(augmentObject(opts.markerOptions || opts, {
-              position: new G.LatLng(part[1], part[0])
-            }));
-            ovs.push(ov);
-          } else {
-            latlngs = [];
-            for (j = 0, jc = part.length; j < jc; j++) {
-              lnglat = part[j];
-              latlngs.push(new G.LatLng(lnglat[1], lnglat[0]));
-            }
-            if (geom.paths) {
-              ov = new G.Polyline(augmentObject(opts.polylineOptions || opts, {
-                path: latlngs
-              }));
-              ovs.push(ov);
-            } else if (geom.rings) {
-              // V3 supports multiple rings
-              rings.push(latlngs);
-            }
-          }
-        }
-        if (geom.rings) {
-          ov = new G.Polygon(augmentObject(opts.polygonOptions || opts, {
-            paths: rings
-          }));
-          ovs.push(ov);
-        }
-      }
-    }
-    
-    return ovs;
-  };
   
   /**@name Error
    * @class Error returned from Server.
@@ -1369,6 +1387,17 @@
     });
   }
   /**
+   * @name Field
+   * @class This class represents a field in a {@link Layer}. It is accessed from
+   * the <code> fields</code> property. There is no constructor for this class,
+   *  use Object Literal.
+   * @property {String} [name] field Name
+   * @property {String} [type] field type (esriFieldTypeOID|esriFieldTypeString|esriFieldTypeInteger|esriFieldTypeGeometry}.
+   * @property {String} [alias] field alias.
+   * @property {Domain} [domain] domain
+   * @property {Int} [length] length.
+   */
+  /**
    * Create a ArcGIS map Layer using it's url ( 	http://[mapservice-url]/[layerId])
    * @name Layer
    * @class This class (<code>gmaps.ags.Layer</code>) The layer / table(v10+)
@@ -1411,7 +1440,7 @@
     if (this.loaded) {
       return;
     }
-    Util.getJSON(this.url, {}, 'callback', function(json) {
+    Util.getJSON(this.url, {}, 'callback', function (json) {
       augmentObject(json, me);
       me.loaded = true;
       if (opt_callback) {
@@ -2321,7 +2350,7 @@
     params.f = 'json';
     params.outSR = 4326;
     var me = this;
-    Util.getJSON(this.url + '/reverseGeocode', params, 'callback', function(json) {
+    Util.getJSON(this.url + '/reverseGeocode', params, 'callback', function (json) {
       if (json.location) {
         var loc = json.location;
         if (!isNaN(loc.x) && !isNaN(loc.y)) {
@@ -2376,24 +2405,24 @@
     if (!tileInfo) {
       throw new Error('map service is not tiled');
     }
-    this.tileInfo_  =  tileInfo;
-    this.spatialReference  =  spatialReferences[tileInfo.spatialReference.wkid || tileInfo.spatialReference.wkt];
+    this.tileInfo_ = tileInfo;
+    this.spatialReference = spatialReferences[tileInfo.spatialReference.wkid || tileInfo.spatialReference.wkt];
     if (!this.spatialReference) {
-      throw new Error('unsupported Spatial Reference'); 
+      throw new Error('unsupported Spatial Reference');
     }
     // resolution (unit/pixel) at lod level 0. Due to changes from V2-V3, 
     // zoom is no longer defined in Projection. It is assumed that level's zoom factor is 2. 
     this.resolution0_ = this.tileInfo_.lods[0].resolution;
     // zoom offset of this tileinfo's zoom 0 to Google's zoom0
-    this.minZoom  =  Math.floor(Math.log(this.spatialReference.getCircumference() / this.resolution0_ / 256) / Math.LN2 + 0.5);
+    this.minZoom = Math.floor(Math.log(this.spatialReference.getCircumference() / this.resolution0_ / 256) / Math.LN2 + 0.5);
     this.maxZoom = this.minZoom + this.tileInfo_.lods.length - 1;
-    this.tileSize = new G.Size(this.tileInfo_.cols, this.tileInfo_.rows);  
+    this.tileSize = new G.Size(this.tileInfo_.cols, this.tileInfo_.rows);
     // Find out how the map units scaled to 1 tile at zoom 0. 
     // from V2-V3, coords must scaled to 256 pixel under Mercator at zoom 0.
     // scale can be considered under this SR, what's the actual pixel number to 256 to cover whole earth?
     this.scale_ = Math.pow(2, this.minZoom) * this.resolution0_;
-    this.originX_ = this.tileInfo_.origin.x;        
-    this.originY_ = this.tileInfo_.origin.y;        
+    this.originX_ = this.tileInfo_.origin.x;
+    this.originY_ = this.tileInfo_.origin.y;
     // validation check
     var ratio;
     for (var i = 0; i < tileInfo.lods.length - 1; i++) {
@@ -2402,7 +2431,7 @@
         throw new Error('This type of map cache is not supported in V3. \nScale ratio between zoom levels must be 2');
       }
     }
-   }
+  }
   
   /**
    * See <a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a>.
@@ -2972,7 +3001,7 @@
   function GeometryService(url) {
     this.url  = url;
   }
-  function prepareGeometryParams(p){
+  function prepareGeometryParams(p) {
     var params = {};
     if (!p) {
       return null;
@@ -3029,9 +3058,9 @@
    * @param {ProjectOptions} params
    * @param {Function} callback
    */
-  GeometryService.prototype.project = function(p, callback) {
+  GeometryService.prototype.project = function (p, callback) {
     var params = prepareGeometryParams(p);
-    Util.getJSON(this.url + '/project', params, "callback", function(json) {
+    Util.getJSON(this.url + '/project', params, "callback", function (json) {
       var geom = [];
       if (p.outSpatialReference === 4326 || p.outSpatialReference.wkid === 4326) {
         for (var i = 0, c = json.geometries.length; i < c; i++) {
@@ -3064,7 +3093,7 @@
     KILLOMETER: 9036,
     RADIAN: 9101,
     DEGREE: 9102
-  }
+  };
   /**
    * @name BufferOptions
    * @class This class represent the parameters needed in an buffer operation
@@ -3092,7 +3121,7 @@
    * @param {BufferOptions} params
    * @param {Function} callback. 
    */
-  GeometryService.prototype.buffer = function(p, callback) {
+  GeometryService.prototype.buffer = function (p, callback) {
     var params = prepareGeometryParams(p);
     if (p.bufferSpatialReference) {
       params.bufferSR = getSRParam(p.bufferSpatialReference);
@@ -3102,7 +3131,7 @@
     if (p.unit) {
       params.unit = p.unit;
     }
-    Util.getJSON(this.url + '/buffer', params, "callback", function(json) {
+    Util.getJSON(this.url + '/buffer', params, "callback", function (json) {
       var geom = [];
       if (json.geometries) {
         for (var i = 0, c = json.geometries.length; i < c; i++) {
@@ -3114,7 +3143,161 @@
     });
   };
   
-
+  /**
+   * @name GPService
+   * @class GPService
+   * @constructor
+   * @property {String} [serviceDescription]
+   * @property {String[]} [tasks]
+   * @property {String} [executionType]
+   * @property {String} [resultMapServerName]
+   * @param {String} url http://[catalog-url]/[serviceName]/GPServer 
+   */
+  function GPService(url) {
+    this.url = url;
+    this.loaded = false;
+    var me = this;
+    Util.getJSON(url, {
+      f: 'json'
+    }, 'callback', function (json) {
+      augmentObject(json, me);
+      me.loaded = true;
+      /**
+     * This event is fired when the service and it's service info is loaded.
+     * @name GPService#load
+     * @event
+     */
+      G.event.trigger(me, 'load');
+    });
+  }
+  /**
+   * @name GPParameter
+   * @property {String} [name]
+   * @property {String} [dataType]
+   * @property {String} [displayName]
+   * @property {String} [direction]
+   * @property {Object} [defaultValue]
+   * @property {Object} [parameterType]
+   * @property {String} [category]
+   * @property {Object[]} [choiceList]
+   */
+  /**
+   * @name GPTask
+   * @class GPTask
+   * @constructor
+   * @property {String} [name]
+   * @property {String} [displayName]
+   * @property {String} [category]
+   * @property {String} [helpUrl]
+   * @property {String} [executionType]
+   * @property {GPParameter[]} [parameters] see {@link GPParameter}
+   * @property {String} [name]
+   * @property {String} [name]
+   * @property {String[]} [tasks]
+   * @property {String} [resultMapServerName]
+   * @param {String} url http://[catalog-url]/[serviceName]/GPServer 
+   */
+  function GPTask(url) {
+    this.url = url;
+    this.loaded = false;
+    var me = this;
+    Util.getJSON(url, {
+      f: 'json'
+    }, 'callback', function (json) {
+      augmentObject(json, me);
+      me.loaded = true;
+      /**
+     * This event is fired when the service and it's service info is loaded.
+     * @name GPService#load
+     * @event
+     */
+      G.event.trigger(me, 'load');
+    });
+  }
+  
+  /**
+   * @name GPOptions
+   * @property {Object} [parameters] name-value pair of params. 
+   * @property {Number|SpatialReference} [outSpatialReference] 
+   * @property {Number|SpatialReference} [processSpatialReference] 
+   */
+  /**
+   * execute a GeoProcessing task
+   * @param {GPOptions} p
+   * @param {Function} callback will pass {@link GPResults} and {@link Error}
+   */
+  GPTask.prototype.execute = function (p, callback) {
+    var params = {};
+    if (p.parameters) {
+      augmentObject(p.parameters, params);
+    }
+    if (p.outSpatialReference) {
+      params['env:outSR'] = getSRParam(p.outSpatialReference);
+    } else {
+      params['env:outSR'] = 4326;
+    }
+    if (p.processSpatialReference) {
+      params['env:processSR'] = getSRParam(p.processSpatialReference);
+    } 
+    var me = this;
+    Util.getJSON(this.url + '/execute', params, 'callback', function (json) {
+      var ret = null; 
+      if (json.results) {
+        var res, loc, f;
+        for (var i = 0; i < json.results.length; i++) {
+          res = json.results[i];
+          if (res.dataType === 'GPFeatureRecordSetLayer') {
+            for (var j = 0, J = res.value.features.length; j < J; j++) {
+              f = res.value.features[j];
+              if (f.geometry) {
+                f.geometry = fromJSONToOverlays(f.geometry, p.overlayOptions);
+              }
+            }
+          }
+        }
+      }
+      callback(json, json.error);
+    });
+  };
+  
+  /**
+   * @name GPResults
+   * @property {String[]} messages
+   * @propery {GPResult[]} results
+   */
+  /**
+   * @name GPResult
+   * @property {String} paramName
+   * @property {String} dataType
+   * @property {Object} value
+   */
+  /**
+   * @name NetworkService
+   * @class NetworkService
+   * @constructor
+   * @property {String} serviceDescription
+   * @property {String[]} routeLayers
+   * @property {String[]} serviceAreaLayers
+   * @property {String[]} closestFacilityLayers
+   * @param {String} url http://[catalog-url]/[serviceName]/NAServer 
+   */
+  function NetworkService(url) {
+    this.url = url;
+    this.loaded = false;
+    var me = this;
+    Util.getJSON(url, {
+      f: 'json'
+    }, 'callback', function (json) {
+      augmentObject(json, me);
+      me.loaded = true;
+     /**
+     * This event is fired when the service and it's service info is loaded.
+     * @name NetworkService#load
+     * @event
+     */
+      G.event.trigger(me, 'load');
+    });
+  }
   
   /**
    * @name OverlayOptions
@@ -3136,7 +3319,6 @@
     'LambertConformalConic': LambertConformalConic,
     'SphereMercator': SphereMercator,
     'TransverseMercator': TransverseMercator,
-    'FlatSpatialReference': FlatSpatialReference,
     'SpatialRelationship': SpatialRelationship,
     'GeometryType': GeometryType,
     'SRUnit' : SRUnit,
@@ -3145,6 +3327,8 @@
     'Layer': Layer,
     'GeocodeService': GeocodeService,
     'GeometryService': GeometryService,
+    'GPService': GPService,
+    'GPTask': GPTask,
     'Util': Util,
     'Config': Config,
     'Projection': Projection,
@@ -3157,223 +3341,7 @@
 })();
  
 
- /* *
- * @name Domain
- * @class This class represent JSON domain objects as returned by the REST API. Domains specify the set of valid values for a field. 
- *   There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/domain.html'>Domain Objects</a>.
- * Syntax:
- * <pre>
-    {
-      "type" : "range",
-      "name" : "&lt;domainName>",
-      "range" : [ minValue, maxValue ]
-    }
-    {
-      "type" : "codedValue",
-      "name" : "&lt;domainName>",
-      "codedValues" : [
-        { "name" : "codeName1", "code" : code1 },
-        { "name" : "codeName2", "code" : code2 }
-      ]
-    }
- * </pre>
- * @property {type} [String] range | codedValue
- * @property {String} [name] domain name.
- * @property {Array} [codedValue] name-code pairs. only if type=codedValue.
- * @property {Array} [range] min,max values. only if type=codedValue.
- */ 
-/* *
- * @name Color
- * @class Color is represented as a 4-element array. The 4 elements represent values for red, green, blue and alpha in that order. Values range from 0 through 255.
- *   There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.
- * Syntax:
- * <pre>
-   [ &lt;red>, &lt;green>, &lt;blue>, &lt;alpha> ]
- * </pre>
- */ 
-/* *
- * @name SimpleMarkerSymbol
- * @class Simple marker symbols can be used to symbolize point geometries. The type property for simple marker symbols is esriSMS. 
- *   There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.
- * Example:
- * <pre>
-   {
-"type" : "esriSMS",
-"style" : "&lt;esriSMSCircle | esriSMSCross | esriSMSDiamond | esriSMSSquare | esriSMSX&gt;",
-"color" : &lt;color>,
-"size" : &lt;size>,
-"angle" : &lt;angle>,
-"xoffset" : &lt;xoffset>,
-"yoffset" : &lt;yoffset>,
-"outline" : { //if outline has been specified
-  "color" : &lt;color>,
-  "width" : &lt;width>
-}
-}
-
- * </pre>
- */ 
-/* *
- * @name SimpleLineSymbol
- * @class Simple line symbols can be used to symbolize polyline geometries. The type property for simple line symbols is esriSLS. 
- *   There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.
- * Syntax:
- * <pre>
-   {
-"type" : "esriSLS",
-"style" : "&lt; esriSLSDash | esriSLSDashDotDot | esriSLSDot | esriSLSNull | esriSLSSolid >",
-"color" : &lt;color>,
-"width" : &lt;width>
-}
-
- * </pre>
- */ 
-/* *
- * @name SimpleFillSymbol
- * @class SimpleFillSymbol can be used to symbolize polygon geometries. The type property for simple line symbols is esriSFS. 
- *   There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.
- * Syntax:
- * <pre>
-   {
-"type" : "esriSFS",
-"style" : "&lt; esriSFSBackwardDiagonal | esriSFSCross | esriSFSDiagonalCross | esriSFSForwardDiagonal | esriSFSHorizontal | esriSFSNull | esriSFSSolid | esriSFSVertical >",
-"color" : &lt;color>,
-"outline" : &lt;simpleLineSymbol> //if outline has been specified
-}
-
- * </pre>
- */ 
-/* *
- * @name PictureMarkerSymbol
- * @class Picture marker symbols can be used to symbolize point geometries. The type property for picture marker symbols is esriPMS.  
- *  There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.
- * Syntax:
- * <pre>
-  {
-"type" : "esriPMS",
-"url" : "&lt;pictureUrl>",
-"color" : &lt;color>,
-"width" : &lt;width>,
-"height" : &lt;height>,
-"angle" : &lt;angle>,
-"xoffset" : &lt;xoffset>,
-"yoffset" : &lt;yoffset>
-}
- * </pre>
- */ 
-/* *
- * @name PictureFillSymbol
- * @class Picture fill symbols can be used to symbolize polygon geometries. The type property for picture fill symbols is esriPFS. 
- * There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.
- * Syntax:
- * <pre>
-{
-"type" : "esriPFS",
-"url" : "&lt;pictureUrl>",
-"color" : &lt;color>,
-"outline" : &lt;simpleLineSymbol>, //if outline has been specified
-"width" : &lt;width>,
-"height" : &lt;height>,
-"angle" : &lt;angle>,
-"xoffset" : &lt;xoffset>,
-"yoffset" : &lt;yoffset>,
-"xscale": &lt;xscale>,
-"yscale": &lt;yscale>
-}
- * </pre>
- */ 
-/* *
- * @name TextSymbol
- * @class Text symbols are used to add text to a feature (labeling). The type property for text symbols is esriTS.
- * There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/symbol.html'>Symbol Objects</a>.
- * Syntax:
- * <pre>
- {
- "type" : "esriTS",
- "color" : &lt;color>,
- "backgroundColor" : &lt;color>,
- "borderLineColor" : &lt;color>,
- "verticalAlignment" : "&lt;baseline | top | middle | bottom>",
- "horizontalAlignment" : "&lt;left | right | center | justify>",
- "rightToLeft" : &lt;true | false>,
- "angle" : &lt;angle>,
- "xoffset" : &lt;xoffset>,
- "yoffset" : &lt;yoffset>,
- "kerning" : &lt;true | false>,
- "font" : {
- "family" : "&lt;fontFamily>",
- "size" : &lt;fontSize>,
- "style" : "&lt;italic | normal | oblique>",
- "weight" : "&lt;bold | bolder | lighter | normal>",
- "decoration" : "&lt;line-through | underline | none>"
- }
- }
- * </pre>
- */
-/* *
-   * @name Field
-   * @class This class represents a field in a {@link Layer}. It is accessed from
-   * the <code> fields</code> property. There is no constructor for this class,
-   *  use Object Literal.
-   * @property {String} [name] field Name
-   * @property {String} [type] field type (esriFieldTypeOID|esriFieldTypeString|esriFieldTypeInteger|esriFieldTypeGeometry}.
-   * @property {String} [alias] field alias.
-   * @property {Domain} [domain] domain
-   * @property {Int} [length] length.
-   */
-  /* *
-   * @name DrawingInfo
-   * @class Layer rendering info
-   * Syntax:<pre>
-   * "drawingInfo" : {
-  "renderer" : &lt;renderer>,
-  "scaleSymbols" : &lt; true | false >,
-  "transparency" : &lt;transparency>,
-  "brightness" : &lt;brightness>,
-  "contrast" : &lt;contrast>,
-  "labelingInfo" : &lt;labelingInfo>
-}
-  </pre>
-  */
-  /* *
-   * @name TimeInfo
-   * @class TimeInfo if the layer / table supports querying and exporting maps based on time.
-   * Syntax:
-   * <pre>
-   * "timeInfo" : {
-  "startTimeField" : "&lt;startTimeFieldName>",
-  "endTimeField" : "&lt;endTimeFieldName>",
-  "trackIdField" : "&lt;trackIdFieldName>",
-  "timeExtent" : [&lt;startTime>, &lt;endTime>],
-  "timeReference" : {
-    "timeZone" : "&lt;timeZone>",
-    "respectsDaylightSaving" : &lt;true | false>
-  },
-  "timeInterval" : &lt;timeInterval>,
-  "timeIntervalUnits" : "&lt;timeIntervalUnits>",
-  //the default time-related export options for this layer
-  "exportOptions" : { 
-    //If true, use the time extent specified by the time parameter
-    "useTime" : &lt; true | false >,
-    //If true, draw all the features from the beginning of time for that data
-    "timeDataCumulative" : &lt; true | false >,
-    //Time offset for this layer so that it can be overlaid on the top of a previous or future time period
-    "timeOffset" : &lt;timeOffset1>,
-    "timeOffsetUnits" : "&lt;esriTimeUnitsCenturies | esriTimeUnitsDays | esriTimeUnitsDecades | 
-                             esriTimeUnitsHours | esriTimeUnitsMilliseconds | esriTimeUnitsMinutes | 
-                             esriTimeUnitsMonths | esriTimeUnitsSeconds | esriTimeUnitsWeeks | esriTimeUnitsYears |
-                             esriTimeUnitsUnknown>"
-  }
-   * </pre>
-   */
+ 
   
   
 
