@@ -19,7 +19,7 @@
               var myOptions = {
                 zoom: 12,
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
-                center: new google.maps.LatLng(38.899583425982705, -95.3342056274414)
+                center: new google.maps.LatLng(35.23,-80.84)//38.899583425982705, -95.3342056274414)
               }
               map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
               svc = new gmaps.ags.GeometryService('http://sampleserver1.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer');
@@ -30,8 +30,8 @@
             }
             
             function calcRoute() {
-              var start = 'Lawrence, KS';
-              var end = 'Topeka, KS';
+              var start = 'Redlands, CA';
+              var end = 'Riverside, CA';
               var request = {
                 origin: start,
                 destination: end,
@@ -39,7 +39,7 @@
               };
               directionsService.route(request, function(response, status) {
                 if (status == google.maps.DirectionsStatus.OK) {
-                  //directionsDisplay.setDirections(response);
+                  directionsDisplay.setDirections(response);
                   poly = new google.maps.Polyline({
                     path: response.routes[0].overview_path
                   });
@@ -61,9 +61,9 @@
               buffers.length = 0;
               var params = {
                 geometries: [poly],
-                bufferSpatialReference: 102113,
-                distance: [1000],
-                unit: 9001,
+                bufferSpatialReference: gmaps.ags.SpatialReference.WEB_MERCATOR,
+                distances: [500,1000],
+                unit: gmaps.ags.SRUnit.METER,
                 unionResults: true
               };
               svc.buffer(params, function(results, err) {
@@ -74,7 +74,6 @@
                       g = results.geometries[i][j];
                       g.setMap(map);
                       buffers.push(g);
-                      
                     }
                   }
                 } else {

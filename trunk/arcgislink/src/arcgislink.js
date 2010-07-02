@@ -52,7 +52,6 @@
  *     <br/></td>
  *     <td style = 'border:0px;width:200px'>
  *    {@link SpatialReference}<br/>
- *    {@link SpatialReferences}<br/>
  *    {@link Geographic}<br/>
  *    {@link LambertConformalConic}<br/>
  *    {@link TransverseMercator}<br/>
@@ -460,9 +459,8 @@
     proxyUrl: null,
     alwaysUseProxy: false 
   };
-  /**
-   * @name SpatialReferences
-   * @class SpatialReferences has an internal collection of Spatial Refeneces supported in the application.
+  /*
+   * an internal collection of Spatial Refeneces supported in the application.
    * The key of the collection is the wkid, and value is an instance of
    * {@link SpatialReference}.
    * The {@link TileLayer}'s Spatial Refeneces <b>must be already added to collection
@@ -474,9 +472,9 @@
    * <br/> 102100: Web-Mercator with datum transformation.
    * </code>
    * <br/> The application can add a supported spatial references using static method
-   * <code>SpatialReferences.addSpatialReference(wkid,sr);</code>
+   * <code>SpatialReference.register(wkid,sr);</code>
    */
-  var SpatialReferences = {};
+  var spatialReferences = {};
   
   /**
    * Create A Generic Spatial Reference Object
@@ -487,8 +485,8 @@
    * between geographic and real-world coordinates. The following classes extend this class:
    *    {@link Geographic}, {@link SphereMercator}, {@link LambertConformalConic}, and {@link TransverseMercator}.
    * @constructor
-   * @property {String} [wkid] well-known coodinate system id (EPSG code)
-   * @property {String} [wkt] well-known coodinate system text (EPSG code)
+   * @property {Number} [wkid] well-known coodinate system id (EPSG code)
+   * @property {String} [wkt] well-known coodinate system text 
    * @param {Object} params
    */
   function SpatialReference(params) {
@@ -497,13 +495,6 @@
     this.wkt  =  params.wkt;
   }
 
-  /**
-   * get wkid or wkt depending on which is available.
-   * @return {wkid or wkt}
-   */
-  SpatialReference.prototype.getKey  =  function () {
-    return this.wkid? this.wkid : this.wkt?this.wkt:null;
-  };
   /**
    * Convert Lat Lng to real-world coordinates.
    * Note both input and output are array of [x,y], although their values in different units.
@@ -531,6 +522,7 @@
   };
   /**
    * To JSON String
+   * @return String
    */
   SpatialReference.prototype.toJSON  =  function () {
     return '{' + (this.wkid ? ' wkid:' + this.wkid : 'wkt: \''+ this.wkt + '\'') + '}';
@@ -945,7 +937,7 @@
     });
 	
   // declared early but assign here to avoid dependency error by jslint
-  SpatialReferences = {
+  spatialReferences = {
     '4326': WGS84,
     '4269': NAD83,
     '102113': WEB_MERCATOR,
@@ -953,29 +945,33 @@
   };
   
   /**
-   * @name SpatialReferenceId
-   * wkid of common spatial references
-   * @property {Number} [WGS84] 4326
-   * @property {Number} [NAD83] 4269
-   * @property {Number} [WEB_MERCATOR] 102113
-   * @property {Number} [WEB_MERCATOR_AUX] 102100
+   * @static
    */
-  SpatialReferenceId = {
-    'WGS84':4326,
-    'NAD83':4269,
-    'WEB_MERCATOR': 102113,
-    'WEB_MERCATOR_AUX' :102100 
-  };
+  SpatialReference.WGS84 = WGS84;
+  /**
+   * @static
+   */
+  SpatialReference.NAD83 = NAD83;
+  /**
+   * @static
+   */
+  SpatialReference.WEB_MERCATOR = WEB_MERCATOR;
+  /**
+   * @static
+   */
+  SpatialReference.WEB_MERCATOR_AUX = WEB_MERCATOR_AUX;
+ 
     
   /**
-   * Add A Spatial Reference to the collection of Spatial References.
+   * <b> static</b> method. Call with Syntax <code>SpatialReference.register(..)</code>. 
+   * Add A Spatial Reference to the internal collection of Spatial References.
    * the <code>wktOrSR</code> parameter can be String format of "well-known text" of the
    * Spatial Reference, or an instance of {@link SpatialReference}.
    * <br/><li> If passes in String WKT format, to be consistent, it should use the same format as listed
    * in <a  href  = 'http://edndoc.esri.com/arcims/9.2/elements/pcs.htm'>
    * ESRI documentation</a>. For example, add NC State Plane NAD83 as String:
    * <br/><code>
-   * SpatialReferences.addSpatialReference('2264','PROJCS["NAD_1983_StatePlane_North_Carolina_FIPS_3200_Feet",
+   * SpatialReference.register(2264,'PROJCS["NAD_1983_StatePlane_North_Carolina_FIPS_3200_Feet",
    * GEOGCS["GCS_North_American_1983",
    * DATUM["D_North_American_1983",
    * SPHEROID["GRS_1980",6378137.0,298.257222101]],
@@ -995,7 +991,7 @@
    * <br/><li> If passes in an instance of {@link SpatialReference}, it can be one of the
    * built in classes, or a class that extends SpatialReference. For example, add NC State Plane NAD83 as SR:
    * <br/><code>
-   * SpatialReferences.addSpatialReference('2264': new LambertConformalConic({
+   * SpatialReferences.register(2264: new LambertConformalConic({
    * wkid: 2264,
    * semi_major: 6378137.0,
    * inverse_flattening: 298.257222101,
@@ -1008,19 +1004,21 @@
    * unit: 0.3048006096012192
    * });
    * <br/></code>
-   * @param {String} wkid/wkt
+   * @static
+   * @param {Number|String} wkid/wkt
    * @param {Object} wktOrSR
+   * @return {SpatialReference} registered SR
    */
-  SpatialReferences.addSpatialReference = function (wkidt, wktOrSR) {
-    var sr = this['' + wkidt];
+  SpatialReference.register = function (wkidt, wktOrSR) {
+    var sr = spatialReferences['' + wkidt];
     if (sr) {
       return sr;
     }
     if (wktOrSR instanceof SpatialReference) {
-      this['' + wkidt] = wktOrSR;
+      spatialReferences['' + wkidt] = wktOrSR;
       return wktOrSR;
     }
-    var wkt = wktOrSR;
+    var wkt = wktOrSR || wkidt; // only one param is passed in.
     var params = {
       wkt: wkidt
     };
@@ -1055,21 +1053,14 @@
       break;
       // more implementations here.
     default:
-      //throw new Error(prj + "  not supported";
+      throw new Error(prj + "  not supported");
     }
     if (sr) {
-      this['' + wkidt] = sr;
+      spatialReferences['' + wkidt] = sr;
     }
     return sr;
   };
-  /**
-   * Gets the {@link SpatialReference} from the internal colection by well-known id. Returns undefined if not added.
-   * @param {String} wkid/wkt
-   * @return {SpatialReference}
-   */
-  SpatialReferences.getSpatialReference = function (wkidt) {
-    return this['' + wkidt];
-  };	
+  
   //end of projection related code//
   
   /**
@@ -1136,6 +1127,14 @@
     return false;
   }
   
+  var getSRParam = function (sr) {
+    if (!sr) {
+      return null;
+    }
+    // for 9.3 compatibility, return wkid if possible.
+    return isNumber(sr)? sr : sr.wkid? sr.wkid : sr.toJSON();
+  }
+  
   
   /**
    * Convert overlays (Marker, Polyline, Polygons) to JSON string in AGS format.
@@ -1145,12 +1144,15 @@
     /**
     * @param {MVCArray.&lt;LatLng>} pts
     */
-    function fromLatLngsToJSON(pts) {
+    function fromLatLngsToJSON(pts, close) {
       var arr = [];
       var latlng;
       for (var i = 0, c = pts.getLength(); i < c; i++) {
         latlng = pts.getAt(i);
         arr.push('[' + latlng.lng() + ',' + latlng.lat() + ']');
+      }
+      if (close && arr.length > 0) {
+        arr.push('[' + pts.getAt(0).lng() + ',' + pts.getAt(0).lat() + ']');
       }
       return arr.join(',');
     }
@@ -1184,14 +1186,14 @@
       for (i = 0; i < gs.length; i++) {
         pts.push('[' + fromLatLngsToJSON(gs[i].getPath()) + ']');
       }
-      json += 'paths: [' + pts.join(',') + ']';
+      json += 'paths:[' + pts.join(',') + ']';
       break;
     case GeometryType.POLYGON:
       pts = [];
       g = isArray(geom) ? geom[0] : geom;
       var paths = g.getPaths();
       for (i = 0; i < paths.getLength(); i++) {
-        pts.push('[' + fromLatLngsToJSON(paths.getAt(i)) + ']');
+        pts.push('[' + fromLatLngsToJSON(paths.getAt(i), true) + ']');
       }
       json += 'rings:[' + pts.join(',') + ']';
       
@@ -1249,8 +1251,8 @@
    * @return {google.maps.LatLngBounds} gLatLngBounds
    */
   var fromEnvelopeToLatLngBounds  =  function (extent) {
-    var sr  =  SpatialReferences.getSpatialReference(extent.spatialReference.wkid || extent.spatialReference.wkt);
-    sr  =  sr || SpatialReferences.WGS84;
+    var sr  =  spatialReferences[extent.spatialReference.wkid || extent.spatialReference.wkt];
+    sr  =  sr || WGS84;
     var sw  =  sr.reverse([extent.xmin, extent.ymin]);
     var ne  =  sr.reverse([extent.xmax, extent.ymax]);
     return new G.LatLngBounds(new G.LatLng(sw[1], sw[0]), new G.LatLng(ne[1], ne[0]));
@@ -1612,7 +1614,7 @@
    * <ul><li> <code> url</code> (required) is the URL of the map servive, e.g. <code>
    * http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer</code>.
    * <ul/> Note the spatial reference of the map service must already exists
-   * in the {@link SpatialReferences} if actual coordinates transformation is needed.
+   * in the {@link spatialReferences} if actual coordinates transformation is needed.
    * @name MapService
    * @class This class (<code>gmaps.ags.MapService</code>) is the core class for all map service operations.
    * It represents an ArcGIS Server map service that offer access to map and layer content
@@ -1659,9 +1661,9 @@
     var me = this;
     augmentObject(json, this);
     if (json.spatialReference.wkt) {
-      this.spatialReference = SpatialReferences.addSpatialReference(json.spatialReference.wkt, json.spatialReference.wkt);
+      this.spatialReference = spatialReferences.addSpatialReference(json.spatialReference.wkt, json.spatialReference.wkt);
     } else {
-      this.spatialReference = SpatialReferences.getSpatialReference(json.spatialReference.wkid);
+      this.spatialReference = spatialReferences[json.spatialReference.wkid];
     }
     if (json.tables !== undefined) {
       // v10.0 +
@@ -2187,7 +2189,7 @@
   GeocodeService.prototype.init_ = function (json) {
     augmentObject(json, this);
     if (json.spatialReference) {
-      this.spatialReference = SpatialReferences.getSpatialReference(json.spatialReference.wkid || json.spatialReference.wkt) || WGS84;
+      this.spatialReference = spatialReferences[json.spatialReference.wkid || json.spatialReference.wkt] || WGS84;
     }
     this.loaded = true;
     /**
@@ -2375,7 +2377,7 @@
       throw new Error('map service is not tiled');
     }
     this.tileInfo_  =  tileInfo;
-    this.spatialReference  =  SpatialReferences.getSpatialReference(tileInfo.spatialReference.wkid || tileInfo.spatialReference.wkt);
+    this.spatialReference  =  spatialReferences[tileInfo.spatialReference.wkid || tileInfo.spatialReference.wkt];
     if (!this.spatialReference) {
       throw new Error('unsupported Spatial Reference'); 
     }
@@ -2539,7 +2541,10 @@
     //log('url=' + url);
     return url;
   };
-  
+  /**
+   * set Opacity
+   * @param {Number} op (0-1)
+   */
   TileLayer.prototype.setOpacity  =  function (op) {
     this.opacity_ = op;
     var tiles = this.tiles;
@@ -2549,7 +2554,10 @@
       }
     }
   };
-  
+  /**
+   * get the opacity (0-1) of the tile layer
+   * @return {Number}
+   */
   TileLayer.prototype.getOpacity  =  function () {
     return this.opacity_;
   };
@@ -2988,10 +2996,10 @@
     if (isOv) {
       params.inSR = WGS84.wkid;
     } else if (p.inSpatialReference) {
-      params.inSR = isNumber(p.inSpatialReference)? p.inSpatialReference : p.inSpatialReference.toJSON();
+      params.inSR = getSRParam(p.inSpatialReference);
     }
     if (p.outSpatialReference) {
-      params.outSR = isNumber(p.outSpatialReference)? p.outSpatialReference : p.outSpatialReference.toJSON();
+      params.outSR = getSRParam(p.outSpatialReference);
     }
     params.geometries = '{geometryType:"' + p.geometryType + '", geometries:[' + json.join(',') + ']}';
     return params;
@@ -3036,7 +3044,7 @@
   };
  
  /**
-  * Common units code in SpatialReferences. Used in buffer operation.
+  * Common units code in spatialReferences. Used in buffer operation.
   * This only has the most common units, for a full list of supported units, see 
   * <a href=http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnitType.htm>esriSRUnitType</a>
   * and <a href=http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnit2Type.htm>esriSRUnit2Type</a>
@@ -3063,11 +3071,12 @@
    *  for a {@link GeometryService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon</code>, or ESRI Geometry format to project. 
    * @property {SpatialReference} [bufferSpatialReference] The well-known ID of or the spatial reference of the out geometries
    * @property {Number[]} [distances] The distances the input geometries are buffered.
-   * @property {Number} [unit] see <a href='http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnitType.htm>esriSRUnitType Constants </a> .
+   * @property {Number} [unit] see <a href='http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnitType.htm'>esriSRUnitType Constants </a> .
    * @property {Boolean} [unionResults] If true, all geometries buffered at a given distance are unioned into a single (possibly multipart) polygon, and the unioned geometry is placed in the output array.
+   * @property {OverlayOptions} [overlayOptions] how to render result overlay
    */
   /**
    * @name BufferResults
@@ -3086,7 +3095,7 @@
   GeometryService.prototype.buffer = function(p, callback) {
     var params = prepareGeometryParams(p);
     if (p.bufferSpatialReference) {
-      params.bufferSR = isNumber(p.bufferSpatialReference) ? p.bufferSpatialReference : p.bufferSpatialReference.toJSON();
+      params.bufferSR = getSRParam(p.bufferSpatialReference);
     }
     params.outSR = 4326;
     params.distances = p.distances.join(',');
@@ -3097,10 +3106,9 @@
       var geom = [];
       if (json.geometries) {
         for (var i = 0, c = json.geometries.length; i < c; i++) {
-          geom.push(fromJSONToOverlays(json.geometries[i]));
+          geom.push(fromJSONToOverlays(json.geometries[i], p.overlayOptions));
         }
       }
-      
       json.geometries = geom;
       callback(json, json.error);
     });
@@ -3129,8 +3137,6 @@
     'SphereMercator': SphereMercator,
     'TransverseMercator': TransverseMercator,
     'FlatSpatialReference': FlatSpatialReference,
-    'SpatialReferences': SpatialReferences,
-    'SpatialReferenceId':SpatialReferenceId,
     'SpatialRelationship': SpatialRelationship,
     'GeometryType': GeometryType,
     'SRUnit' : SRUnit,

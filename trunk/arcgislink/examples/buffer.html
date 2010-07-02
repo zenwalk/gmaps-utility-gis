@@ -13,7 +13,7 @@
             var poly, map;
             var markers = [];
             var buffers = [];
-            var path = new google.maps.MVCArray;
+            var path = new google.maps.MVCArray();
             // If very complex geometry then it's a good idea to set up your proxy.
             //gmaps.ags.Config.proxyUrl = '/proxy/proxy.ashx';
             
@@ -38,7 +38,7 @@
               google.maps.event.addListener(map, 'click', addPoint);
               
               google.maps.event.addListener(poly, 'click', doBuffer);
-
+//
               svc = new gmaps.ags.GeometryService('http://sampleserver1.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer');
               
              
@@ -101,7 +101,7 @@
               buffers.length = 0;
               var params = {
                 geometries: [poly],
-                bufferSpatialReference:gmaps.ags.SpatialReferences.WEB_MERCATOR,
+                bufferSpatialReference:gmaps.ags.SpatialReference.WEB_MERCATOR,
                 distances: [500,1000],
                 unit: 9001,
                 unionResults: true
