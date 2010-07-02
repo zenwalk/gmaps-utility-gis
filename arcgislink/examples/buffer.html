@@ -36,15 +36,10 @@
               poly.setPaths(new google.maps.MVCArray([path]));
               
               google.maps.event.addListener(map, 'click', addPoint);
-              
-              google.maps.event.addListener(poly, 'click', doBuffer);
-//
-              svc = new gmaps.ags.GeometryService('http://sampleserver1.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer');
-              
-             
+              svc = new gmaps.ags.GeometryService('http://sampleserver3.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer');
               iw = new google.maps.InfoWindow({
                 maxWidth: 250,
-                content: '<ul><li>Click map to add a Vertex<li>Drag marker to adjust<li>Click marker to delete vertex<li>Click on Polygon to Buffer</ul><center><button onclick="iw.close()">Start</button></center>',
+                content: 'Draw polygon by:<ul><li>Click map to add a Vertex<li>Drag marker to adjust<li>Click marker to delete vertex</ul><center><button onclick="iw.close()">OK</button></center>',
                 position: map.getCenter()
               });
               iw.open(map);
@@ -56,10 +51,7 @@
                 iw.close();
                 iw = null;
               }
-              if (skip) {
-                skip = false;
-                return;
-              }
+              
               path.insertAt(path.length, event.latLng);
               
               var marker = new google.maps.Marker({
@@ -91,10 +83,10 @@
                 }
                 doBuffer();
               });
+              doBuffer();
             }
             
             function doBuffer(){
-              skip = true;
               for (var i = 0; i< buffers.length; i++) {
                 buffers[i].setMap(null);
               }
@@ -114,7 +106,6 @@
                       g = results.geometries[i][j];
                       g.setMap(map);
                       buffers.push (g);
-                      
                     }
                   }
                 } else {
