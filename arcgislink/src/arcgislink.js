@@ -94,30 +94,14 @@
  *    </tr></table>
  */
 (function () {
-
-  /*jslint browser:true, evil: true */
-  /*global escape ActiveXObject */
   
-
-  //======= utility/helper functions ==========//
-  /**
-   * create a namespace by name such as a.b.c
-   * @param {String} ns
-   */
-  var namespace = function (ns) {
-    var i, c, n;
-    var names = ns.split('.');
-    n = window;
-    for (i = 0, c = names.length; i < c; i ++) {
-      n[names[i]] = n[names[i]] || {};
-      n = n[names[i]];
-    }
-    return n;
-  };
-
+  /*jslint browser:true, evil: true, sub: true */ 
+  /*global google window escape ActiveXObject */
+  
   var W = window;
-  var G = namespace('google.maps');
-    /**
+  var G = google.maps;
+  
+  /**
    * @name Config
    * @class This is an object literal that sets common configuration values used across the lib.
    * @property {String} [proxyUrl] The URL to the web proxy page used in case the length of the URL request to an ArcGIS Server REST resource exceeds 2000 characters.
@@ -402,7 +386,7 @@
       return null;
     }
     // for 9.3 compatibility, return wkid if possible.
-    return isNumber(sr)? sr : sr.wkid? sr.wkid : sr.toJSON();
+    return isNumber(sr) ? sr : sr.wkid ? sr.wkid : sr.toJSON();
   };
   
   
@@ -549,7 +533,7 @@
     if (geom) {
       ovs = [];
       if (geom.x) {
-        ov = new G.Marker(augmentObject(opts.markerOptions || opts , {
+        ov = new G.Marker(augmentObject(opts.markerOptions || opts, {
           position: new G.LatLng(geom.y, geom.x)
         }));
         ovs.push(ov);
@@ -596,6 +580,17 @@
     
     return ovs;
   };
+  function parseFeatures(features, ovOpts) {
+    if (features) {
+      var i, I, f;
+      for (i = 0, I = features.length; i < I; i++) {
+        f = features[i];
+        if (f.geometry) {
+          f.geometry = fromJSONToOverlays(f.geometry, ovOpts);
+        }
+      }
+    }
+  }
   /**
    * get string as rest parameter
    * @param {Object} o
@@ -630,7 +625,7 @@
   };
   var log = function (msg) {
     if (window.console) {
-      console.log(msg);
+      window.console.log(msg);
     } else {
       var l = document.getElementById('_ags_log');
       if (l) {
@@ -720,7 +715,7 @@
     } else {
       // check if same host
       var loc = window.location;
-      var dom = loc.protocol + '//' + loc.hostname + (!loc.port || loc.port === 80) ? '' : ':' + loc.port + '/';
+      var dom = loc.protocol + '//' + loc.hostname + (!loc.port || loc.port === 80 ? '' : ':' + loc.port + '/');
       var useProxy = true;
       if (url.toLowerCase().indexOf(dom.toLowerCase()) !== -1) {
         useProxy = false;
@@ -755,6 +750,34 @@
     return sid;
   };
 
+  /**
+   * Add a list of overlays to map
+   * @param {google.maps.Map} map
+   * @param {OverlayView[]} overlays
+   */
+  Util.addToMap = function (map, overlays) {
+    if (isArray(overlays)) {
+      var ov;
+      for (var i = 0, I = overlays.length; i < I; i++) {
+        ov = overlays[i];
+        if (isArray(ov)) {
+          Util.addToMap(map, ov);
+        } else if (isOverlay(ov)) {
+          ov.setMap(map);  
+        }
+      }
+    }
+  };
+  /**
+   * Add a list of overlays to map
+   * @param {OverlayView[]} overlays
+   */
+  Util.removeFromMap = function (overlays, clearArray) {
+    Util.addToMap(null, overlays);
+    if (clearArray) {
+      overlays.length = 0;
+    }
+  };
   
   /**
    * Create A Generic Spatial Reference Object
@@ -1398,7 +1421,7 @@
    * @property {Int} [length] length.
    */
   /**
-   * Create a ArcGIS map Layer using it's url ( 	http://[mapservice-url]/[layerId])
+   * Create a ArcGIS map Layer using it's url (http://[mapservice-url]/[layerId])
    * @name Layer
    * @class This class (<code>gmaps.ags.Layer</code>) The layer / table(v10+)
    *  resource represents a single layer / table in a map of a map service 
@@ -1572,15 +1595,7 @@
     params.returnGeometry = p.returnGeometry === false ? false : true;
     params.returnIdsOnly = p.returnIdsOnly === true ? true : false;
     Util.getJSON(this.url + '/query', params, 'callback', function (json) {
-      var i, f;
-      if (json.features) {
-        for (i = 0; i < json.features.length; i++) {
-          f = json.features[i];
-          if (f.geometry) {
-            f.geometry = fromJSONToOverlays(f.geometry, p.overlayOptions);
-          }
-        }
-      }
+      parseFeatures(json.features, p.overlayOptions);
       callback(json, json.error);
     });
   };
@@ -1897,8 +1912,9 @@
    * an instance of {@link MapImage}.
    * @param {ExportMapOptions} params
    * @param {Function} callback
+   * @param {Function} errback
    */
-  MapService.prototype.exportMap = function (eparams, callback) {
+  MapService.prototype.exportMap = function (eparams, callback, errback) {
     if (!eparams || !eparams.bounds) {
       return;
     }
@@ -2514,23 +2530,23 @@
       delete opt_layerOpts.opacity;
     }
     augmentObject(opt_layerOpts, this);
-    this.mapService  =  (service instanceof MapService)?service:new MapService(service);
+    this.mapService_  =  (service instanceof MapService) ? service : new MapService(service);
     //In the format of mt[number].domain.com
     if (opt_layerOpts.hosts) {
-      var pro  =  extractString(this.mapService.url, '', '://');
-      var host  =  extractString(this.mapService.url, '://', '/');
-      var path  =  extractString(this.mapService.url, pro + '://' + host, '');
+      var pro  =  extractString(this.mapService_.url, '', '://');
+      var host  =  extractString(this.mapService_.url, '://', '/');
+      var path  =  extractString(this.mapService_.url, pro + '://' + host, '');
       this.urlTemplate_  =  pro + '://' + opt_layerOpts.hosts + path;
       this.numOfHosts_  =  parseInt(extractString(opt_layerOpts.hosts, '[', ']'), 10);
     }
-    this.name = this.name || this.mapService.name;
+    this.name = this.name || this.mapService_.name;
     this.maxZoom = this.maxZoom || 19;
     this.minZoom = this.minZoom || 0;
-    if (this.mapService.loaded) {
+    if (this.mapService_.loaded) {
       this.init_(opt_layerOpts);
     } else {
       var me  =  this;
-      G.event.addListenerOnce(this.mapService, 'load', function () {
+      G.event.addListenerOnce(this.mapService_, 'load', function () {
         me.init_(opt_layerOpts);
       });
     }
@@ -2540,11 +2556,10 @@
   
   /**
    * Initialize the tile layer from a loaded map service
-   * @param {MapService} mapService
    * @param {Object} opt_layerOpts
    */
   TileLayer.prototype.init_  =  function (opt_layerOpts) {
-    this.projection  =  new Projection(this.mapService.tileInfo);//, this.mapService_.fullExtent);
+    this.projection  =  new Projection(this.mapService_.tileInfo);//, this.mapService_.fullExtent);
     this.minZoom = opt_layerOpts.minZoom || this.projection.minZoom;
     this.maxZoom = opt_layerOpts.maxZoom || this.projection.maxZoom;
   };
@@ -2558,10 +2573,10 @@
    * @return {String} url
    */
   TileLayer.prototype.getTileUrl  =  function (tile, zoom) {
-    var z  = zoom - (this.projection?this.projection.minZoom:this.minZoom);
+    var z  = zoom - (this.projection ? this.projection.minZoom : this.minZoom);
     var url = '';
     if (!isNaN(tile.x) && !isNaN(tile.y) && z >= 0 && tile.x >= 0 && tile.y >= 0) {
-      var u  =  this.mapService.url;
+      var u  =  this.mapService_.url;
       if (this.urlTemplate_) {
         u  =  this.urlTemplate_.replace('[' + this.numOfHosts_ + ']', '' + ((tile.y + tile.x) % this.numOfHosts_));
       }
@@ -2589,6 +2604,13 @@
    */
   TileLayer.prototype.getOpacity  =  function () {
     return this.opacity_;
+  };
+  /**
+   * get the underline Map Service
+   * @return {MapService}
+   */
+  TileLayer.prototype.getMapService  =  function () {
+    return this.mapService_;
   };
   /**
    * @name MapTypeOptions
@@ -2783,7 +2805,7 @@
    */
   function MapOverlay(service, opt_overlayOpts) {
     opt_overlayOpts  =  opt_overlayOpts || {};
-    this.mapService  = (service instanceof MapService)?service:new MapService(service);
+    this.mapService_  = (service instanceof MapService) ? service : new MapService(service);
     
     this.minZoom  = opt_overlayOpts.minZoom;
     this.maxZoom  = opt_overlayOpts.maxZoom;
@@ -2866,6 +2888,13 @@
     var img = this.div_;
     setOpacity(img, op);
   };
+  /**
+   * Gets Image Opacity. return <code>opacity</code> between 0-1.
+   * @return {MapService} MapService
+   */
+  MapOverlay.prototype.getMapService  =  function () {
+    return this.mapService_;
+  };
   
   /**
    * Refresh the map image in current view port.
@@ -2902,7 +2931,7 @@
     var me = this;
     this.drawing_ = true;
     this.div_.style.backgroundImage = '';
-    this.mapService.exportMap(params, function (json) {
+    this.mapService_.exportMap(params, function (json) {
       me.drawing_ = false;
       if (me.needsNewRefresh_ === true) {
         me.needsNewRefresh_ = false;
@@ -3079,7 +3108,7 @@
   * and <a href=http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnit2Type.htm>esriSRUnit2Type</a>
   * @property {Number} [METER] 9001 International meter.
   * @property {Number} [FOOT] 9002 International meter.
-  * @property {Number} [SURVEY_FOOT] 9003 	US survey foot.
+  * @property {Number} [SURVEY_FOOT] 9003 US survey foot.
   * @property {Number} [SURVEY_MILE] 9035 US survey mile.
   * @property {Number} [KILLOMETER] 9036 killometer.
   * @property {Number} [RADIAN] 9101 radian.
@@ -3298,7 +3327,93 @@
       G.event.trigger(me, 'load');
     });
   }
-  
+  /**
+   * @name RouteOptions
+   * @class intance that specify how a route should be solved.
+   * @property {google.maps.LatLng[]|Marker[]} [stops]
+   * @property {google.maps.LatLng[]|Marker[]} [barriers]
+   * @property {Boolean} [returnDirections] If true, directions will be generated and returned with the analysis results. Default is true
+   * @property {Boolean} [returnRoutes] If true, routes will be returned with the analysis results. Default is true. 
+   * @property {Boolean} [findBestSequence] If true, the solver should resequence the route in the optimal order. The default is as defined in the network layer. 
+   * @property {Boolean} [preserveFirstStop] If true, the solver should resequence the route in the optimal order. The default is as defined in the network layer. 
+   * @property {Boolean} [preserveLastStop] If true, the solver should resequence the route in the optimal order. The default is as defined in the network layer. 
+   */
+  /**
+   * @name RouteResults
+   * @class intance that specify the results of the solve operation.
+   * @property {google.maps.LatLng[]} [stops]
+   */
+  /**
+   * Create a route task with the URL of the routing server resource.
+   * @name RouteTask 
+   * @class This class (<code>gmaps.ags.RouteTask</code>) represent a Network Layer resource deployed in a NetWorkService.
+   * It can solve a route based on stops, barrier
+   * @constructor
+   * @param {String} url
+   */
+  function RouteTask(url) {
+    this.url = url;
+  }
+  function fromLatLngsToFeatureSet(latlngs) {
+    var i, I, latlng;
+    var features = [];
+    for (i = 0, I = latlngs.length; i < I; i++) {
+      latlng = latlngs[i];
+      if (latlng instanceof G.Marker) {
+        latlng = latlng.getPosition();
+      }
+      features.push({
+        geometry: {
+          x: latlng.lng(),
+          y: latlng.lat(),
+          spatialReference: {
+            wkid: 4326
+          }
+        }
+      });
+    }
+    return {
+      type: '"features"',
+      features: features,
+      doNotLocateOnRestrictedElements: false
+    };
+  }
+  /**
+   * Solve a route based on inputs such as stops and barriers. Result of type {@link RouteResults} 
+   * is passed to Function callback, and error of type {@link Error} is passed to Function errback.
+   * @param {RouteOptions} opt_Route
+   * @param {Function} callback
+   * @param {Function} errback
+   */
+  RouteTask.prototype.solve = function (opts, callback, errback) {
+    if (!opts) {
+      return;
+    }
+    // handle many other fields
+    var params = augmentObject(opts, {});
+    //params['outSR'] = WGS84.wkid;
+    if (isArray(opts.stops)) {
+      params['stops'] = fromLatLngsToFeatureSet(opts.stops);
+    }
+    if (isArray(opts.barriers)) {
+      if (opts.barriers.length > 0) {
+        params['barriers'] = fromLatLngsToFeatureSet(opts.barriers);
+      } else {
+        delete params['barriers'];
+      }
+    }
+    params['returnRoutes'] = (opts.returnRoutes === false ? false : true);
+    params.returnDirections = (opts.returnDirections === true ? true : false);
+    params.returnBarriers = (opts.returnBarriers === true ? true : false);
+    params.returnStops = (opts.returnStops === true ? true : false);
+    
+    Util.getJSON(this.url + '/solve', params, 'callback', function (json) {
+      if (json.routes) {
+        parseFeatures(json.routes.features, opts.overlayOptions);
+      }
+      callback(json, json.error);
+    });
+  };
   /**
    * @name OverlayOptions
    * @class Instance of this classes that specify how
@@ -3313,7 +3428,10 @@
    * @property {String|MarkerImage} {icon} Icon for the foreground
    * @property {String|MarkerImage} {shadow} Shadow image
    */
-  var arcgis = {
+  
+  // export symbols
+  W.gmaps = W.gmaps || {};
+  W.gmaps.ags = {
     'SpatialReference': SpatialReference,
     'Geographic': Geographic,
     'LambertConformalConic': LambertConformalConic,
@@ -3329,6 +3447,7 @@
     'GeometryService': GeometryService,
     'GPService': GPService,
     'GPTask': GPTask,
+    'RouteTask': RouteTask,
     'Util': Util,
     'Config': Config,
     'Projection': Projection,
@@ -3336,8 +3455,6 @@
     'MapOverlay': MapOverlay,
     'MapType': MapType
   };
-  var NS = namespace('gmaps');
-  NS.ags = arcgis;
 })();
  
 

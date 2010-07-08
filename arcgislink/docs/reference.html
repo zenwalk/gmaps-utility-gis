@@ -1876,7 +1876,7 @@
               <tr class="odd">
                 <td><code>Layer(<span class="type">url:String</span>)</code></td>
                 
-                <td>Create a ArcGIS map Layer using it's url ( 	http://[mapservice-url]/[layerId])</td>
+                <td>Create a ArcGIS map Layer using it's url (http://[mapservice-url]/[layerId])</td>
               </tr>
             
           </tbody>
@@ -2336,6 +2336,16 @@
               </tr>
             
               <tr class="even">
+                <td><code>getMapService()</code></td>
+                
+                  
+                    <td><code>MapService</code></td>
+                  
+                
+                <td>Gets Image Opacity. return <code>opacity</code> between 0-1.</td>
+              </tr>
+            
+              <tr class="odd">
                 <td><code>getOpacity()</code></td>
                 
                   
@@ -2345,7 +2355,7 @@
                 <td>Gets Image Opacity. return <code>opacity</code> between 0-1.</td>
               </tr>
             
-              <tr class="odd">
+              <tr class="even">
                 <td><code>hide()</code></td>
                 
                   
@@ -2355,7 +2365,7 @@
                 <td>Hide the overlay</td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>isHidden()</code></td>
                 
                   
@@ -2365,7 +2375,7 @@
                 <td>Check if the overlay is visible, and within zoomzoom range and current map bounds intersects with it's fullbounds.</td>
               </tr>
             
-              <tr class="odd">
+              <tr class="even">
                 <td><code>onAdd()</code></td>
                 
                   
@@ -2375,7 +2385,7 @@
                 <td>Handler when overlay is added. Interface method.This will be called after setMap(map) is called.</td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>onRemove()</code></td>
                 
                   
@@ -2385,7 +2395,7 @@
                 <td></td>
               </tr>
             
-              <tr class="odd">
+              <tr class="even">
                 <td><code>refresh()</code></td>
                 
                   
@@ -2395,7 +2405,7 @@
                 <td>Refresh the map image in current view port.</td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>setOpacity(<span class="type">opacity:Number</span>)</code></td>
                 
                   
@@ -2405,7 +2415,7 @@
                 <td>Sets Image Opacity. parameter <code>opacity</code> between 0-1.</td>
               </tr>
             
-              <tr class="odd">
+              <tr class="even">
                 <td><code>show()</code></td>
                 
                   
@@ -2761,7 +2771,7 @@
             </tr>
             
               <tr class="odd">
-                <td><code>exportMap(<span class="type">params:ExportMapOptions</span>, <span class="type">callback:Function</span>)</code></td>
+                <td><code>exportMap(<span class="type">params:ExportMapOptions</span>, <span class="type">callback:Function</span>, <span class="type">errback:Function</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
@@ -3910,6 +3920,178 @@
         </table>
       
     
+      <h2><a name="RouteOptions"></a>class RouteOptions</h2>
+      <p>intance that specify how a route should be solved.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class RouteOptions - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>barriers</code></td>
+                
+                  
+                    <td><code>google.maps.LatLng[]|Marker[]</code></td>
+                  
+                
+                <td></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>findBestSequence</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>If true, the solver should resequence the route in the optimal order. The default is as defined in the network layer.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>preserveFirstStop</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>If true, the solver should resequence the route in the optimal order. The default is as defined in the network layer.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>preserveLastStop</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>If true, the solver should resequence the route in the optimal order. The default is as defined in the network layer.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>returnDirections</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>If true, directions will be generated and returned with the analysis results. Default is true</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>returnRoutes</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>If true, routes will be returned with the analysis results. Default is true.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>stops</code></td>
+                
+                  
+                    <td><code>google.maps.LatLng[]|Marker[]</code></td>
+                  
+                
+                <td></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="RouteResults"></a>class RouteResults</h2>
+      <p>intance that specify the results of the solve operation.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class RouteResults - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>stops</code></td>
+                
+                  
+                    <td><code>google.maps.LatLng[]</code></td>
+                  
+                
+                <td></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="RouteTask"></a>class RouteTask</h2>
+      <p>This class (<code>gmaps.ags.RouteTask</code>) represent a Network Layer resource deployed in a NetWorkService.It can solve a route based on stops, barrier</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class RouteTask - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>RouteTask(<span class="type">url:String</span>)</code></td>
+                
+                <td>Create a route task with the URL of the routing server resource.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class RouteTask - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>solve(<span class="type">opt_Route:RouteOptions</span>, <span class="type">callback:Function</span>, <span class="type">errback:Function</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Solve a route based on inputs such as stops and barriers. Result of type <code><a href="reference.html#RouteResults">RouteResults</a></code> is passed to Function callback, and error of type <code><a href="reference.html#Error">Error</a></code> is passed to Function errback.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
       <h2><a name="SpatialReference"></a>class SpatialReference</h2>
       <p>This  class (<code>gmaps.ags.SpatialReference</code>) is for coordinate systems that converts value between geographic and real-world coordinates. The following classes extend this class:   <code><a href="reference.html#Geographic">Geographic</a></code>, <code><a href="reference.html#SphereMercator">SphereMercator</a></code>, <code><a href="reference.html#LambertConformalConic">LambertConformalConic</a></code>, and <code><a href="reference.html#TransverseMercator">TransverseMercator</a></code>.</p>
       
@@ -4346,6 +4528,16 @@
             </tr>
             
               <tr class="odd">
+                <td><code>getMapService()</code></td>
+                
+                  
+                    <td><code>MapService</code></td>
+                  
+                
+                <td>get the underline Map Service</td>
+              </tr>
+            
+              <tr class="even">
                 <td><code>getOpacity()</code></td>
                 
                   
@@ -4355,7 +4547,7 @@
                 <td>get the opacity (0-1) of the tile layer</td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>setOpacity(<span class="type">op:Number</span>)</code></td>
                 
                   
@@ -4519,6 +4711,16 @@ A set of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.<
             </tr>
             
               <tr class="odd">
+                <td><code>addToMap(<span class="type">map:google.maps.Map</span>, <span class="type">overlays:OverlayView[]</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Add a list of overlays to map</td>
+              </tr>
+            
+              <tr class="even">
                 <td><code>getJSON(<span class="type">url:String</span>, <span class="type">params:Object</span>, <span class="type">callbackName:String</span>, <span class="type">callbackFn:Function</span>)</code></td>
                 
                   
@@ -4526,6 +4728,16 @@ A set of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.<
                   
                 
                 <td>Make Cross Domain Calls. This function returns thescript ID which can be used to track the requests. parameters:<ul><li>url: url of server resource<li>params: an object with name,value pairs. value must be string<li>callbackName: Callback parameter name the server is expecting.e.g:'callback'<li>callbackFn: the actual callback function.</ul></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>removeFromMap(<span class="type">overlays:OverlayView[]</span>, <span class="type">clearArray:</span>)</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>Add a list of overlays to map</td>
               </tr>
             
           </tbody>
