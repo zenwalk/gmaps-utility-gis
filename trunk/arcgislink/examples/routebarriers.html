@@ -2,7 +2,7 @@
     <head>
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-        <title>Routing with Barriers</title>
+        <title>Block me if you can!</title>
         <style type="text/css">
             /* http://www.alistapart.com/articles/conflictingabsolutepositions/ */
             html {
@@ -59,7 +59,7 @@
             var routes = [];
             function init() {
               var myOptions = {
-                zoom: 16,
+                zoom: 12,
                 center: new google.maps.LatLng(35.23, -80.84),//37.8, -122.41
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 mapTypeControlOptions: {
@@ -81,12 +81,7 @@
                   draggableCursor: 'default'//'url(http://maps.gstatic.com/intl/en_us/mapfiles/openhand_8_8.cur),default'//inherit'
                 });
               });
-              iw = new google.maps.InfoWindow({
-                maxWidth: 250,
-                content: '<ul><li>Choose stop or barrier at top<li>Click map to add a stop or barrier<li>click marker to remove, drag to move<li>click route button to get directions',
-                position: map.getCenter()
-              });
-              iw.open(map);
+              showHelp();
             }
             
             function addPoint(evt) {
@@ -133,7 +128,7 @@
                 overlayOptions: {
                   strokeColor: '#0000BB',
                   strokeWeight: 8,
-                  opacity: 0.2
+                  strokeOpacity: 0.5
                 }
               }, processResults, handleErr);
               
@@ -168,20 +163,31 @@
             function clearOverlays() {
               gmaps.ags.Util.removeFromMap(routes, true);
               gmaps.ags.Util.removeFromMap(stops, true);
-              gmaps.ags.Util.removeFromMap(barries, true);
+              gmaps.ags.Util.removeFromMap(barriers, true);
+            }
+            function showHelp(){
+              iw = iw || new google.maps.InfoWindow({
+                maxWidth: 250,
+                content: '<ul><li>Choose stop or barrier at top<li>Click map to add a stop or barrier<li>click marker to remove, drag to move<li>click route button to get directions'
+              });
+              iw.bindTo('position', map, 'center');
+              iw.open(map);
             }
         </script>
     </head>
     <body onload="init()">
         <div id="top" style="text-align:center;">
             <form id="frm" onsubmit="return false">
-                Click map to add: <input type="radio" checked="checked" name="pointType" value="0"> Stop<input type="radio" name="pointType" value="1">Barrier
+                Add: <input type="radio" checked="checked" name="pointType" value="0"> Stop<input type="radio" name="pointType" value="1">Barrier
                 <button onclick="route()">
                     Route!
                 </button>
                 <input type="checkbox" id="optimize">Optimize
                 <button onclick="clearOverlays()">
                     Clear
+                </button>
+                <button onclick="showHelp()">
+                    Help
                 </button>
             </form>
         </div>
