@@ -63,6 +63,7 @@
        <li><a href="#Project">Project</a></li>
        <li><a href="#Buffer">Buffer</a></li>
        <li><a href="#CoverArea">Driving Time Coverage</a></li>
+       <li><a href="#Routing">Routing with Barriers</a></li>
    </ul>
    </td>
   </tr>
@@ -799,8 +800,8 @@ Note the input result geometry may not be a Google API overlay such as Marker, P
 <a href="reference.html#GPTask">GPTask</a>'s <code>execute</code> method.
  In the following example, when user clicks on map, a GeoProcessing model will return polygons of areas covered by 1,2,3 minutes of driving time. </p> 
 <pre class="prettyprint">
-      var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Network/ESRI_DriveTime_US/GPServer/CreateDriveTimePolygons';
-    task = new gmaps.ags.GPTask(url);
+ var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Network/ESRI_DriveTime_US/GPServer/CreateDriveTimePolygons';
+   ask = new gmaps.ags.GPTask(url);
     
    ...
   
@@ -846,6 +847,46 @@ Note the input result geometry may not be a Google API overlay such as Marker, P
 <a href="../examples/coverarea.html">View example </a> |
 <a href="../examples/coverarea.html?compiled">Compiled </a> | 
 <a href="../examples/nexus.html?u=coverarea.html">Phone Size </a> | 
+<a href="#Top">Back to top</a>
+</p>
+</div>
+<div>
+<h2><a name="Routing"></a>Routing with Barriers</h2>
+<p>ArcGIS server can perform routing with complex parameters, for example, with barriers to avoid. The 
+<a href="reference.html#RouteTask">RouteTask</a>'s <code>solve</code> method can be used to calculate the routes.
+ In the following example, the user can click on map to add some stops and barriers, drag them to adjust location, and observe different results when barriers change. </p> 
+<pre class="prettyprint">
+             function route() {
+              gmaps.ags.Util.removeFromMap(routes);
+              routes = [];
+              task.solve({
+                stops: stops,
+                barriers: barriers,
+                findBestSequence: document.getElementById('optimize').checked,
+                overlayOptions: {
+                  strokeColor: '#0000BB',
+                  strokeWeight: 8,
+                  strokeOpacity: 0.5
+                }
+              }, processResults, handleErr);
+              
+            }
+            
+            function processResults(results) {
+              if (results.routes) {
+                var r = results.routes.features;
+                for (var i = 0, I = r.length; i < I; i++) {
+                  gmaps.ags.Util.addToMap(map, r[i].geometry);
+                  routes = routes.concat(r[i].geometry);
+                }
+              }
+              
+            }
+</pre>
+
+<p>
+<a href="../examples/routebarriers.html">View example </a> |
+<a href="../examples/routebarriers.html?compiled">Compiled </a> | 
 <a href="#Top">Back to top</a>
 </p>
 </div>

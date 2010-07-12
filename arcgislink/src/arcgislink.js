@@ -57,6 +57,7 @@
  *     <td style = 'width:200px'>
  *    {@link Util} <br/> 
  *    {@link Config} <br/> 
+ *    {@link Error} <br/> 
  *     </td>
  *    </tr></table>
  *    <p> There are many objects used in the REST API that do not require 
@@ -368,7 +369,7 @@
   }
   /**
    * Convert overlays (Marker, Polyline, Polygons) to JSON string in AGS format.
-   * @param {(OverlayView|Array.<OverlayView>)} geom 
+   * @param {(OverlayView|OverlayView[])} geom 
    */
   function fromOverlaysToJSON(geom) {
     var gtype = getGeometryType(geom);
@@ -480,7 +481,7 @@
    * may (Polygon) or may not (Polyline) support multi-parts, so the result is an array for consistency.
    * @param {Object} json geometry
    * @param {OverlayOptions} opts see {@link OverlayOptions}
-   * @return {Array.<OverlayView>} 
+   * @return {OverlayView[]} 
    */
   function fromJSONToOverlays(geom, opts) {
     var ovs = null;
@@ -699,7 +700,7 @@
   /**
    * Add a list of overlays to map
    * @param {google.maps.Map} map
-   * @param {Array.<OverlayView>} overlays
+   * @param {OverlayView[]} overlays
    */
   Util.addToMap = function (map, overlays) {
     if (isArray(overlays)) {
@@ -716,7 +717,7 @@
   };
   /**
    * Add a list of overlays to map
-   * @param {Array.<OverlayView>} overlays
+   * @param {OverlayView[]} overlays
    * @param {Boolean} clearArray
    */
   Util.removeFromMap = function (overlays, clearArray) {
@@ -748,8 +749,8 @@
   /**
    * Convert Lat Lng to real-world coordinates.
    * Note both input and output are array of [x,y], although their values in different units.
-   * @param {Array.<Number>} lnglat
-   * @return {Array.Number}
+   * @param {Number[]} lnglat
+   * @return {Number[]}
    */
   SpatialReference.prototype.forward  =  function (lnglat) {
     return lnglat;
@@ -757,8 +758,8 @@
   /**
    * Convert real-world coordinates  to Lat Lng.
    * Note both input and output are are array of [x,y], although their values are different.
-   * @param {Array.<Number>}  coords
-   * @return {Array.<Number>}
+   * @param {Number[]}  coords
+   * @return {Number[]}
    */
   SpatialReference.prototype.reverse  =  function (coords) {
     return coords;
@@ -908,8 +909,8 @@
   };
   /** 
    * see {@link SpatialReference}
-   * @param {Array.<Number>} lnglat
-   * @return {Array.<Number>}
+   * @param {Number[]} lnglat
+   * @return {Number[]}
    */
   LambertConformalConic.prototype.forward = function (lnglat) {
     var phi = lnglat[1] * RAD_DEG;// (Math.PI / 180);
@@ -923,8 +924,8 @@
   };
   /**
    * see {@link SpatialReference}
-   * @param {Array.<Number>}  coords
-   * @return {Array.<Number>}
+   * @param {Number[]}  coords
+   * @return {Number[]}
    */
   LambertConformalConic.prototype.reverse = function (coords) {
     var E = coords[0];
@@ -1010,8 +1011,8 @@
   };
   /**
    * see {@link SpatialReference}
-   * @param {Array.<Number>} lnglat
-   * @return {Array.<Number>}
+   * @param {Number[]} lnglat
+   * @return {Number[]}
    */
   TransverseMercator.prototype.forward = function (lnglat) {
     var phi = lnglat[1] * RAD_DEG;// (Math.PI / 180);
@@ -1027,8 +1028,8 @@
   };
   /**
    * see {@link SpatialReference}
-   * @param {Array.<Number>}  coords
-   * @return {Array.<Number>}
+   * @param {Number[]}  coords
+   * @return {Number[]}
    */
   TransverseMercator.prototype.reverse = function (coords) {
     var E = coords[0];
@@ -1084,8 +1085,8 @@
   
   /**
    * See {@link SpatialReference}
-   * @param {Array.<Number>} lnglat
-   * @return {Array.<Number>}
+   * @param {Number[]} lnglat
+   * @return {Number[]}
    */
   SphereMercator.prototype.forward = function (lnglat) {
     var phi = lnglat[1] * RAD_DEG;
@@ -1096,8 +1097,8 @@
   };
   /**
    * See {@link SpatialReference}
-   * @param {Array.<Number>}  coords
-   * @return {Array.<Number>}
+   * @param {Number[]}  coords
+   * @return {Number[]}
    */
   SphereMercator.prototype.reverse = function (coords) {
     var E = coords[0];
@@ -1289,8 +1290,8 @@
    * This resource represents a catalog of folders and services published on the host.
    *  @param {String} url
    * @property {String} [currentVersion] currentVersion
-   * @property {Array} [folders] folders list
-   * @property {Array} [services] list of services. Each has <code>name, type</code> property.
+   * @property {String[]} [folders] folders list
+   * @property {String[]} [services] list of services. Each has <code>name, type</code> property.
    */
   function Catalog(url) {
     this.url = url;
@@ -1339,14 +1340,13 @@
    * @property {Boolean} [visibility] Visibility of this layer
    * @property {Number} [minScale] minScale
    * @property {Number} [maxScale] maxScale
-   * @property {Envelope} [extent] extent
    * @property {TimeInfo} [timeInfo] timeInfo
    * @property {DrawingInfo} [drawingInfo] rendering info See {@link DrawingInfo}
    * @property {Boolean} [hasAttachments] hasAttachments
    * @property {String} [typeIdField] typeIdField
    * @property {Field[]} [fields] fields, only available after load. See {@link Field}
-   * @property {Array} [types] subtypes: id, name, domains.
-   * @property {Array} [relationships] relationships (id, name, relatedTableId)
+   * @property {String[]} [types] subtypes: id, name, domains.
+   * @property {String[]} [relationships] relationships (id, name, relatedTableId)
    */
   function Layer(url) {
     this.url = url;
@@ -1428,12 +1428,11 @@
    *    The default spatial relationship is intersects. See {@link SpatialRelationship}
    * @property {String} [where] A where clause for the query filter. Any legal SQL where clause operating on the fields in the layer is allowed.
    * @property {String[]} [outFields] The list of fields to be included in the returned resultset.
-   * @property {Boolean} [returnGeometry  = true] If true, If true, the resultset will include the geometries associated with each result.
+   * @property {Boolean} [returnGeometry] If true, If true, the resultset will include the geometries associated with each result.
    * @property {Int[]} [objectIds] The object IDs of this layer / table to be queried
-   * @property [String[]] [outFields] The list of fields to be included in the returned resultset. This list is a comma delimited list of field names.
-   * @property [Number] [maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the query operation
-   * @property [Boolean] [returnIdsOnly] If true, the response only includes an array of object IDs. Otherwise the response is a feature set. The default is false. 
-   * @property [OverlayOptions] [overlayOptions] See {@link OverlayOptions}
+   * @property {Number} [maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the query operation
+   * @property {Boolean} [returnIdsOnly] If true, the response only includes an array of object IDs. Otherwise the response is a feature set. The default is false. 
+   * @property {OverlayOptions} [overlayOptions] See {@link OverlayOptions}
    */
   /**
    * @name ResultSet
@@ -1490,28 +1489,25 @@
     });
   };
   /**
-   * @name QueryRelatedRecordsParameters
+   * @name QueryRelatedRecordsOptions
    * @class This class represent the parameters needed in an query related records operation for a {@link Layer}.
-   *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/queryrelatedrecords.html'>Query Related Records Operation</a>.
-   * @property {String} [f  = json] The response format. html | json | kmz .
-   * @property {Int,Int} [objectIds] The object IDs of this layer / table to be queried
+   * @property {Int[]} [objectIds] The object IDs of this layer / table to be queried
    * @property {Int} [relatioshipId] The ID of the relationship to be queried
-   * @property [String,] [outFields] The list of fields to be included in the returned resultset. This list is a comma delimited list of field names.
+   * @property {String[]} [outFields] The list of fields to be included in the returned resultset. This list is a comma delimited list of field names.
    * @property {String} [definitionExpression]  The definition expression to be applied to the related table / layer. From the list of objectIds, only those records that conform to this expression will be returned.
-   * @property {Boolean} [returnGeometry  = true] If true, If true, the resultset will include the geometries associated with each result.
+   * @property {Boolean} [returnGeometry  = true] If true, the resultset will include the geometries associated with each result.
    * @property [Number] [maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the query operation
-   * @property {Number} [outSR] The well-known ID of the spatial reference of the output geometries
+   * @property {Number} [outSR] The well-known ID of or the {@link SpatialReference} of the output geometries
    */
   /**
    * @name RelatedRecords
    * @class This class represent the results of an query related records operation for a {@link Layer}.
-   *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/queryrelatedrecords.html'>Query Operation</a>.
    * @property {String} [geometryType] esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolygon | esriGeometryPolyline
-   * @property {Object} [spatialReference] spatial Reference <b>wkid info only</b>
+   * @property {Object} [spatialReference] {@link SpatialReference}
    * @property {String} [displayFieldName] display Field Name for layer
-   * @property {Array} [relatedRecordGroups] list of related records
+   * @property {Object[]} [relatedRecordGroups] list of related records
    */
    /**
    * @name RelatedRecord
@@ -1519,7 +1515,7 @@
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/queryrelatedrecords.html'>Query Operation</a>.
    * @property {int} [objectId] objectid of original record
-   * @property {Array} [relatedRecords] list of {@link Feature}s. 
+   * @property {Feature[]} [relatedRecords] list of {@link Feature}s. 
    */
   /**
    * The query related records operation is performed on a layer / table resource. 
@@ -1559,18 +1555,15 @@
    * @constructor
    * @param {String} url
    * @property {String} [url] map service URL
-   * @property {Boolean} [loaded] if map service meta data is loaded. 
    * @property {String} [serviceDescription] serviceDescription
    * @property {String} [mapName] map frame Name inside the map document
    * @property {String} [description] description
    * @property {String} [copyrightText] copyrightText
-   * @property {Array(Layer)} [layers] array of Layers.
-   * @property {Array(Layer)} [tables] array of Tables.
+   * @property {Layer[]} [layers] array of Layers.
+   * @property {Layer[]} [tables] array of Tables.
    * @property {SpatialReference} [spatialReference] spatialReference
    * @property {Boolean} [singleFusedMapCache] if map cache is singleFused
    * @property {TileInfo} [tileInfo] See {@link TileInfo}
-   * @property {Envelope} [initialExtent] initialExtent, see {@link Envelope}
-   * @property {Envelope} [fullExtent] fullExtent, see {@link Envelope}
    * @property {TimeInfo} [timeInfo] see {@link TimeInfo}
    * @property {String} [units] unit
    * @property {String} [supportedImageFormatTypes] supportedImageFormatTypes, comma delimited list.
@@ -1700,7 +1693,7 @@
   };
   /**
    * get a  list of visible layer's Ids
-   * @return {Array.<Number>}
+   * @return {Number[]}
    */
   MapService.prototype.getVisibleLayerIds_ = function () {
     var ret = [];
@@ -1729,7 +1722,10 @@
     }
     return ret;
   };
-  
+  /**
+   * get initial bounds of the map serivce
+   * @return {google.maps.LatLngBounds}
+   */
   MapService.prototype.getInitialBounds = function () {
     if (this.initialExtent) {
       return fromEnvelopeToLatLngBounds(this.initialExtent);
@@ -1740,21 +1736,20 @@
 /**
  * @name ExportMapOptions
  * @class This class represent the parameters needed in an exportMap operation for a {@link MapService}.
- *   There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href='http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/export.html'>Export Operation</a>.
- * @property {Number} [width] width of image, ignored if <code>size</code> is specified;
- * @property {Number} [height] height of image, ignored if <code>size</code> is specified;
+  * <br/>For more info see <a  href='http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/export.html'>Export Operation</a>.
+ * @property {Number} [width] width of image, in pixel;
+ * @property {Number} [height] height of image, in pixel;
  * @property {SpatialReference} [imageSR] The well-known ID of the spatial reference of the exported image or instance of {@link SpatialReference}.
  * @property {String} [format  = png] The format of the exported image. png | png8 | png24 | jpg | pdf | bmp | gif | svg
  * @property {Number} [dpi] The dpi of the exported image, default 96
  * @property {Object} [layerDefinitions] Allows you to filter the features of individual layers in the exported map by specifying 
  *   definition expressions for those layers. Syntax: { "&lt;layerId1>" : "&lt;layerDef1>" , "&lt;layerId2>" : "&lt;layerDef2>" }
  *   key is layerId returned by server, value is definition for that layer.
- * @property {Array.<Number>} [layerIds] list of layer ids. If not specified along with layerOptions, show list of visible layers. 
+ * @property {Number[]} [layerIds] list of layer ids. If not specified along with layerOptions, show list of visible layers. 
  * @property {String} [layerOptions] show | hide | include | exclude. If not specified with along layerIds, show list of visible layers. 
  * @property {Boolean} [transparent  = true] If true, the image will be exported with 
  *  the background color of the map set as its transparent color. note the REST API default value is false.
- * @property {LatLngBounds} [bounds] bounds of map
+ * @property {google.maps.LatLngBounds} [bounds] bounds of map
  * @property {Date} [time] The time instant the exported map image if the service supports time (since AGS10).
  * @property {Date} [endTime] The end time instant the exported map image if the service supports time (since AGS10).
  *  time=&lt;timeInstant> or time=&lt;startTime>, &lt;endTime>, e.g. time=1199145600000, 1230768000000 (1 Jan 2008 00:00:00 GMT to 1 Jan 2009 00:00:00 GMT) 
@@ -1892,9 +1887,8 @@
    * @class This class represent the parameters needed in an identify operation for a {@link MapService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/identify.html'>Identify Operation</a>.
-   * @property {String} [f  = json] The response format. html | json .
    * @property {Geometry} [geometry] The geometry to identify on, <code>google.maps.LatLng</code>, <code>Polyline</code>, or <code>Polygon</code>.
-   * @property {Array.<Number>} [layerIds] The layers to perform the identify operation on. 
+   * @property {Number[]} [layerIds] The layers to perform the identify operation on. 
    * @property {String} [layerOption] The layers to perform the identify operation on. 'top|visible|all'. 
    * @property {Number} [tolerance] The distance in screen pixels from the specified geometry within which the identify should be performed
    * @property {google.maps.LatLngBounds} [bounds] The bounding box of the map currently being viewed.
@@ -1922,7 +1916,7 @@
    * @property {String} [layerName] layerName
    * @property {String} [value] value of the display field
    * @property {String} [displayFieldName] displayFieldName
-   * @property {Feature} [features] {@link Feature}
+   * @property {Feature} [feature] {@link Feature}
    */
   /**
    * Identify features on a particular Geographic location, using {@link IdentifyOptions} and
@@ -1987,7 +1981,7 @@
    * @property {String[]} [searchFields] The names of the fields to search. The fields are specified as a comma-separated list of field names.
    *    If this parameter is not specified, all fields are searched.
    *    <i>This can also be an array with field names </i>.
-   * @property {Array.<Number>} [layerIds] The layers to perform the find operation on. The layers to perform the find operation on.
+   * @property {Number[]} [layerIds] The layers to perform the find operation on. The layers to perform the find operation on.
    *   The layers are specified as a comma-separated list of layer ids. <i>It can also be an array of layer NAMEs</i>.
    * @property {Boolean} [returnGeometry  = true] If true, the resultset will include the geometries associated with each result.
    * @property {Number} [maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing
@@ -2320,7 +2314,7 @@
    * @property {Number} [maxZoom] The maximum zoom level for the map when displaying this MapType. Required for base MapTypes, ignored for overlay MapTypes.
    * @property {Number} [minZoom] The minimum zoom level for the map when displaying this MapType. Optional; defaults to 0.
    * @property {Number} [radius] Radius of the planet for the map, in meters. Optional; defaults to Earth's equatorial radius of 6378137 meters.
-   * @property {Size} [tileSize] The dimensions of each tile. Required.
+   * @property {google.maps.Size} [tileSize] The dimensions of each tile. Required.
    * @property {google.maps.Map} [map] The map instance. Can be useful for copyright info. 
    *   May not need if API provides access to map instance later.
    */
@@ -2338,7 +2332,7 @@
    * See <a href  = http://code.google.com/p/gmaps-api-issues/issues/detail?id  = 279&can  = 1&q  = refresh&colspec  = ID%20Type%20Status%20Introduced%20Fixed%20Summary%20Stars%20ApiType%20Internal>Issue 279</a>
    * </p>
    * <p> Note: all tiled layer in the same map type must use same spatial reference and tile scheme.</p>
-   * @param {(Array.<TileLayer>|String)} tileLayers
+   * @param {TileLayer[]|String} tileLayers
    * @param {MapTypeOptions} opt_typeOpts
    */
   function MapType(tileLayers, opt_typeOpts) {
@@ -2475,7 +2469,7 @@
   };
   /**
    * get list of {@link TileLayer} in this map type
-   * @return {Array.TileLayer}
+   * @return {TileLayer[]}
    */
   MapType.prototype.getTileLayers  =  function () {
     return this.tileLayers_;
@@ -2486,9 +2480,6 @@
    *  to the constructor of the {@link MapOverlay} class.
    * @property {Number} [opacity  = 1.0] Opacity of map image from 0.0 (invisible) to 1.0 (opaque)
    * @property {ExportMapOptions} [exportOptions] See {@link ExportMapOptions}
-   * @property {String} [name] name assigned to this {@link MapOverlay}
-   * @property {Number} [minResolution] min zoom level.
-   * @property {Number} [maxResolution] max zoom level.
    * @property {google.maps.Map} [map] map to attach to.
    */
   
@@ -2511,8 +2502,8 @@
     opt_overlayOpts  =  opt_overlayOpts || {};
     this.mapService_  = (service instanceof MapService) ? service : new MapService(service);
     
-    this.minZoom  = opt_overlayOpts.minZoom;
-    this.maxZoom  = opt_overlayOpts.maxZoom;
+    //this.minZoom  = opt_overlayOpts.minZoom;
+    //this.maxZoom  = opt_overlayOpts.maxZoom;
     this.opacity_  =  opt_overlayOpts.opacity || 1;
     this.exportOptions_  = opt_overlayOpts.exportOptions || {};
     this.drawing_ = false;
@@ -2594,7 +2585,7 @@
     setNodeOpacity(img, op);
   };
   /**
-   * Gets Image Opacity. return <code>opacity</code> between 0-1.
+   * Gets underline {@link MapService}.
    * @return {MapService} MapService
    */
   MapOverlay.prototype.getMapService  =  function () {
@@ -2775,8 +2766,8 @@
  *   There is no constructor, use JavaScript object literal.
  * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.
  * @property {Object} [inputs] an object literal with name-value pair of input values.
- * @property {String|String[]} [outFields] The list of fields to be included in the returned resultset. 
- * @property {int|SpatialReference} [outSR] 
+ * @property {String[]} [outFields] The list of fields to be included in the returned resultset. 
+ * @property {int|SpatialReference} [outSR] output SR, see {@link SpatialReference}
  */
 /**
  * @name GeocodeResults
@@ -2953,10 +2944,10 @@
    *  for a {@link GeometryService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {(Array.<OverlayView>|Array.Object)} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   * @property {(OverlayView[]|Object[])} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
    * @property {GeometryType} [geometryType] esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope
-   * @property {SpatialReference} [inSpatialReference] The well-known ID of or the spatial reference of the input geometries
-   * @property {SpatialReference} [outSpatialReference] The well-known ID of or the spatial reference of the out geometries
+   * @property {SpatialReference} [inSpatialReference] The well-known ID of or the {@link SpatialReference} of the input geometries
+   * @property {SpatialReference} [outSpatialReference] The well-known ID of or the {@link SpatialReference} of the out geometries
    */
   /**
    * @name ProjectResults
@@ -2964,7 +2955,7 @@
    *  for a {@link GeometryService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {Array.<OverlayView>|Array.Object} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
     */
   /**
    * This resource projects an array of input geometries from an input spatial reference
@@ -3014,22 +3005,19 @@
    * @name BufferOptions
    * @class This class represent the parameters needed in an buffer operation
    *  for a {@link GeometryService}.
-   *   There is no constructor, use JavaScript object literal.
-   * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {Array.<OverlayView>|Array.Object} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon</code>, or ESRI Geometry format to project. 
-   * @property {SpatialReference} [bufferSpatialReference] The well-known ID of or the spatial reference of the out geometries
-   * @property {Array.Number} [distances] The distances the input geometries are buffered.
+   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng</code>, <code>Polyline</code>, <code>Polygon</code>, or ESRI Geometry format to buffer. 
+   * @property {SpatialReference} [bufferSpatialReference] The well-known ID of or the {@link SpatialReference} of the buffer geometries
+   * @property {Number[]} [distances] The distances the input geometries are buffered.
    * @property {Number} [unit] see <a href='http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnitType.htm'>esriSRUnitType Constants </a> .
    * @property {Boolean} [unionResults] If true, all geometries buffered at a given distance are unioned into a single (possibly multipart) polygon, and the unioned geometry is placed in the output array.
-   * @property {OverlayOptions} [overlayOptions] how to render result overlay
+   * @property {OverlayOptions} [overlayOptions] how to render result overlay. See {@link OverlayOptions}
    */
   /**
    * @name BufferResults
    * @class This class represent the parameters needed in an project operation
    *  for a {@link GeometryService}.
    *   There is no constructor, use JavaScript object literal.
-   * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {Array.<OverlayView>|Array.Object} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon</code>, or ESRI Geometry format to project. 
    */
   /**
    * This resource projects an array of input geometries from an input spatial reference
@@ -3095,7 +3083,7 @@
    * @property {Object} [defaultValue]
    * @property {Object} [parameterType]
    * @property {String} [category]
-   * @property {Array.Object} [choiceList]
+   * @property {Object[]} [choiceList]
    */
   /**
    * @name GPTask
@@ -3308,11 +3296,13 @@
    * @property {google.maps.PolylineOptions} [polylineOptions] style option for polylines. {@link http://code.google.com/apis/maps/documentation/javascript/reference.html#PolylineOptions}
    * @property {google.maps.PolygonOptions} [polygonOptions] style option for polygons {@link http://code.google.com/apis/maps/documentation/javascript/reference.html#PolygonOptions}
    * @property {Number} [strokeOpacity] The stroke opacity between 0.0 and 1.0
+   * @property {Number} [fillOpacity] The fill opacity between 0.0 and 1.0
    * @property {String} [strokeColor] The stroke color in HTML hex style, ie. "#FFAA00"
+   * @property {String} [fillColor] The fill color in HTML hex style, ie. "#FFAA00"
    * @property {Number} [strokeWeight] The stroke width in pixels.
    * @property {Number} [zIndex] The zIndex compared to other overlays.
-   * @property {String|MarkerImage} {icon} Icon for the foreground
-   * @property {String|MarkerImage} {shadow} Shadow image
+   * @property {String|google.maps.MarkerImage} [icon] Icon for the foreground
+   * @property {String|google.maps.MarkerImage} [shadow] Shadow image
    */
   
   // export symbols
