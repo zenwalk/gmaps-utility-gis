@@ -124,8 +124,8 @@
    * @property {Boolean} [alwaysUseProxy] whether to always use proxy page when send request to server.
    */
   var Config = {
-    proxyUrl: null,
-    alwaysUseProxy: false 
+    'proxyUrl': null,
+    'alwaysUseProxy': false 
   };
   /**
    * an internal collection of Spatial Refeneces supported in the application.
@@ -288,11 +288,11 @@
    * @property {String} [ENVELOPE] esriGeometryEnvelope
    */
   var GeometryType = {
-    POINT: 'esriGeometryPoint',
-    MULTIPOINT: 'esriGeometryMultipoint',
-    POLYLINE: 'esriGeometryPolyline',
-    POLYGON: 'esriGeometryPolygon',
-    ENVELOPE: 'esriGeometryEnvelope'
+    'POINT': 'esriGeometryPoint',
+    'MULTIPOINT': 'esriGeometryMultipoint',
+    'POLYLINE': 'esriGeometryPolyline',
+    'POLYGON': 'esriGeometryPolygon',
+    'ENVELOPE': 'esriGeometryEnvelope'
   };
   function getGeometryType(obj) {
     var o = obj;
@@ -311,11 +311,11 @@
       return GeometryType.POLYGON;
     } else if (o instanceof G.LatLngBounds) {
       return GeometryType.ENVELOPE;
-    } else if (o['x'] !== undefined && o['y'] !== undefined) {
+    } else if (o.x !== undefined && o.y !== undefined) {
       return GeometryType.POINT;
-    } else if (o['points']) {
+    } else if (o.points) {
       return GeometryType.MULTIPOINT;
-    } else if (o['paths']) {
+    } else if (o.paths) {
       return GeometryType.POLYLINE;
     } else if (o.rings) {
       return GeometryType.POLYGON;
@@ -348,7 +348,7 @@
       return null;
     }
     // for 9.3 compatibility, return wkid if possible.
-    return isNumber(sr) ? sr : sr['wkid'] ? sr['wkid'] : sr.toJSON();
+    return isNumber(sr) ? sr : sr.wkid ? sr.wkid : sr.toJSON();
   }
   
   /**
@@ -368,7 +368,7 @@
   }
   /**
    * Convert overlays (Marker, Polyline, Polygons) to JSON string in AGS format.
-   * @param {(OverlayView|Array.OverlayView)} geom 
+   * @param {(OverlayView|Array.<OverlayView>)} geom 
    */
   function fromOverlaysToJSON(geom) {
     var gtype = getGeometryType(geom);
@@ -466,10 +466,10 @@
    * @return {google.maps.LatLngBounds} gLatLngBounds
    */
   function fromEnvelopeToLatLngBounds(extent) {
-    var sr  =  spatialReferences[extent['spatialReference']['wkid'] || extent['spatialReference']['wkt']];
+    var sr  =  spatialReferences[extent.spatialReference.wkid || extent.spatialReference.wkt];
     sr  =  sr || WGS84;
-    var sw  =  sr.reverse([extent['xmin'], extent['ymin']]);
-    var ne  =  sr.reverse([extent['xmax'], extent['ymax']]);
+    var sw  =  sr.reverse([extent.xmin, extent.ymin]);
+    var ne  =  sr.reverse([extent.xmax, extent.ymax]);
     return new G.LatLngBounds(new G.LatLng(sw[1], sw[0]), new G.LatLng(ne[1], ne[0]));
   }
   
@@ -480,20 +480,18 @@
    * may (Polygon) or may not (Polyline) support multi-parts, so the result is an array for consistency.
    * @param {Object} json geometry
    * @param {OverlayOptions} opts see {@link OverlayOptions}
-   * @return {Array.OverlayView} 
+   * @return {Array.<OverlayView>} 
    */
   function fromJSONToOverlays(geom, opts) {
     var ovs = null;
-    var sr = null;
     var ov;
-    var x, i, ic, j, jc, parts, part, lnglat, latlngs;
-    var title = '';
+    var i, ic, j, jc, parts, part, lnglat, latlngs;
     opts = opts || {};
     if (geom) {
       ovs = [];
       if (geom.x) {
         ov = new G.Marker(augmentObject(opts.markerOptions || opts, {
-          position: new G.LatLng(geom.y, geom.x)
+          'position': new G.LatLng(geom.y, geom.x)
         }));
         ovs.push(ov);
       } else {
@@ -508,7 +506,7 @@
           if (geom.points) {
             // multipoint
             ov = new G.Marker(augmentObject(opts.markerOptions || opts, {
-              position: new G.LatLng(part[1], part[0])
+              'position': new G.LatLng(part[1], part[0])
             }));
             ovs.push(ov);
           } else {
@@ -519,7 +517,7 @@
             }
             if (geom.paths) {
               ov = new G.Polyline(augmentObject(opts.polylineOptions || opts, {
-                path: latlngs
+                'path': latlngs
               }));
               ovs.push(ov);
             } else if (geom.rings) {
@@ -530,7 +528,7 @@
         }
         if (geom.rings) {
           ov = new G.Polygon(augmentObject(opts.polygonOptions || opts, {
-            paths: rings
+            'paths': rings
           }));
           ovs.push(ov);
         }
@@ -594,7 +592,6 @@
       }
     }
   }
- 
   /**
    * A set of utilities ((<code>gmaps.gis.Util</code>) 
    * for commonly used functions.
@@ -602,28 +599,12 @@
    * @namespace
    */
   var Util = {};
-  
-  /**
-   * Make Cross Domain Calls. This function returns the
-   * script ID which can be used to track the requests. parameters:
-   * <ul>
-   * <li>url: url of server resource
-   * <li>params: an object with name,value pairs. value must be string
-   * <li>callbackName: Callback parameter name the server is expecting.e.g:'callback'
-   * <li>callbackFn: the actual callback function.
-   * </ul>
-   * @param {String} url
-   * @param {Object} params
-   * @param {String} callbackName
-   * @param {Function} callbackFn
-   * @return {String} scriptID
-   */
-  Util.getJSON = function (url, params, callbackName, callbackFn) {
+  function getJSON(url, params, callbackName, callbackFn) {
     var sid = 'ags_jsonp' + (jsonpID_++) + '_' + Math.floor(Math.random() * 1000000);
     var script = null;
     var query = '';
     if (params) {
-      params.f = params.f || 'json';
+      params.f = params.f || STR.json;
       for (var x in params) {
         if (params.hasOwnProperty(x) && params[x] !== null && params[x] !== undefined) { // wont sent undefined.
           //jslint complaint about escape cause NN does not support it.
@@ -671,7 +652,7 @@
         useProxy = true;
       }
       if (useProxy && !Config.proxyUrl) {
-        throw new Error('No Config.proxyUrl defined');
+        throw new Error('No proxyUrl property in gmaps.ags.Config is defined');
       }
       var xmlhttp = getXmlHttp();
       xmlhttp.onreadystatechange = function () {
@@ -695,7 +676,25 @@
      */
     triggerEvent(Util, 'jsonpstart', sid);
     return sid;
-  };
+  }
+  
+  
+  /**
+   * Make Cross Domain Calls. This function returns the
+   * script ID which can be used to track the requests. parameters:
+   * <ul>
+   * <li>url: url of server resource
+   * <li>params: an object with name,value pairs. value must be string
+   * <li>callbackName: Callback parameter name the server is expecting.e.g:'callback'
+   * <li>callbackFn: the actual callback function.
+   * </ul>
+   * @param {String} url
+   * @param {Object} params
+   * @param {String} callbackName
+   * @param {Function} callbackFn
+   * @return {String} scriptID
+   */
+  Util.getJSON = getJSON; 
 
   /**
    * Add a list of overlays to map
@@ -749,8 +748,8 @@
   /**
    * Convert Lat Lng to real-world coordinates.
    * Note both input and output are array of [x,y], although their values in different units.
-   * @param {Number[]} lnglat
-   * @return {Number[]}
+   * @param {Array.<Number>} lnglat
+   * @return {Array.Number}
    */
   SpatialReference.prototype.forward  =  function (lnglat) {
     return lnglat;
@@ -758,8 +757,8 @@
   /**
    * Convert real-world coordinates  to Lat Lng.
    * Note both input and output are are array of [x,y], although their values are different.
-   * @param {Number[]}  coords
-   * @return {Number[]}
+   * @param {Array.<Number>}  coords
+   * @return {Array.<Number>}
    */
   SpatialReference.prototype.reverse  =  function (coords) {
     return coords;
@@ -768,7 +767,7 @@
    * Get the map the periodicity in x-direction, in map units NOT pixels
    * @return {Number} periodicity in x-direction
    */
-  SpatialReference.prototype.getCircumference  =  function () {
+  SpatialReference.prototype.getCircum  =  function () {
     return 360;
   };
   /**
@@ -909,8 +908,8 @@
   };
   /** 
    * see {@link SpatialReference}
-   * @param {Number[]} lnglat
-   * @return {Number[]}
+   * @param {Array.<Number>} lnglat
+   * @return {Array.<Number>}
    */
   LambertConformalConic.prototype.forward = function (lnglat) {
     var phi = lnglat[1] * RAD_DEG;// (Math.PI / 180);
@@ -924,8 +923,8 @@
   };
   /**
    * see {@link SpatialReference}
-   * @param {Number[]}  coords
-   * @return {Number[]}
+   * @param {Array.<Number>}  coords
+   * @return {Array.<Number>}
    */
   LambertConformalConic.prototype.reverse = function (coords) {
     var E = coords[0];
@@ -942,7 +941,7 @@
    *  see {@link SpatialReference}
    *  @return {Number}
    */
-  LambertConformalConic.prototype.getCircumference = function () {
+  LambertConformalConic.prototype.getCircum = function () {
     return Math.PI * 2 * this.a_;
   };
 		
@@ -1011,8 +1010,8 @@
   };
   /**
    * see {@link SpatialReference}
-   * @param {Number[]} lnglat
-   * @return {Number[]}
+   * @param {Array.<Number>} lnglat
+   * @return {Array.<Number>}
    */
   TransverseMercator.prototype.forward = function (lnglat) {
     var phi = lnglat[1] * RAD_DEG;// (Math.PI / 180);
@@ -1028,8 +1027,8 @@
   };
   /**
    * see {@link SpatialReference}
-   * @param {Number[]}  coords
-   * @return {Number[]}
+   * @param {Array.<Number>}  coords
+   * @return {Array.<Number>}
    */
   TransverseMercator.prototype.reverse = function (coords) {
     var E = coords[0];
@@ -1051,7 +1050,7 @@
    * see {@link SpatialReference}
    * @return {Number}
    */
-  TransverseMercator.prototype.getCircumference = function () {
+  TransverseMercator.prototype.getCircum = function () {
     return Math.PI * 2 * this.a_;
   };
 
@@ -1085,8 +1084,8 @@
   
   /**
    * See {@link SpatialReference}
-   * @param {Number[]} lnglat
-   * @return {Number[]}
+   * @param {Array.<Number>} lnglat
+   * @return {Array.<Number>}
    */
   SphereMercator.prototype.forward = function (lnglat) {
     var phi = lnglat[1] * RAD_DEG;
@@ -1097,8 +1096,8 @@
   };
   /**
    * See {@link SpatialReference}
-   * @param {Number[]}  coords
-   * @return {Number[]}
+   * @param {Array.<Number>}  coords
+   * @return {Array.<Number>}
    */
   SphereMercator.prototype.reverse = function (coords) {
     var E = coords[0];
@@ -1111,83 +1110,27 @@
    * See {@link SpatialReference}
    * @return {Number}
    */
-  SphereMercator.prototype.getCircumference = function () {
+  SphereMercator.prototype.getCircum = function () {
     return Math.PI * 2 * this.a_;
   };
   
-  /**
-   * Create a flat transform spatial reference. The <code>params</code> passed in constructor should have the following properties:
-   * <li><code>wkid</code>: wkid
-   * <li><code>latlng</code>:  {@link Envelope} in latlng unit;
-   * <li><code>coords</code>: {@link Envelope} in coords unit
-   * @class This class (<code>gmaps.ags.FlatSpatialReference</code>) is a special type of coordinate reference assuming lat/lng will increase
-   * evenly as if earth is flat. Approximate for small regions without implementing
-   * a real projection.
-   * @name FlatSpatialReference
-   * @constructor
-   * @param {Object} params
-   * @extends SpatialReference
-   */
-  function FlatSpatialReference(params) {
-    /*  =========== parameters  =  ===================== */
-    params = params || {};
-    SpatialReference.call(this, params);
-    this.lng_ = params.latlng.xmin;
-    this.lat_ = params.latlng.ymin;
-    this.x_ = params.coords.xmin;
-    this.y_ = params.coords.ymin;
-    this.xscale_ = (params.coords.xmax - params.coords.xmin) / (params.latlng.xmax - params.latlng.xmin);
-    this.yscale_ = (params.coords.ymax - params.coords.ymin) / (params.latlng.ymax - params.latlng.ymin);
-  }
-  
-  FlatSpatialReference.prototype = new SpatialReference();
-  
-  /**
-   * See {@link SpatialReference}
-   * @param {Number[]} lnglat
-   * @return {Number[]}
-   */
-  FlatSpatialReference.prototype.forward = function (lnglat) {
-    var E = this.x_ + (lnglat[0] - this.lng_) * this.xscale_;
-    var N = this.y_ + (lnglat[1] - this.lat_) * this.yscale_;
-    return [E, N];
-  };
-  /**
-   * See {@link SpatialReference}
-   * @param {Number[]}  coords
-   * @return {Number[]}
-   */
-  FlatSpatialReference.prototype.reverse = function (coords) {
-    var lng = this.lng_ + (coords[0] - this.x_) / this.xscale_;
-    var lat = this.lat_ + (coords[1] - this.y_) / this.yscale_;
-    return [lng, lat];
-  };
-  /**
-   * See {@link SpatialReference}
-   * @return {Number}
-   */
-  FlatSpatialReference.prototype.getCircumference = function () {
-    return this.xscale_ * 360;
-  };
-
-
   WGS84 = new Geographic({
-    wkid: 4326
+    'wkid': 4326
   });
   NAD83 = new Geographic({
-    wkid: 4269
+    'wkid': 4269
   });
   WEB_MERCATOR = new SphereMercator({
-    wkid: 102113,
-    semi_major: 6378137.0,
-    central_meridian: 0,
-    unit: 1
+    'wkid': 102113,
+    'semi_major': 6378137.0,
+    'central_meridian': 0,
+    'unit': 1
   });
   WEB_MERCATOR_AUX = new SphereMercator({
-      wkid: 102100,
-      semi_major: 6378137.0,
-      central_meridian: 0,
-      unit: 1
+      'wkid': 102100,
+      'semi_major': 6378137.0,
+      'central_meridian': 0,
+      'unit': 1
     });
 	
   // declared early but assign here to avoid dependency error by jslint
@@ -1275,11 +1218,11 @@
     } else {
       var wkt = wktOrSR || wkidt; // only one param is passed in.
       var params = {
-        wkt: wkidt
+        'wkt': wkidt
       };
       if (wkidt === parseInt(wkidt, 10)) {
         params = {
-          wkid: wkidt
+          'wkid': wkidt
         };
       }
       var prj = extractString(wkt, "PROJECTION[\"", "\"]");
@@ -1352,7 +1295,7 @@
   function Catalog(url) {
     this.url = url;
     var me = this;
-    Util.getJSON(url, {
+    getJSON(url, {
       f: STR.json
     }, STR.callback, function (json) {
       augmentObject(json, me);
@@ -1419,7 +1362,7 @@
     if (this.loaded) {
       return;
     }
-    Util.getJSON(this.url, {}, 'callback', function (json) {
+    getJSON(this.url, {}, 'callback', function (json) {
       augmentObject(json, me);
       me.loaded = true;
       if (opt_callback) {
@@ -1459,14 +1402,14 @@
    * @property {String} [WITHIN] esriSpatialRelWithin
   */
   var SpatialRelationship = {
-    INTERSECTS: 'esriSpatialRelIntersects',
-    CONTAINS: 'esriSpatialRelContains',
-    CROSSES: 'esriSpatialRelCrosses',
-    ENVELOPE_INTERSECTS: 'esriSpatialRelEnvelopeIntersects',
-    INDEX_INTERSECTS: 'esriSpatialRelIndexIntersects',
-    OVERLAPS: 'esriSpatialRelOverlaps',
-    TOUCHES: 'esriSpatialRelTouches',
-    WITHIN: 'esriSpatialRelWithin'
+    'INTERSECTS': 'esriSpatialRelIntersects',
+    'CONTAINS': 'esriSpatialRelContains',
+    'CROSSES': 'esriSpatialRelCrosses',
+    'ENVELOPE_INTERSECTS': 'esriSpatialRelEnvelopeIntersects',
+    'INDEX_INTERSECTS': 'esriSpatialRelIndexIntersects',
+    'OVERLAPS': 'esriSpatialRelOverlaps',
+    'TOUCHES': 'esriSpatialRelTouches',
+    'WITHIN': 'esriSpatialRelWithin'
   };
    /**
    * @name QueryOptions
@@ -1540,7 +1483,7 @@
     params.returnGeometry = p.returnGeometry === false ? false : true;
     params.returnIdsOnly = p.returnIdsOnly === true ? true : false;
     delete params.overlayOptions;
-    Util.getJSON(this.url + '/query', params, 'callback', function (json) {
+    getJSON(this.url + '/query', params, 'callback', function (json) {
       parseFeatures(json.features, p.overlayOptions);
       callback(json, json.error);
       handleErr(errback, json);
@@ -1599,7 +1542,7 @@
       params.outFields = params.outFields.join(',');
     }
     params.returnGeometry = params.returnGeometry === false ? false : true;
-    Util.getJSON(this.url + '/query', params, STR.callback, function (json) {
+    getJSON(this.url + '/query', params, STR.callback, function (json) {
       handleErr(errback, json);
       callback(json);
     });
@@ -1639,8 +1582,7 @@
     var tks = url.split("/");
     this.name = tks[tks.length - 2].replace(/_/g, ' ');
     var me = this;
-    Util.getJSON(url, {
-      'f': 'json'
+    getJSON(url, {
     }, STR.callback, function (json) {
       me.init_(json);
     });
@@ -1663,7 +1605,7 @@
     }
     if (json.tables !== undefined) {
       // v10.0 +
-      Util.getJSON(this.url + '/layers', {}, STR.callback, function (json2) {
+      getJSON(this.url + '/layers', {}, STR.callback, function (json2) {
         me.initLayers_(json2);
       });
     } else {
@@ -1744,7 +1686,7 @@
  * Get the layer definitions.
  * @return {Object} key as id, value as string of definition expression. 
  */
-  MapService.prototype.getLayerDefs = function () {
+  MapService.prototype.getLayerDefs_ = function () {
     var ret = {};
     if (this.layers) {
       for (var i = 0, c = this.layers.length; i < c; i++) {
@@ -1758,9 +1700,9 @@
   };
   /**
    * get a  list of visible layer's Ids
-   * @return {Number[]}
+   * @return {Array.<Number>}
    */
-  MapService.prototype.getVisibleLayerIds = function () {
+  MapService.prototype.getVisibleLayerIds_ = function () {
     var ret = [];
     if (this.layers) { // in case service not loaded
       var layer;
@@ -1808,7 +1750,7 @@
  * @property {Object} [layerDefinitions] Allows you to filter the features of individual layers in the exported map by specifying 
  *   definition expressions for those layers. Syntax: { "&lt;layerId1>" : "&lt;layerDef1>" , "&lt;layerId2>" : "&lt;layerDef2>" }
  *   key is layerId returned by server, value is definition for that layer.
- * @property {Number[]} [layerIds] list of layer ids. If not specified along with layerOptions, show list of visible layers. 
+ * @property {Array.<Number>} [layerIds] list of layer ids. If not specified along with layerOptions, show list of visible layers. 
  * @property {String} [layerOptions] show | hide | include | exclude. If not specified with along layerIds, show list of visible layers. 
  * @property {Boolean} [transparent  = true] If true, the image will be exported with 
  *  the background color of the map set as its transparent color. note the REST API default value is false.
@@ -1895,14 +1837,14 @@
     // if do not want use def at all, pass in {}, if want to use 
     // in service, do not pass in anything.
     if (defs === undefined) {
-      defs = this.getLayerDefs();
+      defs = this.getLayerDefs_();
     } 
     // for 9.3 compatibility:
     params.layerDefs = getLayerDefsString(defs);
     var vlayers = p.layerIds;
     var layerOpt = p.layerOption || 'show';   
     if (vlayers === undefined) {
-      vlayers = this.getVisibleLayerIds();
+      vlayers = this.getVisibleLayerIds_();
     }
     if (vlayers.length > 0) {
       params.layers =  layerOpt + ':' + vlayers.join(',');
@@ -1920,7 +1862,7 @@
     //TODO: finish once v10 released
     params.layerTimeOptions = p.layerTimeOptions;
     
-    Util.getJSON(this.url + '/export', params, 'callback', function (json) {
+    getJSON(this.url + '/export', params, 'callback', function (json) {
       json.bounds = fromEnvelopeToLatLngBounds(json.extent);
       delete json.extent;
       callback(json); //callback.apply(null,json);
@@ -1952,7 +1894,7 @@
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/identify.html'>Identify Operation</a>.
    * @property {String} [f  = json] The response format. html | json .
    * @property {Geometry} [geometry] The geometry to identify on, <code>google.maps.LatLng</code>, <code>Polyline</code>, or <code>Polygon</code>.
-   * @property {Number[]} [layerIds] The layers to perform the identify operation on. 
+   * @property {Array.<Number>} [layerIds] The layers to perform the identify operation on. 
    * @property {String} [layerOption] The layers to perform the identify operation on. 'top|visible|all'. 
    * @property {Number} [tolerance] The distance in screen pixels from the specified geometry within which the identify should be performed
    * @property {google.maps.LatLngBounds} [bounds] The bounding box of the map currently being viewed.
@@ -2012,30 +1954,23 @@
     params.maxAllowableOffset = p.maxAllowableOffset;
     params.returnGeometry = (p.returnGeometry === false ? false : true);
     
-    Util.getJSON(this.url + '/identify', params, 'callback', function (json) {
+    getJSON(this.url + '/identify', params, 'callback', function (json) {
       // process results;
       var rets = null;
-      var i, js, f, g;
+      var i, js, g;
       if (json.results) {
         rets = [];
         for (i = 0; i < json.results.length; i++) {
           js = json.results[i];
           g = fromJSONToOverlays(js.geometry, p.overlayOptions);
-          rets.push({
-            feature: {
-              geometry: g,
-              attributes: js.attributes
-            },
-            displayFieldName: js.displayFieldName,
-            layerId: js.layerId,
-            layerName: js.layerName,
-            value: js.value
-          });
+          js.feature = {
+            'geometry': g,
+            'attributes': js.attributes
+          };
+          delete js.attributes;
         }
       }
-      callback({
-        results: rets
-      });
+      callback(json);
       handleErr(errback, json);
     });
   };
@@ -2052,7 +1987,7 @@
    * @property {String[]} [searchFields] The names of the fields to search. The fields are specified as a comma-separated list of field names.
    *    If this parameter is not specified, all fields are searched.
    *    <i>This can also be an array with field names </i>.
-   * @property {Number[]} [layerIds] The layers to perform the find operation on. The layers to perform the find operation on.
+   * @property {Array.<Number>} [layerIds] The layers to perform the find operation on. The layers to perform the find operation on.
    *   The layers are specified as a comma-separated list of layer ids. <i>It can also be an array of layer NAMEs</i>.
    * @property {Boolean} [returnGeometry  = true] If true, the resultset will include the geometries associated with each result.
    * @property {Number} [maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing
@@ -2107,30 +2042,22 @@
     }
     params.sr = 4326;
     params.returnGeometry = (opts.returnGeometry === false ? false : true);
-    Util.getJSON(this.url + '/find', params, STR.callback, function (json) {
+    getJSON(this.url + '/find', params, STR.callback, function (json) {
       var rets = null;
-      var i, js, f, g;
+      var i, js, g;
       if (json.results) {
         rets = [];
         for (i = 0; i < json.results.length; i++) {
           js = json.results[i];
           g = fromJSONToOverlays(js.geometry, opts.overlayOptions);
-          rets.push({
-            feature: {
-              geometry: g,
-              attributes: js.attributes
-            },
-            displayFieldName: js.displayFieldName,
-            layerId: js.layerId,
-            layerName: js.layerName,
-            foundFieldName: js.foundFieldName,
-            value: js.value
-          });
+          js.feature = {
+            'geometry': g,
+            'attributes': js.attributes
+          };
+          delete js.attributes;
         }
       }
-      callback({
-        results: rets
-      });
+      callback(json);
       handleErr(errback, json);
     });
   };
@@ -2150,192 +2077,6 @@
     if (layer) {
       layer.query(params, callback, errback);
     }
-  };
-  
- 
-  /**
- * Creates a GeocodeService class.
- * Params:<li><code>url</code>: URL of service, syntax:<code>	http://{catalog-url}/{serviceName}/GeocodeServer</code>
- * @name GeocodeService
- * @class This class (<code>gmaps.ags.GeocodeService</code>) represent an ArcGIS <a href="http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geocodeserver.html">GeocodeServer</a>
- *  service.
- * @constructor
- * @param {String} url
- * @property {String} [serviceDescription] serviceDescription
- * @property {Field[]} [addressFields] input fields. 
- *    Each entry is an object of type {@link Field}, plus <code>required(true|false)</code>
- * @property {Field[]} [candidateFields] candidate Fields. 
- *    Each entry is an object of type {@link Field}
- * @property {Field[]} [intersectionCandidateFields] intersectionCandidateFields
- *    Each entry is an object of type {@link Field}
- * @property {SpatialReference} [spatialReference] spatialReference
- * @property {Object} [locatorProperties] an object with key-value pair that is specific to Locator type.
- */
-  function GeocodeService(url) {
-    this.url = url;
-    this.loaded = false;
-    var me = this;
-    Util.getJSON(url, {}, STR.callback, function (json) {
-      me.init_(json);
-    });
-  }
-  
-  /**
-   * init
-   * @param {Object} json
-   */
-  GeocodeService.prototype.init_ = function (json) {
-    augmentObject(json, this);
-    if (json.spatialReference) {
-      this.spatialReference = spatialReferences[json.spatialReference.wkid || json.spatialReference.wkt] || WGS84;
-    }
-    this.loaded = true;
-    /**
-     * This event is fired when the service and it's service info is loaded.
-     * @name GeocodeService#load
-     * @event
-     */
-    triggerEvent(this, 'load');
-  };
-  
-  
-/**
- * @name GeocodeOptions
- * @class This class represent the parameters needed in a find address candidate operation
- *  on a {@link GeocodeService}.
- *   There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.
- * @property {Object} [inputs] an object literal with name-value pair of input values.
- * @property {String|String[]} [outFields] The list of fields to be included in the returned resultset. 
- * @property {int|SpatialReference} [outSR] 
- */
-/**
- * @name GeocodeResults
- * @class This class represent the results of an find address candidate operation for a 
- *  {@link GeocodeService}.
- *   There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.
- * @property {GeocodeResult[]} [candidates] The find address results as 
- * an array of {@link GeocodeResult}
- */
-/**
- * @name GeocodeResult
- * @class This class represent one entry in the results of a find address operation for a
- *  {@link GeocodeService}.
- *   There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.
- * @property {String} [address] matched address
- * @property {google.maps.LatLng} [location] matched location
- * @property {Number} [score] matching score
- * @property {Object} [attributes] attributes as name-value JSON object. 
- * e.g. <code>{"StreetName" : "MASON", "StreetType" : "ST"}</code>
- */
-/**
- * The findAddressCandidates operation is performed on a geocode service
- *  resource. The result of this operation is a resource representing 
- *  the list of address candidates. This resource provides information 
- *  about candidates including the address, location, and score.
- *  param is an instance of {@link GeocodeOptions}. An instance of
- *  {@link GeocodeResults} will be passed into callback function.
- * @param {GeocodeOptions} params
- * @param {Function} callback
- * @param {Function} errback
- */
-  GeocodeService.prototype.findAddressCandidates = function (gparams, callback, errback) {
-    var params = augmentObject(gparams, {});
-    if (params.inputs) {
-      augmentObject(params.inputs, params);
-      delete params.inputs;
-    }
-    if (isArray(params.outFields)) {
-      params.outFields = params.outFields.join(',');
-    }
-    params.outSR = 4326;
-    var me = this;
-    Util.getJSON(this.url + '/findAddressCandidates', params, STR.callback, function (json) {
-      var ret = null; 
-      if (json.candidates) {
-        var res, loc;
-        for (var i = 0; i < json.candidates.length; i++) {
-          ret = ret || [];
-          res = json.candidates[i];
-          loc = res.location;
-          if (!isNaN(loc.x) &&  !isNaN(loc.y)) {
-            var ll = [loc.x, loc.y];
-            if (me.spatialReference) {
-              ll = me.spatialReference.reverse(ll);
-            }
-            res.location = new G.LatLng(ll[1], ll[0]);
-            ret.push(res);
-          }
-        }
-      }
-      callback({
-        candidates: ret
-      });
-      handleErr(errback, json);
-    });
-  };
-  /**
-   * Alias of <code>GeocodeService.findAddressCandidates</code>;
-   * @param {GeocodeOptions} params
-   * @param {Function} callback
-   */
-  GeocodeService.prototype.geocode = function (params, callback) {
-    this.findAddressCandidates(params, callback);
-  };
-
-/**
- * @name ReverseGeocodeOptions
- * @class This class represent the parameters needed in a reverseGeocode operation
- *  on a {@link GeocodeService}.
- *   There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/reverse.html'>Reverse Geocode Operation</a>.
- * @property {google.maps.LatLng} [location] an object literal of LatLng. 
- * @property {Number} [distance] The distance in meters from the given location within which 
- *  a matching address should be searched.
- */
-
-/**
- * @name ReverseGeocodeResult
- * @class This class represent one entry in the results of a find address operation for a
- *  {@link GeocodeService}.
- *   There is no constructor, use JavaScript object literal.
- * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/reverse.html'>Reverse Geocode Operation</a>.
- * @property {Object} [address] matched address, object literal with name-value address parts. 
- *  e.g.: <code>{  "Street" : "771 TUNNEL AVE",  "Zone" : "94005"  }</code>
- * @property {google.maps.LatLng} [location] matched location
- */
-/**
- * The reverseGeocode operation is The reverseGeocode operation is performed on a geocode service resource. 
- * The result of this operation is a reverse geocoded address resource.
- *  param is an instance of {@link ReverseGeocodeOptions}. An instance of
- *  {@link ReverseGeocodeResult} will be passed into callback function.
- * @param {ReverseGeocodeOptions} params
- * @param {Function} callback
- * @param {Function} errback
- */
-  GeocodeService.prototype.reverseGeocode = function (params, callback, errback) {
-    if (!isString(params.location)) {
-      params.location = fromOverlaysToJSON(params.location);
-    }
-    params.f = 'json';
-    params.outSR = 4326;
-    var me = this;
-    Util.getJSON(this.url + '/reverseGeocode', params, STR.callback, function (json) {
-      if (json.location) {
-        var loc = json.location;
-        if (!isNaN(loc.x) && !isNaN(loc.y)) {
-          var ll = [loc.x, loc.y];
-          if (me.spatialReference) {
-            ll = me.spatialReference.reverse(ll);
-          }
-          json.location = new G.LatLng(ll[1], ll[0]);
-        }
-      }
-      callback(json);
-      handleErr(errback, json);
-    });
   };
  
    /**
@@ -2388,7 +2129,7 @@
     // zoom is no longer defined in Projection. It is assumed that level's zoom factor is 2. 
     this.resolution0_ = this.lods_[0].resolution;
     // zoom offset of this tileinfo's zoom 0 to Google's zoom0
-    this.minZoom = Math.floor(Math.log(this.spatialReference.getCircumference() / this.resolution0_ / 256) / Math.LN2 + 0.5);
+    this.minZoom = Math.floor(Math.log(this.spatialReference_.getCircum() / this.resolution0_ / 256) / Math.LN2 + 0.5);
     this.maxZoom = this.minZoom + this.lods_.length - 1;
     this.tileSize = new G.Size(tileInfo.cols, tileInfo.rows);
     // Find out how the map units scaled to 1 tile at zoom 0. 
@@ -2507,18 +2248,17 @@
         me.init_(opt_layerOpts);
       });
     }
-    this.tiles = {};
+    this.tiles_ = {};
   }
-  
   
   /**
    * Initialize the tile layer from a loaded map service
    * @param {Object} opt_layerOpts
    */
   TileLayer.prototype.init_  =  function (opt_layerOpts) {
-    this.projection  =  new Projection(this.mapService_.tileInfo);//, this.mapService_.fullExtent);
-    this.minZoom = opt_layerOpts.minZoom || this.projection.minZoom;
-    this.maxZoom = opt_layerOpts.maxZoom || this.projection.maxZoom;
+    this.projection_  =  new Projection(this.mapService_.tileInfo);//, this.mapService_.fullExtent);
+    this.minZoom = opt_layerOpts.minZoom || this.projection_.minZoom;
+    this.maxZoom = opt_layerOpts.maxZoom || this.projection_.maxZoom;
   };
  
 
@@ -2530,7 +2270,7 @@
    * @return {String} url
    */
   TileLayer.prototype.getTileUrl  =  function (tile, zoom) {
-    var z  = zoom - (this.projection ? this.projection.minZoom : this.minZoom);
+    var z  = zoom - (this.projection_ ? this.projection_.minZoom : this.minZoom);
     var url = '';
     if (!isNaN(tile.x) && !isNaN(tile.y) && z >= 0 && tile.x >= 0 && tile.y >= 0) {
       var u  =  this.mapService_.url;
@@ -2548,7 +2288,7 @@
    */
   TileLayer.prototype.setOpacity  =  function (op) {
     this.opacity_ = op;
-    var tiles = this.tiles;
+    var tiles = this.tiles_;
     for (var x in tiles) {
       if (tiles.hasOwnProperty(x)) {
         setNodeOpacity(tiles[x], op);
@@ -2623,8 +2363,8 @@
         layers[i] = new TileLayer(tileLayers[i]);
       }
     }
-    this.tileLayers = layers;
-    this.tiles = {};
+    this.tileLayers_ = layers;
+    this.tiles_ = {};
     //this.map_ = opt_typeOpts.map;
     if (opt_typeOpts.maxZoom !== undefined) {
       this.maxZoom = opt_typeOpts.maxZoom;
@@ -2635,9 +2375,9 @@
       }
       this.maxZoom = maxZ;
     }
-    if (layers[0].projection) {
-      this.tileSize = layers[0].projection.tileSize;
-      this.projection = layers[0].projection;
+    if (layers[0].projection_) {
+      this.tileSize = layers[0].projection_.tileSize;
+      this.projection = layers[0].projection_;
     } else {
       this.tileSize = new G.Size(256, 256);
     }
@@ -2657,8 +2397,8 @@
   MapType.prototype.getTile = function (tileCoord, zoom, ownerDocument) {
     var div = ownerDocument.createElement('div');
     var tileId = '_' + tileCoord.x + '_' + tileCoord.y + '_' + zoom;
-    for (var i = 0; i < this.tileLayers.length; i++) {
-      var t = this.tileLayers[i];
+    for (var i = 0; i < this.tileLayers_.length; i++) {
+      var t = this.tileLayers_[i];
       if (zoom <= t.maxZoom && zoom >= t.minZoom) {
         var url = t.getTileUrl(tileCoord, zoom);
         if (url) {
@@ -2679,7 +2419,7 @@
             img.style.backgroundImage = 'url(' + url + ')';
           }
           div.appendChild(img);
-          t.tiles[tileId] = img;
+          t.tiles_[tileId] = img;
           if (t.opacity_ !== undefined) {
             setNodeOpacity(img, t.opacity_);
           } else if (this.opacity_ !== undefined) {
@@ -2691,7 +2431,7 @@
         }
       }
     }
-    this.tiles[tileId] = div;
+    this.tiles_[tileId] = div;
     div.setAttribute('tid', tileId);
     return div;
   };
@@ -2702,21 +2442,24 @@
   MapType.prototype.releaseTile = function (node) {
     if (node.getAttribute('tid')) {
       var tileId = node.getAttribute('tid');
-      if (this.tiles[tileId]) {
-        delete this.tiles[tileId];
+      if (this.tiles_[tileId]) {
+        delete this.tiles_[tileId];
       }
-      for (var i = 0; i < this.tileLayers.length; i++) {
-        var t = this.tileLayers[i];
-        if (t.tiles[tileId]) {
-          delete t.tiles[tileId];
+      for (var i = 0; i < this.tileLayers_.length; i++) {
+        var t = this.tileLayers_[i];
+        if (t.tiles_[tileId]) {
+          delete t.tiles_[tileId];
         } 
       }
     }
   };
-  
+  /**
+   * Set Opactity
+   * @param {Number} op
+   */
   MapType.prototype.setOpacity = function (op) {
     this.opacity_ = op;
-    var tiles = this.tiles;
+    var tiles = this.tiles_;
     for (var x in tiles) {
       if (tiles.hasOwnProperty(x)) {
         var nodes = tiles[x].childNodes;
@@ -2730,7 +2473,13 @@
   MapType.prototype.getOpacity  =  function () {
     return this.opacity_;
   };
-  
+  /**
+   * get list of {@link TileLayer} in this map type
+   * @return {Array.TileLayer}
+   */
+  MapType.prototype.getTileLayers  =  function () {
+    return this.tileLayers_;
+  };
   /**
    * @name MapOverlayOptions
    * @class Instance of this class are used in the {@link opt_ovelayOpts} argument
@@ -2802,7 +2551,8 @@
       me.refresh();
     });
   };
-  
+  /** remove overlay
+   */
   MapOverlay.prototype.onRemove = function () {
     G.event.removeListener(this.boundsChangedListener_);
     this.div_.parentNode.removeChild(this.div_);
@@ -2972,6 +2722,185 @@
     this.div_.style.visibility  =  'hidden';
   };
   
+   /**
+ * Creates a GeocodeService class.
+ * Params:<li><code>url</code>: URL of service, syntax:<code>	http://{catalog-url}/{serviceName}/GeocodeServer</code>
+ * @name GeocodeService
+ * @class This class (<code>gmaps.ags.GeocodeService</code>) represent an ArcGIS <a href="http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/geocodeserver.html">GeocodeServer</a>
+ *  service.
+ * @constructor
+ * @param {String} url
+ * @property {String} [serviceDescription] serviceDescription
+ * @property {Field[]} [addressFields] input fields. 
+ *    Each entry is an object of type {@link Field}, plus <code>required(true|false)</code>
+ * @property {Field[]} [candidateFields] candidate Fields. 
+ *    Each entry is an object of type {@link Field}
+ * @property {Field[]} [intersectionCandidateFields] intersectionCandidateFields
+ *    Each entry is an object of type {@link Field}
+ * @property {SpatialReference} [spatialReference] spatialReference
+ * @property {Object} [locatorProperties] an object with key-value pair that is specific to Locator type.
+ */
+  function GeocodeService(url) {
+    this.url = url;
+    this.loaded = false;
+    var me = this;
+    getJSON(url, {}, STR.callback, function (json) {
+      me.init_(json);
+    });
+  }
+  
+  /**
+   * init
+   * @param {Object} json
+   */
+  GeocodeService.prototype.init_ = function (json) {
+    augmentObject(json, this);
+    if (json.spatialReference) {
+      this.spatialReference = spatialReferences[json.spatialReference.wkid || json.spatialReference.wkt] || WGS84;
+    }
+    this.loaded = true;
+    /**
+     * This event is fired when the service and it's service info is loaded.
+     * @name GeocodeService#load
+     * @event
+     */
+    triggerEvent(this, 'load');
+  };
+  
+  
+/**
+ * @name GeocodeOptions
+ * @class This class represent the parameters needed in a find address candidate operation
+ *  on a {@link GeocodeService}.
+ *   There is no constructor, use JavaScript object literal.
+ * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.
+ * @property {Object} [inputs] an object literal with name-value pair of input values.
+ * @property {String|String[]} [outFields] The list of fields to be included in the returned resultset. 
+ * @property {int|SpatialReference} [outSR] 
+ */
+/**
+ * @name GeocodeResults
+ * @class This class represent the results of an find address candidate operation for a 
+ *  {@link GeocodeService}.
+ *   There is no constructor, use JavaScript object literal.
+ * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.
+ * @property {GeocodeResult[]} [candidates] The find address results as 
+ * an array of {@link GeocodeResult}
+ */
+/**
+ * @name GeocodeResult
+ * @class This class represent one entry in the results of a find address operation for a
+ *  {@link GeocodeService}.
+ *   There is no constructor, use JavaScript object literal.
+ * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.
+ * @property {String} [address] matched address
+ * @property {google.maps.LatLng} [location] matched location
+ * @property {Number} [score] matching score
+ * @property {Object} [attributes] attributes as name-value JSON object. 
+ * e.g. <code>{"StreetName" : "MASON", "StreetType" : "ST"}</code>
+ */
+/**
+ * The findAddressCandidates operation is performed on a geocode service
+ *  resource. The result of this operation is a resource representing 
+ *  the list of address candidates. This resource provides information 
+ *  about candidates including the address, location, and score.
+ *  param is an instance of {@link GeocodeOptions}. An instance of
+ *  {@link GeocodeResults} will be passed into callback function.
+ * @param {GeocodeOptions} params
+ * @param {Function} callback
+ * @param {Function} errback
+ */
+  GeocodeService.prototype.findAddressCandidates = function (gparams, callback, errback) {
+    var params = augmentObject(gparams, {});
+    if (params.inputs) {
+      augmentObject(params.inputs, params);
+      delete params.inputs;
+    }
+    if (isArray(params.outFields)) {
+      params.outFields = params.outFields.join(',');
+    }
+    params.outSR = 4326;
+    var me = this;
+    getJSON(this.url + '/findAddressCandidates', params, STR.callback, function (json) {
+      if (json.candidates) {
+        var res, loc;
+        for (var i = 0; i < json.candidates.length; i++) {
+          res = json.candidates[i];
+          loc = res.location;
+          if (!isNaN(loc.x) &&  !isNaN(loc.y)) {
+            var ll = [loc.x, loc.y];
+            if (me.spatialReference) {
+              ll = me.spatialReference.reverse(ll);
+            }
+            res.location = new G.LatLng(ll[1], ll[0]);
+          }
+        }
+      }
+      callback(json);
+      handleErr(errback, json);
+    });
+  };
+  /**
+   * Alias of <code>GeocodeService.findAddressCandidates</code>;
+   * @param {GeocodeOptions} params
+   * @param {Function} callback
+   */
+  GeocodeService.prototype.geocode = function (params, callback) {
+    this.findAddressCandidates(params, callback);
+  };
+
+/**
+ * @name ReverseGeocodeOptions
+ * @class This class represent the parameters needed in a reverseGeocode operation
+ *  on a {@link GeocodeService}.
+ *   There is no constructor, use JavaScript object literal.
+ * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/reverse.html'>Reverse Geocode Operation</a>.
+ * @property {google.maps.LatLng} [location] an object literal of LatLng. 
+ * @property {Number} [distance] The distance in meters from the given location within which 
+ *  a matching address should be searched.
+ */
+
+/**
+ * @name ReverseGeocodeResult
+ * @class This class represent one entry in the results of a find address operation for a
+ *  {@link GeocodeService}.
+ *   There is no constructor, use JavaScript object literal.
+ * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/reverse.html'>Reverse Geocode Operation</a>.
+ * @property {Object} [address] matched address, object literal with name-value address parts. 
+ *  e.g.: <code>{  "Street" : "771 TUNNEL AVE",  "Zone" : "94005"  }</code>
+ * @property {google.maps.LatLng} [location] matched location
+ */
+/**
+ * The reverseGeocode operation is The reverseGeocode operation is performed on a geocode service resource. 
+ * The result of this operation is a reverse geocoded address resource.
+ *  param is an instance of {@link ReverseGeocodeOptions}. An instance of
+ *  {@link ReverseGeocodeResult} will be passed into callback function.
+ * @param {ReverseGeocodeOptions} params
+ * @param {Function} callback
+ * @param {Function} errback
+ */
+  GeocodeService.prototype.reverseGeocode = function (params, callback, errback) {
+    if (!isString(params.location)) {
+      params.location = fromOverlaysToJSON(params.location);
+    }
+    params.outSR = 4326;
+    var me = this;
+    getJSON(this.url + '/reverseGeocode', params, STR.callback, function (json) {
+      if (json.location) {
+        var loc = json.location;
+        if (!isNaN(loc.x) && !isNaN(loc.y)) {
+          var ll = [loc.x, loc.y];
+          if (me.spatialReference) {
+            ll = me.spatialReference.reverse(ll);
+          }
+          json.location = new G.LatLng(ll[1], ll[0]);
+        }
+      }
+      callback(json);
+      handleErr(errback, json);
+    });
+  };
+  
   //TODO: implement more Geometry operations
  /**
  * Creates an GeometryService class.
@@ -3024,7 +2953,7 @@
    *  for a {@link GeometryService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {Array.<OverlayView>|Array.<Object>} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   * @property {(Array.<OverlayView>|Array.Object)} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
    * @property {GeometryType} [geometryType] esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope
    * @property {SpatialReference} [inSpatialReference] The well-known ID of or the spatial reference of the input geometries
    * @property {SpatialReference} [outSpatialReference] The well-known ID of or the spatial reference of the out geometries
@@ -3035,7 +2964,7 @@
    *  for a {@link GeometryService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {Array.OverlayView|Array.Object} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   * @property {Array.<OverlayView>|Array.Object} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
     */
   /**
    * This resource projects an array of input geometries from an input spatial reference
@@ -3046,7 +2975,7 @@
    */
   GeometryService.prototype.project = function (p, callback, errback) {
     var params = prepareGeometryParams(p);
-    Util.getJSON(this.url + '/project', params, "callback", function (json) {
+    getJSON(this.url + '/project', params, "callback", function (json) {
       var geom = [];
       if (p.outSpatialReference === 4326 || p.outSpatialReference.wkid === 4326) {
         for (var i = 0, c = json.geometries.length; i < c; i++) {
@@ -3073,13 +3002,13 @@
   * @property {Number} [DEGREE] 9102 degree.
   */
   var SRUnit = {
-    METER: 9001,
-    FOOT: 9002,
-    SURVEY_FOOT: 9003,
-    SURVEY_MILE: 9035,
-    KILLOMETER: 9036,
-    RADIAN: 9101,
-    DEGREE: 9102
+    'METER': 9001,
+    'FOOT': 9002,
+    'SURVEY_FOOT': 9003,
+    'SURVEY_MILE': 9035,
+    'KILLOMETER': 9036,
+    'RADIAN': 9101,
+    'DEGREE': 9102
   };
   /**
    * @name BufferOptions
@@ -3087,7 +3016,7 @@
    *  for a {@link GeometryService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {Array.OverlayView|Array.Object} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon</code>, or ESRI Geometry format to project. 
+   * @property {Array.<OverlayView>|Array.Object} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon</code>, or ESRI Geometry format to project. 
    * @property {SpatialReference} [bufferSpatialReference] The well-known ID of or the spatial reference of the out geometries
    * @property {Array.Number} [distances] The distances the input geometries are buffered.
    * @property {Number} [unit] see <a href='http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnitType.htm'>esriSRUnitType Constants </a> .
@@ -3100,7 +3029,7 @@
    *  for a {@link GeometryService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {Array.OverlayView|Array.Object} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   * @property {Array.<OverlayView>|Array.Object} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
    */
   /**
    * This resource projects an array of input geometries from an input spatial reference
@@ -3119,7 +3048,7 @@
     if (p.unit) {
       params.unit = p.unit;
     }
-    Util.getJSON(this.url + '/buffer', params, "callback", function (json) {
+    getJSON(this.url + '/buffer', params, "callback", function (json) {
       var geom = [];
       if (json.geometries) {
         for (var i = 0, c = json.geometries.length; i < c; i++) {
@@ -3146,9 +3075,7 @@
     this.url = url;
     this.loaded = false;
     var me = this;
-    Util.getJSON(url, {
-      f: 'json'
-    }, STR.callback, function (json) {
+    getJSON(url, {}, STR.callback, function (json) {
       augmentObject(json, me);
       me.loaded = true;
       /**
@@ -3190,9 +3117,7 @@
     this.url = url;
     this.loaded = false;
     var me = this;
-    Util.getJSON(url, {
-      f: 'json'
-    }, STR.callback, function (json) {
+    getJSON(url, {}, STR.callback, function (json) {
       augmentObject(json, me);
       me.loaded = true;
       /**
@@ -3229,11 +3154,9 @@
     if (p.processSpatialReference) {
       params['env:processSR'] = formatSRParam(p.processSpatialReference);
     } 
-    var me = this;
-    Util.getJSON(this.url + '/execute', params, STR.callback, function (json) {
-      var ret = null; 
+    getJSON(this.url + '/execute', params, STR.callback, function (json) {
       if (json.results) {
-        var res, loc, f;
+        var res, f;
         for (var i = 0; i < json.results.length; i++) {
           res = json.results[i];
           if (res.dataType === 'GPFeatureRecordSetLayer') {
@@ -3276,7 +3199,7 @@
     this.url = url;
     this.loaded = false;
     var me = this;
-    Util.getJSON(url, {
+    getJSON(url, {
       f: 'json'
     }, STR.callback, function (json) {
       augmentObject(json, me);
@@ -3325,19 +3248,19 @@
         latlng = latlng.getPosition();
       }
       features.push({
-        geometry: {
-          x: latlng.lng(),
-          y: latlng.lat(),
-          spatialReference: {
-            wkid: 4326
+        'geometry': {
+          'x': latlng.lng(),
+          'y': latlng.lat(),
+          'spatialReference': {
+            'wkid': 4326
           }
         }
       });
     }
     return {
-      type: '"features"',
-      features: features,
-      doNotLocateOnRestrictedElements: false
+      'type': '"features"',
+      'features': features,
+      'doNotLocateOnRestrictedElements': false
     };
   }
   /**
@@ -3355,21 +3278,21 @@
     var params = augmentObject(opts, {});
     //params['outSR'] = WGS84.wkid;
     if (isArray(opts.stops)) {
-      params['stops'] = fromLatLngsToFeatureSet(opts.stops);
+      params.stops = fromLatLngsToFeatureSet(opts.stops);
     }
     if (isArray(opts.barriers)) {
       if (opts.barriers.length > 0) {
-        params['barriers'] = fromLatLngsToFeatureSet(opts.barriers);
+        params.barriers = fromLatLngsToFeatureSet(opts.barriers);
       } else {
-        delete params['barriers'];
+        delete params.barriers;
       }
     }
-    params['returnRoutes'] = (opts.returnRoutes === false ? false : true);
+    params.returnRoutes = (opts.returnRoutes === false ? false : true);
     params.returnDirections = (opts.returnDirections === true ? true : false);
     params.returnBarriers = (opts.returnBarriers === true ? true : false);
     params.returnStops = (opts.returnStops === true ? true : false);
     
-    Util.getJSON(this.url + '/solve', params, 'callback', function (json) {
+    getJSON(this.url + '/solve', params, 'callback', function (json) {
       if (json.routes) {
         parseFeatures(json.routes.features, opts.overlayOptions);
       }
