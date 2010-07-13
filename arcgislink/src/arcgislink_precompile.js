@@ -202,8 +202,8 @@
    * @param {Object} json
    */
   function handleErr(errback, json) {
-    if (errback && json && json.error) {
-      errback(json.error);
+    if (errback && json && json['error']) {
+      errback(json['error']);
     }
   }
   /**
@@ -231,14 +231,14 @@
     op = Math.min(Math.max(op, 0), 1);
     if (node) {
       var st = node.style;
-      if (typeof st.opacity !== 'undefined') {
-        st.opacity = op;
+      if (typeof st['opacity'] !== 'undefined') {
+        st['opacity'] = op;
       }
-      if (typeof st.filters !== 'undefined') {
-        st.filters.alpha.opacity = Math.floor(100 * op);
+      if (typeof st['filters'] !== 'undefined') {
+        st['filters']['alpha']['opacity'] = Math.floor(100 * op);
       }
-      if (typeof st.filter !== 'undefined') {
-        st.filter = "alpha(opacity:" + Math.floor(op * 100) + ")";
+      if (typeof st['filter'] !== 'undefined') {
+        st['filter'] = "alpha(opacity:" + Math.floor(op * 100) + ")";
       }
     }
   }
@@ -302,24 +302,24 @@
     }
     if (o instanceof G.LatLng || o instanceof G.Marker) {
       if (isArray(obj) && obj.length > 1) {
-        return GeometryType.MULTIPOINT;
+        return GeometryType['MULTIPOINT'];
       } else {
-        return GeometryType.POINT;
+        return GeometryType['POINT'];
       }
     } else if (o instanceof G.Polyline) {
-      return GeometryType.POLYLINE;
+      return GeometryType['POLYLINE'];
     } else if (o instanceof G.Polygon) {
-      return GeometryType.POLYGON;
+      return GeometryType['POLYGON'];
     } else if (o instanceof G.LatLngBounds) {
-      return GeometryType.ENVELOPE;
-    } else if (o.x !== undefined && o.y !== undefined) {
-      return GeometryType.POINT;
-    } else if (o.points) {
-      return GeometryType.MULTIPOINT;
-    } else if (o.paths) {
-      return GeometryType.POLYLINE;
-    } else if (o.rings) {
-      return GeometryType.POLYGON;
+      return GeometryType['ENVELOPE'];
+    } else if (o['x'] !== undefined && o['y'] !== undefined) {
+      return GeometryType['POINT'];
+    } else if (o['points']) {
+      return GeometryType['MULTIPOINT'];
+    } else if (o['paths']) {
+      return GeometryType['POLYLINE'];
+    } else if (o['rings']) {
+      return GeometryType['POLYGON'];
     }
     return null;
   }
@@ -349,7 +349,7 @@
       return null;
     }
     // for 9.3 compatibility, return wkid if possible.
-    return isNumber(sr) ? sr : sr.wkid ? sr.wkid : sr.toJSON();
+    return isNumber(sr) ? sr : sr['wkid'] ? sr['wkid'] : sr['toJSON']();
   }
   
   /**
@@ -376,14 +376,14 @@
     var g, gs, i, pts;
     var json = '{';
     switch (gtype) {
-    case GeometryType.POINT:
+    case GeometryType['POINT']:
       g = isArray(geom) ? geom[0] : geom;
       if (g instanceof G.Marker) {
         g = g.getPosition();
       }
       json += 'x:' + g.lng() + ',y:' + g.lat();
       break;
-    case GeometryType.MULTIPOINT:
+    case GeometryType['MULTIPOINT']:
       pts = [];
       for (i = 0; i < geom.length; i++) {
         if (geom[i] instanceof G.Marker) {
@@ -395,7 +395,7 @@
       }
       json += 'points: [' + pts.join(',') + ']';
       break;
-    case GeometryType.POLYLINE:
+    case GeometryType['POLYLINE']:
       // V3 does not support multiple paths yet
       pts = [];
       gs = isArray(geom) ? geom : [geom];
@@ -404,7 +404,7 @@
       }
       json += 'paths:[' + pts.join(',') + ']';
       break;
-    case GeometryType.POLYGON:
+    case GeometryType['POLYGON']:
       pts = [];
       g = isArray(geom) ? geom[0] : geom;
       var paths = g.getPaths();
@@ -414,7 +414,7 @@
       json += 'rings:[' + pts.join(',') + ']';
       
       break;
-    case GeometryType.ENVELOPE:
+    case GeometryType['ENVELOPE']:
       g = isArray(geom) ? geom[0] : geom;
       json += 'xmin:' + g.getSouthWest().lng() + ',ymin:' + g.getSouthWest().lat() + ',xmax:' + g.getNorthEast().lng() + ',ymax:' + g.getNorthEast().lat();
       break;
@@ -445,16 +445,16 @@
     }
     
     var json = '{';
-    if (geom.x) {
-      json += 'x:' + geom.x + ',y:' + geom.y;
-    } else if (geom.xmin) {
-      json += 'xmin:' + geom.xmin + ',ymin:' + geom.ymin + ',xmax:' + geom.xmax + ',ymax:' + geom.ymax;
-    } else if (geom.points) {
-      json += 'points:' + fromPointsToJSON(geom.points);
-    } else if (geom.paths) {
-      json += 'paths:' + fromLinesToJSON(geom.paths);
-    } else if (geom.rings) {
-      json += 'rings:' + fromLinesToJSON(geom.rings);
+    if (geom['x']) {
+      json += 'x:' + geom['x'] + ',y:' + geom['y'];
+    } else if (geom['xmin']) {
+      json += 'xmin:' + geom['xmin'] + ',ymin:' + geom['ymin'] + ',xmax:' + geom['xmax'] + ',ymax:' + geom['ymax'];
+    } else if (geom['points']) {
+      json += 'points:' + fromPointsToJSON(geom['points']);
+    } else if (geom['paths']) {
+      json += 'paths:' + fromLinesToJSON(geom['paths']);
+    } else if (geom['rings']) {
+      json += 'rings:' + fromLinesToJSON(geom['rings']);
     }
     json += '}';
     return json;
@@ -467,10 +467,10 @@
    * @return {google.maps.LatLngBounds} gLatLngBounds
    */
   function fromEnvelopeToLatLngBounds(extent) {
-    var sr  =  spatialReferences[extent.spatialReference.wkid || extent.spatialReference.wkt];
+    var sr  =  spatialReferences[extent['spatialReference']['wkid'] || extent['spatialReference']['wkt']];
     sr  =  sr || WGS84;
-    var sw  =  sr.reverse([extent.xmin, extent.ymin]);
-    var ne  =  sr.reverse([extent.xmax, extent.ymax]);
+    var sw  =  sr['reverse']([extent['xmin'], extent['ymin']]);
+    var ne  =  sr['reverse']([extent['xmax'], extent['ymax']]);
     return new G.LatLngBounds(new G.LatLng(sw[1], sw[0]), new G.LatLng(ne[1], ne[0]));
   }
   
@@ -490,23 +490,23 @@
     opts = opts || {};
     if (geom) {
       ovs = [];
-      if (geom.x) {
-        ov = new G.Marker(augmentObject(opts.markerOptions || opts, {
-          'position': new G.LatLng(geom.y, geom.x)
+      if (geom['x']) {
+        ov = new G.Marker(augmentObject(opts['markerOptions'] || opts, {
+          'position': new G.LatLng(geom['y'], geom['x'])
         }));
         ovs.push(ov);
       } else {
         //mulpt, line and poly
-        parts = geom.points || geom.paths || geom.rings;
+        parts = geom['points'] || geom['paths'] || geom['rings'];
         if (!parts) {
           return ovs;
         }
         var rings = [];
         for (i = 0, ic = parts.length; i < ic; i++) {
           part = parts[i];
-          if (geom.points) {
+          if (geom['points']) {
             // multipoint
-            ov = new G.Marker(augmentObject(opts.markerOptions || opts, {
+            ov = new G.Marker(augmentObject(opts['markerOptions'] || opts, {
               'position': new G.LatLng(part[1], part[0])
             }));
             ovs.push(ov);
@@ -516,19 +516,19 @@
               lnglat = part[j];
               latlngs.push(new G.LatLng(lnglat[1], lnglat[0]));
             }
-            if (geom.paths) {
-              ov = new G.Polyline(augmentObject(opts.polylineOptions || opts, {
+            if (geom['paths']) {
+              ov = new G.Polyline(augmentObject(opts['polylineOptions'] || opts, {
                 'path': latlngs
               }));
               ovs.push(ov);
-            } else if (geom.rings) {
+            } else if (geom['rings']) {
               // V3 supports multiple rings
               rings.push(latlngs);
             }
           }
         }
-        if (geom.rings) {
-          ov = new G.Polygon(augmentObject(opts.polygonOptions || opts, {
+        if (geom['rings']) {
+          ov = new G.Polygon(augmentObject(opts['polygonOptions'] || opts, {
             'paths': rings
           }));
           ovs.push(ov);
@@ -544,8 +544,8 @@
       var i, I, f;
       for (i = 0, I = features.length; i < I; i++) {
         f = features[i];
-        if (f.geometry) {
-          f.geometry = fromJSONToOverlays(f.geometry, ovOpts);
+        if (f['geometry']) {
+          f['geometry'] = fromJSONToOverlays(f['geometry'], ovOpts);
         }
       }
     }
@@ -565,8 +565,8 @@
         return '[' + ret.join(',') + ']';
       } else if (isOverlay(o)) {
         return fromOverlaysToJSON(o);
-      } else if (o.toJSON) {
-        return o.toJSON();
+      } else if (o['toJSON']) {
+        return o['toJSON']();
       } else {
         ret = '';
         for (var x in o) {
@@ -613,29 +613,29 @@
     }
     var json = [];
     var g, isOv;
-    if (p.geometries && p.geometries.length > 0) {
-      g = p.geometries[0];
+    if (p['geometries'] && p['geometries'].length > 0) {
+      g = p['geometries'][0];
       isOv = isOverlay(g);
-      for (var i = 0, c = p.geometries.length; i < c; i++) {
+      for (var i = 0, c = p['geometries'].length; i < c; i++) {
         if (isOv) {
-          json.push(fromOverlaysToJSON(p.geometries[i]));
+          json.push(fromOverlaysToJSON(p['geometries'][i]));
         } else {
-          json.push(fromGeometryToJSON(p.geometries[i]));
+          json.push(fromGeometryToJSON(p['geometries'][i]));
         }
       }
     }
-    if (!p.geometryType) {
-      p.geometryType = getGeometryType(g);
+    if (!p['geometryType']) {
+      p['geometryType'] = getGeometryType(g);
     }
     if (isOv) {
-      params.inSR = WGS84.wkid;
-    } else if (p.inSpatialReference) {
-      params.inSR = formatSRParam(p.inSpatialReference);
+      params['inSR'] = WGS84['wkid'];
+    } else if (p['inSpatialReference']) {
+      params['inSR'] = formatSRParam(p['inSpatialReference']);
     }
-    if (p.outSpatialReference) {
-      params.outSR = formatSRParam(p.outSpatialReference);
+    if (p['outSpatialReference']) {
+      params['outSR'] = formatSRParam(p['outSpatialReference']);
     }
-    params.geometries = '{geometryType:"' + p.geometryType + '", geometries:[' + json.join(',') + ']}';
+    params['geometries'] = '{geometryType:"' + p['geometryType'] + '", geometries:[' + json.join(',') + ']}';
     return params;
   }
   function log(msg) {
@@ -661,7 +661,7 @@
     var script = null;
     var query = '';
     if (params) {
-      params.f = params.f || STR.json;
+      params['f'] = params['f'] || STR.json;
       for (var x in params) {
         if (params.hasOwnProperty(x) && params[x] !== null && params[x] !== undefined) { // wont sent undefined.
           //jslint complaint about escape cause NN does not support it.
@@ -692,23 +692,23 @@
     };
     xdc[sid] = jsonpcallback;
     
-    if ((query + url).length < 2000 && !Config.alwaysUseProxy) {
+    if ((query + url).length < 2000 && !Config['alwaysUseProxy']) {
       script = document.createElement("script");
       script.src = url + (url.indexOf('?') === -1 ? '?' : '&') + query;
-      script.id = sid;
+      script['id'] = sid;
       head.appendChild(script);
     } else {
       // check if same host
-      var loc = window.location;
+      var loc = window['location'];
       var dom = loc.protocol + '//' + loc.hostname + (!loc.port || loc.port === 80 ? '' : ':' + loc.port + '/');
       var useProxy = true;
       if (url.toLowerCase().indexOf(dom.toLowerCase()) !== -1) {
         useProxy = false;
       }
-      if (Config.alwaysUseProxy) {
+      if (Config['alwaysUseProxy']) {
         useProxy = true;
       }
-      if (useProxy && !Config.proxyUrl) {
+      if (useProxy && !Config['proxyUrl']) {
         throw new Error('No proxyUrl property in gmaps.ags.Config is defined');
       }
       var xmlhttp = getXmlHttp();
@@ -721,7 +721,7 @@
           }
         }
       };
-      xmlhttp.open('POST', useProxy ? Config.proxyUrl + '?' + url : url, true);
+      xmlhttp.open('POST', useProxy ? Config['proxyUrl'] + '?' + url : url, true);
       xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
       xmlhttp.send(query);
     }
@@ -751,7 +751,7 @@
    * @param {Function} callbackFn
    * @return {String} scriptID
    */
-  Util.getJSON = function (url, params, callbackName, callbackFn) {
+  Util['getJSON'] = function (url, params, callbackName, callbackFn) {
     getJSON(url, params, callbackName, callbackFn);
   }; 
 
@@ -760,13 +760,13 @@
    * @param {google.maps.Map} map
    * @param {OverlayView[]} overlays
    */
-  Util.addToMap = function (map, overlays) {
+  Util['addToMap'] = function (map, overlays) {
     if (isArray(overlays)) {
       var ov;
       for (var i = 0, I = overlays.length; i < I; i++) {
         ov = overlays[i];
         if (isArray(ov)) {
-          Util.addToMap(map, ov);
+          Util['addToMap'](map, ov);
         } else if (isOverlay(ov)) {
           ov.setMap(map);  
         }
@@ -778,8 +778,8 @@
    * @param {OverlayView[]} overlays
    * @param {Boolean} clearArray
    */
-  Util.removeFromMap = function (overlays, clearArray) {
-    Util.addToMap(null, overlays);
+  Util['removeFromMap'] = function (overlays, clearArray) {
+    Util['addToMap'](null, overlays);
     if (clearArray) {
       overlays.length = 0;
     }
@@ -800,8 +800,8 @@
    */
   function SpatialReference(params) {
     params  =  params || {};
-    this.wkid  =  params.wkid;
-    this.wkt  =  params.wkt;
+    this['wkid']  =  params['wkid'];
+    this['wkt']  =  params['wkt'];
   }
 
   /**
@@ -810,7 +810,7 @@
    * @param {Number[]} lnglat
    * @return {Number[]}
    */
-  SpatialReference.prototype.forward  =  function (lnglat) {
+  SpatialReference.prototype['forward']  =  function (lnglat) {
     return lnglat;
   };
   /**
@@ -819,7 +819,7 @@
    * @param {Number[]}  coords
    * @return {Number[]}
    */
-  SpatialReference.prototype.reverse  =  function (coords) {
+  SpatialReference.prototype['reverse']  =  function (coords) {
     return coords;
   };
   /**
@@ -833,8 +833,8 @@
    * To JSON String
    * @return String
    */
-  SpatialReference.prototype.toJSON  =  function () {
-    return '{' + (this.wkid ? ' wkid:' + this.wkid : 'wkt: \'' + this.wkt + '\'') + '}';
+  SpatialReference.prototype['toJSON']  =  function () {
+    return '{' + (this['wkid'] ? ' wkid:' + this['wkid'] : 'wkt: \'' + this['wkt'] + '\'') + '}';
   };
   /**
    * Creates a Geographic Coordinate System. e.g.:<br/>
@@ -885,14 +885,14 @@
     //for NCSP83: GLatLng(35.102363,-80.5666)<  === > GPoint(1531463.95, 495879.744);
     params = params || {};
     SpatialReference.call(this, params);
-    var f_i = params.inverse_flattening;
-    var phi1 = params.standard_parallel_1 * RAD_DEG;
-    var phi2 = params.standard_parallel_2 * RAD_DEG;
-    var phiF = params.latitude_of_origin * RAD_DEG;
-    this.a_ = params.semi_major / params.unit;
-    this.lamdaF_ = params.central_meridian * RAD_DEG;
-    this.FE_ = params.false_easting;
-    this.FN_ = params.false_northing;
+    var f_i = params['inverse_flattening'];
+    var phi1 = params['standard_parallel_1'] * RAD_DEG;
+    var phi2 = params['standard_parallel_2'] * RAD_DEG;
+    var phiF = params['latitude_of_origin'] * RAD_DEG;
+    this.a_ = params['semi_major'] / params['unit'];
+    this.lamdaF_ = params['central_meridian'] * RAD_DEG;
+    this.FE_ = params['false_easting'];
+    this.FN_ = params['false_northing'];
     
     var f = 1.0 / f_i; //e: eccentricity of the ellipsoid where e^2  =  2f - f^2 
     var es = 2 * f - f * f;
@@ -969,7 +969,7 @@
    * @param {Number[]} lnglat
    * @return {Number[]}
    */
-  LambertConformalConic.prototype.forward = function (lnglat) {
+  LambertConformalConic.prototype['forward'] = function (lnglat) {
     var phi = lnglat[1] * RAD_DEG;// (Math.PI / 180);
     var lamda = lnglat[0] * RAD_DEG;
     var t = this.calc_t_(phi, this.e_);
@@ -984,7 +984,7 @@
    * @param {Number[]}  coords
    * @return {Number[]}
    */
-  LambertConformalConic.prototype.reverse = function (coords) {
+  LambertConformalConic.prototype['reverse'] = function (coords) {
     var E = coords[0];
     var N = coords[1];
     var theta_i = Math.atan((E - this.FE_) / (this.rF_ - (N - this.FN_)));
@@ -1034,13 +1034,13 @@
     params = params || {};
     SpatialReference.call(this, params);
     //GLatLng(33.74561,-84.454308)<  === >  GPoint(2209149.07977075, 1362617.71496891);
-    this.a_ = params.semi_major / params.unit;//this.
-    var f_i = params.inverse_flattening;
-    this.k0_ = params.scale_factor;
-    var phiF = params.latitude_of_origin * RAD_DEG;//(Math.PI / 180);
-    this.lamdaF_ = params.central_meridian * RAD_DEG;
-    this.FE_ = params.false_easting;//this.
-    this.FN_ = params.false_northing;//this.
+    this.a_ = params['semi_major'] / params['unit'];//this.
+    var f_i = params['inverse_flattening'];
+    this.k0_ = params['scale_factor'];
+    var phiF = params['latitude_of_origin'] * RAD_DEG;//(Math.PI / 180);
+    this.lamdaF_ = params['central_meridian'] * RAD_DEG;
+    this.FE_ = params['false_easting'];//this.
+    this.FN_ = params['false_northing'];//this.
     var f = 1.0 / f_i;//this.
     /*e: eccentricity of the ellipsoid where e^2  =  2f - f^2 */
     this.es_ = 2 * f - f * f;
@@ -1071,7 +1071,7 @@
    * @param {Number[]} lnglat
    * @return {Number[]}
    */
-  TransverseMercator.prototype.forward = function (lnglat) {
+  TransverseMercator.prototype['forward'] = function (lnglat) {
     var phi = lnglat[1] * RAD_DEG;// (Math.PI / 180);
     var lamda = lnglat[0] * RAD_DEG;//(Math.PI / 180);
     var nu = this.a_ / Math.sqrt(1 - this.es_ * Math.pow(Math.sin(phi), 2));
@@ -1088,7 +1088,7 @@
    * @param {Number[]}  coords
    * @return {Number[]}
    */
-  TransverseMercator.prototype.reverse = function (coords) {
+  TransverseMercator.prototype['reverse'] = function (coords) {
     var E = coords[0];
     var N = coords[1];
     var e1 = (1 - Math.sqrt(1 - this.es_)) / (1 + Math.sqrt(1 - this.es_));
@@ -1134,8 +1134,8 @@
     params = params ||
     {};
     SpatialReference.call(this, params);
-    this.a_ = (params.semi_major || 6378137.0) / (params.unit || 1);
-    this.lamdaF_ = (params.central_meridian || 0.0) * RAD_DEG;
+    this.a_ = (params['semi_major'] || 6378137.0) / (params['unit'] || 1);
+    this.lamdaF_ = (params['central_meridian'] || 0.0) * RAD_DEG;
   }
   
   SphereMercator.prototype = new SpatialReference();
@@ -1145,7 +1145,7 @@
    * @param {Number[]} lnglat
    * @return {Number[]}
    */
-  SphereMercator.prototype.forward = function (lnglat) {
+  SphereMercator.prototype['forward'] = function (lnglat) {
     var phi = lnglat[1] * RAD_DEG;
     var lamda = lnglat[0] * RAD_DEG;
     var E = this.a_ * (lamda - this.lamdaF_);
@@ -1157,7 +1157,7 @@
    * @param {Number[]}  coords
    * @return {Number[]}
    */
-  SphereMercator.prototype.reverse = function (coords) {
+  SphereMercator.prototype['reverse'] = function (coords) {
     var E = coords[0];
     var N = coords[1];
     var phi = Math.PI / 2 - 2 * Math.atan(Math.exp(-N / this.a_));
@@ -1202,23 +1202,23 @@
   /**
    * @static
    */
-  SpatialReference.WGS84 = WGS84;
+  SpatialReference['WGS84'] = WGS84;
   /**
    * @static
    */
-  SpatialReference.NAD83 = NAD83;
+  SpatialReference['NAD83'] = NAD83;
   /**
    * @static
    */
-  SpatialReference.WEB_MERCATOR = WEB_MERCATOR;
+  SpatialReference['WEB_MERCATOR'] = WEB_MERCATOR;
   /**
    * @static
    */
-  SpatialReference.WEB_MERCATOR_AUX = WEB_MERCATOR_AUX;
+  SpatialReference['WEB_MERCATOR_AUX'] = WEB_MERCATOR_AUX;
  
     
   /**
-   * <b> static</b> method. Call with Syntax <code>SpatialReference.register(..)</code>. 
+   * <b> static</b> method. Call with Syntax <code>SpatialReference['register'](..)</code>. 
    * Add A Spatial Reference to the internal collection of Spatial References.
    * the <code>wktOrSR</code> parameter can be String format of "well-known text" of the
    * Spatial Reference, or an instance of {@link SpatialReference}.
@@ -1226,7 +1226,7 @@
    * in <a  href  = 'http://edndoc.esri.com/arcims/9.2/elements/pcs.htm'>
    * ESRI documentation</a>. For example, add NC State Plane NAD83 as String:
    * <br/><code>
-   * SpatialReference.register(2264,'PROJCS["NAD_1983_StatePlane_North_Carolina_FIPS_3200_Feet",
+   * SpatialReference['register'](2264,'PROJCS["NAD_1983_StatePlane_North_Carolina_FIPS_3200_Feet",
    * GEOGCS["GCS_North_American_1983",
    * DATUM["D_North_American_1983",
    * SPHEROID["GRS_1980",6378137.0,298.257222101]],
@@ -1246,7 +1246,7 @@
    * <br/><li> If passes in an instance of {@link SpatialReference}, it can be one of the
    * built in classes, or a class that extends SpatialReference. For example, add NC State Plane NAD83 as SR:
    * <br/><code>
-   * SpatialReferences.register(2264: new LambertConformalConic({
+   * SpatialReferences['register'](2264: new LambertConformalConic({
    * wkid: 2264,
    * semi_major: 6378137.0,
    * inverse_flattening: 298.257222101,
@@ -1264,7 +1264,7 @@
    * @param {Object} wktOrSR
    * @return {SpatialReference} registered SR
    */
-  SpatialReference.register = function (wkidt, wktOrSR) {
+  SpatialReference['register'] = function (wkidt, wktOrSR) {
     var sr = spatialReferences['' + wkidt];
     if (sr) {
       return sr;
@@ -1286,25 +1286,25 @@
       var prj = extractString(wkt, "PROJECTION[\"", "\"]");
       var spheroid = extractString(wkt, "SPHEROID[", "]").split(",");
       if (prj !== "") {
-        params.unit = parseFloat(extractString(extractString(wkt, "PROJECTION", ""), "UNIT[", "]").split(",")[1]);
-        params.semi_major = parseFloat(spheroid[1]);
-        params.inverse_flattening = parseFloat(spheroid[2]);
-        params.latitude_of_origin = parseFloat(extractString(wkt, "\"Latitude_Of_Origin\",", "]"));
-        params.central_meridian = parseFloat(extractString(wkt, "\"Central_Meridian\",", "]"));
-        params.false_easting = parseFloat(extractString(wkt, "\"False_Easting\",", "]"));
-        params.false_northing = parseFloat(extractString(wkt, "\"False_Northing\",", "]"));
+        params['unit'] = parseFloat(extractString(extractString(wkt, "PROJECTION", ""), "UNIT[", "]").split(",")[1]);
+        params['semi_major'] = parseFloat(spheroid[1]);
+        params['inverse_flattening'] = parseFloat(spheroid[2]);
+        params['latitude_of_origin'] = parseFloat(extractString(wkt, "\"Latitude_Of_Origin\",", "]"));
+        params['central_meridian'] = parseFloat(extractString(wkt, "\"Central_Meridian\",", "]"));
+        params['false_easting'] = parseFloat(extractString(wkt, "\"False_Easting\",", "]"));
+        params['false_northing'] = parseFloat(extractString(wkt, "\"False_Northing\",", "]"));
       }
       switch (prj) {
       case "":
         sr = new SpatialReference(params);
         break;
       case "Lambert_Conformal_Conic":
-        params.standard_parallel_1 = parseFloat(extractString(wkt, "\"Standard_Parallel_1\",", "]"));
-        params.standard_parallel_2 = parseFloat(extractString(wkt, "\"Standard_Parallel_2\",", "]"));
+        params['standard_parallel_1'] = parseFloat(extractString(wkt, "\"Standard_Parallel_1\",", "]"));
+        params['standard_parallel_2'] = parseFloat(extractString(wkt, "\"Standard_Parallel_2\",", "]"));
         sr = new LambertConformalConic(params);
         break;
       case "Transverse_Mercator":
-        params.scale_factor = parseFloat(extractString(wkt, "\"Scale_Factor\",", "]"));
+        params['scale_factor'] = parseFloat(extractString(wkt, "\"Scale_Factor\",", "]"));
         sr = new TransverseMercator(params);
         break;
         // more implementations here.
@@ -1351,7 +1351,7 @@
    * @property {String[]} [services] list of services. Each has <code>name, type</code> property.
    */
   function Catalog(url) {
-    this.url = url;
+    this['url'] = url;
     var me = this;
     getJSON(url, {
       f: STR.json
@@ -1406,20 +1406,20 @@
    * @property {String[]} [relationships] relationships (id, name, relatedTableId)
    */
   function Layer(url) {
-    this.url = url;
-    this.definition = null;
+    this['url'] = url;
+    this['definition'] = null;
   }
   /**
    * Load extra information such as it's fields from layer resource.
    * If opt_callback function will be called after it is loaded
    * @param {Function} opt_callback
    */
-  Layer.prototype.loadInfo = function (opt_callback) {
+  Layer.prototype['loadInfo'] = function (opt_callback) {
     var me = this;
     if (this.loaded) {
       return;
     }
-    getJSON(this.url, {}, 'callback', function (json) {
+    getJSON(this['url'], {}, 'callback', function (json) {
       augmentObject(json, me);
       me.loaded = true;
       if (opt_callback) {
@@ -1434,12 +1434,12 @@
    * @param {Number} scale
    * @return {Boolean}
    */
-  Layer.prototype.isInScale = function (scale) {
+  Layer.prototype['isInScale'] = function (scale) {
     // note if the layer's extra info is not loaded, it will return true
-    if (this.maxScale && this.maxScale > scale) {
+    if (this['maxScale'] && this['maxScale'] > scale) {
       return false;
     }
-    if (this.minScale && this.minScale < scale) {
+    if (this['minScale'] && this['minScale'] < scale) {
       return false;
     }
     return true;
@@ -1511,37 +1511,37 @@
    * @param {Function} callback
    * @param {Function} errback
    */
-  Layer.prototype.query = function (p, callback, errback) {
+  Layer.prototype['query'] = function (p, callback, errback) {
     if (!p) {
       return;
     }
     // handle text, where, relationParam, objectIds, maxAllowableOffset
     var params = augmentObject(p, {});
-    if (p.geometry && !isString(p.geometry)) {
-      params.geometry = fromOverlaysToJSON(p.geometry);
-      params.geometryType = getGeometryType(p.geometry);
-      params.inSR = 4326;
+    if (p['geometry'] && !isString(p['geometry'])) {
+      params['geometry'] = fromOverlaysToJSON(p['geometry']);
+      params['geometryType'] = getGeometryType(p['geometry']);
+      params['inSR'] = 4326;
     }
-    if (p.spatialRelationship) {
-      params.spatialRel = p.spatialRelationship;
-      delete params.spatialRelationship;
+    if (p['spatialRelationship']) {
+      params['spatialRel'] = p['spatialRelationship'];
+      delete params['spatialRelationship'];
     }
-    if (p.outFields && !isArray(p.outFields)) {
-      params.outFields = p.outFields.join(',');
+    if (p['outFields'] && !isArray(p['outFields'])) {
+      params['outFields'] = p['outFields'].join(',');
     }
-    if (p.objectIds) {
-      params.objectIds = p.objectIds.join(',');
+    if (p['objectIds']) {
+      params['objectIds'] = p['objectIds'].join(',');
     }
-    if (p.time) {
-      params.time = formatTimeString(p.time, p.endTime);
+    if (p['time']) {
+      params['time'] = formatTimeString(p['time'], p['endTime']);
     }
-    params.outSR = 4326;
-    params.returnGeometry = p.returnGeometry === false ? false : true;
-    params.returnIdsOnly = p.returnIdsOnly === true ? true : false;
-    delete params.overlayOptions;
-    getJSON(this.url + '/query', params, 'callback', function (json) {
-      parseFeatures(json.features, p.overlayOptions);
-      callback(json, json.error);
+    params['outSR'] = 4326;
+    params['returnGeometry'] = p['returnGeometry'] === false ? false : true;
+    params['returnIdsOnly'] = p['returnIdsOnly'] === true ? true : false;
+    delete params['overlayOptions'];
+    getJSON(this['url'] + '/query', params, 'callback', function (json) {
+      parseFeatures(json['features'], p['overlayOptions']);
+      callback(json, json['error']);
       handleErr(errback, json);
     });
   };
@@ -1585,17 +1585,17 @@
    * @param {Function} callback
    * @param {Function} errback
    */
-  Layer.prototype.queryRelatedRecords = function (qparams, callback, errback) {
+  Layer.prototype['queryRelatedRecords'] = function (qparams, callback, errback) {
     if (!qparams) {
       return;
     } 
     var params = augmentObject(qparams, {});
-    params.f = params.f || 'json';
-    if (params.outFields && !isString(params.outFields)) {
-      params.outFields = params.outFields.join(',');
+    params['f'] = params['f'] || 'json';
+    if (params['outFields'] && !isString(params['outFields'])) {
+      params['outFields'] = params['outFields'].join(',');
     }
-    params.returnGeometry = params.returnGeometry === false ? false : true;
-    getJSON(this.url + '/query', params, STR.callback, function (json) {
+    params['returnGeometry'] = params['returnGeometry'] === false ? false : true;
+    getJSON(this['url'] + '/query', params, STR.callback, function (json) {
       handleErr(errback, json);
       callback(json);
     });
@@ -1627,10 +1627,10 @@
    * @property {Object} [documentInfo] Object with the folloing properties: <code>Title, Author,Comments,Subject,Category,Keywords</code>
    */
   function MapService(url) {
-    this.url = url;
+    this['url'] = url;
     this.loaded = false;
     var tks = url.split("/");
-    this.name = tks[tks.length - 2].replace(/_/g, ' ');
+    this['name'] = tks[tks.length - 2].replace(/_/g, ' ');
     var me = this;
     getJSON(url, {
     }, STR.callback, function (json) {
@@ -1648,14 +1648,14 @@
   MapService.prototype.init_ = function (json) {
     var me = this;
     augmentObject(json, this);
-    if (json.spatialReference.wkt) {
-      this.spatialReference = spatialReferences.addSpatialReference(json.spatialReference.wkt, json.spatialReference.wkt);
+    if (json['spatialReference']['wkt']) {
+      this['spatialReference'] = spatialReferences.addSpatialReference(json['spatialReference']['wkt'], json['spatialReference']['wkt']);
     } else {
-      this.spatialReference = spatialReferences[json.spatialReference.wkid];
+      this['spatialReference'] = spatialReferences[json['spatialReference']['wkid']];
     }
-    if (json.tables !== undefined) {
+    if (json['tables'] !== undefined) {
       // v10.0 +
-      getJSON(this.url + '/layers', {}, STR.callback, function (json2) {
+      getJSON(this['url'] + '/layers', {}, STR.callback, function (json2) {
         me.initLayers_(json2);
       });
     } else {
@@ -1673,35 +1673,35 @@
     var layers = [];
     var tables = [];
     var layer, i, c, info;
-    for (i = 0, c = json2.layers.length; i < c; i++) {
-      info = json2.layers[i];
-      layer = new Layer(this.url + '/' + info.id);
+    for (i = 0, c = json2['layers'].length; i < c; i++) {
+      info = json2['layers'][i];
+      layer = new Layer(this['url'] + '/' + info['id']);
       augmentObject(info, layer);
-      layer.visible = layer.defaultVisibility;
+      layer['visible'] = layer['defaultVisibility'];
       layers.push(layer);
     }
-    if (json2.tables) {
-      for (i = 0, c = json2.tables.length; i < c; i++) {
-        info = json2.tables[i];
-        layer = new Layer(this.url + '/' + info.id);
+    if (json2['tables']) {
+      for (i = 0, c = json2['tables'].length; i < c; i++) {
+        info = json2['tables'][i];
+        layer = new Layer(this['url'] + '/' + info['id']);
         augmentObject(info, layer);
         tables.push(layer);
       }
     }
     for (i = 0, c = layers.length; i < c; i++) {
       layer = layers[i];
-      if (layer.subLayerIds) {
-        layer.subLayers = [];
-        for (var j = 0, jc = layer.subLayerIds.length; j < jc; j++) {
-          var subLayer = this.getLayer(layer.subLayerIds[j]);
-          layer.subLayers.push(subLayer);
-          subLayer.parentLayer = layer;
+      if (layer['subLayerIds']) {
+        layer['subLayers'] = [];
+        for (var j = 0, jc = layer['subLayerIds'].length; j < jc; j++) {
+          var subLayer = this['getLayer'](layer['subLayerIds'][j]);
+          layer['subLayers'].push(subLayer);
+          subLayer['parentLayer'] = layer;
         }
       }
     }
-    this.layers = layers;
-    if (json2.tables) {
-      this.tables = tables;
+    this['layers'] = layers;
+    if (json2['tables']) {
+      this['tables'] = tables;
     }
     this.loaded = true;
     /**
@@ -1717,14 +1717,14 @@
    * @param {String|Number} nameOrId
    * @return {Layer}
    */
-  MapService.prototype.getLayer = function (nameOrId) {
-    var layers = this.layers;
+  MapService.prototype['getLayer'] = function (nameOrId) {
+    var layers = this['layers'];
     if (layers) {
       for (var i = 0, c = layers.length; i < c; i++) {
-        if (nameOrId === layers[i].id) {
+        if (nameOrId === layers[i]['id']) {
           return layers[i];
         }
-        if (isString(nameOrId) && layers[i].name.toLowerCase() === nameOrId.toLowerCase()) {
+        if (isString(nameOrId) && layers[i]['name'].toLowerCase() === nameOrId.toLowerCase()) {
           return layers[i];
         }
       }
@@ -1738,11 +1738,11 @@
  */
   MapService.prototype.getLayerDefs_ = function () {
     var ret = {};
-    if (this.layers) {
-      for (var i = 0, c = this.layers.length; i < c; i++) {
-        var layer = this.layers[i];
-        if (layer.definition) {
-          ret[String(layer.id)] = layer.definition;
+    if (this['layers']) {
+      for (var i = 0, c = this['layers'].length; i < c; i++) {
+        var layer = this['layers'][i];
+        if (layer['definition']) {
+          ret[String(layer['id'])] = layer['definition'];
         }
       }
     }
@@ -1754,26 +1754,26 @@
    */
   MapService.prototype.getVisibleLayerIds_ = function () {
     var ret = [];
-    if (this.layers) { // in case service not loaded
+    if (this['layers']) { // in case service not loaded
       var layer;
       // a special behavior of REST (as of 9.3.1): 
       // if partial group then parent must be off
       var i, c;
-      for (i = 0, c = this.layers.length; i < c; i++) {
-        layer = this.layers[i];
-        if (layer.subLayers) {
-          for (var j = 0, jc = layer.subLayers.length; j < jc; j++) {
-            if (layer.subLayers[j].visible === false) {
-              layer.visible = false;
+      for (i = 0, c = this['layers'].length; i < c; i++) {
+        layer = this['layers'][i];
+        if (layer['subLayers']) {
+          for (var j = 0, jc = layer['subLayers'].length; j < jc; j++) {
+            if (layer['subLayers'][j]['visible'] === false) {
+              layer['visible'] = false;
               break;
             }
           }
         }
       }
-      for (i = 0, c = this.layers.length; i < c; i++) {
-        layer = this.layers[i];
-        if (layer.visible === true) {
-          ret.push(layer.id);
+      for (i = 0, c = this['layers'].length; i < c; i++) {
+        layer = this['layers'][i];
+        if (layer['visible'] === true) {
+          ret.push(layer['id']);
         }
       }
     }
@@ -1783,9 +1783,9 @@
    * get initial bounds of the map serivce
    * @return {google.maps.LatLngBounds}
    */
-  MapService.prototype.getInitialBounds = function () {
-    if (this.initialExtent) {
-      return fromEnvelopeToLatLngBounds(this.initialExtent);
+  MapService.prototype['getInitialBounds'] = function () {
+    if (this['initialExtent']) {
+      return fromEnvelopeToLatLngBounds(this['initialExtent']);
     }
     return null;
   };
@@ -1838,7 +1838,7 @@
 
 /**
  * @name MapImage
- * @class This is the result of {@link MapService}.exportMap operation.
+ * @class This is the result of {@link MapService}['exportMap'] operation.
  *   There is no constructor, use as JavaScript object literal.
  * @property {String} [href] URL of image
  * @property {LatLngBounds} [bounds] The bounding box of the exported image. 
@@ -1858,33 +1858,33 @@
    * @param {Function} callback
    * @param {Function} errback
    */
-  MapService.prototype.exportMap = function (p, callback, errback) {
-    if (!p || !p.bounds) {
+  MapService.prototype['exportMap'] = function (p, callback, errback) {
+    if (!p || !p['bounds']) {
       return;
     }
     // note: dynamic map may overlay on top of maptypes with different projection
     var params = {};// augmentObject(p, );
-    var bnds = p.bounds;
-    params.bbox = '' + bnds.getSouthWest().lng() + ',' + '' + bnds.getSouthWest().lat() + ',' +
+    var bnds = p['bounds'];
+    params['bbox'] = '' + bnds.getSouthWest().lng() + ',' + '' + bnds.getSouthWest().lat() + ',' +
     bnds.getNorthEast().lng() +
     ',' +
     '' +
     bnds.getNorthEast().lat();
-    //delete params.bounds;
+    //delete params['bounds'];
     
-    params.size = '' + p.width + ',' + p.height;
-    params.dpi = p.dpi;
+    params['size'] = '' + p['width'] + ',' + p['height'];
+    params['dpi'] = p['dpi'];
     
-    if (p.imageSR) {
-      if (p.imageSR.wkid) {
-        params.imageSR = p.imageSR.wkid;
+    if (p['imageSR']) {
+      if (p['imageSR']['wkid']) {
+        params['imageSR'] = p['imageSR']['wkid'];
       } else {
-        params.imageSR = '{wkt:' + p.imageSR.wkt + '}';
+        params['imageSR'] = '{wkt:' + p['imageSR']['wkt'] + '}';
       }
     }
-    params.bboxSR = '4326';
-    params.format = p.format;
-    var defs = p.layerDefinitions;
+    params['bboxSR'] = '4326';
+    params['format'] = p['format'];
+    var defs = p['layerDefinitions'];
     // there is a slightly difference between {} and undefined
     // if do not want use def at all, pass in {}, if want to use 
     // in service, do not pass in anything.
@@ -1892,14 +1892,14 @@
       defs = this.getLayerDefs_();
     } 
     // for 9.3 compatibility:
-    params.layerDefs = getLayerDefsString(defs);
-    var vlayers = p.layerIds;
-    var layerOpt = p.layerOption || 'show';   
+    params['layerDefs'] = getLayerDefsString(defs);
+    var vlayers = p['layerIds'];
+    var layerOpt = p['layerOption'] || 'show';   
     if (vlayers === undefined) {
       vlayers = this.getVisibleLayerIds_();
     }
     if (vlayers.length > 0) {
-      params.layers =  layerOpt + ':' + vlayers.join(',');
+      params['layers'] =  layerOpt + ':' + vlayers.join(',');
     } else {
       // no layers visible, no need to go to server
       callback({
@@ -1907,16 +1907,16 @@
       });
       return;
     }
-    params.transparent = (p.transparent === false ? false : true);
-    if (p.time) {
-      params.time = formatTimeString(p.time, p.endTime);
+    params['transparent'] = (p['transparent'] === false ? false : true);
+    if (p['time']) {
+      params['time'] = formatTimeString(p['time'], p['endTime']);
     }
     //TODO: finish once v10 released
-    params.layerTimeOptions = p.layerTimeOptions;
+    params['layerTimeOptions'] = p['layerTimeOptions'];
     
-    getJSON(this.url + '/export', params, 'callback', function (json) {
-      json.bounds = fromEnvelopeToLatLngBounds(json.extent);
-      delete json.extent;
+    getJSON(this['url'] + '/export', params, 'callback', function (json) {
+      json['bounds'] = fromEnvelopeToLatLngBounds(json['extent']);
+      delete json['extent'];
       callback(json); //callback.apply(null,json);
     });
   };
@@ -1984,41 +1984,41 @@
    * @param {Function} callback
    * @param {Function} errback
    */
-  MapService.prototype.identify = function (p, callback, errback) {
+  MapService.prototype['identify'] = function (p, callback, errback) {
     if (!p) {
       return;
     }
     var params = {};//augmentObject(p, );
-    params.geometry = fromOverlaysToJSON(p.geometry);
-    params.geometryType = getGeometryType(p.geometry);
-    params.mapExtent = fromOverlaysToJSON(p.bounds);
-    params.tolerance = p.tolerance || 2;
-    params.sr = 4326;
-    params.imageDisplay = '' + p.width + ',' + p.height + ',' + (p.dpi || 96);
-    params.layers = (p.layerOption || 'all');
-    if (p.layerIds) {
-      params.layers += ':' + p.layerIds.join(',');
+    params['geometry'] = fromOverlaysToJSON(p['geometry']);
+    params['geometryType'] = getGeometryType(p['geometry']);
+    params['mapExtent'] = fromOverlaysToJSON(p['bounds']);
+    params['tolerance'] = p['tolerance'] || 2;
+    params['sr'] = 4326;
+    params['imageDisplay'] = '' + p['width'] + ',' + p['height'] + ',' + (p['dpi'] || 96);
+    params['layers'] = (p['layerOption'] || 'all');
+    if (p['layerIds']) {
+      params['layers'] += ':' + p['layerIds'].join(',');
     }
-    if (p.layerDefs) {
-      params.layerDefs = getLayerDefsString(p.layerDefs);//TODO
+    if (p['layerDefs']) {
+      params['layerDefs'] = getLayerDefsString(p['layerDefs']);//TODO
     }
-    params.maxAllowableOffset = p.maxAllowableOffset;
-    params.returnGeometry = (p.returnGeometry === false ? false : true);
+    params['maxAllowableOffset'] = p['maxAllowableOffset'];
+    params['returnGeometry'] = (p['returnGeometry'] === false ? false : true);
     
-    getJSON(this.url + '/identify', params, 'callback', function (json) {
+    getJSON(this['url'] + '/identify', params, 'callback', function (json) {
       // process results;
       var rets = null;
       var i, js, g;
-      if (json.results) {
+      if (json['results']) {
         rets = [];
-        for (i = 0; i < json.results.length; i++) {
-          js = json.results[i];
-          g = fromJSONToOverlays(js.geometry, p.overlayOptions);
-          js.feature = {
+        for (i = 0; i < json['results'].length; i++) {
+          js = json['results'][i];
+          g = fromJSONToOverlays(js['geometry'], p['overlayOptions']);
+          js['feature'] = {
             'geometry': g,
-            'attributes': js.attributes
+            'attributes': js['attributes']
           };
-          delete js.attributes;
+          delete js['attributes'];
         }
       }
       callback(json);
@@ -2071,39 +2071,39 @@
    * @param {Function} callback
    * @param {Function} errback
    */
-  MapService.prototype.find = function (opts, callback, errback) {
+  MapService.prototype['find'] = function (opts, callback, errback) {
     if (!opts) {
       return;
     }
     // handle searchText, contains, maxAllowableOffset
     var params = augmentObject(opts, {});
-    if (opts.layerIds) {
-      params.layers = opts.layerIds.join(',');
-      delete params.layerIds;
+    if (opts['layerIds']) {
+      params['layers'] = opts['layerIds'].join(',');
+      delete params['layerIds'];
     }
-    if (opts.searchFields) {
-      params.searchFields = opts.searchFields.join(',');
+    if (opts['searchFields']) {
+      params['searchFields'] = opts['searchFields'].join(',');
     }
-    params.contains = (opts.contains === false ? false : true);
-    if (opts.layerDefinitions) {
-      params.layerDefs = getLayerDefsString(opts.layerDefinitions);
-      delete params.layerDefinitions;
+    params['contains'] = (opts['contains'] === false ? false : true);
+    if (opts['layerDefinitions']) {
+      params['layerDefs'] = getLayerDefsString(opts['layerDefinitions']);
+      delete params['layerDefinitions'];
     }
-    params.sr = 4326;
-    params.returnGeometry = (opts.returnGeometry === false ? false : true);
-    getJSON(this.url + '/find', params, STR.callback, function (json) {
+    params['sr'] = 4326;
+    params['returnGeometry'] = (opts['returnGeometry'] === false ? false : true);
+    getJSON(this['url'] + '/find', params, STR.callback, function (json) {
       var rets = null;
       var i, js, g;
-      if (json.results) {
+      if (json['results']) {
         rets = [];
-        for (i = 0; i < json.results.length; i++) {
-          js = json.results[i];
-          g = fromJSONToOverlays(js.geometry, opts.overlayOptions);
-          js.feature = {
+        for (i = 0; i < json['results'].length; i++) {
+          js = json['results'][i];
+          g = fromJSONToOverlays(js['geometry'], opts['overlayOptions']);
+          js['feature'] = {
             'geometry': g,
-            'attributes': js.attributes
+            'attributes': js['attributes']
           };
-          delete js.attributes;
+          delete js['attributes'];
         }
       }
       callback(json);
@@ -2121,10 +2121,10 @@
    * @param {Function} callback
    * @param {Function} errback
    */
-  MapService.prototype.queryLayer = function (layerNameOrId, params, callback, errback) {
-    var layer = this.getLayer(layerNameOrId);
+  MapService.prototype['queryLayer'] = function (layerNameOrId, params, callback, errback) {
+    var layer = this['getLayer'](layerNameOrId);
     if (layer) {
-      layer.query(params, callback, errback);
+      layer['query'](params, callback, errback);
     }
   };
  
@@ -2169,28 +2169,28 @@
     if (!tileInfo) {
       throw new Error('map service is not tiled');
     }
-    this.lods_ = tileInfo.lods;
-    this.spatialReference_ = spatialReferences[tileInfo.spatialReference.wkid || tileInfo.spatialReference.wkt];
+    this.lods_ = tileInfo['lods'];
+    this.spatialReference_ = spatialReferences[tileInfo['spatialReference']['wkid'] || tileInfo['spatialReference']['wkt']];
     if (!this.spatialReference_) {
       throw new Error('unsupported Spatial Reference');
     }
     // resolution (unit/pixel) at lod level 0. Due to changes from V2-V3, 
     // zoom is no longer defined in Projection. It is assumed that level's zoom factor is 2. 
-    this.resolution0_ = this.lods_[0].resolution;
+    this.resolution0_ = this.lods_[0]['resolution'];
     // zoom offset of this tileinfo's zoom 0 to Google's zoom0
-    this.minZoom = Math.floor(Math.log(this.spatialReference_.getCircum() / this.resolution0_ / 256) / Math.LN2 + 0.5);
-    this.maxZoom = this.minZoom + this.lods_.length - 1;
-    this.tileSize = new G.Size(tileInfo.cols, tileInfo.rows);
+    this['minZoom'] = Math.floor(Math.log(this.spatialReference_.getCircum() / this.resolution0_ / 256) / Math.LN2 + 0.5);
+    this['maxZoom'] = this['minZoom'] + this.lods_.length - 1;
+    this['tileSize'] = new G.Size(tileInfo['cols'], tileInfo['rows']);
     // Find out how the map units scaled to 1 tile at zoom 0. 
     // from V2-V3, coords must scaled to 256 pixel under Mercator at zoom 0.
     // scale can be considered under this SR, what's the actual pixel number to 256 to cover whole earth?
-    this.scale_ = Math.pow(2, this.minZoom) * this.resolution0_;
-    this.originX_ = tileInfo.origin.x;
-    this.originY_ = tileInfo.origin.y;
+    this.scale_ = Math.pow(2, this['minZoom']) * this.resolution0_;
+    this.originX_ = tileInfo['origin']['x'];
+    this.originY_ = tileInfo['origin']['y'];
     // validation check
     var ratio;
-    for (var i = 0; i < tileInfo.lods.length - 1; i++) {
-      ratio = tileInfo.lods[i].resolution / tileInfo.lods[i + 1].resolution;
+    for (var i = 0; i < tileInfo['lods'].length - 1; i++) {
+      ratio = tileInfo['lods'][i]['resolution'] / tileInfo['lods'][i + 1]['resolution'];
       if (ratio > 2.001 || ratio < 1.999) {
         throw new Error('This type of map cache is not supported in V3. \nScale ratio between zoom levels must be 2');
       }
@@ -2203,14 +2203,14 @@
    * @param {Point} opt_point
    * @return {Point} pixel
    */
-  Projection.prototype.fromLatLngToPoint  =  function (latlng, opt_point) {
+  Projection.prototype['fromLatLngToPoint']  =  function (latlng, opt_point) {
     if (!latlng || isNaN(latlng.lat()) || isNaN(latlng.lng())) {
       return null;
     }
-    var coords  =  this.spatialReference_.forward([latlng.lng(), latlng.lat()]);
+    var coords  =  this.spatialReference_['forward']([latlng.lng(), latlng.lat()]);
     var point = opt_point || new G.Point(0, 0);
-    point.x = (coords[0] - this.originX_) / this.scale_;
-    point.y = (this.originY_ - coords[1]) / this.scale_; 
+    point['x'] = (coords[0] - this.originX_) / this.scale_;
+    point['y'] = (this.originY_ - coords[1]) / this.scale_; 
     return point;
   };
   /**
@@ -2219,14 +2219,14 @@
    * @param {Boolean} opt_nowrap
    * @return {LatLng}
    */
-  Projection.prototype.fromPointToLatLng = function (pixel, opt_nowrap) {
+  Projection.prototype['fromPointToLatLng'] = function (pixel, opt_nowrap) {
     //TODO: handle nowrap
     if (pixel === null) {
       return null;
     }
-    var x = pixel.x * this.scale_ + this.originX_;
-    var y = this.originY_ - pixel.y * this.scale_;
-    var geo = this.spatialReference_.reverse([x, y]);
+    var x = pixel['x'] * this.scale_ + this.originX_;
+    var y = this.originY_ - pixel['y'] * this.scale_;
+    var geo = this.spatialReference_['reverse']([x, y]);
     return new G.LatLng(geo[1], geo[0]);
   };
   /**
@@ -2235,10 +2235,10 @@
    * @return {Number}
    */
   Projection.prototype.getScale  =  function (zoom) {
-    var zoomIdx  =  zoom - this.minZoom;
+    var zoomIdx  =  zoom - this['minZoom'];
     var res  = 0;
     if (this.lods_[zoomIdx]) {
-      res  = this.lods_[zoomIdx].scale;
+      res  = this.lods_[zoomIdx]['scale'];
     } 
     return res;
   };
@@ -2272,23 +2272,23 @@
    */
   function TileLayer(service, opt_layerOpts) {
     opt_layerOpts  =  opt_layerOpts || {};
-    if (opt_layerOpts.opacity) {
-      this.opacity_ = opt_layerOpts.opacity;
-      delete opt_layerOpts.opacity;
+    if (opt_layerOpts['opacity']) {
+      this.opacity_ = opt_layerOpts['opacity'];
+      delete opt_layerOpts['opacity'];
     }
     augmentObject(opt_layerOpts, this);
     this.mapService_  =  (service instanceof MapService) ? service : new MapService(service);
     //In the format of mt[number].domain.com
-    if (opt_layerOpts.hosts) {
-      var pro  =  extractString(this.mapService_.url, '', '://');
-      var host  =  extractString(this.mapService_.url, '://', '/');
-      var path  =  extractString(this.mapService_.url, pro + '://' + host, '');
-      this.urlTemplate_  =  pro + '://' + opt_layerOpts.hosts + path;
-      this.numOfHosts_  =  parseInt(extractString(opt_layerOpts.hosts, '[', ']'), 10);
+    if (opt_layerOpts['hosts']) {
+      var pro  =  extractString(this.mapService_['url'], '', '://');
+      var host  =  extractString(this.mapService_['url'], '://', '/');
+      var path  =  extractString(this.mapService_['url'], pro + '://' + host, '');
+      this.urlTemplate_  =  pro + '://' + opt_layerOpts['hosts'] + path;
+      this.numOfHosts_  =  parseInt(extractString(opt_layerOpts['hosts'], '[', ']'), 10);
     }
-    this.name = this.name || this.mapService_.name;
-    this.maxZoom = this.maxZoom || 19;
-    this.minZoom = this.minZoom || 0;
+    this['name'] = this['name'] || this.mapService_['name'];
+    this['maxZoom'] = this['maxZoom'] || 19;
+    this['minZoom'] = this['minZoom'] || 0;
     if (this.mapService_.loaded) {
       this.init_(opt_layerOpts);
     } else {
@@ -2305,9 +2305,9 @@
    * @param {Object} opt_layerOpts
    */
   TileLayer.prototype.init_  =  function (opt_layerOpts) {
-    this.projection_  =  new Projection(this.mapService_.tileInfo);//, this.mapService_.fullExtent);
-    this.minZoom = opt_layerOpts.minZoom || this.projection_.minZoom;
-    this.maxZoom = opt_layerOpts.maxZoom || this.projection_.maxZoom;
+    this.projection_  =  new Projection(this.mapService_['tileInfo']);//, this.mapService_.fullExtent);
+    this['minZoom'] = opt_layerOpts['minZoom'] || this.projection_['minZoom'];
+    this['maxZoom'] = opt_layerOpts['maxZoom'] || this.projection_['maxZoom'];
   };
  
 
@@ -2318,15 +2318,15 @@
    * @param {Number} zoom
    * @return {String} url
    */
-  TileLayer.prototype.getTileUrl  =  function (tile, zoom) {
-    var z  = zoom - (this.projection_ ? this.projection_.minZoom : this.minZoom);
+  TileLayer.prototype['getTileUrl']  =  function (tile, zoom) {
+    var z  = zoom - (this.projection_ ? this.projection_['minZoom'] : this['minZoom']);
     var url = '';
-    if (!isNaN(tile.x) && !isNaN(tile.y) && z >= 0 && tile.x >= 0 && tile.y >= 0) {
-      var u  =  this.mapService_.url;
+    if (!isNaN(tile['x']) && !isNaN(tile['y']) && z >= 0 && tile['x'] >= 0 && tile['y'] >= 0) {
+      var u  =  this.mapService_['url'];
       if (this.urlTemplate_) {
-        u  =  this.urlTemplate_.replace('[' + this.numOfHosts_ + ']', '' + ((tile.y + tile.x) % this.numOfHosts_));
+        u  =  this.urlTemplate_.replace('[' + this.numOfHosts_ + ']', '' + ((tile['y'] + tile['x']) % this.numOfHosts_));
       }
-      url = u + '/tile/' + z + '/' + tile.y + '/' + tile.x;
+      url = u + '/tile/' + z + '/' + tile['y'] + '/' + tile['x'];
     }
     //log('url=' + url);
     return url;
@@ -2335,7 +2335,7 @@
    * set Opacity
    * @param {Number} op (0-1)
    */
-  TileLayer.prototype.setOpacity  =  function (op) {
+  TileLayer.prototype['setOpacity']  =  function (op) {
     this.opacity_ = op;
     var tiles = this.tiles_;
     for (var x in tiles) {
@@ -2348,14 +2348,14 @@
    * get the opacity (0-1) of the tile layer
    * @return {Number}
    */
-  TileLayer.prototype.getOpacity  =  function () {
+  TileLayer.prototype['getOpacity']  =  function () {
     return this.opacity_;
   };
   /**
    * get the underline Map Service
    * @return {MapService}
    */
-  TileLayer.prototype.getMapService  =  function () {
+  TileLayer.prototype['getMapService']  =  function () {
     return this.mapService_;
   };
   /**
@@ -2394,9 +2394,9 @@
     //TODO: handle copyright info.
     opt_typeOpts = opt_typeOpts || {};
     var i;
-    if (opt_typeOpts.opacity) {
-      this.opacity_ = opt_typeOpts.opacity;
-      delete opt_typeOpts.opacity;
+    if (opt_typeOpts['opacity']) {
+      this.opacity_ = opt_typeOpts['opacity'];
+      delete opt_typeOpts['opacity'];
     }
     augmentObject(opt_typeOpts, this);
     var layers = tileLayers;
@@ -2414,24 +2414,24 @@
     }
     this.tileLayers_ = layers;
     this.tiles_ = {};
-    //this.map_ = opt_typeOpts.map;
-    if (opt_typeOpts.maxZoom !== undefined) {
-      this.maxZoom = opt_typeOpts.maxZoom;
+    //this.map_ = opt_typeOpts['map'];
+    if (opt_typeOpts['maxZoom'] !== undefined) {
+      this['maxZoom'] = opt_typeOpts['maxZoom'];
     } else {
       var maxZ = 0;
       for (i = 0; i < layers.length; i++) {
-        maxZ = Math.max(maxZ, layers[i].maxZoom);
+        maxZ = Math.max(maxZ, layers[i]['maxZoom']);
       }
-      this.maxZoom = maxZ;
+      this['maxZoom'] = maxZ;
     }
     if (layers[0].projection_) {
-      this.tileSize = layers[0].projection_.tileSize;
+      this['tileSize'] = layers[0].projection_['tileSize'];
       this.projection = layers[0].projection_;
     } else {
-      this.tileSize = new G.Size(256, 256);
+      this['tileSize'] = new G.Size(256, 256);
     }
-    if (!this.name) {
-      this.name = layers[0].name;
+    if (!this['name']) {
+      this['name'] = layers[0]['name'];
     }
     
   }
@@ -2443,13 +2443,13 @@
    * @param {Number} zoom
    * @return {Node}
    */
-  MapType.prototype.getTile = function (tileCoord, zoom, ownerDocument) {
+  MapType.prototype['getTile'] = function (tileCoord, zoom, ownerDocument) {
     var div = ownerDocument.createElement('div');
-    var tileId = '_' + tileCoord.x + '_' + tileCoord.y + '_' + zoom;
+    var tileId = '_' + tileCoord['x'] + '_' + tileCoord['y'] + '_' + zoom;
     for (var i = 0; i < this.tileLayers_.length; i++) {
       var t = this.tileLayers_[i];
-      if (zoom <= t.maxZoom && zoom >= t.minZoom) {
-        var url = t.getTileUrl(tileCoord, zoom);
+      if (zoom <= t['maxZoom'] && zoom >= t['minZoom']) {
+        var url = t['getTileUrl'](tileCoord, zoom);
         if (url) {
           var img = ownerDocument.createElement(document.all ? 'img' : 'div');//IE does not like img
           img.style.border = '0px none';
@@ -2459,8 +2459,8 @@
           img.style.position = 'absolute';
           img.style.top = '0px';
           img.style.left = '0px';
-          img.style.width = '' + this.tileSize.width + 'px';
-          img.style.height = '' + this.tileSize.height + 'px';
+          img.style['width'] = '' + this['tileSize']['width'] + 'px';
+          img.style['height'] = '' + this['tileSize']['height'] + 'px';
           //log(url);
           if (document.all) {
             img.src = url;
@@ -2488,7 +2488,7 @@
    * Release tile and cleanup
    * @param {Node} node
    */
-  MapType.prototype.releaseTile = function (node) {
+  MapType.prototype['releaseTile'] = function (node) {
     if (node.getAttribute('tid')) {
       var tileId = node.getAttribute('tid');
       if (this.tiles_[tileId]) {
@@ -2506,7 +2506,7 @@
    * Set Opactity
    * @param {Number} op
    */
-  MapType.prototype.setOpacity = function (op) {
+  MapType.prototype['setOpacity'] = function (op) {
     this.opacity_ = op;
     var tiles = this.tiles_;
     for (var x in tiles) {
@@ -2519,14 +2519,14 @@
     }
   };
   
-  MapType.prototype.getOpacity  =  function () {
+  MapType.prototype['getOpacity']  =  function () {
     return this.opacity_;
   };
   /**
    * get list of {@link TileLayer} in this map type
    * @return {TileLayer[]}
    */
-  MapType.prototype.getTileLayers  =  function () {
+  MapType.prototype['getTileLayers']  =  function () {
     return this.tileLayers_;
   };
   /**
@@ -2557,18 +2557,18 @@
     opt_overlayOpts  =  opt_overlayOpts || {};
     this.mapService_  = (service instanceof MapService) ? service : new MapService(service);
     
-    //this.minZoom  = opt_overlayOpts.minZoom;
-    //this.maxZoom  = opt_overlayOpts.maxZoom;
-    this.opacity_  =  opt_overlayOpts.opacity || 1;
-    this.exportOptions_  = opt_overlayOpts.exportOptions || {};
+    //this['minZoom']  = opt_overlayOpts['minZoom'];
+    //this['maxZoom']  = opt_overlayOpts['maxZoom'];
+    this.opacity_  =  opt_overlayOpts['opacity'] || 1;
+    this.exportOptions_  = opt_overlayOpts['exportOptions'] || {};
     this.drawing_ = false;
     // do we need another refresh. Normally happens bounds changed before server returns image.
     this.needsNewRefresh_ = false;
     this.div_ = null;
     // Once the LatLng and text are set, add the overlay to the map.  This will
     // trigger a call to panes_changed which should in turn call draw.
-    if (opt_overlayOpts.map) {
-      this.setMap(opt_overlayOpts.map);
+    if (opt_overlayOpts['map']) {
+      this.setMap(opt_overlayOpts['map']);
     }
   }
   
@@ -2578,7 +2578,7 @@
    * Handler when overlay is added. Interface method.
    * This will be called after setMap(map) is called.
    */
-  MapOverlay.prototype.onAdd = function () {
+  MapOverlay.prototype['onAdd'] = function () {
     var div = document.createElement("div");
     div.style.position = "absolute";
     
@@ -2594,12 +2594,12 @@
     }
     var me = this;
     this.boundsChangedListener_ = G.event.addListener(this.getMap(), 'bounds_changed', function () {
-      me.refresh();
+      me['refresh']();
     });
   };
   /** remove overlay
    */
-  MapOverlay.prototype.onRemove = function () {
+  MapOverlay.prototype['onRemove'] = function () {
     G.event.removeListener(this.boundsChangedListener_);
     this.div_.parentNode.removeChild(this.div_);
     this.div_ = null;
@@ -2614,11 +2614,11 @@
    * would return a new value for a given LatLng. 
    * This can happen on change of zoom, center, or 
    * map type. It is not necessarily called on drag or resize.
-   * See OverlayView.draw.
+   * See OverlayView['draw'].
    */
-  MapOverlay.prototype.draw = function () {
+  MapOverlay.prototype['draw'] = function () {
     if (!this.drawing_ || this.needsNewRefresh_ === true) {
-      this.refresh();
+      this['refresh']();
     }
   };
   
@@ -2626,14 +2626,14 @@
    * Gets Image Opacity. return <code>opacity</code> between 0-1.
    * @return {Number} opacity
    */
-  MapOverlay.prototype.getOpacity  =  function () {
+  MapOverlay.prototype['getOpacity']  =  function () {
     return this.opacity_;
   };
   /**
    * Sets Image Opacity. parameter <code>opacity</code> between 0-1.
    * @param {Number} opacity
    */
-  MapOverlay.prototype.setOpacity = function (opacity) {
+  MapOverlay.prototype['setOpacity'] = function (opacity) {
     var op = Math.min(Math.max(opacity, 0), 1);
     this.opacity_ = op;
     var img = this.div_;
@@ -2643,14 +2643,14 @@
    * Gets underline {@link MapService}.
    * @return {MapService} MapService
    */
-  MapOverlay.prototype.getMapService  =  function () {
+  MapOverlay.prototype['getMapService']  =  function () {
     return this.mapService_;
   };
   
   /**
    * Refresh the map image in current view port.
    */
-  MapOverlay.prototype.refresh  =  function () {
+  MapOverlay.prototype['refresh']  =  function () {
     
     if (this.drawing_ === true) {
       this.needsNewRefresh_ = true;
@@ -2662,17 +2662,17 @@
       return;
     }
     var params = this.exportOptions_;
-    params.bounds = bnds;
+    params['bounds'] = bnds;
     var sr = WEB_MERCATOR;
     // V3 no map.getSize()
     var s = m.getDiv();
-    params.width = s.offsetWidth; 
-    params.height = s.offsetHeight;
+    params['width'] = s.offsetWidth; 
+    params['height'] = s.offsetHeight;
     var prj = m.getProjection(); // note this is not same as this.getProjection which returns MapCanvasProjection
     if (prj && prj instanceof Projection) {
-      sr = prj.spatialReference;
+      sr = prj['spatialReference'];
     }
-    params.imageSR = sr;
+    params['imageSR'] = sr;
     /**
      * This event is fired before the the drawing request was sent to server.
      * @name MapOverlay#drawstart
@@ -2682,11 +2682,11 @@
     var me = this;
     this.drawing_ = true;
     this.div_.style.backgroundImage = '';
-    this.mapService_.exportMap(params, function (json) {
+    this.mapService_['exportMap'](params, function (json) {
       me.drawing_ = false;
       if (me.needsNewRefresh_ === true) {
         me.needsNewRefresh_ = false;
-        me.refresh();
+        me['refresh']();
         return;
       }
       if (json.href) {
@@ -2695,18 +2695,18 @@
         // We need to retrieve the projection from this overlay to do this.
         var overlayProjection = me.getProjection();
         
-        var bounds = json.bounds;//this.getMap().getBounds();
+        var bounds = json['bounds'];//this.getMap().getBounds();
         var sw = overlayProjection.fromLatLngToDivPixel(bounds.getSouthWest());
         var ne = overlayProjection.fromLatLngToDivPixel(bounds.getNorthEast());
         
         // Resize the image's DIV to fit the indicated dimensions.
         var div = me.div_;
-        div.style.left = sw.x + 'px';
-        div.style.top = ne.y + 'px';
-        div.style.width = (ne.x - sw.x) + 'px';
-        div.style.height = (sw.y - ne.y) + 'px';
+        div.style.left = sw['x'] + 'px';
+        div.style.top = ne['y'] + 'px';
+        div.style['width'] = (ne['x'] - sw['x']) + 'px';
+        div.style['height'] = (sw['y'] - ne['y']) + 'px';
         me.div_.style.backgroundImage = 'url(' + json.href + ')';
-        me.setOpacity(me.opacity_);
+        me['setOpacity'](me.opacity_);
       }
       /**
        * This event is fired after the the drawing request was returned by server.
@@ -2745,8 +2745,8 @@
    */
   MapOverlay.prototype.isInZoomRange_  =  function () {
     var z  = this.getMap().getZoom();
-    if ((this.minZoom !== undefined && z < this.minZoom) || 
-     (this.maxZoom !== undefined && z > this.maxZoom)) {
+    if ((this['minZoom'] !== undefined && z < this['minZoom']) || 
+     (this['maxZoom'] !== undefined && z > this['maxZoom'])) {
       return false; 
     } 
     return true;
@@ -2758,7 +2758,7 @@
   MapOverlay.prototype.show  =  function () {
     this.visible_  =  true;
     this.div_.style.visibility  =  'visible';
-    this.refresh();
+    this['refresh']();
   };
   /**
    * Hide the overlay
@@ -2787,7 +2787,7 @@
  * @property {Object} [locatorProperties] an object with key-value pair that is specific to Locator type.
  */
   function GeocodeService(url) {
-    this.url = url;
+    this['url'] = url;
     this.loaded = false;
     var me = this;
     getJSON(url, {}, STR.callback, function (json) {
@@ -2801,8 +2801,8 @@
    */
   GeocodeService.prototype.init_ = function (json) {
     augmentObject(json, this);
-    if (json.spatialReference) {
-      this.spatialReference = spatialReferences[json.spatialReference.wkid || json.spatialReference.wkt] || WGS84;
+    if (json['spatialReference']) {
+      this['spatialReference'] = spatialReferences[json['spatialReference']['wkid'] || json['spatialReference']['wkt']] || WGS84;
     }
     this.loaded = true;
     /**
@@ -2856,29 +2856,29 @@
  * @param {Function} callback
  * @param {Function} errback
  */
-  GeocodeService.prototype.findAddressCandidates = function (gparams, callback, errback) {
+  GeocodeService.prototype['findAddressCandidates'] = function (gparams, callback, errback) {
     var params = augmentObject(gparams, {});
-    if (params.inputs) {
-      augmentObject(params.inputs, params);
-      delete params.inputs;
+    if (params['inputs']) {
+      augmentObject(params['inputs'], params);
+      delete params['inputs'];
     }
-    if (isArray(params.outFields)) {
-      params.outFields = params.outFields.join(',');
+    if (isArray(params['outFields'])) {
+      params['outFields'] = params['outFields'].join(',');
     }
-    params.outSR = 4326;
+    params['outSR'] = 4326;
     var me = this;
-    getJSON(this.url + '/findAddressCandidates', params, STR.callback, function (json) {
-      if (json.candidates) {
+    getJSON(this['url'] + '/findAddressCandidates', params, STR.callback, function (json) {
+      if (json['candidates']) {
         var res, loc;
-        for (var i = 0; i < json.candidates.length; i++) {
-          res = json.candidates[i];
-          loc = res.location;
-          if (!isNaN(loc.x) &&  !isNaN(loc.y)) {
-            var ll = [loc.x, loc.y];
-            if (me.spatialReference) {
-              ll = me.spatialReference.reverse(ll);
+        for (var i = 0; i < json['candidates'].length; i++) {
+          res = json['candidates'][i];
+          loc = res['location'];
+          if (!isNaN(loc['x']) &&  !isNaN(loc['y'])) {
+            var ll = [loc['x'], loc['y']];
+            if (me['spatialReference']) {
+              ll = me['spatialReference']['reverse'](ll);
             }
-            res.location = new G.LatLng(ll[1], ll[0]);
+            res['location'] = new G.LatLng(ll[1], ll[0]);
           }
         }
       }
@@ -2887,12 +2887,12 @@
     });
   };
   /**
-   * Alias of <code>GeocodeService.findAddressCandidates</code>;
+   * Alias of <code>GeocodeService['findAddressCandidates']</code>;
    * @param {GeocodeOptions} params
    * @param {Function} callback
    */
-  GeocodeService.prototype.geocode = function (params, callback) {
-    this.findAddressCandidates(params, callback);
+  GeocodeService.prototype['geocode'] = function (params, callback) {
+    this['findAddressCandidates'](params, callback);
   };
 
 /**
@@ -2925,21 +2925,21 @@
  * @param {Function} callback
  * @param {Function} errback
  */
-  GeocodeService.prototype.reverseGeocode = function (params, callback, errback) {
-    if (!isString(params.location)) {
-      params.location = fromOverlaysToJSON(params.location);
+  GeocodeService.prototype['reverseGeocode'] = function (params, callback, errback) {
+    if (!isString(params['location'])) {
+      params['location'] = fromOverlaysToJSON(params['location']);
     }
-    params.outSR = 4326;
+    params['outSR'] = 4326;
     var me = this;
-    getJSON(this.url + '/reverseGeocode', params, STR.callback, function (json) {
-      if (json.location) {
-        var loc = json.location;
-        if (!isNaN(loc.x) && !isNaN(loc.y)) {
-          var ll = [loc.x, loc.y];
-          if (me.spatialReference) {
-            ll = me.spatialReference.reverse(ll);
+    getJSON(this['url'] + '/reverseGeocode', params, STR.callback, function (json) {
+      if (json['location']) {
+        var loc = json['location'];
+        if (!isNaN(loc['x']) && !isNaN(loc['y'])) {
+          var ll = [loc['x'], loc['y']];
+          if (me['spatialReference']) {
+            ll = me['spatialReference']['reverse'](ll);
           }
-          json.location = new G.LatLng(ll[1], ll[0]);
+          json['location'] = new G.LatLng(ll[1], ll[0]);
         }
       }
       callback(json);
@@ -2959,7 +2959,7 @@
  * @param {String} url
  */
   function GeometryService(url) {
-    this.url  = url;
+    this['url']  = url;
   }
   
   /**
@@ -2988,15 +2988,15 @@
    * @param {Function} callback
    * @param {Function} errback
    */
-  GeometryService.prototype.project = function (p, callback, errback) {
+  GeometryService.prototype['project'] = function (p, callback, errback) {
     var params = prepareGeometryParams(p);
-    getJSON(this.url + '/project', params, "callback", function (json) {
+    getJSON(this['url'] + '/project', params, "callback", function (json) {
       var geom = [];
-      if (p.outSpatialReference === 4326 || p.outSpatialReference.wkid === 4326) {
-        for (var i = 0, c = json.geometries.length; i < c; i++) {
-          geom.push(fromJSONToOverlays(json.geometries[i]));
+      if (p['outSpatialReference'] === 4326 || p['outSpatialReference']['wkid'] === 4326) {
+        for (var i = 0, c = json['geometries'].length; i < c; i++) {
+          geom.push(fromJSONToOverlays(json['geometries'][i]));
         }
-        json.geometries = geom;
+        json['geometries'] = geom;
       }
       callback(json);
       handleErr(errback, json);
@@ -3050,24 +3050,24 @@
    * @param {Function} callback. 
    * @param {Function} errback
    */
-  GeometryService.prototype.buffer = function (p, callback, errback) {
+  GeometryService.prototype['buffer'] = function (p, callback, errback) {
     var params = prepareGeometryParams(p);
-    if (p.bufferSpatialReference) {
-      params.bufferSR = formatSRParam(p.bufferSpatialReference);
+    if (p['bufferSpatialReference']) {
+      params['bufferSR'] = formatSRParam(p['bufferSpatialReference']);
     }
-    params.outSR = 4326;
-    params.distances = p.distances.join(',');
-    if (p.unit) {
-      params.unit = p.unit;
+    params['outSR'] = 4326;
+    params['distances'] = p['distances'].join(',');
+    if (p['unit']) {
+      params['unit'] = p['unit'];
     }
-    getJSON(this.url + '/buffer', params, "callback", function (json) {
+    getJSON(this['url'] + '/buffer', params, "callback", function (json) {
       var geom = [];
-      if (json.geometries) {
-        for (var i = 0, c = json.geometries.length; i < c; i++) {
-          geom.push(fromJSONToOverlays(json.geometries[i], p['overlayOptions']));
+      if (json['geometries']) {
+        for (var i = 0, c = json['geometries'].length; i < c; i++) {
+          geom.push(fromJSONToOverlays(json['geometries'][i], p['overlayOptions']));
         }
       }
-      json.geometries = geom;
+      json['geometries'] = geom;
       callback(json);
       handleErr(errback, json);
     });
@@ -3084,7 +3084,7 @@
    * @param {String} url http://[catalog-url]/[serviceName]/GPServer 
    */
   function GPService(url) {
-    this.url = url;
+    this['url'] = url;
     this.loaded = false;
     var me = this;
     getJSON(url, {}, STR.callback, function (json) {
@@ -3126,7 +3126,7 @@
    * @param {String} url http://[catalog-url]/[serviceName]/GPServer 
    */
   function GPTask(url) {
-    this.url = url;
+    this['url'] = url;
     this.loaded = false;
     var me = this;
     getJSON(url, {}, STR.callback, function (json) {
@@ -3153,29 +3153,29 @@
    * @param {Function} callback will pass {@link GPResults} 
    * @param {Function} errback pass in {@link Error}
    */
-  GPTask.prototype.execute = function (p, callback, errback) {
+  GPTask.prototype['execute'] = function (p, callback, errback) {
     var params = {};
-    if (p.parameters) {
-      augmentObject(p.parameters, params);
+    if (p['parameters']) {
+      augmentObject(p['parameters'], params);
     }
-    if (p.outSpatialReference) {
-      params['env:outSR'] = formatSRParam(p.outSpatialReference);
+    if (p['outSpatialReference']) {
+      params['env:outSR'] = formatSRParam(p['outSpatialReference']);
     } else {
       params['env:outSR'] = 4326;
     }
-    if (p.processSpatialReference) {
-      params['env:processSR'] = formatSRParam(p.processSpatialReference);
+    if (p['processSpatialReference']) {
+      params['env:processSR'] = formatSRParam(p['processSpatialReference']);
     } 
-    getJSON(this.url + '/execute', params, STR.callback, function (json) {
-      if (json.results) {
+    getJSON(this['url'] + '/execute', params, STR.callback, function (json) {
+      if (json['results']) {
         var res, f;
-        for (var i = 0; i < json.results.length; i++) {
-          res = json.results[i];
-          if (res.dataType === 'GPFeatureRecordSetLayer') {
-            for (var j = 0, J = res.value.features.length; j < J; j++) {
-              f = res.value.features[j];
-              if (f.geometry) {
-                f.geometry = fromJSONToOverlays(f.geometry, p.overlayOptions);
+        for (var i = 0; i < json['results'].length; i++) {
+          res = json['results'][i];
+          if (res['dataType'] === 'GPFeatureRecordSetLayer') {
+            for (var j = 0, J = res['value']['features'].length; j < J; j++) {
+              f = res['value']['features'][j];
+              if (f['geometry']) {
+                f['geometry'] = fromJSONToOverlays(f['geometry'], p['overlayOptions']);
               }
             }
           }
@@ -3208,7 +3208,7 @@
    * @param {String} url http://[catalog-url]/[serviceName]/NAServer 
    */
   function NetworkService(url) {
-    this.url = url;
+    this['url'] = url;
     this.loaded = false;
     var me = this;
     getJSON(url, {
@@ -3249,7 +3249,7 @@
    * @param {String} url
    */
   function RouteTask(url) {
-    this.url = url;
+    this['url'] = url;
   }
   
   /**
@@ -3259,31 +3259,31 @@
    * @param {Function} callback
    * @param {Function} errback
    */
-  RouteTask.prototype.solve = function (opts, callback, errback) {
+  RouteTask.prototype['solve'] = function (opts, callback, errback) {
     if (!opts) {
       return;
     }
     // handle many other fields
     var params = augmentObject(opts, {});
-    //params['outSR'] = WGS84.wkid;
-    if (isArray(opts.stops)) {
-      params.stops = fromLatLngsToFeatureSet(opts.stops);
+    //params['outSR'] = WGS84['wkid'];
+    if (isArray(opts['stops'])) {
+      params['stops'] = fromLatLngsToFeatureSet(opts['stops']);
     }
-    if (isArray(opts.barriers)) {
-      if (opts.barriers.length > 0) {
-        params.barriers = fromLatLngsToFeatureSet(opts.barriers);
+    if (isArray(opts['barriers'])) {
+      if (opts['barriers'].length > 0) {
+        params['barriers'] = fromLatLngsToFeatureSet(opts['barriers']);
       } else {
-        delete params.barriers;
+        delete params['barriers'];
       }
     }
-    params.returnRoutes = (opts.returnRoutes === false ? false : true);
-    params.returnDirections = (opts.returnDirections === true ? true : false);
-    params.returnBarriers = (opts.returnBarriers === true ? true : false);
-    params.returnStops = (opts.returnStops === true ? true : false);
+    params['returnRoutes'] = (opts['returnRoutes'] === false ? false : true);
+    params['returnDirections'] = (opts['returnDirections'] === true ? true : false);
+    params['returnBarriers'] = (opts['returnBarriers'] === true ? true : false);
+    params['returnStops'] = (opts['returnStops'] === true ? true : false);
     
-    getJSON(this.url + '/solve', params, 'callback', function (json) {
-      if (json.routes) {
-        parseFeatures(json.routes.features, opts.overlayOptions);
+    getJSON(this['url'] + '/solve', params, 'callback', function (json) {
+      if (json['routes']) {
+        parseFeatures(json['routes']['features'], opts['overlayOptions']);
       }
       callback(json);
       handleErr(errback, json);
