@@ -601,7 +601,7 @@
                     <td><code>Number[]</code></td>
                   
                 
-                <td>The layers to perform the find operation on. The layers to perform the find operation on.  The layers are specified as a comma-separated list of layer ids. <i>It can also be an array of layer NAMEs</i>.</td>
+                <td>The layer Ids to perform the find operation on. The layers to perform the find operation on.</td>
               </tr>
             
               <tr class="odd">
@@ -631,7 +631,7 @@
                     <td><code>String[]</code></td>
                   
                 
-                <td>The names of the fields to search. The fields are specified as a comma-separated list of field names.   If this parameter is not specified, all fields are searched.   <i>This can also be an array with field names </i>.</td>
+                <td>The names of the fields to search.    If this parameter is not specified, all fields are searched.</td>
               </tr>
             
               <tr class="even">
@@ -1103,7 +1103,7 @@
               <tr class="odd">
                 <td><code>Geographic(<span class="type">params:Object</span>)</code></td>
                 
-                <td>Creates a Geographic Coordinate System. e.g.:<br/><code>var g  = new Geographic({"wkid":4326});<br/>var g2 = new gmaps.ags.Geographic({"wkid":4326});</code></td>
+                <td>Creates a Geographic Coordinate System. e.g.:<br/><code> var g2 = new gmaps.ags.Geographic({"wkid":4326});</code></td>
               </tr>
             
           </tbody>
@@ -2200,7 +2200,7 @@
       
     
       <h2><a name="MapOverlay"></a>class MapOverlay</h2>
-      <p>This class (<code>gmaps.ags.MapOverlay</code>) extends the Google Maps API's<a href  = http://code.google.com/apis/maps/documentation/reference.html#OverlayView>OverlayView</a>that draws map images from data source on the fly. It is also known as "<b>Dynamic Maps</b>".It can be added to the map via <code>GMap.addOverlay </code> method.The similar class in the core GMap API is <a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#GroundOverlay>GGroundOverlay</a>,however, the instance of this class always cover the viewport exactly, and will redraw itself as map moves.</p>
+      <p>This class (<code>gmaps.ags.MapOverlay</code>) extends the Google Maps API's<a href  = http://code.google.com/apis/maps/documentation/reference.html#OverlayView>OverlayView</a>that draws map images from data source on the fly. It is also known as "<b>Dynamic Maps</b>".It can be added to the map via <code>GMap.addOverlay </code> method.The similar class in the core GMap API is <a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#GroundOverlay>google.maps.GroundOverlay</a>,however, the instance of this class always cover the viewport exactly, and will redraw itself as map moves.</p>
       
         <h3>Constructor</h3>
         <table summary="class MapOverlay - Constructor" width="90%">
@@ -3054,7 +3054,7 @@
                     <td><code>google.maps.PolygonOptions</code></td>
                   
                 
-                <td>style option for polygons <code>http://code.google.com/apis/maps/documentation/javascript/reference.html#PolygonOptions</code></td>
+                <td>style option for polygons. <a href=http://code.google.com/apis/maps/documentation/javascript/reference.html#PolygonOptions>PolygonOptions</a></td>
               </tr>
             
               <tr class="even">
@@ -3064,7 +3064,7 @@
                     <td><code>google.maps.PolylineOptions</code></td>
                   
                 
-                <td>style option for polylines. <code>http://code.google.com/apis/maps/documentation/javascript/reference.html#PolylineOptions</code></td>
+                <td>style option for polylines. <a href=http://code.google.com/apis/maps/documentation/javascript/reference.html#PolylineOptions>PolylineOptions</a></td>
               </tr>
             
               <tr class="odd">
@@ -3341,16 +3341,6 @@
               </tr>
             
               <tr class="odd">
-                <td><code>outFields</code></td>
-                
-                  
-                    <td><code>String[]</code></td>
-                  
-                
-                <td>The list of fields to be included in the returned resultset. This list is a comma delimited list of field names.</td>
-              </tr>
-            
-              <tr class="even">
                 <td><code>overlayOptions</code></td>
                 
                   
@@ -3360,7 +3350,7 @@
                 <td>See <code><a href="reference.html#OverlayOptions">OverlayOptions</a></code></td>
               </tr>
             
-              <tr class="odd">
+              <tr class="even">
                 <td><code>returnGeometry</code></td>
                 
                   
@@ -3370,7 +3360,7 @@
                 <td>If true, If true, the resultset will include the geometries associated with each result.</td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>returnIdsOnly</code></td>
                 
                   
@@ -3380,7 +3370,7 @@
                 <td>If true, the response only includes an array of object IDs. Otherwise the response is a feature set. The default is false.</td>
               </tr>
             
-              <tr class="odd">
+              <tr class="even">
                 <td><code>spatialRelationship</code></td>
                 
                   
@@ -3390,7 +3380,7 @@
                 <td>The spatial relationship to be applied on the   input geometry while performing the query. The supported spatial relationships   include intersects, contains, envelope intersects, within, etc.   The default spatial relationship is intersects. See <code><a href="reference.html#SpatialRelationship">SpatialRelationship</a></code></td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>text</code></td>
                 
                   
@@ -3400,7 +3390,7 @@
                 <td>A literal search text. If the layer has a display field  associated with it, the server searches for this text in this field.  This parameter is a short hand for a where clause of:  where [displayField]like '%[text]%'. The text is case sensitive.  This parameter is ignored if the where parameter is specified.</td>
               </tr>
             
-              <tr class="odd">
+              <tr class="even">
                 <td><code>where</code></td>
                 
                   
@@ -3414,11 +3404,11 @@
         </table>
       
     
-      <h2><a name="QueryRelatedRecordsParameters"></a>class QueryRelatedRecordsParameters</h2>
-      <p>This class represent the parameters needed in an query related records operation for a <code><a href="reference.html#Layer">Layer</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/queryrelatedrecords.html'>Query Related Records Operation</a>.</p>
+      <h2><a name="QueryRelatedRecordsOptions"></a>class QueryRelatedRecordsOptions</h2>
+      <p>This class represent the parameters needed in an query related records operation for a <code><a href="reference.html#Layer">Layer</a></code>.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/queryrelatedrecords.html'>Query Related Records Operation</a>.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
       
         <h3>Properties</h3>
-        <table summary="class QueryRelatedRecordsParameters - Properties" width="90%">
+        <table summary="class QueryRelatedRecordsOptions - Properties" width="90%">
           
           <tbody>
             <tr>
@@ -3442,16 +3432,6 @@
               </tr>
             
               <tr class="even">
-                <td><code>f</code></td>
-                
-                  
-                    <td><code>String</code></td>
-                  
-                
-                <td>The response format. html | json | kmz .  The default value is <code> json</code>.</td>
-              </tr>
-            
-              <tr class="odd">
                 <td><code>Number</code></td>
                 
                   
@@ -3461,14 +3441,24 @@
                 <td>[maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the query operation</td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>objectIds</code></td>
                 
                   
-                    <td><code>Int|Int</code></td>
+                    <td><code>Int[]</code></td>
                   
                 
                 <td>The object IDs of this layer / table to be queried</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>outFields</code></td>
+                
+                  
+                    <td><code>String[]</code></td>
+                  
+                
+                <td>The list of fields to be included in the returned resultset. This list is a comma delimited list of field names.</td>
               </tr>
             
               <tr class="odd">
@@ -3478,7 +3468,7 @@
                     <td><code>Number</code></td>
                   
                 
-                <td>The well-known ID of the spatial reference of the output geometries</td>
+                <td>The well-known ID of or the <code><a href="reference.html#SpatialReference">SpatialReference</a></code> of the output geometries</td>
               </tr>
             
               <tr class="even">
@@ -3498,17 +3488,7 @@
                     <td><code>Boolean</code></td>
                   
                 
-                <td>If true, If true, the resultset will include the geometries associated with each result.  The default value is <code> true</code>.</td>
-              </tr>
-            
-              <tr class="even">
-                <td><code>String,</code></td>
-                
-                  
-                    <td><code></code></td>
-                  
-                
-                <td>[outFields] The list of fields to be included in the returned resultset. This list is a comma delimited list of field names.</td>
+                <td>If true, the resultset will include the geometries associated with each result.  The default value is <code> true</code>.</td>
               </tr>
             
           </tbody>
@@ -3557,7 +3537,7 @@
       
     
       <h2><a name="RelatedRecords"></a>class RelatedRecords</h2>
-      <p>This class represent the results of an query related records operation for a <code><a href="reference.html#Layer">Layer</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/queryrelatedrecords.html'>Query Operation</a>.</p>
+      <p>This class represent the results of an query related records operation for a <code><a href="reference.html#Layer">Layer</a></code>.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/queryrelatedrecords.html'>Query Operation</a>.</p>
       
         <h3>Properties</h3>
         <table summary="class RelatedRecords - Properties" width="90%">
@@ -3610,7 +3590,7 @@
                     <td><code>Object</code></td>
                   
                 
-                <td>spatial Reference <b>wkid info only</b></td>
+                <td><code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
               </tr>
             
           </tbody>
@@ -3804,7 +3784,7 @@
                     <td><code>google.maps.LatLng[]|Marker[]</code></td>
                   
                 
-                <td></td>
+                <td>the locations the route must avoid</td>
               </tr>
             
               <tr class="even">
@@ -3864,7 +3844,7 @@
                     <td><code>google.maps.LatLng[]|Marker[]</code></td>
                   
                 
-                <td></td>
+                <td>the locations the route must pass</td>
               </tr>
             
           </tbody>
@@ -4554,7 +4534,7 @@
     
       <h2><a name="Util"></a>namespace Util</h2>
       <p>
-A set of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.</p>
+A set of utilities ((<code>gmaps.ags.Util</code>) for commonly used functions.</p>
       
         <h3>Static Methods</h3>
         <table summary="namespace Util - Static Methods" width="90%">
@@ -4581,6 +4561,16 @@ A set of utilities ((<code>gmaps.gis.Util</code>) for commonly used functions.<
               </tr>
             
               <tr class="even">
+                <td><code>getJSON(<span class="type">url:String</span>, <span class="type">params:Object</span>, <span class="type">callbackName:String</span>, <span class="type">callbackFn:Function</span>)</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>Make Cross Domain Calls. This function returns thescript ID which can be used to track the requests. parameters:<ul><li>url: url of server resource<li>params: an object with name,value pairs. value must be string<li>callbackName: Callback parameter name the server is expecting.e.g:'callback'<li>callbackFn: the actual callback function.</ul></td>
+              </tr>
+            
+              <tr class="odd">
                 <td><code>removeFromMap(<span class="type">overlays:OverlayView[]</span>, <span class="type">clearArray:Boolean</span>)</code></td>
                 
                   
