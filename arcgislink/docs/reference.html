@@ -9,8 +9,78 @@
   <body>
     <h1>ArcGIS Server Link for Google Maps JavaScript API V3</h1>
     <p>
-<p><a href="examples.html">Examples</a>  </p>  <p>This library lets you add map resources accessible via    <a href = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/index.html'>    ESRI ArcGIS Server&#0153; REST API</a> into <a    href='http://code.google.com/apis/maps/documentation/javascript/'>   Google Maps API V3</a> and provide some additional support for map tiles created    with different spatial reference and tiling scheme.</p>   </p>.   <table>   <tr>   <td style = 'width:200px'>   <code><a href="reference.html#TileLayer">TileLayer</a></code><br/>   <code><a href="reference.html#TileLayerOptions">TileLayerOptions</a></code><br/>   <code><a href="reference.html#MapType">MapType</a></code><br/>   <code><a href="reference.html#MapTypeOptions">MapTypeOptions</a></code><br/>   <code><a href="reference.html#MapOverlay">MapOverlay</a></code><br/>   <code><a href="reference.html#MapOverlayOptions">MapOverlayOptions</a></code><br/>   <code><a href="reference.html#Projection">Projection</a></code><br/>   </td>   <td style = 'width:200px'>   <code><a href="reference.html#Catalog">Catalog</a></code><br/>   <code><a href="reference.html#MapService">MapService</a></code><br/></b>   <code><a href="reference.html#Layer">Layer</a></code><br/>   <code><a href="reference.html#GeocodeService">GeocodeService</a></code><br/>   <code><a href="reference.html#GeometryService">GeometryService</a></code><br/>   <code><a href="reference.html#GPService">GPService</a></code><br/>   <code><a href="reference.html#GPTask">GPTask</a></code><br/>   <code><a href="reference.html#RouteTask">RouteTask</a></code><br/>    <br/></td>    <td style = 'width:200px'>   <code><a href="reference.html#SpatialReference">SpatialReference</a></code><br/>   <code><a href="reference.html#Geographic">Geographic</a></code><br/>   <code><a href="reference.html#LambertConformalConic">LambertConformalConic</a></code><br/>   <code><a href="reference.html#TransverseMercator">TransverseMercator</a></code><br/>   <code><a href="reference.html#SphereMercator">SphereMercator</a></code><br/>   <code><a href="reference.html#SpatialRelationship">SpatialRelationship</a></code><br/>    </td>    <td style = 'width:200px'>   <code><a href="reference.html#Util">Util</a></code> <br/>    <code><a href="reference.html#Config">Config</a></code> <br/>    <code><a href="reference.html#Error">Error</a></code> <br/>     </td>   </tr></table>   <p> There are many objects used in the REST API that do not require    a constructor and can be   used just as object literal in the operation:</p>   <table><tr>   <td style = 'width:200px'>   <code><a href="reference.html#Field">Field</a></code><br/>   <code><a href="reference.html#TileInfo">TileInfo</a></code><br/>   <code><a href="reference.html#LOD">LOD</a></code><br/>   <code><a href="reference.html#ExportMapOptions">ExportMapOptions</a></code><br/>   <code><a href="reference.html#MapImage">MapImage</a></code><br/>   <code><a href="reference.html#IdentifyOptions">IdentifyOptions</a></code><br/>   <code><a href="reference.html#IdentifyResults">IdentifyResults</a></code><br/>   <code><a href="reference.html#IdentifyResult">IdentifyResult</a></code><br/>    <br/></td>    <td style = 'width:200px'>   <code><a href="reference.html#QueryOptions">QueryOptions</a></code><br/>   <code><a href="reference.html#ResultSet">ResultSet</a></code><br/>   <code><a href="reference.html#FindOptions">FindOptions</a></code><br/>   <code><a href="reference.html#FindResults">FindResults</a></code><br/>   <code><a href="reference.html#FindResult">FindResult</a></code><br/>   <code><a href="reference.html#Feature">Feature</a></code><br/>    </td>    <td style = 'width:200px'>   <code><a href="reference.html#GeocodeOptions">GeocodeOptions</a></code><br/>   <code><a href="reference.html#GeocodeResults">GeocodeResults</a></code><br/>   <code><a href="reference.html#GeocodeResult">GeocodeResult</a></code><br/>   <code><a href="reference.html#ReverseGeocodeOptions">ReverseGeocodeOptions</a></code><br/>   <code><a href="reference.html#ReverseGeocodeResult">ReverseGeocodeResult</a></code><br/>   <code><a href="reference.html#BufferOptions">BufferOptions</a></code><br/>   <code><a href="reference.html#BufferResults">BufferResults</a></code><br/>    <code><a href="reference.html#ProjectOptions">ProjectOptions</a></code><br/>   <code><a href="reference.html#ProjectResults">ProjectResults</a></code><br/>    </td>    <td style = 'width:200px'>   <code><a href="reference.html#RouteOptions">RouteOptions</a></code><br/>   <code><a href="reference.html#RouteResults">RouteResults</a></code><br/>     </td>   </tr></table></p>
+<p><a href="examples.html">Examples</a>  </p>  <p>This library lets you add map resources accessible via    <a href = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/index.html'>    ESRI ArcGIS Server&#0153; REST API</a> into <a    href='http://code.google.com/apis/maps/documentation/javascript/'>   Google Maps API V3</a> and provide some additional support for map tiles created    with different spatial reference and tiling scheme.</p>   </p>.   <table>   <tr>   <td style = 'width:200px'>   <code><a href="reference.html#TileLayer">TileLayer</a></code><br/>   <code><a href="reference.html#TileLayerOptions">TileLayerOptions</a></code><br/>   <code><a href="reference.html#MapType">MapType</a></code><br/>   <code><a href="reference.html#MapTypeOptions">MapTypeOptions</a></code><br/>   <code><a href="reference.html#MapOverlay">MapOverlay</a></code><br/>   <code><a href="reference.html#MapOverlayOptions">MapOverlayOptions</a></code><br/>   <code><a href="reference.html#Projection">Projection</a></code><br/>   </td>   <td style = 'width:200px'>   <code><a href="reference.html#Catalog">Catalog</a></code><br/>   <code><a href="reference.html#MapService">MapService</a></code><br/></b>   <code><a href="reference.html#Layer">Layer</a></code><br/>   <code><a href="reference.html#GeocodeService">GeocodeService</a></code><br/>   <code><a href="reference.html#GeometryService">GeometryService</a></code><br/>   <code><a href="reference.html#GPService">GPService</a></code><br/>   <code><a href="reference.html#GPTask">GPTask</a></code><br/>   <code><a href="reference.html#RouteTask">RouteTask</a></code><br/>    <br/></td>    <td style = 'width:200px'>   <code><a href="reference.html#SpatialReference">SpatialReference</a></code><br/>   <code><a href="reference.html#Geographic">Geographic</a></code><br/>   <code><a href="reference.html#LambertConformalConic">LambertConformalConic</a></code><br/>   <code><a href="reference.html#TransverseMercator">TransverseMercator</a></code><br/>   <code><a href="reference.html#SphereMercator">SphereMercator</a></code><br/>   <code><a href="reference.html#Albers">Albers</a></code><br/>   <code><a href="reference.html#SpatialRelationship">SpatialRelationship</a></code><br/>    </td>    <td style = 'width:200px'>   <code><a href="reference.html#Util">Util</a></code> <br/>    <code><a href="reference.html#Config">Config</a></code> <br/>    <code><a href="reference.html#Error">Error</a></code> <br/>     </td>   </tr></table>   <p> There are many objects used in the REST API that do not require    a constructor and can be   used just as object literal in the operation:</p>   <table><tr>   <td style = 'width:200px'>   <code><a href="reference.html#Field">Field</a></code><br/>   <code><a href="reference.html#TileInfo">TileInfo</a></code><br/>   <code><a href="reference.html#LOD">LOD</a></code><br/>   <code><a href="reference.html#ExportMapOptions">ExportMapOptions</a></code><br/>   <code><a href="reference.html#MapImage">MapImage</a></code><br/>   <code><a href="reference.html#IdentifyOptions">IdentifyOptions</a></code><br/>   <code><a href="reference.html#IdentifyResults">IdentifyResults</a></code><br/>   <code><a href="reference.html#IdentifyResult">IdentifyResult</a></code><br/>    <br/></td>    <td style = 'width:200px'>   <code><a href="reference.html#QueryOptions">QueryOptions</a></code><br/>   <code><a href="reference.html#ResultSet">ResultSet</a></code><br/>   <code><a href="reference.html#FindOptions">FindOptions</a></code><br/>   <code><a href="reference.html#FindResults">FindResults</a></code><br/>   <code><a href="reference.html#FindResult">FindResult</a></code><br/>   <code><a href="reference.html#Feature">Feature</a></code><br/>    </td>    <td style = 'width:200px'>   <code><a href="reference.html#GeocodeOptions">GeocodeOptions</a></code><br/>   <code><a href="reference.html#GeocodeResults">GeocodeResults</a></code><br/>   <code><a href="reference.html#GeocodeResult">GeocodeResult</a></code><br/>   <code><a href="reference.html#ReverseGeocodeOptions">ReverseGeocodeOptions</a></code><br/>   <code><a href="reference.html#ReverseGeocodeResult">ReverseGeocodeResult</a></code><br/>   <code><a href="reference.html#BufferOptions">BufferOptions</a></code><br/>   <code><a href="reference.html#BufferResults">BufferResults</a></code><br/>    <code><a href="reference.html#ProjectOptions">ProjectOptions</a></code><br/>   <code><a href="reference.html#ProjectResults">ProjectResults</a></code><br/>    </td>    <td style = 'width:200px'>   <code><a href="reference.html#RouteOptions">RouteOptions</a></code><br/>   <code><a href="reference.html#RouteResults">RouteResults</a></code><br/>     </td>   </tr></table></p>
     <p>For a description and examples of how to use this library, check out the <a href="examples.html">how-to</a>.</p>
+    
+      <h2><a name="Albers"></a>class Albers</h2>
+      <p>This class (<code>gmaps.ags.Albers</code>) represents a Spatial Reference System based on <a target=wiki href  = 'http://en.wikipedia.org/wiki/Albers_projection'>Albers Projection</a>.  This class extends <code><a href="reference.html#SpatialReference">SpatialReference</a></code>.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class Albers - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>Albers(<span class="type">params:Object</span>)</code></td>
+                
+                <td>Create a Albers Equal-Area Conic Projection based Spatial Reference. The <code>params</code> passed in construction shouldinclude the following properties:<code><br/>-wkid: well-known id<br/>-semi_major:  ellipsoidal semi-major axis in meter<br/>-unit: meters per unit<br/>-inverse_flattening: inverse of flattening of the ellipsoid where 1/f  =  a/(a - b)<br/>-standard_parallel_1: phi1, latitude of the first standard parallel<br/>-standard_parallel_2: phi2, latitude of the second standard parallel<br/>-latitude_of_origin: phi0, latitude of the false origin<br/>-central_meridian: lamda0, longitude of the false origin  (with respect to the prime meridian)<br/>-false_easting: FE, false easting, the Eastings value assigned to the natural origin<br/>-false_northing: FN, false northing, the Northings value assigned to the natural origin</code><br/> e.g. <code> var albers  = new gmaps.ags.Albers({wkid:9999, semi_major: 6378206.4,inverse_flattening: 294.9786982,  standard_parallel_1: 29.5, standard_parallel_2: 45.5,  central_meridian: -96.0, latitude_of_origin: 23,'false_easting': 0,  'false_northing': 0, unit: 1 }); </code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Methods</h3>
+        <table summary="class Albers - Methods" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Methods</th>
+              
+                
+                  <th>Return&nbsp;Value</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>forward(<span class="type">lnglat:Number[]</span>)</code></td>
+                
+                  
+                    <td><code>Number[]</code></td>
+                  
+                
+                <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>getCircum()</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>inverse(<span class="type">coords:Number[]</span>)</code></td>
+                
+                  
+                    <td><code>Number[]</code></td>
+                  
+                
+                <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
     
       <h2><a name="BufferOptions"></a>class BufferOptions</h2>
       <p>This class represent the parameters needed in an buffer operation for a <code><a href="reference.html#GeometryService">GeometryService</a></code>.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
@@ -1053,7 +1123,7 @@
                     <td><code>None</code></td>
                   
                 
-                <td>The reverseGeocode operation is The reverseGeocode operation is performed on a geocode service resource. The result of this operation is a reverse geocoded address resource. param is an instance of <code><a href="reference.html#ReverseGeocodeOptions">ReverseGeocodeOptions</a></code>. An instance of <code><a href="reference.html#ReverseGeocodeResult">ReverseGeocodeResult</a></code> will be passed into callback function.</td>
+                <td>The reverseGeocode operation is The reverseGeocode operation is performed on a geocode service resource. The result of this operation is a inverse geocoded address resource. param is an instance of <code><a href="reference.html#ReverseGeocodeOptions">ReverseGeocodeOptions</a></code>. An instance of <code><a href="reference.html#ReverseGeocodeResult">ReverseGeocodeResult</a></code> will be passed into callback function.</td>
               </tr>
             
           </tbody>
@@ -1726,7 +1796,7 @@
               <tr class="odd">
                 <td><code>LambertConformalConic(<span class="type">params:Object</span>)</code></td>
                 
-                <td>Create a Lambert Conformal Conic Projection based Spatial Reference. The <code>params</code> passed in construction shouldinclude the following properties:<code><br/>-wkid: well-known id<br/>-semi_major:  ellipsoidal semi-major axis in meter<br/>-unit: meters per unit<br/>-inverse_flattening: inverse of flattening of the ellipsoid where 1/f  =  a/(a - b)<br/>-standard_parallel_1: phi1, latitude of the first standard parallel<br/>-standard_parallel_2: phi2, latitude of the second standard parallel<br/>-latitude_of_origin: phiF, latitude of the false origin<br/>-central_meridian: lamdaF, longitude of the false origin  (with respect to the prime meridian)<br/>-false_easting: FE, false easting, the Eastings value assigned to the natural origin<br/>-false_northing: FN, false northing, the Northings value assigned to the natural origin</code><br/> e.g. North Carolina State Plane NAD83 Feet: <br/><code> var ncsp82  = new gmaps.ags.LambertConformalConic({wkid:2264, semi_major: 6378137.0,inverse_flattening: 298.257222101,  standard_parallel_1: 34.33333333333334, standard_parallel_2: 36.16666666666666,  central_meridian: -79.0, latitude_of_origin: 33.75,'false_easting': 2000000.002616666,  'false_northing': 0, unit: 0.3048006096012192 }); </code></td>
+                <td>Create a Lambert Conformal Conic Projection based Spatial Reference. The <code>params</code> passed in construction shouldinclude the following properties:<code><br/>-wkid: well-known id<br/>-semi_major:  ellipsoidal semi-major axis in meter<br/>-unit: meters per unit<br/>-inverse_flattening: inverse of flattening of the ellipsoid where 1/f  =  a/(a - b)<br/>-standard_parallel_1: phi1, latitude of the first standard parallel<br/>-standard_parallel_2: phi2, latitude of the second standard parallel<br/>-latitude_of_origin: phi0, latitude of the false origin<br/>-central_meridian: lamda0, longitude of the false origin  (with respect to the prime meridian)<br/>-false_easting: FE, false easting, the Eastings value assigned to the natural origin<br/>-false_northing: FN, false northing, the Northings value assigned to the natural origin</code><br/> e.g. North Carolina State Plane NAD83 Feet: <br/><code> var ncsp82  = new gmaps.ags.LambertConformalConic({wkid:2264, semi_major: 6378137.0,inverse_flattening: 298.257222101,  standard_parallel_1: 34.33333333333334, standard_parallel_2: 36.16666666666666,  central_meridian: -79.0, latitude_of_origin: 33.75,'false_easting': 2000000.002616666,  'false_northing': 0, unit: 0.3048006096012192 }); </code></td>
               </tr>
             
           </tbody>
@@ -1767,7 +1837,7 @@
               </tr>
             
               <tr class="odd">
-                <td><code>reverse(<span class="type">coords:Number[]</span>)</code></td>
+                <td><code>inverse(<span class="type">coords:Number[]</span>)</code></td>
                 
                   
                     <td><code>Number[]</code></td>
@@ -2242,7 +2312,7 @@
                     <td><code>None</code></td>
                   
                 
-                <td>The API invokes a separate draw() method on the overlay whenever it needs to draw the overlay on the map (including when first added).Implement this method to draw or update the overlay. This method is called after onAdd() and when the position from projection.fromLatLngToPixel() would return a new value for a given LatLng. This can happen on change of zoom, center, or map type. It is not necessarily called on drag or resize.See OverlayView.draw.</td>
+                <td>The API invokes a separate draw() method on the overlay whenever it needs to drawthe overlay on the map (including when first added).Implement this method to draw or update the overlay.This method is called after onAdd() and whenthe position from projection.fromLatLngToPixel()would return a new value for a given LatLng.This can happen on change of zoom, center, ormap type. It is not necessarily called on drag or resize.See OverlayView.draw.</td>
               </tr>
             
               <tr class="even">
@@ -2764,7 +2834,7 @@
                     <td><code>Node</code></td>
                   
                 
-                <td>Get a tile for given tile coordinates Returns a tile for the given tile coordinate (x, y) and zoom level. This tile will be appended to the given ownerDocument.</td>
+                <td>Get a tile for given tile coordinates Returns a tile for the given tile coordinate (x, y) and zoom level.This tile will be appended to the given ownerDocument.</td>
               </tr>
             
               <tr class="odd">
@@ -2802,7 +2872,7 @@
       
     
       <h2><a name="MapTypeOptions"></a>class MapTypeOptions</h2>
-      <p>Instance of this class are used in the <code>opt_typeOpts</code> argument to the constructor of the <code><a href="reference.html#MapType">MapType</a></code> class. See  <a href=http://code.google.com/apis/maps/documentation/javascript/reference.html#MapType>google.maps.MapType</a>.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
+      <p>Instance of this class are used in the <code>opt_typeOpts</code> argument to the constructor of the <code><a href="reference.html#MapType">MapType</a></code> class. See <a href=http://code.google.com/apis/maps/documentation/javascript/reference.html#MapType>google.maps.MapType</a>.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
       
         <h3>Properties</h3>
         <table summary="class MapTypeOptions - Properties" width="90%">
@@ -2835,7 +2905,7 @@
                     <td><code>google.maps.Map</code></td>
                   
                 
-                <td>The map instance. Can be useful for copyright info.   May not need if API provides access to map instance later.</td>
+                <td>The map instance. Can be useful for copyright info.  May not need if API provides access to map instance later.</td>
               </tr>
             
               <tr class="odd">
@@ -3122,7 +3192,7 @@
       
     
       <h2><a name="Projection"></a>class Projection</h2>
-      <p>This class (<code>gmaps.ags.Projection</code>) implements a custom<a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a> from the core Google Maps API.  It carries a real <code><a href="reference.html#SpatialReference">SpatialReference</a></code> object to convert LatLng from/to  map coordinates, and tiling scheme informations to convert  map coordinates from/to pixel coordinates.</p>
+      <p>This class (<code>gmaps.ags.Projection</code>) implements a custom<a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a>from the core Google Maps API.  It carries a real <code><a href="reference.html#SpatialReference">SpatialReference</a></code> object to convert LatLng from/to  map coordinates, and tiling scheme informations to convert  map coordinates from/to pixel coordinates.</p>
       
         <h3>Constructor</h3>
         <table summary="class Projection - Constructor" width="90%">
@@ -3679,7 +3749,7 @@
       
     
       <h2><a name="ReverseGeocodeOptions"></a>class ReverseGeocodeOptions</h2>
-      <p>This class represent the parameters needed in a reverseGeocode operation on a <code><a href="reference.html#GeocodeService">GeocodeService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/reverse.html'>Reverse Geocode Operation</a>.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
+      <p>This class represent the parameters needed in a reverseGeocode operation on a <code><a href="reference.html#GeocodeService">GeocodeService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/inverse.html'>Reverse Geocode Operation</a>.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
       
         <h3>Properties</h3>
         <table summary="class ReverseGeocodeOptions - Properties" width="90%">
@@ -3720,7 +3790,7 @@
       
     
       <h2><a name="ReverseGeocodeResult"></a>class ReverseGeocodeResult</h2>
-      <p>This class represent one entry in the results of a find address operation for a <code><a href="reference.html#GeocodeService">GeocodeService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/reverse.html'>Reverse Geocode Operation</a>.</p>
+      <p>This class represent one entry in the results of a find address operation for a <code><a href="reference.html#GeocodeService">GeocodeService</a></code>.  There is no constructor, use JavaScript object literal.<br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/inverse.html'>Reverse Geocode Operation</a>.</p>
       
         <h3>Properties</h3>
         <table summary="class ReverseGeocodeResult - Properties" width="90%">
@@ -4026,7 +4096,7 @@
               </tr>
             
               <tr class="odd">
-                <td><code>reverse(<span class="type">coords:Number[]</span>)</code></td>
+                <td><code>inverse(<span class="type">coords:Number[]</span>)</code></td>
                 
                   
                     <td><code>Number[]</code></td>
@@ -4176,7 +4246,7 @@
               <tr class="odd">
                 <td><code>SphereMercator(<span class="type">params:Object</span>)</code></td>
                 
-                <td>Creates a Spatial Reference based on Sphere Mercator Projection. The <code>params</code> passed in constructor should have the following properties:<code><br/>-wkid: wkid<br/>-semi_major:  ellipsoidal semi-major axis <br/>-unit: meters per unit<br/>-central_meridian: lamdaF, longitude of the false origin  (with respect to the prime meridian)</code><br/>e.g. The "Web Mercator" used in ArcGIS Server:<br/><code> var web_mercator  = new SphereMercator({wkid: 102113,  semi_major:6378137.0,  central_meridian:0, unit: 1 });</code></td>
+                <td>Creates a Spatial Reference based on Sphere Mercator Projection. The <code>params</code> passed in constructor should have the following properties:<code><br/>-wkid: wkid<br/>-semi_major:  ellipsoidal semi-major axis <br/>-unit: meters per unit<br/>-central_meridian: lamda0, longitude of the false origin  (with respect to the prime meridian)</code><br/>e.g. The "Web Mercator" used in ArcGIS Server:<br/><code> var web_mercator  = new SphereMercator({wkid: 102113,  semi_major:6378137.0,  central_meridian:0, unit: 1 });</code></td>
               </tr>
             
           </tbody>
@@ -4217,7 +4287,7 @@
               </tr>
             
               <tr class="odd">
-                <td><code>reverse(<span class="type">coords:Number[]</span>)</code></td>
+                <td><code>inverse(<span class="type">coords:Number[]</span>)</code></td>
                 
                   
                     <td><code>Number[]</code></td>
@@ -4332,7 +4402,7 @@
       
     
       <h2><a name="TileLayer"></a>class TileLayer</h2>
-      <p>This class (<code>gmaps.ags.TileLayer</code>) provides access to a cached ArcGIS Server map service. There is no GTileLayer class in Google Maps API V3, but this class is kept to allowfiner control of zoom levels for each individual tile sets within a map type, such as zoom level range and opacity.<br/> This class can be used in <code><a href="reference.html#MapType">MapType</a></code></p>
+      <p>This class (<code>gmaps.ags.TileLayer</code>) provides access to a cached ArcGIS Servermap service. There is no GTileLayer class in Google Maps API V3, but this class is kept to allowfiner control of zoom levels for each individual tile sets within a map type, such as zoom level range and opacity.<br/> This class can be used in <code><a href="reference.html#MapType">MapType</a></code></p>
       
         <h3>Constructor</h3>
         <table summary="class TileLayer - Constructor" width="90%">
@@ -4478,7 +4548,7 @@
               <tr class="odd">
                 <td><code>TransverseMercator(<span class="type">params:Object</span>)</code></td>
                 
-                <td>Create a Transverse Mercator Projection. The <code>params</code> passed in constructor should contain the following properties: <br/><code><br/>-wkid: well-known id<br/>-semi_major:  ellipsoidal semi-major axis in meters<br/>-unit: meters per unit<br/>-inverse_flattening: inverse of flattening of the ellipsoid where 1/f  =  a/(a - b)<br/>-Scale Factor: scale factor at origin<br/>-latitude_of_origin: phiF, latitude of the false origin<br/>-central_meridian: lamdaF, longitude of the false origin  (with respect to the prime meridian)<br/>-false_easting: FE, false easting, the Eastings value assigned to the natural origin <br/>-false_northing: FN, false northing, the Northings value assigned to the natural origin </code><br/>e.g. Georgia West State Plane NAD83 Feet:  <br/><code> var gawsp83  = new gmaps.ags.TransverseMercator({wkid: 102667, semi_major:6378137.0, inverse_flattening:298.257222101,central_meridian:-84.16666666666667, latitude_of_origin: 30.0, scale_factor:0.9999,'false_easting':2296583.333333333, 'false_northing':0, unit: 0.3048006096012192}); </code></td>
+                <td>Create a Transverse Mercator Projection. The <code>params</code> passed in constructor should contain the following properties: <br/><code><br/>-wkid: well-known id<br/>-semi_major:  ellipsoidal semi-major axis in meters<br/>-unit: meters per unit<br/>-inverse_flattening: inverse of flattening of the ellipsoid where 1/f  =  a/(a - b)<br/>-Scale Factor: scale factor at origin<br/>-latitude_of_origin: phi0, latitude of the false origin<br/>-central_meridian: lamda0, longitude of the false origin  (with respect to the prime meridian)<br/>-false_easting: FE, false easting, the Eastings value assigned to the natural origin <br/>-false_northing: FN, false northing, the Northings value assigned to the natural origin </code><br/>e.g. Georgia West State Plane NAD83 Feet:  <br/><code> var gawsp83  = new gmaps.ags.TransverseMercator({wkid: 102667, semi_major:6378137.0, inverse_flattening:298.257222101,central_meridian:-84.16666666666667, latitude_of_origin: 30.0, scale_factor:0.9999,'false_easting':2296583.333333333, 'false_northing':0, unit: 0.3048006096012192}); </code></td>
               </tr>
             
           </tbody>
@@ -4519,7 +4589,7 @@
               </tr>
             
               <tr class="odd">
-                <td><code>reverse(<span class="type">coords:Number[]</span>)</code></td>
+                <td><code>inverse(<span class="type">coords:Number[]</span>)</code></td>
                 
                   
                     <td><code>Number[]</code></td>
