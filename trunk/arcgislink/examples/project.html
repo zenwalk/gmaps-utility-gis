@@ -10,12 +10,13 @@
         </script>
         <script type="text/javascript">
             var map, svc, iw, pt;
-            gmaps.ags.Config.proxyUrl = '/proxy/proxy.ashx';
+            //gmaps.ags.Config.proxyUrl = '/proxy/proxy.ashx';
             function init() {
               var myOptions = {
-                zoom: 5,
-                center: new google.maps.LatLng(65.712557, -154.423828),
-                mapTypeId: google.maps.MapTypeId.ROADMAP
+                zoom: 15,
+                center: new google.maps.LatLng(61.18, -149.86),
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                draggableCursor: 'default'
               }
               map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
               svc = new gmaps.ags.GeometryService('http://sampleserver1.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer');
@@ -23,6 +24,7 @@
               google.maps.event.addListener(map, 'click', function(evt) {
                 projectTo(evt.latLng);
               });
+              
               iw = new google.maps.InfoWindow({
                 maxWidth: 200, 
                 content: 'Click map to project the clicked point to Alaska Albers Feet Projection',

@@ -156,7 +156,7 @@ getJSON
 addToMap
 removeFromMap
 forward
-reverse
+inverse
 getLayer
 getCircumference
 query
@@ -190,3 +190,9 @@ geocode
 reverseGeocode
 execute
 parameters
+
+gmaps
+ags
+ags_jsonp
+google
+maps
