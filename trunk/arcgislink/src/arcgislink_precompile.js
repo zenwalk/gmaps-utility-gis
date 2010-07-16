@@ -656,10 +656,11 @@
    * @namespace
    */
   var Util = {};
-  
-  function getJSON(url, params, callbackName, callbackFn) {
-    var sid = 'ags_jsonp' + (jsonpID_++) + '_' + Math.floor(Math.random() * 1000000);
-    var script = null;
+  /**
+   * Format params to URL string
+   * @param {Object} params
+   */
+  function formatParams(params) {
     var query = '';
     if (params) {
       params['f'] = params['f'] || STR.json;
@@ -671,6 +672,12 @@
         }
       }
     }
+    return query;
+  }
+  function getJSON(url, params, callbackName, callbackFn) {
+    var sid = 'ags_jsonp' + (jsonpID_++) + '_' + Math.floor(Math.random() * 1000000);
+    var script = null;
+    var query = formatParams(params);
     query += callbackName + '=ags_jsonp.' + sid;
     var head = document.getElementsByTagName("head")[0];
     if (!head) {
@@ -882,7 +889,6 @@
  */
   function LambertConformalConic(params) {
     //http://pubs.er.usgs.gov/djvu/PP/PP_1395.pdf
-    // http://www.posc.org/Epicentre.2_2/DataModel/ExamplesofUsage/eu_cs34.html
     //for NCSP83: GLatLng(35.102363,-80.5666)<  === > GPoint(1531463.95, 495879.744);
     params = params || {};
     SpatialReference.call(this, params);
@@ -905,7 +911,7 @@
     var t2 = this.calc_t_(phi2, this.e_);
     this.n_ = Math.log(m1 / m2) / Math.log(t1 / t2);
     this.F_ = m1 / (this.n_ * Math.pow(t1, this.n_));
-    this.rF_ = this.calc_r_(this.a_, this.F_, tF, this.n_);
+    this.rho0_ = this.calc_rho_(this.a_, this.F_, tF, this.n_);
   }
   
   LambertConformalConic.prototype = new SpatialReference();
@@ -924,17 +930,17 @@
    * @param {Object} e
    */
   LambertConformalConic.prototype.calc_t_ = function (phi, e) {
-    var esinphi = e * Math.sin(phi);
-    return Math.tan(Math.PI / 4 - phi / 2) / Math.pow((1 - esinphi) / (1 + esinphi), e / 2);
+    var esp = e * Math.sin(phi);
+    return Math.tan(Math.PI / 4 - phi / 2) / Math.pow((1 - esp) / (1 + esp), e / 2);
   };
   /**
-   * calc_r_
+   * calc_rho (15-7)_
    * @param {Object} a
    * @param {Object} F
    * @param {Object} t
    * @param {Object} n
    */
-  LambertConformalConic.prototype.calc_r_ = function (a, F, t, n) {
+  LambertConformalConic.prototype.calc_rho_ = function (a, F, t, n) {
     return a * F * Math.pow(t, n);
   };
   /**
@@ -943,9 +949,9 @@
    * @param {Object} e
    * @param {Object} phi
    */
-  LambertConformalConic.prototype.calc_phi_ = function (t_i, e, phi) {
-    var esinphi = e * Math.sin(phi);
-    return Math.PI / 2 - 2 * Math.atan(t_i * Math.pow((1 - esinphi) / (1 + esinphi), e / 2));
+  LambertConformalConic.prototype.calc_phi_ = function (t, e, phi) {
+    var esp = e * Math.sin(phi);
+    return Math.PI / 2 - 2 * Math.atan(t * Math.pow((1 - esp) / (1 + esp), e / 2));
   };
   /**
    * solve phi iteratively.
@@ -974,10 +980,10 @@
     var phi = lnglat[1] * RAD_DEG;// (Math.PI / 180);
     var lamda = lnglat[0] * RAD_DEG;
     var t = this.calc_t_(phi, this.e_);
-    var r = this.calc_r_(this.a_, this.F_, t, this.n_);
+    var rho = this.calc_rho_(this.a_, this.F_, t, this.n_);
     var theta = this.n_ * (lamda - this.lamda0_);
-    var E = this.FE_ + r * Math.sin(theta);
-    var N = this.FN_ + this.rF_ - r * Math.cos(theta);
+    var E = this.FE_ + rho * Math.sin(theta);
+    var N = this.FN_ + this.rho0_ - rho * Math.cos(theta);
     return [E, N];
   };
   /**
@@ -988,10 +994,11 @@
   LambertConformalConic.prototype['inverse'] = function (coords) {
     var E = coords[0] - this.FE_;
     var N = coords[1] - this.FN_;
-    var theta = Math.atan(E / (this.rF_ - N));
-    var r_i = (this.n_ > 0 ? 1 : -1) * Math.sqrt(E * E + (this.rF_ - N) * (this.rF_ - N));
-    var t_i = Math.pow((r_i / (this.a_ * this.F_)), 1 / this.n_);
-    var phi = this.solve_phi_(t_i, this.e_, 0);
+    var theta = Math.atan(E / (this.rho0_ - N));
+    var rho = (this.n_ > 0 ? 1 : -1) * Math.sqrt(E * E + (this.rho0_ - N) * (this.rho0_ - N));
+    var t = Math.pow((rho / (this.a_ * this.F_)), 1 / this.n_);
+    var init = Math.PI / 2 - 2 * Math.atan(t);
+    var phi = this.solve_phi_(t, this.e_, init);
     var lamda = theta / this.n_ + this.lamda0_;
     return [lamda / RAD_DEG, phi / RAD_DEG];
   };
@@ -1236,8 +1243,8 @@
    * @param {Object} e
    */
   Albers.prototype.calc_q_ = function (phi, e) {
-    var esinphi = e * Math.sin(phi);
-    return (1 - e * e) * (Math.sin(phi) / (1 - esinphi * esinphi) - (1 / (2 * e)) * Math.log((1 - esinphi) / (1 + esinphi)));
+    var esp = e * Math.sin(phi);
+    return (1 - e * e) * (Math.sin(phi) / (1 - esp * esp) - (1 / (2 * e)) * Math.log((1 - esp) / (1 + esp)));
   };
   
   Albers.prototype.calc_rho_ = function (a, C, n, q) {
@@ -1988,6 +1995,7 @@
    * @param {ExportMapOptions} params
    * @param {Function} callback
    * @param {Function} errback
+   * @return {String|None} url of image if f=image, none if f=json
    */
   MapService.prototype['exportMap'] = function (p, callback, errback) {
     if (!p || !p['bounds']) {
@@ -1995,6 +2003,7 @@
     }
     // note: dynamic map may overlay on top of maptypes with different projection
     var params = {};// augmentObject(p, );
+    params['f'] = p['f'];
     var bnds = p['bounds'];
     params['bbox'] = '' + bnds.getSouthWest().lng() + ',' + '' + bnds.getSouthWest().lat() + ',' +
     bnds.getNorthEast().lng() +
@@ -2033,9 +2042,11 @@
       params['layers'] =  layerOpt + ':' + vlayers.join(',');
     } else {
       // no layers visible, no need to go to server
-      callback({
-        href: null
-      });
+      if (callback) {
+        callback({
+          href: null
+        });
+      }
       return;
     }
     params['transparent'] = (p['transparent'] === false ? false : true);
@@ -2045,11 +2056,19 @@
     //TODO: finish once v10 released
     params['layerTimeOptions'] = p['layerTimeOptions'];
     
-    getJSON(this['url'] + '/export', params, 'callback', function (json) {
-      json['bounds'] = fromEnvelopeToLatLngBounds(json['extent']);
-      delete json['extent'];
-      callback(json); //callback.apply(null,json);
-    });
+    if (params['f'] === 'image') {
+      return this['url'] + '/export?' + formatParams(params);
+    } else {
+      getJSON(this['url'] + '/export', params, 'callback', function (json) {
+        if (json['extent']) {
+          json['bounds'] = fromEnvelopeToLatLngBounds(json['extent']);
+          delete json['extent'];
+          callback(json); 
+        } else {
+          handleErr(errback, json['error']);  
+        }
+      });
+    }
   };
  /**
  * @name Feature
@@ -2837,33 +2856,37 @@
    * @param {TileInfo} tileInfo
    */
   function Projection(tileInfo) {
-    if (!tileInfo) {
-      throw new Error('map service is not tiled');
-    }
-    this.lods_ = tileInfo['lods'];
-    this.spatialReference_ = spatialReferences[tileInfo['spatialReference']['wkid'] || tileInfo['spatialReference']['wkt']];
+    //if (!tileInfo) {
+    //  throw new Error('map service is not tiled');
+    //}
+    this.lods_ = tileInfo ? tileInfo['lods'] : null;
+    this.spatialReference_ = tileInfo ? spatialReferences[tileInfo['spatialReference']['wkid'] || tileInfo['spatialReference']['wkt']] : WEB_MERCATOR;
     if (!this.spatialReference_) {
       throw new Error('unsupported Spatial Reference');
     }
     // resolution (unit/pixel) at lod level 0. Due to changes from V2-V3, 
     // zoom is no longer defined in Projection. It is assumed that level's zoom factor is 2. 
-    this.resolution0_ = this.lods_[0]['resolution'];
+    this.resolution0_ = tileInfo ? tileInfo['lods'][0]['resolution'] : 156543.033928;
     // zoom offset of this tileinfo's zoom 0 to Google's zoom0
     this['minZoom'] = Math.floor(Math.log(this.spatialReference_.getCircum() / this.resolution0_ / 256) / Math.LN2 + 0.5);
-    this['maxZoom'] = this['minZoom'] + this.lods_.length - 1;
-    this['tileSize'] = new G.Size(tileInfo['cols'], tileInfo['rows']);
+    this['maxZoom'] = tileInfo ? this['minZoom'] + this.lods_.length - 1 : 20;
+    if (G.Size) {
+      this.tileSize_ = tileInfo ? new G.Size(tileInfo['cols'], tileInfo['rows']) : new G.Size(256, 256);
+    }
     // Find out how the map units scaled to 1 tile at zoom 0. 
     // from V2-V3, coords must scaled to 256 pixel under Mercator at zoom 0.
     // scale can be considered under this SR, what's the actual pixel number to 256 to cover whole earth?
     this.scale_ = Math.pow(2, this['minZoom']) * this.resolution0_;
-    this.originX_ = tileInfo['origin']['x'];
-    this.originY_ = tileInfo['origin']['y'];
+    this.originX_ = tileInfo ? tileInfo['origin']['x'] : -20037508.342787;
+    this.originY_ = tileInfo ? tileInfo['origin']['y'] : 20037508.342787;
     // validation check
-    var ratio;
-    for (var i = 0; i < tileInfo['lods'].length - 1; i++) {
-      ratio = tileInfo['lods'][i]['resolution'] / tileInfo['lods'][i + 1]['resolution'];
-      if (ratio > 2.001 || ratio < 1.999) {
-        throw new Error('This type of map cache is not supported in V3. \nScale ratio between zoom levels must be 2');
+    if (tileInfo) {
+      var ratio;
+      for (var i = 0; i < tileInfo['lods'].length - 1; i++) {
+        ratio = tileInfo['lods'][i]['resolution'] / tileInfo['lods'][i + 1]['resolution'];
+        if (ratio > 2.001 || ratio < 1.999) {
+          throw new Error('This type of map cache is not supported in V3. \nScale ratio between zoom levels must be 2');
+        }
       }
     }
   }
@@ -2913,6 +2936,8 @@
     }
     return res;
   };
+  
+  Projection.WEB_MECATOR = new Projection();
   
   /**
    * @name TileLayerOptions
@@ -2968,6 +2993,7 @@
       });
     }
     this.tiles_ = {};
+    this.map_ = opt_layerOpts['map'];
   }
   
   /**
@@ -2975,9 +3001,11 @@
    * @param {Object} opt_layerOpts
    */
   TileLayer.prototype.init_ = function (opt_layerOpts) {
-    this.projection_ = new Projection(this.mapService_['tileInfo']);//, this.mapService_.fullExtent);
-    this['minZoom'] = opt_layerOpts['minZoom'] || this.projection_['minZoom'];
-    this['maxZoom'] = opt_layerOpts['maxZoom'] || this.projection_['maxZoom'];
+    if (this.mapService_['tileInfo']) {
+      this.projection_ = new Projection(this.mapService_['tileInfo']);
+      this['minZoom'] = opt_layerOpts['minZoom'] || this.projection_['minZoom'];
+      this['maxZoom'] = opt_layerOpts['maxZoom'] || this.projection_['maxZoom'];
+    }
   };
   
   
@@ -2996,7 +3024,29 @@
       if (this.urlTemplate_) {
         u = this.urlTemplate_.replace('[' + this.numOfHosts_ + ']', '' + ((tile['y'] + tile['x']) % this.numOfHosts_));
       }
-      url = u + '/tile/' + z + '/' + tile['y'] + '/' + tile['x'];
+      if (this.mapService_.singleFusedMapCache) {
+        url = u + '/tile/' + z + '/' + tile['y'] + '/' + tile['x'];
+      } else {
+        // dynamic map service
+        var prj = this.projection_ || this.map_ ? this.map_.getProjection() : Projection.WEB_MECATOR;
+        if (!prj instanceof Projection) {
+          // if use Google's image 
+          prj = Projection.WEB_MECATOR;
+        }
+        var size = prj.tileSize_;
+        var numOfTiles = 1 << zoom;
+        var gworldsw = new G.Point(tile['x'] * size['width'] / numOfTiles, (tile['y'] + 1) * size['height'] / numOfTiles);
+        var gworldne = new G.Point((tile['x'] + 1) * size['width'] / numOfTiles, tile['y'] * size['height'] / numOfTiles);
+        var bnds = new G.LatLngBounds(prj['fromPointToLatLng'](gworldsw), prj['fromPointToLatLng'](gworldne));
+        var params = {
+          'f': 'image'
+        };
+        params['bounds'] = bnds;
+        params['width'] = size['width'];
+        params['height'] = size['height'];
+        params['imageSR'] = prj.spatialReference_;
+        url = this.mapService_['exportMap'](params);
+      }
     }
     //log('url=' + url);
     return url;
@@ -3071,15 +3121,15 @@
     augmentObject(opt_typeOpts, this);
     var layers = tileLayers;
     if (isString(tileLayers)) {
-      layers = [new TileLayer(tileLayers)];
+      layers = [new TileLayer(tileLayers, opt_typeOpts)];
     } else if (tileLayers instanceof MapService) {
-      layers = [new TileLayer(tileLayers)];
+      layers = [new TileLayer(tileLayers, opt_typeOpts)];
     } else if (tileLayers instanceof TileLayer) {
       layers = [tileLayers];
     } else if (tileLayers.length > 0 && isString(tileLayers[0])) {
       layers = [];
       for (i = 0; i < tileLayers.length; i++) {
-        layers[i] = new TileLayer(tileLayers[i]);
+        layers[i] = new TileLayer(tileLayers[i], opt_typeOpts);
       }
     }
     this.tileLayers_ = layers;
@@ -3095,7 +3145,7 @@
       this['maxZoom'] = maxZ;
     }
     if (layers[0].projection_) {
-      this['tileSize'] = layers[0].projection_['tileSize'];
+      this['tileSize'] = layers[0].projection_.tileSize_;
       this.projection = layers[0].projection_;
     } else {
       this['tileSize'] = new G.Size(256, 256);
@@ -3340,7 +3390,7 @@
     params['height'] = s.offsetHeight;
     var prj = m.getProjection(); // note this is not same as this.getProjection which returns MapCanvasProjection
     if (prj && prj instanceof Projection) {
-      sr = prj['spatialReference'];
+      sr = prj.spatialReference_;
     }
     params['imageSR'] = sr;
     /**
