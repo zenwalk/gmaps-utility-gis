@@ -87,7 +87,7 @@ goog.require('goog.ui.TabBar');
                 for (var j = 0; j < count; j++) {
                   var attributes = results[j].feature.attributes;
                   content += "<tr>";
-                  content += "<td><a href='#' onclick='showFeature(" + layerId + "," + j + ")'>" + attributes["TLID"]  + "</a></td>";
+                  content += "<td><a href='javascript:void(0)' onclick='showFeature(" + layerId + "," + j + ")'>" + attributes["TLID"]  + "</a></td>";
                   content += "<td>" + attributes["OWNER1"]  + "</td>";
                   content += "<td>" + attributes["TOTALVAL"]  + "</td>";
                   content += "</tr>";
@@ -102,7 +102,7 @@ goog.require('goog.ui.TabBar');
                 for (var j = 0; j < count; j++) {
                   var attributes = results[j].feature.attributes;
                   content += "<tr>";
-                  content += "<td><a href='#' onclick='showFeature(" + layerId + "," + j + ")'>" + attributes["OBJECTID_1"]  + "</td>";
+                  content += "<td><a href='javascript:void(0)' onclick='showFeature(" + layerId + "," + j + ")'>" + attributes["OBJECTID_1"]  + "</td>";
                   content += "<td>" + attributes["Shape_Area"]  + "</td>";
                   content += "</tr>";
                 }
@@ -116,7 +116,7 @@ goog.require('goog.ui.TabBar');
                 for (var j = 0; j < count; j++) {
                   var attributes = results[j].feature.attributes;
                   content += "<tr>";
-                  content += "<td><a href='#' onclick='showFeature(" + layerId + "," + j + ")'>" + attributes["OBJECTID"]  + "</td>";
+                  content += "<td><a href='javascript:void(0)' onclick='showFeature(" + layerId + "," + j + ")'>" + attributes["OBJECTID"]  + "</td>";
                   content += "<td>" + attributes["ZONE"]  + "</td>";
                   content += "<td>" + attributes["ZONE_CLASS"]  + "</td>";
                   content += "<td>" + attributes["ZONEGEN_CL"]  + "</td>";
