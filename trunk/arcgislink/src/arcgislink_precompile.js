@@ -1554,12 +1554,12 @@
    */
   Layer.prototype['loadInfo'] = function (opt_callback) {
     var me = this;
-    if (this.loaded) {
+    if (this.loaded_) {
       return;
     }
     getJSON(this['url'], {}, 'callback', function (json) {
       augmentObject(json, me);
-      me.loaded = true;
+      me.loaded_ = true;
       if (opt_callback) {
         opt_callback();
       }
@@ -1766,7 +1766,7 @@
    */
   function MapService(url) {
     this['url'] = url;
-    this.loaded = false;
+    this.loaded_ = false;
     var tks = url.split("/");
     this['name'] = tks[tks.length - 2].replace(/_/g, ' ');
     var me = this;
@@ -1841,7 +1841,7 @@
     if (json2['tables']) {
       this['tables'] = tables;
     }
-    this.loaded = true;
+    this.loaded_ = true;
     /**
      * This event is fired when the service and it's service info is loaded.
      * @name MapService#load
@@ -1888,7 +1888,7 @@
   };
   /**
    * get a  list of visible layer's Ids
-   * @return {Number[]}
+   * @return {Number[]} null if not initialized
    */
   MapService.prototype.getVisibleLayerIds_ = function () {
     var ret = [];
@@ -2041,13 +2041,14 @@
     if (vlayers.length > 0) {
       params['layers'] =  layerOpt + ':' + vlayers.join(',');
     } else {
-      // no layers visible, no need to go to server
-      if (callback) {
+      // no layers visible, no need to go to server, note if vlayers is null means not init yet in which case do not send layers 
+      if (this.loaded_ && callback) {
         callback({
           href: null
         });
+        return;
       }
-      return;
+      
     }
     params['transparent'] = (p['transparent'] === false ? false : true);
     if (p['time']) {
@@ -3024,9 +3025,7 @@
       if (this.urlTemplate_) {
         u = this.urlTemplate_.replace('[' + this.numOfHosts_ + ']', '' + ((tile['y'] + tile['x']) % this.numOfHosts_));
       }
-      if (this.mapService_.singleFusedMapCache) {
-        url = u + '/tile/' + z + '/' + tile['y'] + '/' + tile['x'];
-      } else {
+      if (this.mapService_.singleFusedMapCache === false) {
         // dynamic map service
         var prj = this.projection_ || this.map_ ? this.map_.getProjection() : Projection.WEB_MECATOR;
         if (!prj instanceof Projection) {
@@ -3046,6 +3045,8 @@
         params['height'] = size['height'];
         params['imageSR'] = prj.spatialReference_;
         url = this.mapService_['exportMap'](params);
+      } else {
+        url = u + '/tile/' + z + '/' + tile['y'] + '/' + tile['x'];
       }
     }
     //log('url=' + url);
