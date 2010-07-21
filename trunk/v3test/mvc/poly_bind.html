@@ -30,18 +30,19 @@
     
     poly = new google.maps.Polyline(polyOptions);
     var path = poly.getPath();
-    path.prefix_ = '_any_unique_string_'
+    //path.prefix_ = '_any_unique_string_'
     /* overwrite get/set for this instance */
+   
     path.get = function(key) {
-      if (key.indexOf(this.prefix_)==0){
-        return google.maps.MVCArray.prototype.getAt.call(this, parseInt(key.substring(this.prefix_.length)));
+      if (!isNaN(parseInt(key))){//key.indexOf(this.prefix_)==0){
+        return google.maps.MVCArray.prototype.getAt.call(this, parseInt(key));//.substring(this.prefix_.length)));
       } else {
         return google.maps.MVCArray.prototype.get.call(this, key);
       }
     }
     path.set = function(key, val) {
-      if (key.indexOf(this.prefix_)==0){
-        google.maps.MVCArray.prototype.setAt.call(this, parseInt(key.substring(this.prefix_.length)), val);
+      if (!isNaN(parseInt(key))){//key.indexOf(this.prefix_)==0){
+        google.maps.MVCArray.prototype.setAt.call(this, parseInt(key), val);//.substring(this.prefix_.length)), val);
       } else {
         google.maps.MVCArray.prototype.set.call(this, key, val);
       }
@@ -64,7 +65,7 @@
       map: map,
       draggable : true
     });
-    marker.bindTo('position', path, path.prefix_+(len-1));
+    marker.bindTo('position', path, ''+(len-1));
   }
 
 </script>
