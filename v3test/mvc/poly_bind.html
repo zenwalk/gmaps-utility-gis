@@ -1,0 +1,76 @@
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<title>Bind Marker to Poly</title>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript">
+  /*
+   * Use bindTo to allow dynamic drag of markers to refresh poly.
+   */
+
+  var poly;
+  var map;
+  var prefix = '__myunique__';
+  
+  function initialize() {
+    var chicago = new google.maps.LatLng(41.879535, -87.624333);
+    var myOptions = {
+      zoom: 7,
+      center: chicago,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+
+    map = new google.maps.Map(document.getElementById('map_canvas'), myOptions);
+
+    var polyOptions = {
+      strokeColor: '#000000',
+      strokeOpacity: 1.0,
+      strokeWeight: 3, map: map
+    }
+    
+    poly = new google.maps.Polyline(polyOptions);
+    var path = poly.getPath();
+    path.prefix_ = '_any_unique_string_'
+    /* overwrite get/set for this instance */
+    path.get = function(key) {
+      if (key.indexOf(this.prefix_)==0){
+        return google.maps.MVCArray.prototype.getAt.call(this, parseInt(key.substring(this.prefix_.length)));
+      } else {
+        return google.maps.MVCArray.prototype.get.call(this, key);
+      }
+    }
+    path.set = function(key, val) {
+      if (key.indexOf(this.prefix_)==0){
+        google.maps.MVCArray.prototype.setAt.call(this, parseInt(key.substring(this.prefix_.length)), val);
+      } else {
+        google.maps.MVCArray.prototype.set.call(this, key, val);
+      }
+    }
+    // Add a listener for the click event
+    google.maps.event.addListener(map, 'click', addLatLng);
+  }
+
+  /**
+   * Handles click events on a map, and adds a new point to the Polyline.
+   * @param {MouseEvent} mouseEvent
+   */
+  function addLatLng(event) {
+    var path = poly.getPath();
+    path.push(event.latLng);
+    var len = path.getLength();
+    var marker = new google.maps.Marker({
+      position: event.latLng,
+      title: '#' + len,
+      map: map,
+      draggable : true
+    });
+    marker.bindTo('position', path, path.prefix_+(len-1));
+  }
+
+</script>
+</head>
+<body onload="initialize()" style="width:100%; height:100%">
+  <div id="map_canvas" style="width:100%; height:100%"></div>
+</body>
+</html>
