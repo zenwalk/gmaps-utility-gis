@@ -142,7 +142,7 @@ returnBarriers
 returnStops
 routes
 inSpatialReference
-
+deferLoad
 
 #style
 filters
@@ -162,7 +162,7 @@ getCircumference
 query
 queryRelatedRecords
 register
-loadInfo
+load
 isInScale
 getInitialBounds
 exportMap

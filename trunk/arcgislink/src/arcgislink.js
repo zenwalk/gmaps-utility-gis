@@ -1550,9 +1550,8 @@
   /**
    * Load extra information such as it's fields from layer resource.
    * If opt_callback function will be called after it is loaded
-   * @param {Function} opt_callback
    */
-  Layer.prototype.loadInfo = function (opt_callback) {
+  Layer.prototype.load = function () {
     var me = this;
     if (this.loaded_) {
       return;
@@ -1560,9 +1559,12 @@
     getJSON(this.url, {}, 'callback', function (json) {
       augmentObject(json, me);
       me.loaded_ = true;
-      if (opt_callback) {
-        opt_callback();
-      }
+      /**
+       * This event is fired when layer's service info is loaded.
+       * @name Layer#load
+       * @event
+       */
+      triggerEvent(me, 'load');
     });
   };
 
@@ -1738,6 +1740,12 @@
       callback(json);
     });
   };
+  
+  /**
+   * @name MapSerivceOptions
+   * @class provides options to construct a {@link MapService}
+   * @property {Boolean} deferLoad whether to defer load meta data on construction.
+   */
   /**
    * Creates a MapService objects that can be used by UI components.
    * <ul><li> <code> url</code> (required) is the URL of the map servive, e.g. <code>
@@ -1764,19 +1772,26 @@
    * @property {String} [supportedImageFormatTypes] supportedImageFormatTypes, comma delimited list.
    * @property {Object} [documentInfo] Object with the folloing properties: <code>Title, Author,Comments,Subject,Category,Keywords</code>
    */
-  function MapService(url) {
+  function MapService(url, opts) {
     this.url = url;
     this.loaded_ = false;
     var tks = url.split("/");
     this.name = tks[tks.length - 2].replace(/_/g, ' ');
+    opts = opts || {};
+    if (!opts.deferLoad) {
+      this.load();
+    }
+  }
+
+ /**
+ * Load serviceInfo
+ */
+  MapService.prototype.load = function () {
     var me = this;
-    getJSON(url, {
-    }, STR.callback, function (json) {
+    getJSON(url, {}, STR.callback, function(json) {
       me.init_(json);
     });
-   
-  }
-  
+  }; 
   /**
    * initialize an ArcGIS Map Service from the meta data information.
    * The <code>json</code> parameter is the json object returned by Map Service.
