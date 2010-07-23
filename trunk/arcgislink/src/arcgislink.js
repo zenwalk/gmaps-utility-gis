@@ -1788,7 +1788,7 @@
  */
   MapService.prototype.load = function () {
     var me = this;
-    getJSON(url, {}, STR.callback, function(json) {
+    getJSON(this.url, {}, STR.callback, function(json) {
       me.init_(json);
     });
   }; 
