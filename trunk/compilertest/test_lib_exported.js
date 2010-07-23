@@ -1,4 +1,11 @@
   var myns = myns || {};
+  
+  var MyUtil = {
+    show: function(msg) {
+      alert('msg is ' + msg);
+    }
+  };
+  
   /** @constructor */
   function MyClass(){
     this.myProp = 'myProp_Default';
@@ -8,10 +15,10 @@
     this.myPrivateMethod(json);
   }
   MyClass.prototype.myPrivateMethod = function(/** @type {MyMessage}*/json){
-    alert('json  '+json.myVeryLongJSONProperty.anotherJSONProperty + '  myProp:'+ this.myProp);
+    MyUtil.show('json  '+json.myVeryLongJSONProperty.anotherJSONProperty + '  myProp:'+ this.myProp);
   }
   MyClass.prototype.myUnusedMethod = function(json){
-    alert('unused method');
+    MyUtil.show('unused method');
   }
   /**
    * @enum
@@ -30,8 +37,6 @@
   window.myns = myns;
   myns.MyClass = MyClass;
   myns.MyEnum = MyEnum;
-  
-  
   
   window['myns'] = myns;
 myns['MyClass'] = MyClass;
