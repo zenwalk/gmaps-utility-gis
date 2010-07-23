@@ -3,10 +3,10 @@ function b() {
   this.myProp = "myProp_Default"
 }
 b.prototype.a = function(d) {
-  alert("json  " + d.myVeryLongJSONProperty.anotherJSONProperty + "  myProp:" + this.myProp)
+  alert("msg is " + ("json  " + d.myVeryLongJSONProperty.anotherJSONProperty + "  myProp:" + this.myProp))
 };
 b.prototype.b = function() {
-  alert("unused method")
+  alert("msg is unused method")
 };
 var MyEnum = {ONE:1, TWO:2, THREE:3};
 window.e = a;

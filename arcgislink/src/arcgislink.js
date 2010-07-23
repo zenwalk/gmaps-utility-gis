@@ -100,7 +100,10 @@
  *    </td>
  *    </tr></table>
  */
-(function () {
+
+// No longer use anonymous wrapper for closure compiler compile lib with app together.
+// 
+//(function () {
   
   /*jslint evil: true, sub: true */ 
   /*global escape ActiveXObject */
@@ -126,8 +129,8 @@
    * @property {Boolean} [alwaysUseProxy] whether to always use proxy page when send request to server.
    */
   var Config = {
-    'proxyUrl': null,
-    'alwaysUseProxy': false 
+    proxyUrl: null,
+    alwaysUseProxy: false 
   };
   /**
    * an internal collection of Spatial Refeneces supported in the application.
@@ -3503,6 +3506,7 @@
     this.visible_ = false;
     this.div_.style.visibility = 'hidden';
   };
+
   W.gmaps.ags = {
     'SpatialReference': SpatialReference,
     'Geographic': Geographic,
@@ -3528,9 +3532,7 @@
     'MapOverlay': MapOverlay,
     'MapType': MapType
   };
-    
-  
-})();
+///})();
  
 
  

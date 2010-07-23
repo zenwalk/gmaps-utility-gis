@@ -18,8 +18,9 @@ set i=--js %~dp0test_lib_notated.js
 set o=--js_output_file %~dp0test_lib_notated_compiled.js 
 "%JAVA_HOME%\bin\java" -jar %compiler% %f% %lv% %ex% %i% %o% %w%
 
-copy %~dp0test_lib.js /B + %~dp0test_use.js /B %~dp0test_use_all.js
-set i=--js %~dp0test_use_all.js
+rem copy %~dp0test_lib.js /B + %~dp0test_use.js /B %~dp0test_use_all.js
+rem set i=--js %~dp0test_use_all.js
+set i=--js %~dp0test_lib.js --js %~dp0test_use.js  
 set o=--js_output_file %~dp0test_use_compiled.js 
 "%JAVA_HOME%\bin\java" -jar %compiler% %f% %lv% %i% %o% %w%
 
