@@ -4,3 +4,4 @@ var p = MyClass.prototype;
 p['myMethod'] = p.myMethod;
 p['myUnusedMethod'] = p.myUnusedMethod;
 myns['MyEnum'] = MyEnum;
+myns['MyConfig'] = MyConfig;

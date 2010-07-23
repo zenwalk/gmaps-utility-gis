@@ -1,13 +1,15 @@
-(function(){var a = a || {};
-function b() {
+(function(){var a = a || {}, b = {};
+b.configKey = "defaultValue";
+function c() {
   this.myProp = "myProp_Default"
 }
-b.prototype.myMethod = function(c) {
-  alert("msg is " + ("json  " + c.myVeryLongJSONProperty.anotherJSONProperty + "  myProp:" + this.myProp))
+c.prototype.myMethod = function(d) {
+  alert("msg is " + ("myConfig:" + b.configKey + " json  " + d.myVeryLongJSONProperty.anotherJSONProperty + "  myProp:" + this.myProp))
 };
-b.prototype.myUnusedMethod = function() {
+c.prototype.myUnusedMethod = function() {
   alert("msg is unused method")
 };
 window.myns = a;
-a.MyClass = b;
-a.MyEnum = {ONE:1, TWO:2, THREE:3};})()
+a.MyClass = c;
+a.MyEnum = {ONE:1, TWO:2, THREE:3};
+a.MyConfig = b;})()

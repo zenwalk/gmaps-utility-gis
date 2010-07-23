@@ -6,3 +6,5 @@ myMethod
 myUnusedMethod
 
 MyEnum
+MyConfig
+configKey
