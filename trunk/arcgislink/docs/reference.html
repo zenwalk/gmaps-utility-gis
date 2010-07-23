@@ -2114,16 +2114,6 @@
               </tr>
             
               <tr class="even">
-                <td><code>loadInfo(<span class="type">opt_callback:Function</span>)</code></td>
-                
-                  
-                    <td><code>None</code></td>
-                  
-                
-                <td>Load extra information such as it's fields from layer resource.If opt_callback function will be called after it is loaded</td>
-              </tr>
-            
-              <tr class="odd">
                 <td><code>query(<span class="type">params:QueryOptions</span>, <span class="type">callback:Function</span>, <span class="type">errback:Function</span>)</code></td>
                 
                   
@@ -2133,7 +2123,7 @@
                 <td>The query operation is performed on a layer resource. The result of this operation is a resultset resource that will bepassed in the callback function. param is an instance of <code><a href="reference.html#QueryOptions">QueryOptions</a></code><br/>For more info see <a href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/query.html'>Query Operation</a>.</td>
               </tr>
             
-              <tr class="even">
+              <tr class="odd">
                 <td><code>queryRelatedRecords(<span class="type">params:QueryRelatedRecordsParameters</span>, <span class="type">callback:Function</span>, <span class="type">errback:Function</span>)</code></td>
                 
                   
@@ -2141,6 +2131,33 @@
                   
                 
                 <td>The query related records operation is performed on a layer / table resource. The result of this operation are featuresets grouped by source layer / table object IDs. Each featureset contains Feature objects including the values for the fields requested by the user. For related layers, if you request geometry information, the geometry of each feature is also returned in the featureset. For related tables, the featureset does not include geometries.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3>Events</h3>
+        <table summary="class Layer - Events" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Events</th>
+              
+                
+                  <th>Arguments</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>load</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td>This event is fired when layer's service info is loaded.</td>
               </tr>
             
           </tbody>
@@ -2497,6 +2514,37 @@
         </table>
       
     
+      <h2><a name="MapSerivceOptions"></a>class MapSerivceOptions</h2>
+      <p>provides options to construct a <code><a href="reference.html#MapService">MapService</a></code>  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class MapSerivceOptions - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>deferLoad</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>whether to defer load meta data on construction.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
       <h2><a name="MapService"></a>class MapService</h2>
       <p>This class (<code>gmaps.ags.MapService</code>) is the core class for all map service operations.It represents an ArcGIS Server map service that offer access to map and layer content</p>
       
@@ -2513,7 +2561,7 @@
               <tr class="odd">
                 <td><code>MapService(<span class="type">url:String</span>)</code></td>
                 
-                <td>Creates a MapService objects that can be used by UI components.<ul><li> <code> url</code> (required) is the URL of the map servive, e.g. <code>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer</code>.<ul/> Note the spatial reference of the map service must already existsin the <code>spatialReferences</code> if actual coordinates transformation is needed.</td>
+                <td>Creates a MapService objects that can be used by UI components.<ul><li> <code> url</code> (required) is the URL of the map servive, e.g. <code>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer</code>.<ul/> Note the spatial reference of the map service must already existsin the <code>spatialReferences__</code> if actual coordinates transformation is needed.</td>
               </tr>
             
           </tbody>
@@ -2782,7 +2830,7 @@
       
     
       <h2><a name="MapType"></a>class MapType</h2>
-      <p>This class (<code>gmaps.ags.MapType</code>) extends the Google Maps API's<a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#MapType>GMapType</a>.It holds a list of <code><a href="reference.html#TileLayer">TileLayer</a></code>s.<p> Because all tileLayers are loaded asynchronously, and currently thecore API does not have method to refresh tiles on demand, if you do not load the defaultGoogle maps, you should either 1) add tomap after it STR.load event is fired, or) trigger an map type change to force refresh.See <a href  = http://code.google.com/p/gmaps-api-issues/issues/detail?id  = 279&can  = 1&q  = refresh&colspec  = ID%20Type%20Status%20Introduced%20Fixed%20Summary%20Stars%20ApiType%20Internal>Issue 279</a></p><p> Note: all tiled layer in the same map type must use same spatial reference and tile scheme.</p></p>
+      <p>This class (<code>gmaps.ags.MapType</code>) extends the Google Maps API's<a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#MapType>GMapType</a>.It holds a list of <code><a href="reference.html#TileLayer">TileLayer</a></code>s.<p> Because all tileLayers are loaded asynchronously, and currently thecore API does not have method to refresh tiles on demand, if you do not load the defaultGoogle maps, you should either 1) add tomap after it 'load' event is fired, or) trigger an map type change to force refresh.See <a href  = http://code.google.com/p/gmaps-api-issues/issues/detail?id  = 279&can  = 1&q  = refresh&colspec  = ID%20Type%20Status%20Introduced%20Fixed%20Summary%20Stars%20ApiType%20Internal>Issue 279</a></p><p> Note: all tiled layer in the same map type must use same spatial reference and tile scheme.</p></p>
       
         <h3>Constructor</h3>
         <table summary="class MapType - Constructor" width="90%">
@@ -4604,7 +4652,7 @@
     
       <h2><a name="Util"></a>namespace Util</h2>
       <p>
-A set of utilities ((<code>gmaps.ags.Util</code>) for commonly used functions.</p>
+A set of utilities ((<code>gmaps.ags.Util</code>)for commonly used functions.</p>
       
         <h3>Static Methods</h3>
         <table summary="namespace Util - Static Methods" width="90%">
@@ -4637,7 +4685,7 @@ A set of utilities ((<code>gmaps.ags.Util</code>) for commonly used functions.<
                     <td><code>String</code></td>
                   
                 
-                <td>Make Cross Domain Calls. This function returns thescript ID which can be used to track the requests. parameters:<ul><li>url: url of server resource<li>params: an object with name,value pairs. value must be string<li>callbackName: Callback parameter name the server is expecting.e.g:'callback'<li>callbackFn: the actual callback function.</ul></td>
+                <td>Make Cross Domain Calls. This function returns thescript ID which can be used to track the requests. parameters:<ul><li>url: url of server resource<li>params: an object with name,value pairs. value must be string<li>callbackName: Callback parameter name the server is expecting.e.g:''<li>callbackFn: the actual callback function.</ul></td>
               </tr>
             
               <tr class="odd">

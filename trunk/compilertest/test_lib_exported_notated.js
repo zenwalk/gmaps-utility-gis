@@ -6,6 +6,9 @@
     }
   };
   
+  var MyConfig = {};
+  MyConfig['configKey']='defaultValue';
+  
   /** @constructor */
   function MyClass(){
     this['myProp'] = 'myProp_Default';
@@ -15,7 +18,7 @@
     this.myPrivateMethod(json);
   }
   MyClass.prototype.myPrivateMethod = function(/** @type {MyMessage}*/json){
-    MyUtil.show('json  '+json.myVeryLongJSONProperty.anotherJSONProperty + '  myProp:'+ this['myProp']);
+    MyUtil.show('myConfig:'+MyConfig['configKey']+' json  '+json.myVeryLongJSONProperty.anotherJSONProperty + '  myProp:'+ this['myProp']);
   }
   MyClass.prototype.myUnusedMethod = function(json){
     MyUtil.show('unused method');
@@ -37,6 +40,8 @@
   window.myns = myns;
   myns.MyClass = MyClass;
   myns.MyEnum = MyEnum;
+  myns.MyConfig = MyConfig;
+  
   
   window['myns'] = myns;
 myns['MyClass'] = MyClass;
@@ -44,3 +49,4 @@ var p = MyClass.prototype;
 p['myMethod'] = p.myMethod;
 p['myUnusedMethod'] = p.myUnusedMethod;
 myns['MyEnum'] = MyEnum;
+myns['MyConfig'] = MyConfig;

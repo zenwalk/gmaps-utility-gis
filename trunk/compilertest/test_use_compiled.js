@@ -1,12 +1,15 @@
-(function(){var a = a || {};
-window.i = a;
-a.b = function() {
+(function(){var a = a || {}, b = {};
+b.b = "defaultValue";
+window.k = a;
+a.c = function() {
   this.a = "myProp_Default"
 };
-a.c = {g:1, d:2, h:3};window.onload = function() {
-  var b = new a.b;
-  alert(b.a);
-  b.a = "newProp";
-  alert("msg is " + ("json  " + {f:{e:"myVeryLongJSONProperty.anotherJSONProperty"}}.f.e + "  myProp:" + b.a));
-  alert(a.c.d)
+a.e = {i:1, f:2, j:3};
+a.d = b;window.onload = function() {
+  var c = new a.c;
+  alert(c.a);
+  c.a = "newProp";
+  a.d.b = "newValue";
+  alert("msg is " + ("myConfig:" + b.b + " json  " + {h:{g:"myVeryLongJSONProperty.anotherJSONProperty"}}.h.g + "  myProp:" + c.a));
+  alert(a.e.f)
 };})()
