@@ -49,10 +49,10 @@
             </tr>
             
               <tr class="odd">
-                <td><code>forward(<span class="type">lnglat:Number[]</span>)</code></td>
+                <td><code>forward(<span class="type">lnglat:Array.&lt;Number&gt;</span>)</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
@@ -69,10 +69,10 @@
               </tr>
             
               <tr class="odd">
-                <td><code>inverse(<span class="type">coords:Number[]</span>)</code></td>
+                <td><code>inverse(<span class="type">coords:Array.&lt;Number&gt;</span>)</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
@@ -113,7 +113,7 @@
                 <td><code>distances</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>The distances the input geometries are buffered.</td>
@@ -123,7 +123,7 @@
                 <td><code>geometries</code></td>
                 
                   
-                    <td><code>OverlayView[]|Object[]</code></td>
+                    <td><code>Array.&lt;OverlayView&gt;|Array.&lt;Object&gt;</code></td>
                   
                 
                 <td>Array of <code>google.maps.LatLng</code>, <code>Polyline</code>, <code>Polygon</code>, or ESRI Geometry format to buffer.</td>
@@ -184,7 +184,7 @@
                 <td><code>geometries</code></td>
                 
                   
-                    <td><code>OverlayView[]|Object[]</code></td>
+                    <td><code>Array.&lt;OverlayView&gt;|Array.&lt;Object&gt;</code></td>
                   
                 
                 <td>Array of <code>google.maps.LatLng, Polyline, Polygon</code>, or ESRI Geometry format to project.</td>
@@ -244,7 +244,7 @@
                 <td><code>folders</code></td>
                 
                   
-                    <td><code>String[]</code></td>
+                    <td><code>Array.&lt;String&gt;</code></td>
                   
                 
                 <td>folders list</td>
@@ -254,7 +254,7 @@
                 <td><code>services</code></td>
                 
                   
-                    <td><code>String[]</code></td>
+                    <td><code>Array.&lt;String&gt;</code></td>
                   
                 
                 <td>list of services. Each has <code>name, type</code> property.</td>
@@ -437,7 +437,7 @@
                 <td><code>layerIds</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>list of layer ids. If not specified along with layerOptions, show list of visible layers.</td>
@@ -556,7 +556,7 @@
                 <td><code>geometry</code></td>
                 
                   
-                    <td><code>Marker[]|Polyline[]|Polygon[]</code></td>
+                    <td><code>Array.&lt;OverlayView&gt;</code></td>
                   
                 
                 <td>geometry</td>
@@ -668,7 +668,7 @@
                 <td><code>layerIds</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>The layer Ids to perform the find operation on. The layers to perform the find operation on.</td>
@@ -698,7 +698,7 @@
                 <td><code>searchFields</code></td>
                 
                   
-                    <td><code>String[]</code></td>
+                    <td><code>Array.&lt;String&gt;</code></td>
                   
                 
                 <td>The names of the fields to search.    If this parameter is not specified, all fields are searched.</td>
@@ -830,7 +830,7 @@
                 <td><code>results</code></td>
                 
                   
-                    <td><code>FindResult[]</code></td>
+                    <td><code>Array.&lt;FindResult&gt;</code></td>
                   
                 
                 <td>The find results as an array of <code><a href="reference.html#FindResult">FindResult</a></code></td>
@@ -871,7 +871,7 @@
                 <td><code>outFields</code></td>
                 
                   
-                    <td><code>String[]</code></td>
+                    <td><code>Array.&lt;String&gt;</code></td>
                   
                 
                 <td>The list of fields to be included in the returned resultset.</td>
@@ -973,7 +973,7 @@
                 <td><code>candidates</code></td>
                 
                   
-                    <td><code>GeocodeResult[]</code></td>
+                    <td><code>Array.&lt;GeocodeResult&gt;</code></td>
                   
                 
                 <td>The find address results as an array of <code><a href="reference.html#GeocodeResult">GeocodeResult</a></code></td>
@@ -1023,7 +1023,7 @@
                 <td><code>addressFields</code></td>
                 
                   
-                    <td><code>Field[]</code></td>
+                    <td><code>Array.&lt;Field&gt;</code></td>
                   
                 
                 <td>input fields.    Each entry is an object of type <code><a href="reference.html#Field">Field</a></code>, plus <code>required(true|false)</code></td>
@@ -1033,7 +1033,7 @@
                 <td><code>candidateFields</code></td>
                 
                   
-                    <td><code>Field[]</code></td>
+                    <td><code>Array.&lt;Field&gt;</code></td>
                   
                 
                 <td>candidate Fields.    Each entry is an object of type <code><a href="reference.html#Field">Field</a></code></td>
@@ -1043,7 +1043,7 @@
                 <td><code>intersectionCandidateFields</code></td>
                 
                   
-                    <td><code>Field[]</code></td>
+                    <td><code>Array.&lt;Field&gt;</code></td>
                   
                 
                 <td>intersectionCandidateFields   Each entry is an object of type <code><a href="reference.html#Field">Field</a></code></td>
@@ -1362,7 +1362,7 @@
                 <td><code>tasks</code></td>
                 
                   
-                    <td><code>String[]</code></td>
+                    <td><code>Array.&lt;String&gt;</code></td>
                   
                 
                 <td></td>
@@ -1490,7 +1490,7 @@
                 <td><code>parameters</code></td>
                 
                   
-                    <td><code>GPParameter[]</code></td>
+                    <td><code>Array.&lt;GPParameter&gt;</code></td>
                   
                 
                 <td>see <code><a href="reference.html#_global_#GPParameter">GPParameter</a></code></td>
@@ -1510,7 +1510,7 @@
                 <td><code>tasks</code></td>
                 
                   
-                    <td><code>String[]</code></td>
+                    <td><code>Array.&lt;String&gt;</code></td>
                   
                 
                 <td></td>
@@ -1608,7 +1608,7 @@
                 <td><code>layerIds</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>The layers to perform the identify operation on.</td>
@@ -1770,7 +1770,7 @@
                 <td><code>results</code></td>
                 
                   
-                    <td><code>IdentifyResult[]</code></td>
+                    <td><code>Array.&lt;IdentifyResult&gt;</code></td>
                   
                 
                 <td>The identify results as an array of <code><a href="reference.html#IdentifyResult">IdentifyResult</a></code></td>
@@ -1817,10 +1817,10 @@
             </tr>
             
               <tr class="odd">
-                <td><code>forward(<span class="type">lnglat:Number[]</span>)</code></td>
+                <td><code>forward(<span class="type">lnglat:Array.&lt;Number&gt;</span>)</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
@@ -1837,10 +1837,10 @@
               </tr>
             
               <tr class="odd">
-                <td><code>inverse(<span class="type">coords:Number[]</span>)</code></td>
+                <td><code>inverse(<span class="type">coords:Array.&lt;Number&gt;</span>)</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
@@ -1940,7 +1940,7 @@
                 <td><code>fields</code></td>
                 
                   
-                    <td><code>Field[]</code></td>
+                    <td><code>Array.&lt;Field&gt;</code></td>
                   
                 
                 <td>fields, only available after load. See <code><a href="reference.html#Field">Field</a></code></td>
@@ -2020,7 +2020,7 @@
                 <td><code>relationships</code></td>
                 
                   
-                    <td><code>String[]</code></td>
+                    <td><code>Array.&lt;String&gt;</code></td>
                   
                 
                 <td>relationships (id, name, relatedTableId)</td>
@@ -2030,10 +2030,10 @@
                 <td><code>subLayers</code></td>
                 
                   
-                    <td><code>Layer[]</code></td>
+                    <td><code>Array.&lt;Layer&gt;</code></td>
                   
                 
-                <td>sub Layers. <code><a href="reference.html#Layer">Layer</a></code>[].</td>
+                <td>sub Layers. <code><a href="reference.html#Layer">Layer</a></code>.</td>
               </tr>
             
               <tr class="even">
@@ -2070,7 +2070,7 @@
                 <td><code>types</code></td>
                 
                   
-                    <td><code>String[]</code></td>
+                    <td><code>Array.&lt;String&gt;</code></td>
                   
                 
                 <td>subtypes: id, name, domains.</td>
@@ -2561,7 +2561,7 @@
               <tr class="odd">
                 <td><code>MapService(<span class="type">url:String</span>)</code></td>
                 
-                <td>Creates a MapService objects that can be used by UI components.<ul><li> <code> url</code> (required) is the URL of the map servive, e.g. <code>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer</code>.<ul/> Note the spatial reference of the map service must already existsin the <code>spatialReferences__</code> if actual coordinates transformation is needed.</td>
+                <td>Creates a MapService objects that can be used by UI components.<ul><li> <code> url</code> (required) is the URL of the map servive, e.g. <code>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer</code>.<ul/> Note the spatial reference of the map service must already existsin the <code><a href="reference.html#_global_#spatialReferences_">spatialReferences_</a></code> if actual coordinates transformation is needed.</td>
               </tr>
             
           </tbody>
@@ -2615,7 +2615,7 @@
                 <td><code>layers</code></td>
                 
                   
-                    <td><code>Layer[]</code></td>
+                    <td><code>Array.&lt;Layer&gt;</code></td>
                   
                 
                 <td>array of Layers.</td>
@@ -2675,10 +2675,10 @@
                 <td><code>tables</code></td>
                 
                   
-                    <td><code>Layer[]</code></td>
+                    <td><code>Array.&lt;Layer&gt;</code></td>
                   
                 
-                <td>array of Tables.</td>
+                <td>array of Tables of type <code><a href="reference.html#Layer">Layer</a></code>.</td>
               </tr>
             
               <tr class="odd">
@@ -2779,6 +2779,26 @@
               </tr>
             
               <tr class="odd">
+                <td><code>getLayers()</code></td>
+                
+                  
+                    <td><code>None</code></td>
+                  
+                
+                <td></td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>hasLoaded()</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>If the map service meta info is loaded</td>
+              </tr>
+            
+              <tr class="odd">
                 <td><code>identify(<span class="type">params:IdentifyOptions</span>, <span class="type">callback:Function</span>, <span class="type">errback:Function</span>)</code></td>
                 
                   
@@ -2819,7 +2839,7 @@
                 <td><code>load</code></td>
                 
                   
-                    <td><code><span class="type">service:MapService</span></code></td>
+                    <td><code>&lt;span class=&quot;type&quot;&gt;service:MapService&lt;/span&gt;</code></td>
                   
                 
                 <td>This event is fired when the service and it's service info is loaded.</td>
@@ -2843,7 +2863,7 @@
             </tr>
             
               <tr class="odd">
-                <td><code>MapType(<span class="type">tileLayers:TileLayer[]|String</span>, <span class="type">opt_typeOpts:MapTypeOptions</span>)</code></td>
+                <td><code>MapType(<span class="type">tileLayers:TileArray.&lt;Layer&gt;|String</span>, <span class="type">opt_typeOpts:MapTypeOptions</span>)</code></td>
                 
                 <td>Creates a MapType, with a array of TileLayers, or a single URL as shortcut.</td>
               </tr>
@@ -2889,7 +2909,7 @@
                 <td><code>getTileLayers()</code></td>
                 
                   
-                    <td><code>TileLayer[]</code></td>
+                    <td><code>Array.&lt;TileLayer&gt;</code></td>
                   
                 
                 <td>get list of <code><a href="reference.html#TileLayer">TileLayer</a></code> in this map type</td>
@@ -3041,7 +3061,7 @@
                 <td><code>closestFacilityLayers</code></td>
                 
                   
-                    <td><code>String[]</code></td>
+                    <td><code>Array.&lt;String&gt;</code></td>
                   
                 
                 <td></td>
@@ -3051,7 +3071,7 @@
                 <td><code>routeLayers</code></td>
                 
                   
-                    <td><code>String[]</code></td>
+                    <td><code>Array.&lt;String&gt;</code></td>
                   
                 
                 <td></td>
@@ -3061,7 +3081,7 @@
                 <td><code>serviceAreaLayers</code></td>
                 
                   
-                    <td><code>String[]</code></td>
+                    <td><code>Array.&lt;String&gt;</code></td>
                   
                 
                 <td></td>
@@ -3330,7 +3350,7 @@
                 <td><code>geometries</code></td>
                 
                   
-                    <td><code>(OverlayView[]|Object[])</code></td>
+                    <td><code>(Array.&lt;OverlayView&gt;|Array.&lt;Object&gt;)</code></td>
                   
                 
                 <td>Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project.</td>
@@ -3391,7 +3411,7 @@
                 <td><code>geometries</code></td>
                 
                   
-                    <td><code>OverlayView[]|Object[]</code></td>
+                    <td><code>Array.&lt;OverlayView&gt;|Array.&lt;Object&gt;</code></td>
                   
                 
                 <td>Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project.</td>
@@ -3422,7 +3442,7 @@
                 <td><code>geometry</code></td>
                 
                   
-                    <td><code>OverlayView|OverlayView[]</code></td>
+                    <td><code>OverlayView|Array.&lt;OverlayView&gt;</code></td>
                   
                 
                 <td>The geometry to apply as the spatial filter.</td>
@@ -3442,7 +3462,7 @@
                 <td><code>objectIds</code></td>
                 
                   
-                    <td><code>Int[]</code></td>
+                    <td><code>Array.&lt;Int&gt;</code></td>
                   
                 
                 <td>The object IDs of this layer / table to be queried</td>
@@ -3452,7 +3472,7 @@
                 <td><code>outFields</code></td>
                 
                   
-                    <td><code>String[]</code></td>
+                    <td><code>Array.&lt;String&gt;</code></td>
                   
                 
                 <td>The list of fields to be included in the returned resultset.</td>
@@ -3573,7 +3593,7 @@
                 <td><code>outFields</code></td>
                 
                   
-                    <td><code>String[]</code></td>
+                    <td><code>Array.&lt;String&gt;</code></td>
                   
                 
                 <td>The list of fields to be included in the returned resultset. This list is a comma delimited list of field names.</td>
@@ -3695,7 +3715,7 @@
                 <td><code>relatedRecordGroups</code></td>
                 
                   
-                    <td><code>Object[]</code></td>
+                    <td><code>Array.&lt;Object&gt;</code></td>
                   
                 
                 <td>list of related records</td>
@@ -3746,7 +3766,7 @@
                 <td><code>features</code></td>
                 
                   
-                    <td><code>Feature[]</code></td>
+                    <td><code>Array.&lt;Feature&gt;</code></td>
                   
                 
                 <td>result as array of <code><a href="reference.html#Feature">Feature</a></code></td>
@@ -3899,7 +3919,7 @@
                 <td><code>barriers</code></td>
                 
                   
-                    <td><code>google.maps.LatLng[]|Marker[]</code></td>
+                    <td><code>Array.&lt;google.maps.LatLng&gt;|Array.&lt;Marker&gt;</code></td>
                   
                 
                 <td>the locations the route must avoid</td>
@@ -3959,7 +3979,7 @@
                 <td><code>stops</code></td>
                 
                   
-                    <td><code>google.maps.LatLng[]|Marker[]</code></td>
+                    <td><code>Array.&lt;google.maps.LatLng&gt;|Array.&lt;Marker&gt;</code></td>
                   
                 
                 <td>the locations the route must pass</td>
@@ -3990,7 +4010,7 @@
                 <td><code>stops</code></td>
                 
                   
-                    <td><code>google.maps.LatLng[]</code></td>
+                    <td><code>Array.&lt;google.maps.LatLng&gt;</code></td>
                   
                 
                 <td></td>
@@ -4124,10 +4144,10 @@
             </tr>
             
               <tr class="odd">
-                <td><code>forward(<span class="type">lnglat:Number[]</span>)</code></td>
+                <td><code>forward(<span class="type">lnglat:Array.&lt;Number&gt;</span>)</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>Convert Lat Lng to real-world coordinates.Note both input and output are array of [x,y], although their values in different units.</td>
@@ -4144,10 +4164,10 @@
               </tr>
             
               <tr class="odd">
-                <td><code>inverse(<span class="type">coords:Number[]</span>)</code></td>
+                <td><code>inverse(<span class="type">coords:Array.&lt;Number&gt;</span>)</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>Convert real-world coordinates  to Lat Lng.Note both input and output are are array of [x,y], although their values are different.</td>
@@ -4315,10 +4335,10 @@
             </tr>
             
               <tr class="odd">
-                <td><code>forward(<span class="type">lnglat:Number[]</span>)</code></td>
+                <td><code>forward(<span class="type">lnglat:Array.&lt;Number&gt;</span>)</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>See <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
@@ -4335,10 +4355,10 @@
               </tr>
             
               <tr class="odd">
-                <td><code>inverse(<span class="type">coords:Number[]</span>)</code></td>
+                <td><code>inverse(<span class="type">coords:Array.&lt;Number&gt;</span>)</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>See <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
@@ -4409,7 +4429,7 @@
                 <td><code>lods</code></td>
                 
                   
-                    <td><code>LOD[]</code></td>
+                    <td><code>Array.&lt;LOD&gt;</code></td>
                   
                 
                 <td>Array of Level of Details. See <code><a href="reference.html#LOD">LOD</a></code></td>
@@ -4617,10 +4637,10 @@
             </tr>
             
               <tr class="odd">
-                <td><code>forward(<span class="type">lnglat:Number[]</span>)</code></td>
+                <td><code>forward(<span class="type">lnglat:Array.&lt;Number&gt;</span>)</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
@@ -4637,10 +4657,10 @@
               </tr>
             
               <tr class="odd">
-                <td><code>inverse(<span class="type">coords:Number[]</span>)</code></td>
+                <td><code>inverse(<span class="type">coords:Array.&lt;Number&gt;</span>)</code></td>
                 
                   
-                    <td><code>Number[]</code></td>
+                    <td><code>Array.&lt;Number&gt;</code></td>
                   
                 
                 <td>see <code><a href="reference.html#SpatialReference">SpatialReference</a></code></td>
@@ -4669,7 +4689,7 @@ A set of utilities ((<code>gmaps.ags.Util</code>)for commonly used functions.</
             </tr>
             
               <tr class="odd">
-                <td><code>addToMap(<span class="type">map:google.maps.Map</span>, <span class="type">overlays:OverlayView[]</span>)</code></td>
+                <td><code>addToMap(<span class="type">map:google.maps.Map</span>, <span class="type">overlays:Array.&lt;OverlayView&gt;</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
@@ -4689,7 +4709,7 @@ A set of utilities ((<code>gmaps.ags.Util</code>)for commonly used functions.</
               </tr>
             
               <tr class="odd">
-                <td><code>removeFromMap(<span class="type">overlays:OverlayView[]</span>, <span class="type">clearArray:Boolean</span>)</code></td>
+                <td><code>removeFromMap(<span class="type">overlays:Array.&lt;OverlayView&gt;</span>, <span class="type">clearArray:Boolean</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
@@ -4719,7 +4739,7 @@ A set of utilities ((<code>gmaps.ags.Util</code>)for commonly used functions.</
                 <td><code>jsonpend</code></td>
                 
                   
-                    <td><code><span class="type">scriptID:String</span></code></td>
+                    <td><code>&lt;span class=&quot;type&quot;&gt;scriptID:String&lt;/span&gt;</code></td>
                   
                 
                 <td>This event is fired after a REST JSONP response was returned by server.</td>
@@ -4729,7 +4749,7 @@ A set of utilities ((<code>gmaps.ags.Util</code>)for commonly used functions.</
                 <td><code>jsonpstart</code></td>
                 
                   
-                    <td><code><span class="type">scriptID:String</span></code></td>
+                    <td><code>&lt;span class=&quot;type&quot;&gt;scriptID:String&lt;/span&gt;</code></td>
                   
                 
                 <td>This event is fired before a REST request sent to server.</td>

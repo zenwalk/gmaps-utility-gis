@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10,11 +10,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ */
+/**
+ * @preserve http://google-maps-utility-library-v3.googlecode.com
  */
 /**
  * @name ArcGIS Server Link for Google Maps JavaScript API V3
  * @version 1.0
- * @author: Nianwei Liu (nianwei at gmail dot com)
+ * @author Nianwei Liu [nianwei at gmail dot dom]
  * @fileoverview 
  *  <p><a href="examples.html">Examples</a>
  *   </p> 
@@ -101,10 +105,9 @@
  *    </tr></table>
  */
 
-// No longer use anonymous wrapper for closure compiler compile lib with app together.
-// 
-//(function () {
-  
+// No longer use anonymous wrapper for closure compiler to compile lib with app together.
+// add (function(){})() at compile time.
+
   /*jslint evil: true, sub: true */ 
   /*global escape ActiveXObject */
   
@@ -114,19 +117,20 @@ var jsonpID_ = 0;
 // cross domain function list.
 var W = window;
 W.ags_jsonp = W.ags_jsonp || {};
-W.gmaps = W.gmaps || {};
-var G = W.google && W.google.maps ? W.google.maps : {};
+var gmaps = W.gmaps || {};
+var G = google.maps; // W.google && W.google.maps ? W.google.maps : {};
 var WGS84, NAD83, WEB_MERCATOR, WEB_MERCATOR_AUX;
 /**
  * @name Config
+ * @type {Config_}
  * @class This is an object literal that sets common configuration values used across the lib.
  * @property {String} [proxyUrl] The URL to the web proxy page used in case the length of the URL request to an ArcGIS Server REST resource exceeds 2000 characters.
  * @property {Boolean} [alwaysUseProxy] whether to always use proxy page when send request to server.
  */
-var Config = {};
-// not use literal syntax for tool rename proxyUrl to quote notation.
-Config.proxyUrl = null;
-Config.alwaysUseProxy = false;
+var Config = {
+  proxyUrl:null,
+  alwaysUseProxy: false
+};
 
 /**
  * an internal collection of Spatial Refeneces supported in the application.
@@ -148,29 +152,29 @@ var Util = {};
  * @param {String} start
  * @param {String} end
  */
-Util.extractString_ = function(full, start, end) {
+function extractString_(full, start, end) {
   var i = (start === '') ? 0 : full.indexOf(start);
   var e = end === '' ? full.length : full.indexOf(end, i + start.length);
   return full.substring(i + start.length, e);
-};
+}
 
 /**
  * Check if the object is String
  * @param {Object} o
  */
-Util.isString_ = function(o) {
+function isString_(o) {
   return o && typeof o === 'string';
-};
+}
   
   /**
    * Check if the object is array
    * @param {Object} o
    */
-Util.isArray_ = function (o) {
+function isArray_(o) {
   return o && o.splice;
-};
+}
   
-Util.isNumber_ = function (o) {
+function isNumber_(o) {
   return typeof o === 'number';
 }
  
@@ -238,7 +242,7 @@ Util.isNumber_ = function (o) {
    // closure compiler removed?
     op = Math.min(Math.max(op, 0), 1);
     if (node) {
-      var st = node.style;
+      var /** @type nodestyle */ st = node.style;
       if (typeof st.opacity !== 'undefined') {
         st.opacity = op;
       }
@@ -288,7 +292,8 @@ Util.isNumber_ = function (o) {
   }
   /**
    * @name GeometryType
-   * @enum
+   * @enum {String}
+   * @const
    * @class List of Geometry type supported by ArcGIS server.
    * @property {String} [POINT] esriGeometryPoint 
    * @property {String} [MULTIPOINT] esriGeometryMultipoint
@@ -297,11 +302,11 @@ Util.isNumber_ = function (o) {
    * @property {String} [ENVELOPE] esriGeometryEnvelope
    */
   var GeometryType = {
-    'POINT': 'esriGeometryPoint',
-    'MULTIPOINT': 'esriGeometryMultipoint',
-    'POLYLINE': 'esriGeometryPolyline',
-    'POLYGON': 'esriGeometryPolygon',
-    'ENVELOPE': 'esriGeometryEnvelope'
+    POINT: 'esriGeometryPoint',
+    MULTIPOINT: 'esriGeometryMultipoint',
+    POLYLINE: 'esriGeometryPolyline',
+    POLYGON: 'esriGeometryPolygon',
+    ENVELOPE: 'esriGeometryEnvelope'
   };
   function getGeometryType(obj) {
     var o = obj;
@@ -377,7 +382,7 @@ Util.isNumber_ = function (o) {
   }
   /**
    * Convert overlays (Marker, Polyline, Polygons) to JSON string in AGS format.
-   * @param {(OverlayView|OverlayView[])} geom 
+   * @param {(OverlayView|Array.<OverlayView>)} geom 
    */
   function fromOverlaysToJSON(geom) {
     var gtype = getGeometryType(geom);
@@ -475,7 +480,7 @@ Util.isNumber_ = function (o) {
    * @return {google.maps.LatLngBounds} gLatLngBounds
    */
   function fromEnvelopeToLatLngBounds(extent) {
-    var sr  =  spatialReferences__[extent.spatialReference.wkid || extent.spatialReference.wkt];
+    var sr  =  spatialReferences_[extent.spatialReference.wkid || extent.spatialReference.wkt];
     sr  =  sr || WGS84;
     var sw  =  sr.inverse([extent.xmin, extent.ymin]);
     var ne  =  sr.inverse([extent.xmax, extent.ymax]);
@@ -489,7 +494,7 @@ Util.isNumber_ = function (o) {
    * may (Polygon) or may not (Polyline) support multi-parts, so the result is an array for consistency.
    * @param {Object} json geometry
    * @param {OverlayOptions} opts see {@link OverlayOptions}
-   * @return {OverlayView[]} 
+   * @return {Array.<OverlayView>} 
    */
   function fromJSONToOverlays(geom, opts) {
     var ovs = null;
@@ -767,7 +772,7 @@ Util.isNumber_ = function (o) {
   /**
    * Add a list of overlays to map
    * @param {google.maps.Map} map
-   * @param {OverlayView[]} overlays
+   * @param {Array.<OverlayView>} overlays
    */
   Util.addToMap = function (map, overlays) {
     if (isArray_(overlays)) {
@@ -784,7 +789,7 @@ Util.isNumber_ = function (o) {
   };
   /**
    * Add a list of overlays to map
-   * @param {OverlayView[]} overlays
+   * @param {Array.<OverlayView>} overlays
    * @param {Boolean} clearArray
    */
   Util.removeFromMap = function (overlays, clearArray) {
@@ -816,8 +821,8 @@ Util.isNumber_ = function (o) {
   /**
    * Convert Lat Lng to real-world coordinates.
    * Note both input and output are array of [x,y], although their values in different units.
-   * @param {Number[]} lnglat
-   * @return {Number[]}
+   * @param {Array.<Number>} lnglat
+   * @return {Array.<Number>}
    */
   SpatialReference.prototype.forward  =  function (lnglat) {
     return lnglat;
@@ -825,8 +830,8 @@ Util.isNumber_ = function (o) {
   /**
    * Convert real-world coordinates  to Lat Lng.
    * Note both input and output are are array of [x,y], although their values are different.
-   * @param {Number[]}  coords
-   * @return {Number[]}
+   * @param {Array.<Number>}  coords
+   * @return {Array.<Number>}
    */
   SpatialReference.prototype.inverse  =  function (coords) {
     return coords;
@@ -974,8 +979,8 @@ Util.isNumber_ = function (o) {
   };
   /** 
    * see {@link SpatialReference}
-   * @param {Number[]} lnglat
-   * @return {Number[]}
+   * @param {Array.<Number>} lnglat
+   * @return {Array.<Number>}
    */
   LambertConformalConic.prototype.forward = function (lnglat) {
     var phi = lnglat[1] * RAD_DEG;// (Math.PI / 180);
@@ -989,8 +994,8 @@ Util.isNumber_ = function (o) {
   };
   /**
    * see {@link SpatialReference}
-   * @param {Number[]}  coords
-   * @return {Number[]}
+   * @param {Array.<Number>}  coords
+   * @return {Array.<Number>}
    */
   LambertConformalConic.prototype.inverse = function (coords) {
     var E = coords[0] - this.FE_;
@@ -1076,8 +1081,8 @@ Util.isNumber_ = function (o) {
   };
   /**
    * see {@link SpatialReference}
-   * @param {Number[]} lnglat
-   * @return {Number[]}
+   * @param {Array.<Number>} lnglat
+   * @return {Array.<Number>}
    */
   TransverseMercator.prototype.forward = function (lnglat) {
     var phi = lnglat[1] * RAD_DEG;// (Math.PI / 180);
@@ -1093,8 +1098,8 @@ Util.isNumber_ = function (o) {
   };
   /**
    * see {@link SpatialReference}
-   * @param {Number[]}  coords
-   * @return {Number[]}
+   * @param {Array.<Number>}  coords
+   * @return {Array.<Number>}
    */
   TransverseMercator.prototype.inverse = function (coords) {
     var E = coords[0];
@@ -1150,8 +1155,8 @@ Util.isNumber_ = function (o) {
   
   /**
    * See {@link SpatialReference}
-   * @param {Number[]} lnglat
-   * @return {Number[]}
+   * @param {Array.<Number>} lnglat
+   * @return {Array.<Number>}
    */
   SphereMercator.prototype.forward = function (lnglat) {
     var phi = lnglat[1] * RAD_DEG;
@@ -1162,8 +1167,8 @@ Util.isNumber_ = function (o) {
   };
   /**
    * See {@link SpatialReference}
-   * @param {Number[]}  coords
-   * @return {Number[]}
+   * @param {Array.<Number>}  coords
+   * @return {Array.<Number>}
    */
   SphereMercator.prototype.inverse = function (coords) {
     var E = coords[0];
@@ -1272,8 +1277,8 @@ Util.isNumber_ = function (o) {
 
   /** 
    * see {@link SpatialReference}
-   * @param {Number[]} lnglat
-   * @return {Number[]}
+   * @param {Array.<Number>} lnglat
+   * @return {Array.<Number>}
    */
   Albers.prototype.forward = function (lnglat) {
     var phi = lnglat[1] * RAD_DEG;
@@ -1287,8 +1292,8 @@ Util.isNumber_ = function (o) {
   };
   /**
    * see {@link SpatialReference}
-   * @param {Number[]}  coords
-   * @return {Number[]}
+   * @param {Array.<Number>}  coords
+   * @return {Array.<Number>}
    */
   Albers.prototype.inverse = function (coords) {
     var E = coords[0] - this.FE_;
@@ -1338,7 +1343,7 @@ Util.isNumber_ = function (o) {
     });
 	
   // declared early but assign here to avoid dependency error by jslint
-  spatialReferences__ = {
+  spatialReferences_ = {
     '4326': WGS84,
     '4269': NAD83,
     '102113': WEB_MERCATOR,
@@ -1399,12 +1404,12 @@ Util.isNumber_ = function (o) {
    * @return {SpatialReference} registered SR
    */
   SpatialReference.register = function (wkidt, wktOrSR) {
-    var sr = spatialReferences__['' + wkidt];
+    var sr = spatialReferences_['' + wkidt];
     if (sr) {
       return sr;
     }
     if (wktOrSR instanceof SpatialReference) {
-      spatialReferences__['' + wkidt] = wktOrSR;
+      spatialReferences_['' + wkidt] = wktOrSR;
       sr = wktOrSR;
       
     } else {
@@ -1417,33 +1422,33 @@ Util.isNumber_ = function (o) {
           'wkid': wkidt
         };
       }
-      var prj = Util.extractString_(wkt, "PROJECTION[\"", "\"]");
-      var spheroid = Util.extractString_(wkt, "SPHEROID[", "]").split(",");
+      var prj = extractString_(wkt, "PROJECTION[\"", "\"]");
+      var spheroid = extractString_(wkt, "SPHEROID[", "]").split(",");
       if (prj !== "") {
-        params.unit = parseFloat(Util.extractString_(Util.extractString_(wkt, "PROJECTION", ""), "UNIT[", "]").split(",")[1]);
+        params.unit = parseFloat(extractString_(extractString_(wkt, "PROJECTION", ""), "UNIT[", "]").split(",")[1]);
         params.semi_major = parseFloat(spheroid[1]);
         params.inverse_flattening = parseFloat(spheroid[2]);
-        params.latitude_of_origin = parseFloat(Util.extractString_(wkt, "\"Latitude_Of_Origin\",", "]"));
-        params.central_meridian = parseFloat(Util.extractString_(wkt, "\"Central_Meridian\",", "]"));
-        params.false_easting = parseFloat(Util.extractString_(wkt, "\"False_Easting\",", "]"));
-        params.false_northing = parseFloat(Util.extractString_(wkt, "\"False_Northing\",", "]"));
+        params.latitude_of_origin = parseFloat(extractString_(wkt, "\"Latitude_Of_Origin\",", "]"));
+        params.central_meridian = parseFloat(extractString_(wkt, "\"Central_Meridian\",", "]"));
+        params.false_easting = parseFloat(extractString_(wkt, "\"False_Easting\",", "]"));
+        params.false_northing = parseFloat(extractString_(wkt, "\"False_Northing\",", "]"));
       }
       switch (prj) {
       case "":
         sr = new SpatialReference(params);
         break;
       case "Lambert_Conformal_Conic":
-        params.standard_parallel_1 = parseFloat(Util.extractString_(wkt, "\"Standard_Parallel_1\",", "]"));
-        params.standard_parallel_2 = parseFloat(Util.extractString_(wkt, "\"Standard_Parallel_2\",", "]"));
+        params.standard_parallel_1 = parseFloat(extractString_(wkt, "\"Standard_Parallel_1\",", "]"));
+        params.standard_parallel_2 = parseFloat(extractString_(wkt, "\"Standard_Parallel_2\",", "]"));
         sr = new LambertConformalConic(params);
         break;
       case "Transverse_Mercator":
-        params.scale_factor = parseFloat(Util.extractString_(wkt, "\"Scale_Factor\",", "]"));
+        params.scale_factor = parseFloat(extractString_(wkt, "\"Scale_Factor\",", "]"));
         sr = new TransverseMercator(params);
         break;
       case "Albers":
-        params.standard_parallel_1 = parseFloat(Util.extractString_(wkt, "\"Standard_Parallel_1\",", "]"));
-        params.standard_parallel_2 = parseFloat(Util.extractString_(wkt, "\"Standard_Parallel_2\",", "]"));
+        params.standard_parallel_1 = parseFloat(extractString_(wkt, "\"Standard_Parallel_1\",", "]"));
+        params.standard_parallel_2 = parseFloat(extractString_(wkt, "\"Standard_Parallel_2\",", "]"));
         sr = new Albers(params);
         break;
       // more implementations here.
@@ -1451,7 +1456,7 @@ Util.isNumber_ = function (o) {
         throw new Error(prj + "  not supported");
       }
       if (sr) {
-        spatialReferences__['' + wkidt] = sr;
+        spatialReferences_['' + wkidt] = sr;
       }
     }
     
@@ -1486,8 +1491,8 @@ Util.isNumber_ = function (o) {
    * This resource represents a catalog of folders and services published on the host.
    *  @param {String} url
    * @property {String} [currentVersion] currentVersion
-   * @property {String[]} [folders] folders list
-   * @property {String[]} [services] list of services. Each has <code>name, type</code> property.
+   * @property {Array.<String>} [folders] folders list
+   * @property {Array.<String>} [services] list of services. Each has <code>name, type</code> property.
    */
   function Catalog(url) {
     this.url = url;
@@ -1530,7 +1535,7 @@ Util.isNumber_ = function (o) {
    * @property {String} [copyrightText] copyrightText, only available after load.
    * @property {Layer} [parentLayer] parent Layer {@link Layer}
    * @property {Boolean} [defaultVisibility] defaultVisibility
-   * @property {Layer[]} [subLayers] sub Layers. {@link Layer}[].
+   * @property {Array.<Layer>} [subLayers] sub Layers. {@link Layer}.
    * @property {Boolean} [visibility] Visibility of this layer
    * @property {Number} [minScale] minScale
    * @property {Number} [maxScale] maxScale
@@ -1538,9 +1543,9 @@ Util.isNumber_ = function (o) {
    * @property {DrawingInfo} [drawingInfo] rendering info See {@link DrawingInfo}
    * @property {Boolean} [hasAttachments] hasAttachments
    * @property {String} [typeIdField] typeIdField
-   * @property {Field[]} [fields] fields, only available after load. See {@link Field}
-   * @property {String[]} [types] subtypes: id, name, domains.
-   * @property {String[]} [relationships] relationships (id, name, relatedTableId)
+   * @property {Array.<Field>} [fields] fields, only available after load. See {@link Field}
+   * @property {Array.<String>} [types] subtypes: id, name, domains.
+   * @property {Array.<String>} [relationships] relationships (id, name, relatedTableId)
    */
   function Layer(url) {
     this.url = url;
@@ -1598,14 +1603,14 @@ Util.isNumber_ = function (o) {
    * @property {String} [WITHIN] esriSpatialRelWithin
   */
   var SpatialRelationship = {
-    'INTERSECTS': 'esriSpatialRelIntersects',
-    'CONTAINS': 'esriSpatialRelContains',
-    'CROSSES': 'esriSpatialRelCrosses',
-    'ENVELOPE_INTERSECTS': 'esriSpatialRelEnvelopeIntersects',
-    'INDEX_INTERSECTS': 'esriSpatialRelIndexIntersects',
-    'OVERLAPS': 'esriSpatialRelOverlaps',
-    'TOUCHES': 'esriSpatialRelTouches',
-    'WITHIN': 'esriSpatialRelWithin'
+    INTERSECTS: 'esriSpatialRelIntersects',
+    CONTAINS: 'esriSpatialRelContains',
+    CROSSES: 'esriSpatialRelCrosses',
+    ENVELOPE_INTERSECTS: 'esriSpatialRelEnvelopeIntersects',
+    INDEX_INTERSECTS: 'esriSpatialRelIndexIntersects',
+    OVERLAPS: 'esriSpatialRelOverlaps',
+    TOUCHES: 'esriSpatialRelTouches',
+    WITHIN: 'esriSpatialRelWithin'
   };
    /**
    * @name QueryOptions
@@ -1617,15 +1622,15 @@ Util.isNumber_ = function (o) {
    *   This parameter is a short hand for a where clause of:
    *   where [displayField]like '%[text]%'. The text is case sensitive.
    *   This parameter is ignored if the where parameter is specified.
-   * @property {OverlayView|OverlayView[]} [geometry] The geometry to apply as the spatial filter.
+   * @property {OverlayView|Array.<OverlayView>} [geometry] The geometry to apply as the spatial filter.
    * @property {SpatialRelationship} [spatialRelationship] The spatial relationship to be applied on the
    *    input geometry while performing the query. The supported spatial relationships
    *    include intersects, contains, envelope intersects, within, etc.
    *    The default spatial relationship is intersects. See {@link SpatialRelationship}
    * @property {String} [where] A where clause for the query filter. Any legal SQL where clause operating on the fields in the layer is allowed.
-   * @property {String[]} [outFields] The list of fields to be included in the returned resultset.
+   * @property {Array.<String>} [outFields] The list of fields to be included in the returned resultset.
    * @property {Boolean} [returnGeometry] If true, If true, the resultset will include the geometries associated with each result.
-   * @property {Int[]} [objectIds] The object IDs of this layer / table to be queried
+   * @property {Array.<Int>} [objectIds] The object IDs of this layer / table to be queried
    * @property {Number} [maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the query operation
    * @property {Boolean} [returnIdsOnly] If true, the response only includes an array of object IDs. Otherwise the response is a feature set. The default is false. 
    * @property {OverlayOptions} [overlayOptions] See {@link OverlayOptions}
@@ -1638,7 +1643,7 @@ Util.isNumber_ = function (o) {
    * @property {String} [displayFieldName] display Field Name for layer
    * @property {Object} [fieldAliases] Field Name's Aliases. key is field name, value is alias.
    * @property {GemetryType} [geometryType] esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolygon | esriGeometryPolyline
-   * @property {Feature[]} [features] result as array of {@link Feature}
+   * @property {Array.<Feature>} [features] result as array of {@link Feature}
    * @property {String} [objectIdFieldName] objectIdFieldName when returnIdsOnly=true
    * @property {int[]} [objectIds] objectIds when returnIdsOnly=true
    */
@@ -1656,7 +1661,7 @@ Util.isNumber_ = function (o) {
     }
     // handle text, where, relationParam, objectIds, maxAllowableOffset
     var params = augmentObject(p, {});
-    if (p.geometry && !Util.Util.isString_(p.geometry)) {
+    if (p.geometry && !isString_(p.geometry)) {
       params.geometry = fromOverlaysToJSON(p.geometry);
       params.geometryType = getGeometryType(p.geometry);
       params.inSR = 4326;
@@ -1688,9 +1693,9 @@ Util.isNumber_ = function (o) {
    * @name QueryRelatedRecordsOptions
    * @class This class represent the parameters needed in an query related records operation for a {@link Layer}.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/queryrelatedrecords.html'>Query Related Records Operation</a>.
-   * @property {Int[]} [objectIds] The object IDs of this layer / table to be queried
+   * @property {Array.<Int>} [objectIds] The object IDs of this layer / table to be queried
    * @property {Int} [relatioshipId] The ID of the relationship to be queried
-   * @property {String[]} [outFields] The list of fields to be included in the returned resultset. This list is a comma delimited list of field names.
+   * @property {Array.<String>} [outFields] The list of fields to be included in the returned resultset. This list is a comma delimited list of field names.
    * @property {String} [definitionExpression]  The definition expression to be applied to the related table / layer. From the list of objectIds, only those records that conform to this expression will be returned.
    * @property {Boolean} [returnGeometry  = true] If true, the resultset will include the geometries associated with each result.
    * @property [Number] [maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the query operation
@@ -1703,7 +1708,7 @@ Util.isNumber_ = function (o) {
    * @property {String} [geometryType] esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolygon | esriGeometryPolyline
    * @property {Object} [spatialReference] {@link SpatialReference}
    * @property {String} [displayFieldName] display Field Name for layer
-   * @property {Object[]} [relatedRecordGroups] list of related records
+   * @property {Array.<Object>} [relatedRecordGroups] list of related records
    */
    /**
    * @name RelatedRecord
@@ -1711,7 +1716,7 @@ Util.isNumber_ = function (o) {
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/queryrelatedrecords.html'>Query Operation</a>.
    * @property {int} [objectId] objectid of original record
-   * @property {Feature[]} [relatedRecords] list of {@link Feature}s. 
+   * @property {Array.<Feature>} [relatedRecords] list of {@link Feature}s. 
    */
   /**
    * The query related records operation is performed on a layer / table resource. 
@@ -1730,7 +1735,7 @@ Util.isNumber_ = function (o) {
     } 
     var params = augmentObject(qparams, {});
     params.f = params.f || 'json';
-    if (params.outFields && !Util.Util.isString_(params.outFields)) {
+    if (params.outFields && !isString_(params.outFields)) {
       params.outFields = params.outFields.join(',');
     }
     params.returnGeometry = params.returnGeometry === false ? false : true;
@@ -1750,7 +1755,7 @@ Util.isNumber_ = function (o) {
    * <ul><li> <code> url</code> (required) is the URL of the map servive, e.g. <code>
    * http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer</code>.
    * <ul/> Note the spatial reference of the map service must already exists
-   * in the {@link spatialReferences__} if actual coordinates transformation is needed.
+   * in the {@link spatialReferences_} if actual coordinates transformation is needed.
    * @name MapService
    * @class This class (<code>gmaps.ags.MapService</code>) is the core class for all map service operations.
    * It represents an ArcGIS Server map service that offer access to map and layer content
@@ -1761,8 +1766,8 @@ Util.isNumber_ = function (o) {
    * @property {String} [mapName] map frame Name inside the map document
    * @property {String} [description] description
    * @property {String} [copyrightText] copyrightText
-   * @property {Layer[]} [layers] array of Layers.
-   * @property {Layer[]} [tables] array of Tables.
+   * @property {Array.<Layer>} [layers] array of Layers.
+   * @property {Array.<Layer>} [tables] array of Tables of type {@link Layer}.
    * @property {SpatialReference} [spatialReference] spatialReference
    * @property {Boolean} [singleFusedMapCache] if map cache is singleFused
    * @property {TileInfo} [tileInfo] See {@link TileInfo}
@@ -1801,9 +1806,9 @@ Util.isNumber_ = function (o) {
     var me = this;
     augmentObject(json, this);
     if (json.spatialReference.wkt) {
-      this.spatialReference = spatialReferences__.addSpatialReference(json.spatialReference.wkt, json.spatialReference.wkt);
+      this.spatialReference = spatialReferences_.addSpatialReference(json.spatialReference.wkt, json.spatialReference.wkt);
     } else {
-      this.spatialReference = spatialReferences__[json.spatialReference.wkid];
+      this.spatialReference = spatialReferences_[json.spatialReference.wkid];
     }
     if (json.tables !== undefined) {
       // v10.0 +
@@ -1812,7 +1817,7 @@ Util.isNumber_ = function (o) {
       });
     } else {
       // v9.3
-      this.initLayers_(json);
+      me.initLayers_(json);
     }
   };
    /**
@@ -1824,6 +1829,10 @@ Util.isNumber_ = function (o) {
   MapService.prototype.initLayers_ = function (json2) {
     var layers = [];
     var tables = [];
+    this.layers_ = layers;
+    if (json2.tables) {
+      this.tables_ = tables;
+    }
     var layer, i, c, info;
     for (i = 0, c = json2.layers.length; i < c; i++) {
       info = json2.layers[i];
@@ -1851,10 +1860,6 @@ Util.isNumber_ = function (o) {
         }
       }
     }
-    this.layers = layers;
-    if (json2.tables) {
-      this.tables = tables;
-    }
     this.loaded_ = true;
     /**
      * This event is fired when the service and it's service info is loaded.
@@ -1870,13 +1875,13 @@ Util.isNumber_ = function (o) {
    * @return {Layer}
    */
   MapService.prototype.getLayer = function (nameOrId) {
-    var layers = this.layers;
+    var layers = this.layers_;
     if (layers) {
       for (var i = 0, c = layers.length; i < c; i++) {
         if (nameOrId === layers[i].id) {
           return layers[i];
         }
-        if (Util.Util.isString_(nameOrId) && layers[i].name.toLowerCase() === nameOrId.toLowerCase()) {
+        if (isString_(nameOrId) && layers[i].name.toLowerCase() === nameOrId.toLowerCase()) {
           return layers[i];
         }
       }
@@ -1890,9 +1895,9 @@ Util.isNumber_ = function (o) {
  */
   MapService.prototype.getLayerDefs_ = function () {
     var ret = {};
-    if (this.layers) {
-      for (var i = 0, c = this.layers.length; i < c; i++) {
-        var layer = this.layers[i];
+    if (this.layers_) {
+      for (var i = 0, c = this.layers_.length; i < c; i++) {
+        var layer = this.layers_[i];
         if (layer.definition) {
           ret[String(layer.id)] = layer.definition;
         }
@@ -1901,18 +1906,25 @@ Util.isNumber_ = function (o) {
     return ret;
   };
   /**
+   * If the map service meta info is loaded
+   * @return {Boolean}
+   */
+  MapService.prototype.hasLoaded = function () {
+    return this.loaded_;
+  }
+  /**
    * get a  list of visible layer's Ids
-   * @return {Number[]} null if not initialized
+   * @return {Array.<Number>} null if not initialized
    */
   MapService.prototype.getVisibleLayerIds_ = function () {
     var ret = [];
-    if (this.layers) { // in case service not loaded
+    if (this.layers_) { // in case service not loaded
       var layer;
       // a special behavior of REST (as of 9.3.1): 
       // if partial group then parent must be off
       var i, c;
-      for (i = 0, c = this.layers.length; i < c; i++) {
-        layer = this.layers[i];
+      for (i = 0, c = this.layers_.length; i < c; i++) {
+        layer = this.layers_[i];
         if (layer.subLayers) {
           for (var j = 0, jc = layer.subLayers.length; j < jc; j++) {
             if (layer.subLayers[j].visible === false) {
@@ -1922,8 +1934,8 @@ Util.isNumber_ = function (o) {
           }
         }
       }
-      for (i = 0, c = this.layers.length; i < c; i++) {
-        layer = this.layers[i];
+      for (i = 0, c = this.layers_.length; i < c; i++) {
+        layer = this.layers_[i];
         if (layer.visible === true) {
           ret.push(layer.id);
         }
@@ -1941,7 +1953,9 @@ Util.isNumber_ = function (o) {
     }
     return null;
   };
-  
+  MapService.prototype.getLayers = function () {
+    return this.layers_;
+  };
 /**
  * @name ExportMapOptions
  * @class This class represent the parameters needed in an exportMap operation for a {@link MapService}.
@@ -1954,7 +1968,7 @@ Util.isNumber_ = function (o) {
  * @property {Object} [layerDefinitions] Allows you to filter the features of individual layers in the exported map by specifying 
  *   definition expressions for those layers. Syntax: { "&lt;layerId1>" : "&lt;layerDef1>" , "&lt;layerId2>" : "&lt;layerDef2>" }
  *   key is layerId returned by server, value is definition for that layer.
- * @property {Number[]} [layerIds] list of layer ids. If not specified along with layerOptions, show list of visible layers. 
+ * @property {Array.<Number>} [layerIds] list of layer ids. If not specified along with layerOptions, show list of visible layers. 
  * @property {String} [layerOptions] show | hide | include | exclude. If not specified with along layerIds, show list of visible layers. 
  * @property {Boolean} [transparent  = true] If true, the image will be exported with 
  *  the background color of the map set as its transparent color. note the REST API default value is false.
@@ -2101,7 +2115,7 @@ Util.isNumber_ = function (o) {
   }
 }
  * </pre>
- * @property {Marker[]|Polyline[]|Polygon[]} [geometry] geometry
+ * @property {Array.<OverlayView>} [geometry] geometry
  * @property {Object} [attributes] attributes as name-value JSON object.
  */
   /**
@@ -2110,7 +2124,7 @@ Util.isNumber_ = function (o) {
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/identify.html'>Identify Operation</a>.
    * @property {Geometry} [geometry] The geometry to identify on, <code>google.maps.LatLng</code>, <code>Polyline</code>, or <code>Polygon</code>.
-   * @property {Number[]} [layerIds] The layers to perform the identify operation on. 
+   * @property {Array.<Number>} [layerIds] The layers to perform the identify operation on. 
    * @property {String} [layerOption] The layers to perform the identify operation on. 'top|visible|all'. 
    * @property {Number} [tolerance] The distance in screen pixels from the specified geometry within which the identify should be performed
    * @property {google.maps.LatLngBounds} [bounds] The bounding box of the map currently being viewed.
@@ -2127,7 +2141,7 @@ Util.isNumber_ = function (o) {
    * a {@link MapService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/identify.html'>Identify Operation</a>.
-   * @property {IdentifyResult[]} [results] The identify results as an array of {@link IdentifyResult}
+   * @property {Array.<IdentifyResult>} [results] The identify results as an array of {@link IdentifyResult}
    */
   /**
    * @name IdentifyResult
@@ -2200,9 +2214,9 @@ Util.isNumber_ = function (o) {
    *   the searchText string. An exact match is case sensitive.
    *   Otherwise, it searches for a value that contains the searchText provided.
    *    This search is not case sensitive. The default is true.
-   * @property {String[]} [searchFields] The names of the fields to search. 
+   * @property {Array.<String>} [searchFields] The names of the fields to search. 
    *    If this parameter is not specified, all fields are searched.
-   * @property {Number[]} [layerIds] The layer Ids to perform the find operation on. The layers to perform the find operation on.
+   * @property {Array.<Number>} [layerIds] The layer Ids to perform the find operation on. The layers to perform the find operation on.
    * @property {Boolean} [returnGeometry  = true] If true, the resultset will include the geometries associated with each result.
    * @property {Number} [maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing
    *             geometries returned by the find operation 
@@ -2212,7 +2226,7 @@ Util.isNumber_ = function (o) {
    * @class This class represent the results of a find operation for a {@link MapService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/find.html'>Find Operation</a>.
-   * @property {FindResult[]} [results] The find results as an array of {@link FindResult}
+   * @property {Array.<FindResult>} [results] The find results as an array of {@link FindResult}
    */
   /**
    * @name FindResult
@@ -2303,11 +2317,11 @@ Util.isNumber_ = function (o) {
  * @constructor
  * @param {String} url
  * @property {String} [serviceDescription] serviceDescription
- * @property {Field[]} [addressFields] input fields. 
+ * @property {Array.<Field>} [addressFields] input fields. 
  *    Each entry is an object of type {@link Field}, plus <code>required(true|false)</code>
- * @property {Field[]} [candidateFields] candidate Fields. 
+ * @property {Array.<Field>} [candidateFields] candidate Fields. 
  *    Each entry is an object of type {@link Field}
- * @property {Field[]} [intersectionCandidateFields] intersectionCandidateFields
+ * @property {Array.<Field>} [intersectionCandidateFields] intersectionCandidateFields
  *    Each entry is an object of type {@link Field}
  * @property {SpatialReference} [spatialReference] spatialReference
  * @property {Object} [locatorProperties] an object with key-value pair that is specific to Locator type.
@@ -2328,7 +2342,7 @@ Util.isNumber_ = function (o) {
   GeocodeService.prototype.init_ = function (json) {
     augmentObject(json, this);
     if (json.spatialReference) {
-      this.spatialReference = spatialReferences__[json.spatialReference.wkid || json.spatialReference.wkt] || WGS84;
+      this.spatialReference = spatialReferences_[json.spatialReference.wkid || json.spatialReference.wkt] || WGS84;
     }
     this.loaded = true;
     /**
@@ -2347,7 +2361,7 @@ Util.isNumber_ = function (o) {
  *   There is no constructor, use JavaScript object literal.
  * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.
  * @property {Object} [inputs] an object literal with name-value pair of input values.
- * @property {String[]} [outFields] The list of fields to be included in the returned resultset. 
+ * @property {Array.<String>} [outFields] The list of fields to be included in the returned resultset. 
  * @property {int|SpatialReference} [outSR] output SR, see {@link SpatialReference}
  */
 /**
@@ -2356,7 +2370,7 @@ Util.isNumber_ = function (o) {
  *  {@link GeocodeService}.
  *   There is no constructor, use JavaScript object literal.
  * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/candidates.html'>Find Adddress Candidates Operation</a>.
- * @property {GeocodeResult[]} [candidates] The find address results as 
+ * @property {Array.<GeocodeResult>} [candidates] The find address results as 
  * an array of {@link GeocodeResult}
  */
 /**
@@ -2452,7 +2466,7 @@ Util.isNumber_ = function (o) {
  * @param {Function} errback
  */
   GeocodeService.prototype.reverseGeocode = function (params, callback, errback) {
-    if (!Util.Util.isString_(params.location)) {
+    if (!isString_(params.location)) {
       params.location = fromOverlaysToJSON(params.location);
     }
     params.outSR = 4326;
@@ -2494,7 +2508,7 @@ Util.isNumber_ = function (o) {
    *  for a {@link GeometryService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {(OverlayView[]|Object[])} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   * @property {(Array.<OverlayView>|Array.<Object>)} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
    * @property {GeometryType} [geometryType] esriGeometryPoint | esriGeometryPolyline | esriGeometryPolygon | esriGeometryEnvelope
    * @property {SpatialReference} [inSpatialReference] The well-known ID of or the {@link SpatialReference} of the input geometries
    * @property {SpatialReference} [outSpatialReference] The well-known ID of or the {@link SpatialReference} of the out geometries
@@ -2505,7 +2519,7 @@ Util.isNumber_ = function (o) {
    *  for a {@link GeometryService}.
    *   There is no constructor, use JavaScript object literal.
    * <br/>For more info see <a  href  = 'http://sampleserver3.arcgisonline.com/ArcGIS/SDK/REST/project.html'>Project Operation</a>.
-   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
+   * @property {Array.<OverlayView>|Array.<Object>} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon<code>, or ESRI Geometry format to project. 
     */
   /**
    * This resource projects an array of input geometries from an input spatial reference
@@ -2530,7 +2544,7 @@ Util.isNumber_ = function (o) {
   };
  
  /**
-  * Common units code in spatialReferences__. Used in buffer operation.
+  * Common units code in spatialReferences_. Used in buffer operation.
   * This only has the most common units, for a full list of supported units, see 
   * <a href=http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnitType.htm>esriSRUnitType</a>
   * and <a href=http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnit2Type.htm>esriSRUnit2Type</a>
@@ -2555,9 +2569,9 @@ Util.isNumber_ = function (o) {
    * @name BufferOptions
    * @class This class represent the parameters needed in an buffer operation
    *  for a {@link GeometryService}.
-   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng</code>, <code>Polyline</code>, <code>Polygon</code>, or ESRI Geometry format to buffer. 
+   * @property {Array.<OverlayView>|Array.<Object>} [geometries] Array of <code>google.maps.LatLng</code>, <code>Polyline</code>, <code>Polygon</code>, or ESRI Geometry format to buffer. 
    * @property {SpatialReference} [bufferSpatialReference] The well-known ID of or the {@link SpatialReference} of the buffer geometries
-   * @property {Number[]} [distances] The distances the input geometries are buffered.
+   * @property {Array.<Number>} [distances] The distances the input geometries are buffered.
    * @property {Number} [unit] see <a href='http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnitType.htm'>esriSRUnitType Constants </a> .
    * @property {Boolean} [unionResults] If true, all geometries buffered at a given distance are unioned into a single (possibly multipart) polygon, and the unioned geometry is placed in the output array.
    * @property {OverlayOptions} [overlayOptions] how to render result overlay. See {@link OverlayOptions}
@@ -2567,7 +2581,7 @@ Util.isNumber_ = function (o) {
    * @class This class represent the parameters needed in an project operation
    *  for a {@link GeometryService}.
    *   There is no constructor, use JavaScript object literal.
-   * @property {OverlayView[]|Object[]} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon</code>, or ESRI Geometry format to project. 
+   * @property {Array.<OverlayView>|Array.<Object>} [geometries] Array of <code>google.maps.LatLng, Polyline, Polygon</code>, or ESRI Geometry format to project. 
    */
   /**
    * This resource projects an array of input geometries from an input spatial reference
@@ -2604,7 +2618,7 @@ Util.isNumber_ = function (o) {
    * @class GPService
    * @constructor
    * @property {String} [serviceDescription]
-   * @property {String[]} [tasks]
+   * @property {Array.<String>} [tasks]
    * @property {String} [executionType]
    * @property {String} [resultMapServerName]
    * @param {String} url http://[catalog-url]/[serviceName]/GPServer 
@@ -2633,7 +2647,7 @@ Util.isNumber_ = function (o) {
    * @property {Object} [defaultValue]
    * @property {Object} [parameterType]
    * @property {String} [category]
-   * @property {Object[]} [choiceList]
+   * @property {Array.<Object>} [choiceList]
    */
   /**
    * @name GPTask
@@ -2644,10 +2658,10 @@ Util.isNumber_ = function (o) {
    * @property {String} [category]
    * @property {String} [helpUrl]
    * @property {String} [executionType]
-   * @property {GPParameter[]} [parameters] see {@link GPParameter}
+   * @property {Array.<GPParameter>} [parameters] see {@link GPParameter}
    * @property {String} [name]
    * @property {String} [name]
-   * @property {String[]} [tasks]
+   * @property {Array.<String>} [tasks]
    * @property {String} [resultMapServerName]
    * @param {String} url http://[catalog-url]/[serviceName]/GPServer 
    */
@@ -2714,8 +2728,8 @@ Util.isNumber_ = function (o) {
   
   /**
    * @name GPResults
-   * @property {String[]} messages
-   * @property {GPResult[]} results
+   * @property {Array.<String>} messages
+   * @property {Array.<GPResult>} results
    */
   /**
    * @name GPResult
@@ -2728,9 +2742,9 @@ Util.isNumber_ = function (o) {
    * @class NetworkService
    * @constructor
    * @property {String} serviceDescription
-   * @property {String[]} routeLayers
-   * @property {String[]} serviceAreaLayers
-   * @property {String[]} closestFacilityLayers
+   * @property {Array.<String>} routeLayers
+   * @property {Array.<String>} serviceAreaLayers
+   * @property {Array.<String>} closestFacilityLayers
    * @param {String} url http://[catalog-url]/[serviceName]/NAServer 
    */
   function NetworkService(url) {
@@ -2753,8 +2767,8 @@ Util.isNumber_ = function (o) {
   /**
    * @name RouteOptions
    * @class intance that specify how a route should be solved.
-   * @property {google.maps.LatLng[]|Marker[]} [stops] the locations the route must pass
-   * @property {google.maps.LatLng[]|Marker[]} [barriers] the locations the route must avoid
+   * @property {Array.<google.maps.LatLng>|Array.<Marker>} [stops] the locations the route must pass
+   * @property {Array.<google.maps.LatLng>|Array.<Marker>} [barriers] the locations the route must avoid
    * @property {Boolean} [returnDirections] If true, directions will be generated and returned with the analysis results. Default is true
    * @property {Boolean} [returnRoutes] If true, routes will be returned with the analysis results. Default is true. 
    * @property {Boolean} [findBestSequence] If true, the solver should resequence the route in the optimal order. The default is as defined in the network layer. 
@@ -2764,7 +2778,7 @@ Util.isNumber_ = function (o) {
   /**
    * @name RouteResults
    * @class intance that specify the results of the solve operation.
-   * @property {google.maps.LatLng[]} [stops]
+   * @property {Array.<google.maps.LatLng>} [stops]
    */
   /**
    * Create a route task with the URL of the routing server resource.
@@ -2844,7 +2858,7 @@ Util.isNumber_ = function (o) {
    * @property {Number} [compressionQuality] JPEG only.0-100.
    * @property {Point} [origin] origin of tile system of type
    * @property {SpatialReference} [spatialReference] spatial reference.  <b>wkid info only</b>.
-   * @property {LOD[]} [lods] Array of Level of Details. See {@link LOD}
+   * @property {Array.<LOD>} [lods] Array of Level of Details. See {@link LOD}
    */
   /**
    * @name LOD
@@ -2990,11 +3004,11 @@ Util.isNumber_ = function (o) {
     this.mapService_ = (service instanceof MapService) ? service : new MapService(service);
     //In the format of mt[number].domain.com
     if (opt_layerOpts.hosts) {
-      var pro = Util.extractString_(this.mapService_.url, '', '://');
-      var host = Util.extractString_(this.mapService_.url, '://', '/');
-      var path = Util.extractString_(this.mapService_.url, pro + '://' + host, '');
+      var pro = extractString_(this.mapService_.url, '', '://');
+      var host = extractString_(this.mapService_.url, '://', '/');
+      var path = extractString_(this.mapService_.url, pro + '://' + host, '');
       this.urlTemplate_ = pro + '://' + opt_layerOpts.hosts + path;
-      this.numOfHosts_ = parseInt(Util.extractString_(opt_layerOpts.hosts, '[', ']'), 10);
+      this.numOfHosts_ = parseInt(extractString_(opt_layerOpts.hosts, '[', ']'), 10);
     }
     this.name = this.name || this.mapService_.name;
     this.maxZoom = this.maxZoom || 19;
@@ -3122,7 +3136,7 @@ Util.isNumber_ = function (o) {
    * See <a href  = http://code.google.com/p/gmaps-api-issues/issues/detail?id  = 279&can  = 1&q  = refresh&colspec  = ID%20Type%20Status%20Introduced%20Fixed%20Summary%20Stars%20ApiType%20Internal>Issue 279</a>
    * </p>
    * <p> Note: all tiled layer in the same map type must use same spatial reference and tile scheme.</p>
-   * @param {TileLayer[]|String} tileLayers
+   * @param {TileArray.<Layer>|String} tileLayers
    * @param {MapTypeOptions} opt_typeOpts
    */
   function MapType(tileLayers, opt_typeOpts) {
@@ -3135,13 +3149,13 @@ Util.isNumber_ = function (o) {
     }
     augmentObject(opt_typeOpts, this);
     var layers = tileLayers;
-    if (Util.Util.isString_(tileLayers)) {
+    if (isString_(tileLayers)) {
       layers = [new TileLayer(tileLayers, opt_typeOpts)];
     } else if (tileLayers instanceof MapService) {
       layers = [new TileLayer(tileLayers, opt_typeOpts)];
     } else if (tileLayers instanceof TileLayer) {
       layers = [tileLayers];
-    } else if (tileLayers.length > 0 && Util.isString_(tileLayers[0])) {
+    } else if (tileLayers.length > 0 && isString_(tileLayers[0])) {
       layers = [];
       for (i = 0; i < tileLayers.length; i++) {
         layers[i] = new TileLayer(tileLayers[i], opt_typeOpts);
@@ -3259,7 +3273,7 @@ Util.isNumber_ = function (o) {
   };
   /**
    * get list of {@link TileLayer} in this map type
-   * @return {TileLayer[]}
+   * @return {Array.<TileLayer>}
    */
   MapType.prototype.getTileLayers = function () {
     return this.tileLayers_;
@@ -3503,35 +3517,55 @@ Util.isNumber_ = function (o) {
     this.div_.style.visibility = 'hidden';
   };
 
-  W.gmaps.ags = {
-    'SpatialReference': SpatialReference,
-    'Geographic': Geographic,
-    'Albers': Albers,
-    'LambertConformalConic': LambertConformalConic,
-    'SphereMercator': SphereMercator,
-    'TransverseMercator': TransverseMercator,
-    'SpatialRelationship': SpatialRelationship,
-    'GeometryType': GeometryType,
-    'SRUnit': SRUnit,
-    'Catalog': Catalog,
-    'MapService': MapService,
-    'Layer': Layer,
-    'GeocodeService': GeocodeService,
-    'GeometryService': GeometryService,
-    'GPService': GPService,
-    'GPTask': GPTask,
-    'RouteTask': RouteTask,
-    'Util': Util,
-    'Config': Config,
-    'Projection': Projection,
-    'TileLayer': TileLayer,
-    'MapOverlay': MapOverlay,
-    'MapType': MapType
-  };
-///})();
- 
-
- 
-  
-  
-
+  var ags = {};
+  ags.SpatialReference = SpatialReference;
+  ags.Geographic = Geographic;
+  ags.Albers = Albers;
+  ags.LambertConformalConic = LambertConformalConic;
+  ags.SphereMercator = SphereMercator;
+  ags.TransverseMercator = TransverseMercator;
+  ags.SpatialRelationship = SpatialRelationship;
+  ags.GeometryType = GeometryType;
+  ags.SRUnit = SRUnit;
+  ags.Catalog = Catalog;
+  ags.MapService = MapService;
+  ags.Layer = Layer;
+  ags.GeocodeService = GeocodeService;
+  ags.GeometryService = GeometryService;
+  ags.GPService = GPService;
+  ags.GPTask = GPTask;
+  ags.RouteTask = RouteTask;
+  ags.Util = Util;
+  ags.Config = Config;
+  ags.Projection = Projection;
+  ags.TileLayer = TileLayer;
+  ags.MapOverlay = MapOverlay;
+  ags.MapType = MapType;
+  gmaps.ags = ags;
+  /*gmaps.ags = {
+    SpatialReference: SpatialReference,
+    Geographic: Geographic,
+    Albers: Albers,
+    LambertConformalConic: LambertConformalConic,
+    SphereMercator: SphereMercator,
+    TransverseMercator: TransverseMercator,
+    SpatialRelationship: SpatialRelationship,
+    GeometryType: GeometryType,
+    SRUnit: SRUnit,
+    Catalog: Catalog,
+    MapService: MapService,
+    Layer: Layer,
+    GeocodeService: GeocodeService,
+    GeometryService: GeometryService,
+    GPService: GPService,
+    GPTask: GPTask,
+    RouteTask: RouteTask,
+    Util: Util,
+    Config: Config,
+    Projection: Projection,
+    TileLayer: TileLayer,
+    MapOverlay: MapOverlay,
+    MapType: MapType
+  };*/
+ // W.gmaps = gmaps;
+//})();
