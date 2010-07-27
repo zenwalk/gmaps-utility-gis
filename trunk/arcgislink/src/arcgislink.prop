@@ -3,18 +3,15 @@
 ## e.g.  .x ==> ['x']
 ## additional notes: all JSON should use string as key.
 
-proxyUrl
-alwaysUseProxy
+## pushed to extern
+#proxyUrl
+#alwaysUseProxy
 
 
-## json stuff
-parameters
 
-#style
-filters
-alpha
-filter
-#onreadystatechange
+## json stuff pushed to extern
+
+
 
 ## methods:
 toJSON
