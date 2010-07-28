@@ -116,8 +116,8 @@ var RAD_DEG = Math.PI / 180;
 var jsonpID_ = 0;
 // cross domain function list.
 var W = window;
-W.ags_jsonp = W.ags_jsonp || {};
-var gmaps = W.gmaps || {};
+W['ags_jsonp'] = W['ags_jsonp'] || {};
+var gmaps = {};// W.gmaps || {};
 var G = google.maps; // W.google && W.google.maps ? W.google.maps : {};
 var WGS84, NAD83, WEB_MERCATOR, WEB_MERCATOR_AUX;
 /**
@@ -186,7 +186,7 @@ function isNumber_(o) {
    * @param {Boolean} force
    * @return {Object}
    */
-  function augmentObject(src, dest, force) {
+ function augmentObject_(src, dest, force) {
     if (src && dest) {
       var p;
       for (p in src) {
@@ -204,7 +204,7 @@ function isNumber_(o) {
    * @param {String} evtName
    * @param {Object} args
    */
-  function triggerEvent(src, evtName, args) {
+  function triggerEvent_(src, evtName, args) {
       G.event.trigger.apply(this, arguments);
     }
   
@@ -213,7 +213,7 @@ function isNumber_(o) {
    * @param {Object} errback
    * @param {Object} json
    */
-  function handleErr(errback, json) {
+  function handleErr_(errback, json) {
     if (errback && json && json.error) {
       errback(json.error);
     }
@@ -223,7 +223,7 @@ function isNumber_(o) {
    * @param {Date} time
    * @param {Date} endTime
    */
-  function formatTimeString(time, endTime) {
+  function formatTimeString_(time, endTime) {
     var ret = '';
     if (time) {
       ret +=  (time.getTime() - time.getTimezoneOffset() * 60000);
@@ -238,7 +238,7 @@ function isNumber_(o) {
    * @param {Node} node
    * @param {Number} 0-1
    */
-  function setNodeOpacity(node, op) {
+  function setNodeOpacity_(node, op) {
    // closure compiler removed?
     op = Math.min(Math.max(op, 0), 1);
     if (node) {
@@ -258,7 +258,7 @@ function isNumber_(o) {
    * get the layerdef text string from an object literal
    * @param {Object} defs
    */
-  function getLayerDefsString(defs) {
+  function getLayerDefsString_(defs) {
     var strDefs = '';
     for (var x in defs) {
       if (defs.hasOwnProperty(x)) {
@@ -271,7 +271,7 @@ function isNumber_(o) {
     return strDefs;
   }
   
-  function getXmlHttp() {
+  function getXmlHttp_() {
     if (typeof XMLHttpRequest === "undefined") {
       try {
         return new ActiveXObject("Msxml2.XMLHTTP.6.0");
@@ -308,7 +308,7 @@ function isNumber_(o) {
     POLYGON: 'esriGeometryPolygon',
     ENVELOPE: 'esriGeometryEnvelope'
   };
-  function getGeometryType(obj) {
+  function getGeometryType_(obj) {
     var o = obj;
     if (isArray_(obj) && obj.length > 0) {
       o = obj[0];
@@ -341,7 +341,7 @@ function isNumber_(o) {
    * @param {Object} obj
    * @return {Boolean}
    */
-  function isOverlay(obj) {
+  function isOverlay_(obj) {
     var o = obj;
     if (isArray_(obj) && obj.length > 0) {
       o = obj[0];
@@ -357,7 +357,7 @@ function isNumber_(o) {
     return false;
   }
   
-  function formatSRParam(sr) {
+  function formatSRParam_(sr) {
     if (!sr) {
       return null;
     }
@@ -368,7 +368,7 @@ function isNumber_(o) {
   /**
    * @param {MVCArrayOfLatLng} pts
     */
-  function fromLatLngsToJSON(pts, close) {
+  function fromLatLngsToJSON_(pts, close) {
     var arr = [];
     var latlng;
     for (var i = 0, c = pts.getLength(); i < c; i++) {
@@ -384,8 +384,8 @@ function isNumber_(o) {
    * Convert overlays (Marker, Polyline, Polygons) to JSON string in AGS format.
    * @param {(OverlayView|Array.<OverlayView>)} geom 
    */
-  function fromOverlaysToJSON(geom) {
-    var gtype = getGeometryType(geom);
+  function fromOverlaysToJSON_(geom) {
+    var gtype = getGeometryType_(geom);
     var g, gs, i, pts;
     var json = '{';
     switch (gtype) {
@@ -413,7 +413,7 @@ function isNumber_(o) {
       pts = [];
       gs = isArray_(geom) ? geom : [geom];
       for (i = 0; i < gs.length; i++) {
-        pts.push('[' + fromLatLngsToJSON(gs[i].getPath()) + ']');
+        pts.push('[' + fromLatLngsToJSON_(gs[i].getPath()) + ']');
       }
       json += 'paths:[' + pts.join(',') + ']';
       break;
@@ -422,7 +422,7 @@ function isNumber_(o) {
       g = isArray_(geom) ? geom[0] : geom;
       var paths = g.getPaths();
       for (i = 0; i < paths.getLength(); i++) {
-        pts.push('[' + fromLatLngsToJSON(paths.getAt(i), true) + ']');
+        pts.push('[' + fromLatLngsToJSON_(paths.getAt(i), true) + ']');
       }
       json += 'rings:[' + pts.join(',') + ']';
       
@@ -441,7 +441,7 @@ function isNumber_(o) {
    * From ESRI geometry format to JSON String, primarily used in Geometry service
    * @param {Object} geom
    */
-  function fromGeometryToJSON(geom) {
+  function fromGeometryToJSON_(geom) {
     function fromPointsToJSON(pts) {
       var arr = [];
       for (var i = 0, c = pts.length; i < c; i++) {
@@ -479,7 +479,7 @@ function isNumber_(o) {
    * @param {Object} extent
    * @return {google.maps.LatLngBounds} gLatLngBounds
    */
-  function fromEnvelopeToLatLngBounds(extent) {
+  function fromEnvelopeToLatLngBounds_(extent) {
     var sr  =  spatialReferences_[extent.spatialReference.wkid || extent.spatialReference.wkt];
     sr  =  sr || WGS84;
     var sw  =  sr.inverse([extent.xmin, extent.ymin]);
@@ -496,7 +496,7 @@ function isNumber_(o) {
    * @param {OverlayOptions} opts see {@link OverlayOptions}
    * @return {Array.<OverlayView>} 
    */
-  function fromJSONToOverlays(geom, opts) {
+  function fromJSONToOverlays_(geom, opts) {
     var ovs = null;
     var ov;
     var i, ic, j, jc, parts, part, lnglat, latlngs;
@@ -504,7 +504,7 @@ function isNumber_(o) {
     if (geom) {
       ovs = [];
       if (geom.x) {
-        ov = new G.Marker(augmentObject(opts.markerOptions || opts, {
+        ov = new G.Marker(augmentObject_(opts.markerOptions || opts, {
           'position': new G.LatLng(geom.y, geom.x)
         }));
         ovs.push(ov);
@@ -519,7 +519,7 @@ function isNumber_(o) {
           part = parts[i];
           if (geom.points) {
             // multipoint
-            ov = new G.Marker(augmentObject(opts.markerOptions || opts, {
+            ov = new G.Marker(augmentObject_(opts.markerOptions || opts, {
               'position': new G.LatLng(part[1], part[0])
             }));
             ovs.push(ov);
@@ -530,7 +530,7 @@ function isNumber_(o) {
               latlngs.push(new G.LatLng(lnglat[1], lnglat[0]));
             }
             if (geom.paths) {
-              ov = new G.Polyline(augmentObject(opts.polylineOptions || opts, {
+              ov = new G.Polyline(augmentObject_(opts.polylineOptions || opts, {
                 'path': latlngs
               }));
               ovs.push(ov);
@@ -541,7 +541,7 @@ function isNumber_(o) {
           }
         }
         if (geom.rings) {
-          ov = new G.Polygon(augmentObject(opts.polygonOptions || opts, {
+          ov = new G.Polygon(augmentObject_(opts.polygonOptions || opts, {
             'paths': rings
           }));
           ovs.push(ov);
@@ -552,13 +552,13 @@ function isNumber_(o) {
     return ovs;
   }
   
-  function parseFeatures(features, ovOpts) {
+  function parseFeatures_(features, ovOpts) {
     if (features) {
       var i, I, f;
       for (i = 0, I = features.length; i < I; i++) {
         f = features[i];
         if (f.geometry) {
-          f.geometry = fromJSONToOverlays(f.geometry, ovOpts);
+          f.geometry = fromJSONToOverlays_(f.geometry, ovOpts);
         }
       }
     }
@@ -567,17 +567,17 @@ function isNumber_(o) {
    * get string as rest parameter
    * @param {Object} o
    */
-  function formatRequestString(o) {
+  function formatRequestString_(o) {
     var ret;
     if (typeof o === 'object') {
       if (isArray_(o)) {
         ret = [];
         for (var i = 0, I = o.length; i < I; i++) {
-          ret.push(formatRequestString(o[i]));
+          ret.push(formatRequestString_(o[i]));
         }
         return '[' + ret.join(',') + ']';
-      } else if (isOverlay(o)) {
-        return fromOverlaysToJSON(o);
+      } else if (isOverlay_(o)) {
+        return fromOverlaysToJSON_(o);
       } else if (o.toJSON) {
         return o.toJSON();
       } else {
@@ -587,7 +587,7 @@ function isNumber_(o) {
             if (ret.length > 0) {
               ret += ', ';
             }
-            ret += x + ':' + formatRequestString(o[x]);
+            ret += x + ':' + formatRequestString_(o[x]);
           }
         }
         return '{' + ret + '}';
@@ -595,7 +595,7 @@ function isNumber_(o) {
     }
     return o.toString();
   }
-  function fromLatLngsToFeatureSet(latlngs) {
+  function fromLatLngsToFeatureSet_(latlngs) {
     var i, I, latlng;
     var features = [];
     for (i = 0, I = latlngs.length; i < I; i++) {
@@ -619,7 +619,7 @@ function isNumber_(o) {
       'doNotLocateOnRestrictedElements': false
     };
   }
-  function prepareGeometryParams(p) {
+  function prepareGeometryParams_(p) {
     var params = {};
     if (!p) {
       return null;
@@ -628,32 +628,32 @@ function isNumber_(o) {
     var g, isOv;
     if (p.geometries && p.geometries.length > 0) {
       g = p.geometries[0];
-      isOv = isOverlay(g);
+      isOv = isOverlay_(g);
       for (var i = 0, c = p.geometries.length; i < c; i++) {
         if (isOv) {
-          json.push(fromOverlaysToJSON(p.geometries[i]));
+          json.push(fromOverlaysToJSON_(p.geometries[i]));
         } else {
-          json.push(fromGeometryToJSON(p.geometries[i]));
+          json.push(fromGeometryToJSON_(p.geometries[i]));
         }
       }
     }
     if (!p.geometryType) {
-      p.geometryType = getGeometryType(g);
+      p.geometryType = getGeometryType_(g);
     }
     if (isOv) {
       params.inSR = WGS84.wkid;
     } else if (p.inSpatialReference) {
-      params.inSR = formatSRParam(p.inSpatialReference);
+      params.inSR = formatSRParam_(p.inSpatialReference);
     }
     if (p.outSpatialReference) {
-      params.outSR = formatSRParam(p.outSpatialReference);
+      params.outSR = formatSRParam_(p.outSpatialReference);
     }
     params.geometries = '{geometryType:"' + p.geometryType + '", geometries:[' + json.join(',') + ']}';
     return params;
   }
-  function log(msg) {
+  function log_(msg) {
     if (window.console) {
-      window.console.log(msg);
+      window.console.log_(msg);
     } else {
       var l = document.getElementById('_ags_log');
       if (l) {
@@ -666,31 +666,31 @@ function isNumber_(o) {
    * Format params to URL string
    * @param {Object} params
    */
-  function formatParams(params) {
+  function formatParams_(/** @type {JSONParams} */params) {
     var query = '';
     if (params) {
       params.f = params.f || 'json';
       for (var x in params) {
         if (params.hasOwnProperty(x) && params[x] !== null && params[x] !== undefined) { // wont sent undefined.
           //jslint complaint about escape cause NN does not support it.
-          var val = formatRequestString(params[x]);
+          var val = formatRequestString_(params[x]);
           query += (x + '=' + (escape ? escape(val) : encodeURIComponent(val)) + '&');
         }
       }
     }
     return query;
   }
-  function getJSON(url, params, callbackName, callbackFn) {
+  function getJSON_(url, params, callbackName, callbackFn) {
     var sid = 'ags_jsonp' + (jsonpID_++) + '_' + Math.floor(Math.random() * 1000000);
     var script = null;
-    var query = formatParams(params);
+    var query = formatParams_(params);
     query += (callbackName || 'callback') + '=ags_jsonp.' + sid;
     var head = document.getElementsByTagName("head")[0];
     if (!head) {
       throw new Error("document must have header tag");
     }
     var jsonpcallback = function () {
-      delete W.ags_jsonp[sid];
+      delete W['ags_jsonp'][sid];
       if (script) {
         head.removeChild(script);
       }
@@ -702,9 +702,9 @@ function isNumber_(o) {
        * @param {String} scriptID
        * @event
        */
-      triggerEvent(Util, 'jsonpend', sid);
+      triggerEvent_(Util, 'jsonpend', sid);
     };
-    W.ags_jsonp[sid] = jsonpcallback;
+    W['ags_jsonp'][sid] = jsonpcallback;
     
     if ((query + url).length < 2000 && !Config.alwaysUseProxy) {
       script = document.createElement("script");
@@ -725,7 +725,7 @@ function isNumber_(o) {
       if (useProxy && !Config.proxyUrl) {
         throw new Error('No proxyUrl property in Config is defined');
       }
-      var xmlhttp = getXmlHttp();
+      var xmlhttp = getXmlHttp_();
       xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState === 4) {
           if (xmlhttp.status === 200) {
@@ -745,7 +745,7 @@ function isNumber_(o) {
      * @param {String} scriptID
      * @event
      */
-    triggerEvent(Util, 'jsonpstart', sid);
+    triggerEvent_(Util, 'jsonpstart', sid);
     return sid;
   }
   
@@ -765,8 +765,8 @@ function isNumber_(o) {
    * @param {Function} callbackFn
    * @return {String} scriptID
    */
-  Util.getJSON = function (url, params, callbackName, callbackFn) {
-    getJSON(url, params, callbackName, callbackFn);
+  Util.getJSON_ = function (url, params, callbackName, callbackFn) {
+    getJSON_(url, params, callbackName, callbackFn);
   }; 
 
   /**
@@ -781,7 +781,7 @@ function isNumber_(o) {
         ov = overlays[i];
         if (isArray_(ov)) {
           Util.addToMap(map, ov);
-        } else if (isOverlay(ov)) {
+        } else if (isOverlay_(ov)) {
           ov.setMap(map);  
         }
       }
@@ -915,7 +915,7 @@ function isNumber_(o) {
     var tF = this.calc_t_(phi0, this.e_);
     var t1 = this.calc_t_(phi1, this.e_);
     var t2 = this.calc_t_(phi2, this.e_);
-    this.n_ = Math.log(m1 / m2) / Math.log(t1 / t2);
+    this.n_ = Math.log_(m1 / m2) / Math.log_(t1 / t2);
     this.F_ = m1 / (this.n_ * Math.pow(t1, this.n_));
     this.rho0_ = this.calc_rho_(this.a_, this.F_, tF, this.n_);
   }
@@ -1162,7 +1162,7 @@ function isNumber_(o) {
     var phi = lnglat[1] * RAD_DEG;
     var lamda = lnglat[0] * RAD_DEG;
     var E = this.a_ * (lamda - this.lamda0_);
-    var N = (this.a_ / 2) * Math.log((1 + Math.sin(phi)) / (1 - Math.sin(phi)));
+    var N = (this.a_ / 2) * Math.log_((1 + Math.sin(phi)) / (1 - Math.sin(phi)));
     return [E, N];
   };
   /**
@@ -1250,7 +1250,7 @@ function isNumber_(o) {
    */
   Albers.prototype.calc_q_ = function (phi, e) {
     var esp = e * Math.sin(phi);
-    return (1 - e * e) * (Math.sin(phi) / (1 - esp * esp) - (1 / (2 * e)) * Math.log((1 - esp) / (1 + esp)));
+    return (1 - e * e) * (Math.sin(phi) / (1 - esp * esp) - (1 / (2 * e)) * Math.log_((1 - esp) / (1 + esp)));
   };
   
   Albers.prototype.calc_rho_ = function (a, C, n, q) {
@@ -1259,7 +1259,7 @@ function isNumber_(o) {
     
   Albers.prototype.calc_phi_ = function (q, e, phi) {
     var esp = e * Math.sin(phi);
-    return phi + (1 - esp * esp) * (1 - esp * esp) / (2 * Math.cos(phi)) * (q / (1 - e * e) - Math.sin(phi) / (1 - esp * esp) + Math.log((1 - esp) / (1 + esp)) / (2 * e));
+    return phi + (1 - esp * esp) * (1 - esp * esp) / (2 * Math.cos(phi)) * (q / (1 - e * e) - Math.sin(phi) / (1 - esp * esp) + Math.log_((1 - esp) / (1 + esp)) / (2 * e));
   };
   
   Albers.prototype.solve_phi_ = function (q, e, init) {
@@ -1497,14 +1497,14 @@ function isNumber_(o) {
   function Catalog(url) {
     this.url = url;
     var me = this;
-    getJSON(url, {}, '', function (json) {
-      augmentObject(json, me);
+    getJSON_(url, {}, '', function (json) {
+      augmentObject_(json, me);
       /**
        * This event is fired when the catalog info is loaded.
        * @name Catalog#load
        * @event
        */
-      triggerEvent(me, 'load');
+      triggerEvent_(me, 'load');
     });
   }
   /**
@@ -1560,15 +1560,15 @@ function isNumber_(o) {
     if (this.loaded_) {
       return;
     }
-    getJSON(this.url, {}, '', function (json) {
-      augmentObject(json, me);
+    getJSON_(this.url, {}, '', function (json) {
+      augmentObject_(json, me);
       me.loaded_ = true;
       /**
        * This event is fired when layer's service info is loaded.
        * @name Layer#load
        * @event
        */
-      triggerEvent(me, 'load');
+      triggerEvent_(me, 'load');
     });
   };
 
@@ -1660,10 +1660,10 @@ function isNumber_(o) {
       return;
     }
     // handle text, where, relationParam, objectIds, maxAllowableOffset
-    var params = augmentObject(p, {});
+    var params = augmentObject_(p, {});
     if (p.geometry && !isString_(p.geometry)) {
-      params.geometry = fromOverlaysToJSON(p.geometry);
-      params.geometryType = getGeometryType(p.geometry);
+      params.geometry = fromOverlaysToJSON_(p.geometry);
+      params.geometryType = getGeometryType_(p.geometry);
       params.inSR = 4326;
     }
     if (p.spatialRelationship) {
@@ -1677,16 +1677,16 @@ function isNumber_(o) {
       params.objectIds = p.objectIds.join(',');
     }
     if (p.time) {
-      params.time = formatTimeString(p.time, p.endTime);
+      params.time = formatTimeString_(p.time, p.endTime);
     }
     params.outSR = 4326;
     params.returnGeometry = p.returnGeometry === false ? false : true;
     params.returnIdsOnly = p.returnIdsOnly === true ? true : false;
     delete params.overlayOptions;
-    getJSON(this.url + '/query', params, '', function (json) {
-      parseFeatures(json.features, p.overlayOptions);
+    getJSON_(this.url + '/query', params, '', function (json) {
+      parseFeatures_(json.features, p.overlayOptions);
       callback(json, json.error);
-      handleErr(errback, json);
+      handleErr_(errback, json);
     });
   };
   /**
@@ -1733,14 +1733,14 @@ function isNumber_(o) {
     if (!qparams) {
       return;
     } 
-    var params = augmentObject(qparams, {});
+    var params = augmentObject_(qparams, {});
     params.f = params.f || 'json';
     if (params.outFields && !isString_(params.outFields)) {
       params.outFields = params.outFields.join(',');
     }
     params.returnGeometry = params.returnGeometry === false ? false : true;
-    getJSON(this.url + '/query', params, '', function (json) {
-      handleErr(errback, json);
+    getJSON_(this.url + '/query', params, '', function (json) {
+      handleErr_(errback, json);
       callback(json);
     });
   };
@@ -1792,7 +1792,7 @@ function isNumber_(o) {
  */
   MapService.prototype.load = function () {
     var me = this;
-    getJSON(this.url, {}, '', function(json) {
+    getJSON_(this.url, {}, '', function(json) {
       me.init_(json);
     });
   }; 
@@ -1802,17 +1802,17 @@ function isNumber_(o) {
    * @private
    * @param {Object} json
    */
-  MapService.prototype.init_ = function (json) {
+  MapService.prototype.init_ = function (/** @type MapServiceResponse */json) {
     var me = this;
-    augmentObject(json, this);
+    augmentObject_(json, this);
     if (json.spatialReference.wkt) {
-      this.spatialReference = spatialReferences_.addSpatialReference(json.spatialReference.wkt, json.spatialReference.wkt);
+      this.spatialReference = SpatialReference.register(json.spatialReference.wkt);
     } else {
       this.spatialReference = spatialReferences_[json.spatialReference.wkid];
     }
     if (json.tables !== undefined) {
       // v10.0 +
-      getJSON(this.url + '/layers', {}, '', function (json2) {
+      getJSON_(this.url + '/layers', {}, '', function (json2) {
         me.initLayers_(json2);
       });
     } else {
@@ -1837,7 +1837,7 @@ function isNumber_(o) {
     for (i = 0, c = json2.layers.length; i < c; i++) {
       info = json2.layers[i];
       layer = new Layer(this.url + '/' + info.id);
-      augmentObject(info, layer);
+      augmentObject_(info, layer);
       layer.visible = layer.defaultVisibility;
       layers.push(layer);
     }
@@ -1845,7 +1845,7 @@ function isNumber_(o) {
       for (i = 0, c = json2.tables.length; i < c; i++) {
         info = json2.tables[i];
         layer = new Layer(this.url + '/' + info.id);
-        augmentObject(info, layer);
+        augmentObject_(info, layer);
         tables.push(layer);
       }
     }
@@ -1867,7 +1867,7 @@ function isNumber_(o) {
      * @param {MapService} service
      * @event
      */
-    triggerEvent(this, "load");
+    triggerEvent_(this, "load");
   };
   /**
    * Get a map layer by it's name(String) or id (Number), return {@link Layer}.
@@ -1949,13 +1949,18 @@ function isNumber_(o) {
    */
   MapService.prototype.getInitialBounds = function () {
     if (this.initialExtent) {
-      return fromEnvelopeToLatLngBounds(this.initialExtent);
+      return fromEnvelopeToLatLngBounds_(this.initialExtent);
     }
     return null;
   };
   MapService.prototype.getLayers = function () {
     return this.layers_;
   };
+  
+  MapService.prototype.getTables = function () {
+    return this.tables_;
+  };
+  
 /**
  * @name ExportMapOptions
  * @class This class represent the parameters needed in an exportMap operation for a {@link MapService}.
@@ -2030,7 +2035,7 @@ function isNumber_(o) {
       return;
     }
     // note: dynamic map may overlay on top of maptypes with different projection
-    var params = {};// augmentObject(p, );
+    var params = {};// augmentObject_(p, );
     params.f = p.f;
     var bnds = p.bounds;
     params.bbox = '' + bnds.getSouthWest().lng() + ',' + '' + bnds.getSouthWest().lat() + ',' +
@@ -2060,7 +2065,7 @@ function isNumber_(o) {
       defs = this.getLayerDefs_();
     } 
     // for 9.3 compatibility:
-    params.layerDefs = getLayerDefsString(defs);
+    params.layerDefs = getLayerDefsString_(defs);
     var vlayers = p.layerIds;
     var layerOpt = p.layerOption || 'show';   
     if (vlayers === undefined) {
@@ -2080,21 +2085,21 @@ function isNumber_(o) {
     }
     params.transparent = (p.transparent === false ? false : true);
     if (p.time) {
-      params.time = formatTimeString(p.time, p.endTime);
+      params.time = formatTimeString_(p.time, p.endTime);
     }
     //TODO: finish once v10 released
     params.layerTimeOptions = p.layerTimeOptions;
     
     if (params.f === 'image') {
-      return this.url + '/export?' + formatParams(params);
+      return this.url + '/export?' + formatParams_(params);
     } else {
-      getJSON(this.url + '/export', params, '', function (json) {
+      getJSON_(this.url + '/export', params, '', function (json) {
         if (json.extent) {
-          json.bounds = fromEnvelopeToLatLngBounds(json.extent);
+          json.bounds = fromEnvelopeToLatLngBounds_(json.extent);
           delete json.extent;
           callback(json); 
         } else {
-          handleErr(errback, json.error);  
+          handleErr_(errback, json.error);  
         }
       });
     }
@@ -2167,10 +2172,10 @@ function isNumber_(o) {
     if (!p) {
       return;
     }
-    var params = {};//augmentObject(p, );
-    params.geometry = fromOverlaysToJSON(p.geometry);
-    params.geometryType = getGeometryType(p.geometry);
-    params.mapExtent = fromOverlaysToJSON(p.bounds);
+    var params = {};//augmentObject_(p, );
+    params.geometry = fromOverlaysToJSON_(p.geometry);
+    params.geometryType = getGeometryType_(p.geometry);
+    params.mapExtent = fromOverlaysToJSON_(p.bounds);
     params.tolerance = p.tolerance || 2;
     params.sr = 4326;
     params.imageDisplay = '' + p.width + ',' + p.height + ',' + (p.dpi || 96);
@@ -2179,12 +2184,12 @@ function isNumber_(o) {
       params.layers += ':' + p.layerIds.join(',');
     }
     if (p.layerDefs) {
-      params.layerDefs = getLayerDefsString(p.layerDefs);//TODO
+      params.layerDefs = getLayerDefsString_(p.layerDefs);//TODO
     }
     params.maxAllowableOffset = p.maxAllowableOffset;
     params.returnGeometry = (p.returnGeometry === false ? false : true);
     
-    getJSON(this.url + '/identify', params, '', function (json) {
+    getJSON_(this.url + '/identify', params, '', function (json) {
       // process results;
       var rets = null;
       var i, js, g;
@@ -2192,7 +2197,7 @@ function isNumber_(o) {
         rets = [];
         for (i = 0; i < json.results.length; i++) {
           js = json.results[i];
-          g = fromJSONToOverlays(js.geometry, p.overlayOptions);
+          g = fromJSONToOverlays_(js.geometry, p.overlayOptions);
           js.feature = {
             'geometry': g,
             'attributes': js.attributes
@@ -2201,7 +2206,7 @@ function isNumber_(o) {
         }
       }
       callback(json);
-      handleErr(errback, json);
+      handleErr_(errback, json);
     });
   };
   /**
@@ -2255,7 +2260,7 @@ function isNumber_(o) {
       return;
     }
     // handle searchText, contains, maxAllowableOffset
-    var params = augmentObject(opts, {});
+    var params = augmentObject_(opts, {});
     if (opts.layerIds) {
       params.layers = opts.layerIds.join(',');
       delete params.layerIds;
@@ -2265,19 +2270,19 @@ function isNumber_(o) {
     }
     params.contains = (opts.contains === false ? false : true);
     if (opts.layerDefinitions) {
-      params.layerDefs = getLayerDefsString(opts.layerDefinitions);
+      params.layerDefs = getLayerDefsString_(opts.layerDefinitions);
       delete params.layerDefinitions;
     }
     params.sr = 4326;
     params.returnGeometry = (opts.returnGeometry === false ? false : true);
-    getJSON(this.url + '/find', params, '', function (json) {
+    getJSON_(this.url + '/find', params, '', function (json) {
       var rets = null;
       var i, js, g;
       if (json.results) {
         rets = [];
         for (i = 0; i < json.results.length; i++) {
           js = json.results[i];
-          g = fromJSONToOverlays(js.geometry, opts.overlayOptions);
+          g = fromJSONToOverlays_(js.geometry, opts.overlayOptions);
           js.feature = {
             'geometry': g,
             'attributes': js.attributes
@@ -2286,7 +2291,7 @@ function isNumber_(o) {
         }
       }
       callback(json);
-      handleErr(errback, json);
+      handleErr_(errback, json);
     });
   };
   
@@ -2330,7 +2335,7 @@ function isNumber_(o) {
     this.url = url;
     this.loaded = false;
     var me = this;
-    getJSON(url, {}, '', function (json) {
+    getJSON_(url, {}, '', function (json) {
       me.init_(json);
     });
   }
@@ -2340,7 +2345,7 @@ function isNumber_(o) {
    * @param {Object} json
    */
   GeocodeService.prototype.init_ = function (json) {
-    augmentObject(json, this);
+    augmentObject_(json, this);
     if (json.spatialReference) {
       this.spatialReference = spatialReferences_[json.spatialReference.wkid || json.spatialReference.wkt] || WGS84;
     }
@@ -2350,7 +2355,7 @@ function isNumber_(o) {
      * @name GeocodeService#load
      * @event
      */
-    triggerEvent(this, 'load');
+    triggerEvent_(this, 'load');
   };
   
   
@@ -2397,9 +2402,9 @@ function isNumber_(o) {
  * @param {Function} errback
  */
   GeocodeService.prototype.findAddressCandidates = function (gparams, callback, errback) {
-    var params = augmentObject(gparams, {});
+    var params = augmentObject_(gparams, {});
     if (params.inputs) {
-      augmentObject(params.inputs, params);
+      augmentObject_(params.inputs, params);
       delete params.inputs;
     }
     if (isArray_(params.outFields)) {
@@ -2407,7 +2412,7 @@ function isNumber_(o) {
     }
     params.outSR = 4326;
     var me = this;
-    getJSON(this.url + '/findAddressCandidates', params, '', function (json) {
+    getJSON_(this.url + '/findAddressCandidates', params, '', function (json) {
       if (json.candidates) {
         var res, loc;
         for (var i = 0; i < json.candidates.length; i++) {
@@ -2423,7 +2428,7 @@ function isNumber_(o) {
         }
       }
       callback(json);
-      handleErr(errback, json);
+      handleErr_(errback, json);
     });
   };
   /**
@@ -2467,11 +2472,11 @@ function isNumber_(o) {
  */
   GeocodeService.prototype.reverseGeocode = function (params, callback, errback) {
     if (!isString_(params.location)) {
-      params.location = fromOverlaysToJSON(params.location);
+      params.location = fromOverlaysToJSON_(params.location);
     }
     params.outSR = 4326;
     var me = this;
-    getJSON(this.url + '/reverseGeocode', params, '', function (json) {
+    getJSON_(this.url + '/reverseGeocode', params, '', function (json) {
       if (json.location) {
         var loc = json.location;
         if (!isNaN(loc.x) && !isNaN(loc.y)) {
@@ -2483,7 +2488,7 @@ function isNumber_(o) {
         }
       }
       callback(json);
-      handleErr(errback, json);
+      handleErr_(errback, json);
     });
   };
   
@@ -2529,17 +2534,17 @@ function isNumber_(o) {
    * @param {Function} errback
    */
   GeometryService.prototype.project = function (p, callback, errback) {
-    var params = prepareGeometryParams(p);
-    getJSON(this.url + '/project', params, "callback", function (json) {
+    var params = prepareGeometryParams_(p);
+    getJSON_(this.url + '/project', params, "callback", function (json) {
       var geom = [];
       if (p.outSpatialReference === 4326 || p.outSpatialReference.wkid === 4326) {
         for (var i = 0, c = json.geometries.length; i < c; i++) {
-          geom.push(fromJSONToOverlays(json.geometries[i]));
+          geom.push(fromJSONToOverlays_(json.geometries[i]));
         }
         json.geometries = geom;
       }
       callback(json);
-      handleErr(errback, json);
+      handleErr_(errback, json);
     });
   };
  
@@ -2548,6 +2553,7 @@ function isNumber_(o) {
   * This only has the most common units, for a full list of supported units, see 
   * <a href=http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnitType.htm>esriSRUnitType</a>
   * and <a href=http://resources.esri.com/help/9.3/ArcGISDesktop/ArcObjects/esriGeometry/esriSRUnit2Type.htm>esriSRUnit2Type</a>
+   * @enum {Number}
   * @property {Number} [METER] 9001 International meter.
   * @property {Number} [FOOT] 9002 International meter.
   * @property {Number} [SURVEY_FOOT] 9003 US survey foot.
@@ -2557,13 +2563,13 @@ function isNumber_(o) {
   * @property {Number} [DEGREE] 9102 degree.
   */
   var SRUnit = {
-    'METER': 9001,
-    'FOOT': 9002,
-    'SURVEY_FOOT': 9003,
-    'SURVEY_MILE': 9035,
-    'KILLOMETER': 9036,
-    'RADIAN': 9101,
-    'DEGREE': 9102
+    METER: 9001,
+    FOOT: 9002,
+    SURVEY_FOOT: 9003,
+    SURVEY_MILE: 9035,
+    KILLOMETER: 9036,
+    RADIAN: 9101,
+    DEGREE: 9102
   };
   /**
    * @name BufferOptions
@@ -2591,25 +2597,25 @@ function isNumber_(o) {
    * @param {Function} errback
    */
   GeometryService.prototype.buffer = function (p, callback, errback) {
-    var params = prepareGeometryParams(p);
+    var params = prepareGeometryParams_(p);
     if (p.bufferSpatialReference) {
-      params.bufferSR = formatSRParam(p.bufferSpatialReference);
+      params.bufferSR = formatSRParam_(p.bufferSpatialReference);
     }
     params.outSR = 4326;
     params.distances = p.distances.join(',');
     if (p.unit) {
       params.unit = p.unit;
     }
-    getJSON(this.url + '/buffer', params, "callback", function (json) {
+    getJSON_(this.url + '/buffer', params, "callback", function (json) {
       var geom = [];
       if (json.geometries) {
         for (var i = 0, c = json.geometries.length; i < c; i++) {
-          geom.push(fromJSONToOverlays(json.geometries[i], p['overlayOptions']));
+          geom.push(fromJSONToOverlays_(json.geometries[i], p['overlayOptions']));
         }
       }
       json.geometries = geom;
       callback(json);
-      handleErr(errback, json);
+      handleErr_(errback, json);
     });
   };
   
@@ -2627,15 +2633,15 @@ function isNumber_(o) {
     this.url = url;
     this.loaded = false;
     var me = this;
-    getJSON(url, {}, '', function (json) {
-      augmentObject(json, me);
+    getJSON_(url, {}, '', function (json) {
+      augmentObject_(json, me);
       me.loaded = true;
       /**
      * This event is fired when the service and it's service info is loaded.
      * @name GPService#load
      * @event
      */
-      G.event.trigger(me, 'load');
+      triggerEvent(me, 'load');
     });
   }
   /**
@@ -2669,15 +2675,15 @@ function isNumber_(o) {
     this.url = url;
     this.loaded = false;
     var me = this;
-    getJSON(url, {}, '', function (json) {
-      augmentObject(json, me);
+    getJSON_(url, {}, '', function (json) {
+      augmentObject_(json, me);
       me.loaded = true;
       /**
      * This event is fired when the service and it's service info is loaded.
      * @name GPService#load
      * @event
      */
-      G.event.trigger(me, 'load');
+      triggerEvent(me, 'load');
     });
   }
   
@@ -2696,17 +2702,17 @@ function isNumber_(o) {
   GPTask.prototype.execute = function (p, callback, errback) {
     var params = {};
     if (p.parameters) {
-      augmentObject(p.parameters, params);
+      augmentObject_(p.parameters, params);
     }
     if (p.outSpatialReference) {
-      params['env:outSR'] = formatSRParam(p.outSpatialReference);
+      params['env:outSR'] = formatSRParam_(p.outSpatialReference);
     } else {
       params['env:outSR'] = 4326;
     }
     if (p.processSpatialReference) {
-      params['env:processSR'] = formatSRParam(p.processSpatialReference);
+      params['env:processSR'] = formatSRParam_(p.processSpatialReference);
     } 
-    getJSON(this.url + '/execute', params, '', function (json) {
+    getJSON_(this.url + '/execute', params, '', function (json) {
       if (json.results) {
         var res, f;
         for (var i = 0; i < json.results.length; i++) {
@@ -2715,14 +2721,14 @@ function isNumber_(o) {
             for (var j = 0, J = res.value.features.length; j < J; j++) {
               f = res.value.features[j];
               if (f.geometry) {
-                f.geometry = fromJSONToOverlays(f.geometry, p.overlayOptions);
+                f.geometry = fromJSONToOverlays_(f.geometry, p.overlayOptions);
               }
             }
           }
         }
       }
       callback(json);
-      handleErr(errback, json);
+      handleErr_(errback, json);
     });
   };
   
@@ -2751,17 +2757,17 @@ function isNumber_(o) {
     this.url = url;
     this.loaded = false;
     var me = this;
-    getJSON(url, {
+    getJSON_(url, {
       
     }, '', function (json) {
-      augmentObject(json, me);
+      augmentObject_(json, me);
       me.loaded = true;
      /**
      * This event is fired when the service and it's service info is loaded.
      * @name NetworkService#load
      * @event
      */
-      G.event.trigger(me, 'load');
+      triggerEvent(me, 'load');
     });
   }
   /**
@@ -2804,14 +2810,14 @@ function isNumber_(o) {
       return;
     }
     // handle many other fields
-    var params = augmentObject(opts, {});
+    var params = augmentObject_(opts, {});
     //params['outSR'] = WGS84.wkid;
     if (isArray_(opts.stops)) {
-      params.stops = fromLatLngsToFeatureSet(opts.stops);
+      params.stops = fromLatLngsToFeatureSet_(opts.stops);
     }
     if (isArray_(opts.barriers)) {
       if (opts.barriers.length > 0) {
-        params.barriers = fromLatLngsToFeatureSet(opts.barriers);
+        params.barriers = fromLatLngsToFeatureSet_(opts.barriers);
       } else {
         delete params.barriers;
       }
@@ -2821,12 +2827,12 @@ function isNumber_(o) {
     params.returnBarriers = (opts.returnBarriers === true ? true : false);
     params.returnStops = (opts.returnStops === true ? true : false);
     
-    getJSON(this.url + '/solve', params, '', function (json) {
+    getJSON_(this.url + '/solve', params, '', function (json) {
       if (json.routes) {
-        parseFeatures(json.routes.features, opts.overlayOptions);
+        parseFeatures_(json.routes.features, opts.overlayOptions);
       }
       callback(json);
-      handleErr(errback, json);
+      handleErr_(errback, json);
     });
   };
   
@@ -2897,7 +2903,7 @@ function isNumber_(o) {
     // zoom is no longer defined in Projection. It is assumed that level's zoom factor is 2. 
     this.resolution0_ = tileInfo ? tileInfo.lods[0].resolution : 156543.033928;
     // zoom offset of this tileinfo's zoom 0 to Google's zoom0
-    this.minZoom = Math.floor(Math.log(this.spatialReference_.getCircum() / this.resolution0_ / 256) / Math.LN2 + 0.5);
+    this.minZoom = Math.floor(Math.log_(this.spatialReference_.getCircum() / this.resolution0_ / 256) / Math.LN2 + 0.5);
     this.maxZoom = tileInfo ? this.minZoom + this.lods_.length - 1 : 20;
     if (G.Size) {
       this.tileSize_ = tileInfo ? new G.Size(tileInfo.cols, tileInfo.rows) : new G.Size(256, 256);
@@ -3000,7 +3006,7 @@ function isNumber_(o) {
       this.opacity_ = opt_layerOpts.opacity;
       delete opt_layerOpts.opacity;
     }
-    augmentObject(opt_layerOpts, this);
+    augmentObject_(opt_layerOpts, this);
     this.mapService_ = (service instanceof MapService) ? service : new MapService(service);
     //In the format of mt[number].domain.com
     if (opt_layerOpts.hosts) {
@@ -3077,7 +3083,7 @@ function isNumber_(o) {
         url = u + '/tile/' + z + '/' + tile.y + '/' + tile.x;
       }
     }
-    //log('url=' + url);
+    //log_('url=' + url);
     return url;
   };
   /**
@@ -3089,7 +3095,7 @@ function isNumber_(o) {
     var tiles = this.tiles_;
     for (var x in tiles) {
       if (tiles.hasOwnProperty(x)) {
-        setNodeOpacity(tiles[x], op);
+        setNodeOpacity_(tiles[x], op);
       }
     }
   };
@@ -3147,7 +3153,7 @@ function isNumber_(o) {
       this.opacity_ = opt_typeOpts.opacity;
       delete opt_typeOpts.opacity;
     }
-    augmentObject(opt_typeOpts, this);
+    augmentObject_(opt_typeOpts, this);
     var layers = tileLayers;
     if (isString_(tileLayers)) {
       layers = [new TileLayer(tileLayers, opt_typeOpts)];
@@ -3210,7 +3216,7 @@ function isNumber_(o) {
           img.style.left = '0px';
           img.style.width = '' + this.tileSize.width + 'px';
           img.style.height = '' + this.tileSize.height + 'px';
-          //log(url);
+          //log_(url);
           if (document.all) {
             img.src = url;
           } else {
@@ -3219,10 +3225,10 @@ function isNumber_(o) {
           div.appendChild(img);
           t.tiles_[tileId] = img;
           if (t.opacity_ !== undefined) {
-            setNodeOpacity(img, t.opacity_);
+            setNodeOpacity_(img, t.opacity_);
           } else if (this.opacity_ !== undefined) {
             // in FF it's OK to set parent div just once but IE does not like it.
-            setNodeOpacity(img, this.opacity_);
+            setNodeOpacity_(img, this.opacity_);
           }
         } else {
           // TODO: use a div to display NoData
@@ -3262,7 +3268,7 @@ function isNumber_(o) {
       if (tiles.hasOwnProperty(x)) {
         var nodes = tiles[x].childNodes;
         for (var i = 0; i < nodes.length; i++) {
-          setNodeOpacity(nodes[i], op);
+          setNodeOpacity_(nodes[i], op);
         }
       }
     }
@@ -3339,7 +3345,7 @@ function isNumber_(o) {
     var panes = this.getPanes();
     panes.overlayLayer.appendChild(div);
     if (this.opacity_) {
-      setNodeOpacity(div, this.opacity_);
+      setNodeOpacity_(div, this.opacity_);
     }
     var me = this;
     this.boundsChangedListener_ = G.event.addListener(this.getMap(), 'bounds_changed', function () {
@@ -3386,7 +3392,7 @@ function isNumber_(o) {
     var op = Math.min(Math.max(opacity, 0), 1);
     this.opacity_ = op;
     var img = this.div_;
-    setNodeOpacity(img, op);
+    setNodeOpacity_(img, op);
   };
   /**
    * Gets underline {@link MapService}.
@@ -3427,7 +3433,7 @@ function isNumber_(o) {
      * @name MapOverlay#drawstart
      * @event
      */
-    G.event.trigger(this, 'drawstart');
+    triggerEvent(this, 'drawstart');
     var me = this;
     this.drawing_ = true;
     this.div_.style.backgroundImage = '';
@@ -3462,7 +3468,7 @@ function isNumber_(o) {
        * @name MapOverlay#drawend
        * @event
        */
-      G.event.trigger(me, 'drawend');
+      triggerEvent(me, 'drawend');
     });
   };
   
@@ -3517,32 +3523,7 @@ function isNumber_(o) {
     this.div_.style.visibility = 'hidden';
   };
 
-  var ags = {};
-  ags.SpatialReference = SpatialReference;
-  ags.Geographic = Geographic;
-  ags.Albers = Albers;
-  ags.LambertConformalConic = LambertConformalConic;
-  ags.SphereMercator = SphereMercator;
-  ags.TransverseMercator = TransverseMercator;
-  ags.SpatialRelationship = SpatialRelationship;
-  ags.GeometryType = GeometryType;
-  ags.SRUnit = SRUnit;
-  ags.Catalog = Catalog;
-  ags.MapService = MapService;
-  ags.Layer = Layer;
-  ags.GeocodeService = GeocodeService;
-  ags.GeometryService = GeometryService;
-  ags.GPService = GPService;
-  ags.GPTask = GPTask;
-  ags.RouteTask = RouteTask;
-  ags.Util = Util;
-  ags.Config = Config;
-  ags.Projection = Projection;
-  ags.TileLayer = TileLayer;
-  ags.MapOverlay = MapOverlay;
-  ags.MapType = MapType;
-  gmaps.ags = ags;
-  /*gmaps.ags = {
+  gmaps.ags = {
     SpatialReference: SpatialReference,
     Geographic: Geographic,
     Albers: Albers,
@@ -3566,6 +3547,6 @@ function isNumber_(o) {
     TileLayer: TileLayer,
     MapOverlay: MapOverlay,
     MapType: MapType
-  };*/
+  };
  // W.gmaps = gmaps;
 //})();

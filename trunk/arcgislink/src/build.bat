@@ -24,20 +24,20 @@ set format=--formatting PRETTY_PRINT
 
 
 rem ======== START SIMPLE =================
-echo (function(){ > %base%\%lib%\src\%lib%_presimple.js
-copy %base%\%lib%\src\%lib%_presimple.js /B + %base%\%lib%\src\%lib%.js /B %base%\%lib%\src\%lib%_presimple.js
-echo })()  >> %base%\%lib%\src\%lib%_presimple.js
-set in=--js %base%\%lib%\src\%lib%_presimple.js
-set out=--js_output_file %base%\%lib%\src\%lib%_simple.js
+echo (function(){  > %base%\%lib%\src\%lib%_precompile.js
+copy %base%\%lib%\src\%lib%_precompile.js /B + %base%\%lib%\src\%lib%.js /B %base%\%lib%\src\%lib%_precompile.js
+echo window.gmaps = gmaps; })()  >> %base%\%lib%\src\%lib%_precompile.js
+set in=--js %base%\%lib%\src\%lib%_precompile.js
+set out=--js_output_file %base%\%lib%\src\%lib%_compiled.js
 set level=--compilation_level SIMPLE_OPTIMIZATIONS
-set format=--formatting PRETTY_PRINT
+set format=
 "%JAVA_HOME%\bin\java" -jar %compiler% %format% %level% %in% %out% >> %bat%build.log 
-del %base%\%lib%\src\%lib%_presimple.js
+del %base%\%lib%\src\%lib%_precompile.js
 rem ======== END SIMPLE ===================
 
 rem ======= START ADVANCED =====================
-set in=--js %base%\%lib%\src\%lib%.js
-set out=--js_output_file %base%\%lib%\src\%lib%_compiled.js
+set in=--js %base%\%lib%\src\%lib%.js --js %base%\%lib%\src\%lib%_export.js
+set out=--js_output_file %base%\%lib%\src\%lib%_advanced.js
 set level=--compilation_level ADVANCED_OPTIMIZATIONS
 set wrap=--output_wrapper "(function(){%%output%%})()"
 set externs=--externs %util%\util\compiler\closure\google_maps_api_v3.js --externs %base%\%lib%\src\%lib%_externs.js --externs %base%\%lib%\src\%lib%_externs_lib.js
@@ -46,11 +46,17 @@ set format=--formatting PRETTY_PRINT
 rem ======= END ADVANCED =====================
 
 rem ======== START COMPILE APP==========
+echo (function(){  > %base%\%lib%\examples\compile_precompile.js
+copy %base%\%lib%\examples\compile_precompile.js /B + %base%\%lib%\src\%lib%.js /B %base%\%lib%\examples\compile_precompile.js
+copy %base%\%lib%\examples\compile_precompile.js /B + %base%\%lib%\examples\compile.js /B %base%\%lib%\examples\compile_precompile.js
+echo })()  >> %base%\%lib%\examples\compile_precompile.js
+set in=--js %base%\%lib%\examples\compile_precompile.js
 set externs=--externs %util%\util\compiler\closure\google_maps_api_v3.js --externs %base%\%lib%\src\%lib%_externs.js
-set in=--js %base%\%lib%\src\%lib%.js --js %base%\%lib%\examples\compile.js
+set wrap=
+rem set in=--js %base%\%lib%\src\%lib%.js --js %base%\%lib%\examples\compile.js
+rem set wrap=--output_wrapper "(function(){%%output%%})()"
 set out=--js_output_file %base%\%lib%\examples\compile_compiled.js
 set level=--compilation_level ADVANCED_OPTIMIZATIONS
-set wrap=--output_wrapper "(function(){%%output%%})()"
 set format=--formatting PRETTY_PRINT
 "%JAVA_HOME%\bin\java" -jar %compiler% %externs% %format% %level% %in% %out% %wrap% 
 rem ======== END COMPILE APP==========
