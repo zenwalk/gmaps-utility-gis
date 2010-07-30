@@ -11,7 +11,7 @@ if "%1" == "" set lib=arcgislink
 if "%1" == "" del %bat%build.log
 rem %~dp0app_all-min.%date:~10,4%%date:~4,2%%date:~7,2%.js
 
-cd %util%
+cd %util%  
 
 rem "%JAVA_HOME%\bin\java" -jar "%util%\util\docs\jsdoc-toolkit\jsrun.jar" "%util%\util\docs\jsdoc-toolkit\app\run.js" --allfunctions --verbose --suppress --template=%util%\util\docs\template\ --directory=%base%\%lib%\docs %base%\%lib%\src\%lib%.js > %bat%build.log
 rem "%JAVA_HOME%\bin\java" -jar %util%\util\java\js.jar %util%\util\lint\lint.js  %base%\%lib%\src\%lib%.js >> %bat%build.log
@@ -24,38 +24,32 @@ set format=--formatting PRETTY_PRINT
 
 
 rem ======== START SIMPLE =================
-echo (function(){  > %base%\%lib%\src\%lib%_precompile.js
-copy %base%\%lib%\src\%lib%_precompile.js /B + %base%\%lib%\src\%lib%.js /B %base%\%lib%\src\%lib%_precompile.js
-echo window.gmaps = gmaps; })()  >> %base%\%lib%\src\%lib%_precompile.js
-set in=--js %base%\%lib%\src\%lib%_precompile.js
-set out=--js_output_file %base%\%lib%\src\%lib%_compiled.js
-set level=--compilation_level SIMPLE_OPTIMIZATIONS
-set format=
-"%JAVA_HOME%\bin\java" -jar %compiler% %format% %level% %in% %out% >> %bat%build.log 
-del %base%\%lib%\src\%lib%_precompile.js
+rem echo (function(){  > %base%\%lib%\src\%lib%_precompile.js
+rem copy %base%\%lib%\src\%lib%_precompile.js /B + %base%\%lib%\src\%lib%.js /B %base%\%lib%\src\%lib%_precompile.js
+rem echo window.gmaps = gmaps; })()  >> %base%\%lib%\src\%lib%_precompile.js
+rem set in=--js %base%\%lib%\src\%lib%_precompile.js
+rem set out=--js_output_file %base%\%lib%\src\%lib%_compiled.js
+rem set level=--compilation_level SIMPLE_OPTIMIZATIONS
+rem set format=
+rem "%JAVA_HOME%\bin\java" -jar %compiler% %format% %level% %in% %out% >> %bat%build.log 
+rem del %base%\%lib%\src\%lib%_precompile.js
 rem ======== END SIMPLE ===================
 
-rem ======= START ADVANCED =====================
-set in=--js %base%\%lib%\src\%lib%.js --js %base%\%lib%\src\%lib%_export.js
-set out=--js_output_file %base%\%lib%\src\%lib%_advanced.js
+rem ======= START ADVANCED LIB =====================
+set in=--js %closure%\closure\goog\base.js --js %base%\%lib%\src\%lib%.js --js %base%\%lib%\src\%lib%_export.js
+set out=--js_output_file %base%\%lib%\src\%lib%_compiled.js
 set level=--compilation_level ADVANCED_OPTIMIZATIONS
 set wrap=--output_wrapper "(function(){%%output%%})()"
 set externs=--externs %util%\util\compiler\closure\google_maps_api_v3.js --externs %base%\%lib%\src\%lib%_externs.js --externs %base%\%lib%\src\%lib%_externs_lib.js
 set format=--formatting PRETTY_PRINT
 "%JAVA_HOME%\bin\java" -jar %compiler% %externs% %format% %level% %in% %out% %wrap% >> %bat%build.log 
-rem ======= END ADVANCED =====================
+rem ======= END ADVANCED LIB =====================
 
-rem ======== START COMPILE APP==========
-echo (function(){  > %base%\%lib%\examples\compile_precompile.js
-copy %base%\%lib%\examples\compile_precompile.js /B + %base%\%lib%\src\%lib%.js /B %base%\%lib%\examples\compile_precompile.js
-copy %base%\%lib%\examples\compile_precompile.js /B + %base%\%lib%\examples\compile.js /B %base%\%lib%\examples\compile_precompile.js
-echo })()  >> %base%\%lib%\examples\compile_precompile.js
-set in=--js %base%\%lib%\examples\compile_precompile.js
+rem ======== START COMPILE APP ==========
+set in=--js %base%\%lib%\src\%lib%.js --js %base%\%lib%\examples\libapp.js
+set wrap=--output_wrapper "(function(){%%output%%})()"
 set externs=--externs %util%\util\compiler\closure\google_maps_api_v3.js --externs %base%\%lib%\src\%lib%_externs.js
-set wrap=
-rem set in=--js %base%\%lib%\src\%lib%.js --js %base%\%lib%\examples\compile.js
-rem set wrap=--output_wrapper "(function(){%%output%%})()"
-set out=--js_output_file %base%\%lib%\examples\compile_compiled.js
+set out=--js_output_file %base%\%lib%\examples\libapp_all_compiled.js
 set level=--compilation_level ADVANCED_OPTIMIZATIONS
 set format=--formatting PRETTY_PRINT
 "%JAVA_HOME%\bin\java" -jar %compiler% %externs% %format% %level% %in% %out% %wrap% 
@@ -68,6 +62,15 @@ rem copy %closure%\closure\goog\css\tab.css %base%\%lib%\examples\identify_compi
 rem copy %base%\%lib%\examples\identify_compiled.css /B + %closure%\closure\goog\css\tabbar.css /B %base%\%lib%\examples\identify_compiled.css
 rem copy %base%\%lib%\examples\identify_compiled.css /B + %base%\%lib%\examples\identify.css /B  %base%\%lib%\examples\identify_compiled.css
 rem "%JAVA_HOME%\bin\java" -jar %yui% -o %base%\%lib%\examples\identify_compiled.css %base%\%lib%\examples\identify_compiled.css >> %bat%build.log 
+
+
+rem echo (function(){  > %base%\%lib%\examples\lib_app_precompile.js
+rem copy %base%\%lib%\examples\lib_app_precompile.js /B + %base%\%lib%\src\%lib%.js /B %base%\%lib%\examples\lib_app_precompile.js
+rem copy %base%\%lib%\examples\lib_app_precompile.js /B + %base%\%lib%\examples\lib_app.js /B %base%\%lib%\examples\lib_app_precompile.js
+rem echo })()  >> %base%\%lib%\examples\lib_app_precompile.js
+rem set in=--js %base%\%lib%\examples\lib_app_precompile.js
+rem set wrap=
+
 
 pause
 

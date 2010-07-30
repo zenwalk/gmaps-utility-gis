@@ -1,46 +1,65 @@
   var myns = myns || {};
   
-  var MyUtil = {
-    show: function(msg) {
-      alert('msg is ' + msg);
-    }
+  var RAD_DEG = Math.PI / 180;
+  
+  myns.MyUtil = {};
+  myns.MyUtil.usedPublicMethod = function(msg) {
+    log_('inside MyUtil.usedPublicMethod;' + msg);
+  };
+  myns.MyUtil.privateMethod_ = function(){
+    log_('MyUtil.privateMethod');
+  };
+  myns.MyUtil.unusedPublicMethod = function(){
+    log_(' MyUtil.unuseMethod');
+  };
+  function log_( msg){
+    var l = document.getElementById('map_canvas');
+    if (l) l.innerHTML += '<br/>' + msg;
+  }
+  /** @type {IMyConfig} */
+  myns.MyConfig = {
+    configKey:  'defaultConfigValue'
+  };
+  /** 
+   * @constructor 
+   * @implements {IMyClass}
+   */
+  myns.MyClass = function(){
+    this.myPublicProperty = 'MyClass.myPublicProperty_Default';
+    this.myPrivateProperty_ = 'MyClass.myPrivateProperty_Default';
   };
   
-  var MyConfig = {};
-  MyConfig.configKey='defaultValue';
-  
-  /** @constructor */
-  function MyClass(){
-    this.myProp = 'myProp_Default';
-  }
-  
-  MyClass.prototype.myMethod = function(json){
-    this.myPrivateMethod(json);
-  }
-  MyClass.prototype.myPrivateMethod = function(/** @type {MyMessage}*/json){
-    MyUtil.show('myConfig:'+MyConfig.configKey+' json  '+json.myVeryLongJSONProperty.anotherJSONProperty + '  myProp:'+ this.myProp);
-  }
-  MyClass.prototype.myUnusedMethod = function(json){
-    MyUtil.show('unused method');
-  }
+  myns.MyClass.prototype.usedPublicMethod = function(json){
+     log_('MyClass.prototype.usedPublicMethod');
+    this.myPrivateMethod_(json);
+
+  };
+  myns.MyClass.prototype.myPrivateMethod_ = function(/** @type {MyMessage}*/json){
+     log_('inside MyClass.prototype.myPrivateMethod_');
+     myns.MyUtil.usedPublicMethod('myConfig:'+myns.MyConfig.configKey+' json  '+json.myVeryLongJSONProperty.anotherJSONProperty + '  myProp:'+ this.myPublicProperty);
+
+  };
+  myns.MyClass.prototype.unusedPublicMethod = function(json){
+    
+    log_('inside MyClass.prototype.unusedPublicMethod');
+    this.myPrivateMethod_(json);
+  };
   /**
    * @enum
    */
-  var MyEnum = {
+  myns.MyEnum = {
     ONE: 1, TWO: 2, THREE: 3
   }
   
   /**
    * @constructor
    */
-  function MyClass2(){ 
-    this.myProp2 = 'test';
-  }
+  myns.MyUnusedClass = function(){ 
+    this.myPublicProperty = 'MyUnusedClass.myPublicProperty_default';
+  };
+    
   
-  window.myns = myns;
-  myns.MyClass = MyClass;
-  myns.MyEnum = MyEnum;
-  myns.MyConfig = MyConfig;
   
+
   
   
