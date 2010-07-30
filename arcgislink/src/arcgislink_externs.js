@@ -7,11 +7,11 @@ CSSProperties.prototype.filters;
 CSSProperties.prototype.filters.alpha;
 
 /** @type {object } */
-JSONRequest = {
+var JSONRequest = {
   f: null
 };
 /** @type {object } */
-JSONResponse = {
+var JSONResponse = {
   serviceDescription: null,
   mapName: null,
   description: null,
@@ -32,7 +32,7 @@ JSONResponse = {
     rows: 512,
     cols: 512,
     dpi: 96,
-    format: JPEG,
+    format: null,
     compressionQuality: 75,
     origin: {
       x: -130.0,
