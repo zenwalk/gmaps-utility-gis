@@ -107,25 +107,22 @@
 
 // No longer use anonymous wrapper for closure compiler to compile lib with app together.
 // add (function(){})() at compile time.
-
+//(function(){
   /*jslint evil: true, sub: true */ 
   /*global escape ActiveXObject */
+
 var gmaps = gmaps || {};
 gmaps.ags = {};
   
 /** @const */
 var RAD_DEG = Math.PI / 180;
 var jsonpID_ = 0;
-// cross domain function list.
-//window['ags_jsonp'] = {};
-
 
 var G = google.maps; 
 var WGS84, NAD83, WEB_MERCATOR, WEB_MERCATOR_AUX;
 
 /**
  * @name Config
- * @type {Config_}
  * @class This is an object literal that sets common configuration values used across the lib.
  * @property {String} [proxyUrl] The URL to the web proxy page used in case the length of the URL request to an ArcGIS Server REST resource exceeds 2000 characters.
  * @property {Boolean} [alwaysUseProxy] whether to always use proxy page when send request to server.
@@ -169,14 +166,14 @@ gmaps.ags.isString_ = function(o) {
   return o && typeof o === 'string';
 };
   
-  /**
-   * Check if the object is array
-   * @param {Object} o
-   */
+/**
+ * Check if the object is array
+ * @param {Object} o
+ */
 gmaps.ags.isArray_ = function(o) {
   return o && o.splice;
 };
-  
+
 gmaps.ags.isNumber_ = function(o) {
   return typeof o === 'number';
 };
@@ -612,25 +609,25 @@ gmaps.ags.fromLatLngsToFeatureSet_ = function(latlngs) {
     if (latlng instanceof G.Marker) {
       latlng = latlng.getPosition();
     }
-    features.push({
-      'geometry': {
-        'x': latlng.lng(),
-        'y': latlng.lat(),
-        'spatialReference': {
-          'wkid': 4326
+    features.push(/** @type {JSONGeometry} */{
+      geometry: {
+        x: latlng.lng(),
+        y: latlng.lat(),
+        spatialReference: {
+          wkid: 4326
         }
       }
     });
   }
-  return {
-    'type': '"features"',
-    'features': features,
-    'doNotLocateOnRestrictedElements': false
+  return /** @type {JSONRequest } */{
+    type: '"features"',
+    features: features,
+    doNotLocateOnRestrictedElements: false
   };
 };
 
 gmaps.ags.prepareGeometryParams_ = function (p) {
-  var params = {};
+  var /** @type {JSONRequest} */ params = {};
   if (!p) {
     return null;
   }
@@ -767,13 +764,6 @@ gmaps.ags.Util.getJSON = function(url, params, callbackName, callbackFn) {
     xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xmlhttp.send(query);
   }
-  /*
-   * This event is fired before a REST request sent to server.
-   * @name Util#jsonpstart
-   * @param {String} scriptID
-   * @event
-   */
-  //gmaps.ags.triggerEvent_(me, 'jsonpstart', sid);
   return sid;
 };
 
@@ -820,7 +810,7 @@ gmaps.ags.Util.removeFromMap = function(overlays, clearArray) {
  * @property {String} [wkt] well-known coodinate system text
  * @param {Object} params
  */
-gmaps.ags.SpatialReference = function(params) {
+gmaps.ags.SpatialReference = function(/** @type {gmaps.ags.SRParams} */params) {
   params = params || {};
   this.wkid = params.wkid;
   this.wkt = params.wkt;
@@ -1415,13 +1405,13 @@ gmaps.ags.SpatialReference.register = function(wkidt, wktOrSR) {
   if (sr) {
     return sr;
   }
-  if (wktOrSR instanceof SpatialReference) {
+  if (wktOrSR instanceof gmaps.ags.SpatialReference) {
     spatialReferences_['' + wkidt] = wktOrSR;
     sr = wktOrSR;
     
   } else {
     var wkt = wktOrSR || wkidt; // only one param is passed in.
-    var params = {
+    var /** @type {JSONRequest} */ params = {
       'wkt': wkidt
     };
     if (wkidt === parseInt(wkidt, 10)) {
@@ -1442,21 +1432,21 @@ gmaps.ags.SpatialReference.register = function(wkidt, wktOrSR) {
     }
     switch (prj) {
     case "":
-      sr = new SpatialReference(params);
+      sr = new gmaps.ags.SpatialReference(params);
       break;
     case "Lambert_Conformal_Conic":
       params.standard_parallel_1 = parseFloat(gmaps.ags.extractString_(wkt, "\"Standard_Parallel_1\",", "]"));
       params.standard_parallel_2 = parseFloat(gmaps.ags.extractString_(wkt, "\"Standard_Parallel_2\",", "]"));
-      sr = new LambertConformalConic(params);
+      sr = new gmaps.ags.LambertConformalConic(params);
       break;
     case "Transverse_Mercator":
       params.scale_factor = parseFloat(gmaps.ags.extractString_(wkt, "\"Scale_Factor\",", "]"));
-      sr = new TransverseMercator(params);
+      sr = new gmaps.ags.TransverseMercator(params);
       break;
     case "Albers":
       params.standard_parallel_1 = parseFloat(gmaps.ags.extractString_(wkt, "\"Standard_Parallel_1\",", "]"));
       params.standard_parallel_2 = parseFloat(extractString_(wkt, "\"Standard_Parallel_2\",", "]"));
-      sr = new Albers(params);
+      sr = new gmaps.ags.Albers(params);
       break;
     // more implementations here.
     default:
@@ -1608,7 +1598,7 @@ gmaps.ags.Layer.prototype.isInScale = function(scale) {
  * @property {String} [TOUCHES] esriSpatialRelTouches
  * @property {String} [WITHIN] esriSpatialRelWithin
  */
-var SpatialRelationship = {
+gmaps.ags.SpatialRelationship = {
   INTERSECTS: 'esriSpatialRelIntersects',
   CONTAINS: 'esriSpatialRelContains',
   CROSSES: 'esriSpatialRelCrosses',
@@ -1661,12 +1651,12 @@ var SpatialRelationship = {
  * @param {Function} callback
  * @param {Function} errback
  */
-gmaps.ags.Layer.prototype.query = function(p, callback, errback) {
+gmaps.ags.Layer.prototype.query = function(/** @type {JSONRequest} */p, callback, errback) {
   if (!p) {
     return;
   }
   // handle text, where, relationParam, objectIds, maxAllowableOffset
-  var params = gmaps.ags.augmentObject_(p, {});
+  var/** @type {JSONRequest} */ params = gmaps.ags.augmentObject_(p, {});
   if (p.geometry && !gmaps.ags.isString_(p.geometry)) {
     params.geometry = gmaps.ags.fromOverlaysToJSON_(p.geometry);
     params.geometryType = gmaps.ags.getGeometryType_(p.geometry);
@@ -1739,7 +1729,7 @@ gmaps.ags.Layer.prototype.queryRelatedRecords = function(qparams, callback, errb
   if (!qparams) {
     return;
   }
-  var params = gmaps.ags.augmentObject_(qparams, {});
+  var /** @type {JSONRequest} */ params = gmaps.ags.augmentObject_(qparams, {});
   params.f = params.f || 'json';
   if (params.outFields && !gmaps.ags.isString_(params.outFields)) {
     params.outFields = params.outFields.join(',');
@@ -1812,9 +1802,9 @@ gmaps.ags.MapService.prototype.init_ = function(/** @type MapServiceResponse */j
   var me = this;
   gmaps.ags.augmentObject_(json, this);
   if (json.spatialReference.wkt) {
-    this.spatialReference = SpatialReference.register(json.spatialReference.wkt);
+    this.spatialReference_ = SpatialReference.register(json.spatialReference.wkt);
   } else {
-    this.spatialReference = spatialReferences_[json.spatialReference.wkid];
+    this.spatialReference_ = spatialReferences_[json.spatialReference.wkid];
   }
   if (json.tables !== undefined) {
     // v10.0 +
@@ -1842,17 +1832,17 @@ gmaps.ags.MapService.prototype.initLayers_ = function(json2) {
   var layer, i, c, info;
   for (i = 0, c = json2.layers.length; i < c; i++) {
     info = json2.layers[i];
-    layer = new Layer(this.url + '/' + info.id);
+    layer = new gmaps.ags.Layer(this.url + '/' + info.id);
     gmaps.ags.augmentObject_(info, layer);
     layer.visible = layer.defaultVisibility;
-    layers.push(layer);
+    layers[i] = layer;//.push(layer);
   }
   if (json2.tables) {
     for (i = 0, c = json2.tables.length; i < c; i++) {
       info = json2.tables[i];
-      layer = new Layer(this.url + '/' + info.id);
+      layer = new gmaps.ags.Layer(this.url + '/' + info.id);
       gmaps.ags.augmentObject_(info, layer);
-      tables.push(layer);
+      tables[i] = layer;//.push(layer);
     }
   }
   for (i = 0, c = layers.length; i < c; i++) {
@@ -2036,12 +2026,12 @@ gmaps.ags.MapService.prototype.getTables = function() {
  * @param {Function} errback
  * @return {String|None} url of image if f=image, none if f=json
  */
-gmaps.ags.MapService.prototype.exportMap = function(p, callback, errback) {
+gmaps.ags.MapService.prototype.exportMap = function(/** @type {JSONRequest} */p, callback, errback) {
   if (!p || !p.bounds) {
     return;
   }
   // note: dynamic map may overlay on top of maptypes with different projection
-  var params = {};// gmaps.ags.augmentObject_(p, );
+  var /** @type {JSONRequest} */ params = {};// gmaps.ags.augmentObject_(p, );
   params.f = p.f;
   var bnds = p.bounds;
   params.bbox = '' + bnds.getSouthWest().lng() + ',' + '' + bnds.getSouthWest().lat() + ',' +
@@ -2174,11 +2164,11 @@ gmaps.ags.MapService.prototype.exportMap = function(p, callback, errback) {
  * @param {Function} callback
  * @param {Function} errback
  */
-gmaps.ags.MapService.prototype.identify = function(p, callback, errback) {
+gmaps.ags.MapService.prototype.identify = function(/** @type {JSONRequest} */p, callback, errback) {
   if (!p) {
     return;
   }
-  var params = {};//gmaps.ags.augmentObject_(p, );
+  var /** @type {JSONRequest} */ params = {};//gmaps.ags.augmentObject_(p, );
   params.geometry = gmaps.ags.fromOverlaysToJSON_(p.geometry);
   params.geometryType = gmaps.ags.getGeometryType_(p.geometry);
   params.mapExtent = gmaps.ags.fromOverlaysToJSON_(p.bounds);
@@ -2266,7 +2256,7 @@ gmaps.ags.MapService.prototype.find = function(opts, callback, errback) {
     return;
   }
   // handle searchText, contains, maxAllowableOffset
-  var params = gmaps.ags.augmentObject_(opts, {});
+  var /** @type {JSONRequest} */ params = gmaps.ags.augmentObject_(opts, {});
   if (opts.layerIds) {
     params.layers = opts.layerIds.join(',');
     delete params.layerIds;
@@ -2311,7 +2301,7 @@ gmaps.ags.MapService.prototype.find = function(opts, callback, errback) {
  * @param {Function} callback
  * @param {Function} errback
  */
-MapService.prototype.queryLayer = function(layerNameOrId, params, callback, errback) {
+gmaps.ags.MapService.prototype.queryLayer = function(layerNameOrId, params, callback, errback) {
   var layer = this.getLayer(layerNameOrId);
   if (layer) {
     layer.query(params, callback, errback);
@@ -2405,7 +2395,7 @@ gmaps.ags.GeocodeService.prototype.init_ = function(json) {
  * @param {Function} errback
  */
 gmaps.ags.GeocodeService.prototype.findAddressCandidates = function(gparams, callback, errback) {
-  var params = gmaps.ags.augmentObject_(gparams, {});
+  var /** @type {JSONRequest} */ params = gmaps.ags.augmentObject_(gparams, {});
   if (params.inputs) {
     gmaps.ags.augmentObject_(params.inputs, params);
     delete params.inputs;
@@ -2534,8 +2524,8 @@ gmaps.ags.GeometryService = function(url) {
  * @param {Function} callback
  * @param {Function} errback
  */
-gmaps.ags.GeometryService.prototype.project = function(p, callback, errback) {
-  var params = gmaps.ags.prepareGeometryParams_(p);
+gmaps.ags.GeometryService.prototype.project = function(/** @type {JSONRequest} */p, callback, errback) {
+  var /** @type {JSONRequest} */ params = gmaps.ags.prepareGeometryParams_(p);
   gmaps.ags.Util.getJSON(this.url + '/project', params, "callback", function(json) {
     var geom = [];
     if (p.outSpatialReference === 4326 || p.outSpatialReference.wkid === 4326) {
@@ -2597,8 +2587,8 @@ gmaps.ags.SRUnit = {
  * @param {Function} callback.
  * @param {Function} errback
  */
-gmaps.ags.GeometryService.prototype.buffer = function(p, callback, errback) {
-  var params = gmaps.ags.prepareGeometryParams_(p);
+gmaps.ags.GeometryService.prototype.buffer = function(/** @type {JSONRequest} */p, callback, errback) {
+  var /** @type {JSONRequest} */ params = gmaps.ags.prepareGeometryParams_(p);
   if (p.bufferSpatialReference) {
     params.bufferSR = gmaps.ags.formatSRParam_(p.bufferSpatialReference);
   }
@@ -2700,8 +2690,8 @@ gmaps.ags.GPTask = function(url) {
  * @param {Function} callback will pass {@link GPResults}
  * @param {Function} errback pass in {@link Error}
  */
-gmaps.ags.GPTask.prototype.execute = function(p, callback, errback) {
-  var params = {};
+gmaps.ags.GPTask.prototype.execute = function(/** @type {JSONRequest} */p, callback, errback) {
+  var /** @type {JSONRequest} */ params = {};
   if (p.parameters) {
     gmaps.ags.augmentObject_(p.parameters, params);
   }
@@ -2808,7 +2798,7 @@ gmaps.ags.RouteTask.prototype.solve = function(opts, callback, errback) {
     return;
   }
   // handle many other fields
-  var params = gmaps.ags.augmentObject_(opts, {});
+  var /** @type {JSONRequest} */ params = gmaps.ags.augmentObject_(opts, {});
   //params['outSR'] = WGS84.wkid;
   if (gmaps.ags.isArray_(opts.stops)) {
     params.stops = gmaps.ags.fromLatLngsToFeatureSet_(opts.stops);
@@ -3003,7 +2993,7 @@ gmaps.ags.TileLayer = function(service, opt_layerOpts) {
     delete opt_layerOpts.opacity;
   }
   gmaps.ags.augmentObject_(opt_layerOpts, this);
-  this.mapService_ = (service instanceof MapService) ? service : new MapService(service);
+  this.mapService_ = (service instanceof gmaps.ags.MapService) ? service : new gmaps.ags.MapService(service);
   //In the format of mt[number].domain.com
   if (opt_layerOpts.hosts) {
     var pro = extractString_(this.mapService_.url, '', '://');
@@ -3033,7 +3023,7 @@ gmaps.ags.TileLayer = function(service, opt_layerOpts) {
  */
 gmaps.ags.TileLayer.prototype.init_ = function(opt_layerOpts) {
   if (this.mapService_.tileInfo) {
-    this.projection_ = new Projection(this.mapService_.tileInfo);
+    this.projection_ = new gmaps.ags.Projection(this.mapService_.tileInfo);
     this.minZoom = opt_layerOpts.minZoom || this.projection_.minZoom;
     this.maxZoom = opt_layerOpts.maxZoom || this.projection_.maxZoom;
   }
@@ -3058,7 +3048,7 @@ gmaps.ags.TileLayer.prototype.getTileUrl = function(tile, zoom) {
     if (this.mapService_.singleFusedMapCache === false) {
       // dynamic map service
       var prj = this.projection_ || this.map_ ? this.map_.getProjection() : Projection.WEB_MECATOR;
-      if (!prj instanceof Projection) {
+      if (!prj instanceof gmaps.ags.Projection) {
         // if use Google's image 
         prj = Projection.WEB_MECATOR;
       }
@@ -3067,7 +3057,7 @@ gmaps.ags.TileLayer.prototype.getTileUrl = function(tile, zoom) {
       var gworldsw = new G.Point(tile.x * size.width / numOfTiles, (tile.y + 1) * size.height / numOfTiles);
       var gworldne = new G.Point((tile.x + 1) * size.width / numOfTiles, tile.y * size.height / numOfTiles);
       var bnds = new G.LatLngBounds(prj.fromPointToLatLng(gworldsw), prj.fromPointToLatLng(gworldne));
-      var params = {
+      var /** @type {JSONRequest} */ params = {
         'f': 'image'
       };
       params.bounds = bnds;
@@ -3153,15 +3143,15 @@ gmaps.ags.MapType = function(tileLayers, opt_typeOpts) {
   gmaps.ags.augmentObject_(opt_typeOpts, this);
   var layers = tileLayers;
   if (gmaps.ags.isString_(tileLayers)) {
-    layers = [new TileLayer(tileLayers, opt_typeOpts)];
-  } else if (tileLayers instanceof MapService) {
-    layers = [new TileLayer(tileLayers, opt_typeOpts)];
-  } else if (tileLayers instanceof TileLayer) {
+    layers = [new gmaps.ags.TileLayer(tileLayers, opt_typeOpts)];
+  } else if (tileLayers instanceof gmaps.ags.MapService) {
+    layers = [new gmaps.ags.TileLayer(tileLayers, opt_typeOpts)];
+  } else if (tileLayers instanceof gmaps.ags.TileLayer) {
     layers = [tileLayers];
   } else if (tileLayers.length > 0 && gmaps.ags.isString_(tileLayers[0])) {
     layers = [];
     for (i = 0; i < tileLayers.length; i++) {
-      layers[i] = new TileLayer(tileLayers[i], opt_typeOpts);
+      layers[i] = new gmaps.ags.TileLayer(tileLayers[i], opt_typeOpts);
     }
   }
   this.tileLayers_ = layers;
@@ -3287,6 +3277,32 @@ gmaps.ags.MapType.prototype.getTileLayers = function() {
 };
 
 /**
+ * set a reference to map instance to help on copyright info display.
+ * @param {google.maps.Map} [map]
+ */
+gmaps.ags.MapType.prototype.setMap = function(/** @type {google.maps.Map} */ map) {
+  if (this.map_) {
+    this.map_ = map;
+    var me = this;
+    this.maptypeChangeListener_ =  G.event.addListener(map, 'maptypeid_changed', function () {
+      me.displayCopyright_();
+    });
+  }
+};
+
+gmaps.ags.MapType.prototype.displayCopyright_ = function() {
+  if (this.map_) {
+    var div = this.map_.agsCopyrightDiv_;
+    if (!div) {
+      div = document.createElement('div');
+      this.maps_.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(div);
+      this.map_.agsCopyrightDiv_ = div;  
+    }
+    //TODO....
+  }  
+}
+
+/**
  * @name MapOverlayOptions
  * @class Instance of this class are used in the {@link opt_ovelayOpts} argument
  *  to the constructor of the {@link MapOverlay} class.
@@ -3311,7 +3327,7 @@ gmaps.ags.MapType.prototype.getTileLayers = function() {
  */
 gmaps.ags.MapOverlay = function(service, opt_overlayOpts) {
   opt_overlayOpts = opt_overlayOpts || {};
-  this.mapService_ = (service instanceof MapService) ? service : new MapService(service);
+  this.mapService_ = (service instanceof gmaps.ags.MapService) ? service : new gmaps.ags.MapService(service);
   
   //this.minZoom  = opt_overlayOpts.minZoom;
   //this.maxZoom  = opt_overlayOpts.maxZoom;
@@ -3374,7 +3390,7 @@ gmaps.ags.MapOverlay.prototype['onRemove'] = gmaps.ags.MapOverlay.prototype.onRe
  * map type. It is not necessarily called on drag or resize.
  * See OverlayView.draw.
  */
-gmaps.ags.gmaps.ags.MapOverlay.prototype.draw = function() {
+gmaps.ags.MapOverlay.prototype.draw = function() {
   if (!this.drawing_ || this.needsNewRefresh_ === true) {
     this.refresh();
   }
@@ -3420,7 +3436,7 @@ gmaps.ags.MapOverlay.prototype.refresh = function() {
   if (!bnds) {
     return;
   }
-  var params = this.exportOptions_;
+  var /** @type {JSONRequest} */ params = this.exportOptions_;
   params.bounds = bnds;
   var sr = WEB_MERCATOR;
   // V3 no map.getSize()
@@ -3428,7 +3444,7 @@ gmaps.ags.MapOverlay.prototype.refresh = function() {
   params.width = s.offsetWidth;
   params.height = s.offsetHeight;
   var prj = m.getProjection(); // note this is not same as this.getProjection which returns MapCanvasProjection
-  if (prj && prj instanceof Projection) {
+  if (prj && prj instanceof gmaps.ags.Projection) {
     sr = prj.spatialReference_;
   }
   params.imageSR = sr;
@@ -3526,3 +3542,4 @@ gmaps.ags.MapOverlay.prototype.hide = function() {
   this.visible_ = false;
   this.div_.style.visibility = 'hidden';
 };
+//})()

@@ -10,6 +10,7 @@ goog.exportProperty(gmaps.ags.Util, 'removeFromMap', gmaps.ags.Util.removeFromMa
 goog.exportSymbol('gmaps.ags.Config', gmaps.ags.Config);
 
 goog.exportSymbol('gmaps.ags.SpatialReference', gmaps.ags.SpatialReference);
+goog.exportProperty(gmaps.ags.SpatialReference, 'register', gmaps.ags.SpatialReference.register);
 goog.exportProperty(gmaps.ags.SpatialReference.prototype, 'forward', gmaps.ags.SpatialReference.prototype.forward);
 goog.exportProperty(gmaps.ags.SpatialReference.prototype, 'inverse', gmaps.ags.SpatialReference.prototype.inverse);
 
@@ -22,9 +23,20 @@ goog.exportSymbol('gmaps.ags.GeometryType', gmaps.ags.GeometryType);
 
 goog.exportSymbol('gmaps.ags.Catalog', gmaps.ags.Catalog);
 goog.exportSymbol('gmaps.ags.Layer', gmaps.ags.Layer);
-goog.exportProperty(gmaps.ags.Layer.prototype, 'load', gmaps.ags.Layer.load);
+goog.exportProperty(gmaps.ags.Layer.prototype, 'load', gmaps.ags.Layer.prototype.load);
 
 goog.exportSymbol('gmaps.ags.MapService', gmaps.ags.MapService);
+goog.exportProperty(gmaps.ags.MapService.prototype, 'getLayer', gmaps.ags.MapService.prototype.getLayer);
+goog.exportProperty(gmaps.ags.MapService.prototype, 'hasLoaded', gmaps.ags.MapService.prototype.hasLoaded);
+goog.exportProperty(gmaps.ags.MapService.prototype, 'getInitialBounds', gmaps.ags.MapService.prototype.getInitialBounds);
+goog.exportProperty(gmaps.ags.MapService.prototype, 'getLayers', gmaps.ags.MapService.prototype.getLayers);
+goog.exportProperty(gmaps.ags.MapService.prototype, 'getTables', gmaps.ags.MapService.prototype.getTables);
+goog.exportProperty(gmaps.ags.MapService.prototype, 'exportMap', gmaps.ags.MapService.prototype.exportMap);
+goog.exportProperty(gmaps.ags.MapService.prototype, 'identify', gmaps.ags.MapService.prototype.identify);
+goog.exportProperty(gmaps.ags.MapService.prototype, 'find', gmaps.ags.MapService.prototype.find);
+goog.exportProperty(gmaps.ags.MapService.prototype, 'queryLayer', gmaps.ags.MapService.prototype.queryLayer);
+
+
 
 goog.exportSymbol('gmaps.ags.GeocodeService', gmaps.ags.GeocodeService);
 
