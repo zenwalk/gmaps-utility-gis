@@ -41,13 +41,13 @@ function r(a) {
           if(b.x !== undefined && b.y !== undefined) {
             return"esriGeometryPoint"
           }else {
-            if(b.l) {
+            if(b.points) {
               return"esriGeometryMultipoint"
             }else {
               if(b.paths) {
                 return"esriGeometryPolyline"
               }else {
-                if(b.m) {
+                if(b.rings) {
                   return"esriGeometryPolygon"
                 }
               }
@@ -241,9 +241,9 @@ new (function(a) {
   this.minZoom = Math.floor(Math.log(360 / this.b / 256) / Math.LN2 + 0.5);
   this.maxZoom = a ? this.minZoom + this.e.length - 1 : 20;
   if(j.Size) {
-    this.o = a ? new j.Size(a.cols, a.rows) : new j.Size(256, 256)
+    this.m = a ? new j.Size(a.cols, a.rows) : new j.Size(256, 256)
   }
-  this.n = Math.pow(2, this.minZoom) * this.b;
+  this.l = Math.pow(2, this.minZoom) * this.b;
   this.j = a ? a.origin.x : -2.0037508342787E7;
   this.k = a ? a.origin.y : 2.0037508342787E7;
   if(a) {
@@ -257,6 +257,8 @@ new (function(a) {
 });
 new j.OverlayView;window.onload = function() {
   v("http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/BloomfieldHillsMichigan/Parcels/MapServer", {}, "callback", function(a) {
-    alert(a.serviceDescription)
+    a = "layerdesc:" + a.serviceDescription;
+    var b = document.getElementById("log");
+    b.innerHTML = b.innerHTML + a + "</br>"
   })
 };})()
