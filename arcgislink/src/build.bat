@@ -22,23 +22,26 @@ rem "%JAVA_HOME%\bin\java" -jar %notation%  %base%\%lib%\src\%lib%.js %base%\%li
 set externs=--externs %util%\util\compiler\closure\google_maps_api_v3.js --externs %base%\%lib%\src\%lib%_externs.js 
 set format=--formatting PRETTY_PRINT
 
-
-
-rem ======= START SIMPLE LIB =====================
-set in= --js %base%\%lib%\src\%lib%.js 
-rem --js %closure%\closure\goog\base.js --js %base%\%lib%\src\%lib%_export.js
-set out=--js_output_file %base%\%lib%\src\%lib%_simple.js
+rem ======= START YUI LIB =====================
+set in=%base%\%lib%\src\%lib%.js 
+set out=-o %base%\%lib%\src\%lib%_min.js
+"%JAVA_HOME%\bin\java" -jar %yui% %out% %in%
+rem ======= END YUI LIB =====================
+rem ======== START SIMPLE LIB =================
+echo (function(){  > %base%\%lib%\src\%lib%_precompile.js
+copy %base%\%lib%\src\%lib%_precompile.js /B + %base%\%lib%\src\%lib%.js /B %base%\%lib%\src\%lib%_precompile.js
+echo window.gmaps = gmaps; })()  >> %base%\%lib%\src\%lib%_precompile.js
+set in=--js %base%\%lib%\src\%lib%_precompile.js
+set out=--js_output_file %base%\%lib%\src\%lib%_compiled.js
 set level=--compilation_level SIMPLE_OPTIMIZATIONS
-set wrap=--output_wrapper "(function(){%%output%%})()"
-set externs=
-rem --externs %util%\util\compiler\closure\google_maps_api_v3.js --externs %base%\%lib%\src\%lib%_externs.js --externs %base%\%lib%\src\%lib%_externs_lib.js
 set format=--formatting PRETTY_PRINT
-"%JAVA_HOME%\bin\java" -jar %compiler% %externs% %format% %level% %in% %out% %wrap% >> %bat%build.log 
-rem ======= END SIMPLE LIB =====================
+"%JAVA_HOME%\bin\java" -jar %compiler% %format% %level% %in% %out% >> %bat%build.log 
+del %base%\%lib%\src\%lib%_precompile.js
+rem ======== END SIMPLE LIB ===================
 
 rem ======= START ADVANCED LIB =====================
 set in=--js %closure%\closure\goog\base.js --js %base%\%lib%\src\%lib%.js --js %base%\%lib%\src\%lib%_export.js
-set out=--js_output_file %base%\%lib%\src\%lib%_compiled.js
+set out=--js_output_file %base%\%lib%\src\%lib%_advanced.js
 set level=--compilation_level ADVANCED_OPTIMIZATIONS
 set wrap=--output_wrapper "(function(){%%output%%})()"
 set externs=--externs %util%\util\compiler\closure\google_maps_api_v3.js --externs %base%\%lib%\src\%lib%_externs.js --externs %base%\%lib%\src\%lib%_externs_lib.js
@@ -54,9 +57,7 @@ rem copy %base%\%lib%\examples\identify_compiled.css /B + %closure%\closure\goog
 rem copy %base%\%lib%\examples\identify_compiled.css /B + %base%\%lib%\examples\identify.css /B  %base%\%lib%\examples\identify_compiled.css
 rem "%JAVA_HOME%\bin\java" -jar %yui% -o %base%\%lib%\examples\identify_compiled.css %base%\%lib%\examples\identify_compiled.css >> %bat%build.log 
 
-call %bat%example.bat mercator 
 
-pause
 
 rem ====================================== 
 rem "%JAVA_HOME%\bin\java" -jar  %compiler% --compilation_level SIMPLE_OPTIMIZATIONS --externs %util%\util\compiler\closure\google_maps_api_v3.js --js %base%\%lib%\src\%lib%.js --js_output_file %base%\%lib%\src\%lib%_compiled.js >> %bat%build.log 
@@ -64,31 +65,19 @@ rem "%JAVA_HOME%\bin\java" -jar %util%\util\yui\yuicompressor.jar -o %base%\%lib
 rem %closure%\closure\bin\calcdeps.py -i %base%\%lib%\examples\identify.js  -p %closure%\ -o compiled -c %closure%\compiler.jar -f "--compilation_level=ADVANCED_OPTIMIZATIONS"  -f "--externs=%util%\util\compiler\closure\google_maps_api_v3.js" -f "--externs=%base%\%lib%\src\%lib%.js"> %base%\%lib%\examples\identify_compiled.js
 
 rem ======== START COMPILE APP ==========
-rem set in=--js %base%\%lib%\src\%lib%.js --js %base%\%lib%\examples\libapp.js
-rem set wrap=--output_wrapper "(function(){%%output%%})()"
-rem set externs=--externs %util%\util\compiler\closure\google_maps_api_v3.js --externs %base%\%lib%\src\%lib%_externs.js
-rem set out=--js_output_file %base%\%lib%\examples\libapp_all_compiled.js
-rem set level=--compilation_level ADVANCED_OPTIMIZATIONS
-rem set format=--formatting PRETTY_PRINT
-rem "%JAVA_HOME%\bin\java" -jar %compiler% %externs% %format% %level% %in% %out% %wrap% 
+set in=--js %base%\%lib%\src\%lib%.js --js %base%\%lib%\examples\libapp.js
+set wrap=--output_wrapper "(function(){%%output%%})()"
+set externs=--externs %util%\util\compiler\closure\google_maps_api_v3.js --externs %base%\%lib%\src\%lib%_externs.js
+set out=--js_output_file %base%\%lib%\examples\libapp_all_compiled.js
+set level=--compilation_level ADVANCED_OPTIMIZATIONS
+set format=--formatting PRETTY_PRINT
+"%JAVA_HOME%\bin\java" -jar %compiler% %externs% %format% %level% %in% %out% %wrap% 
 rem ======== END COMPILE APP==========
 
-rem ======== START SIMPLE =================
-rem echo (function(){  > %base%\%lib%\src\%lib%_precompile.js
-rem copy %base%\%lib%\src\%lib%_precompile.js /B + %base%\%lib%\src\%lib%.js /B %base%\%lib%\src\%lib%_precompile.js
-rem echo window.gmaps = gmaps; })()  >> %base%\%lib%\src\%lib%_precompile.js
-rem set in=--js %base%\%lib%\src\%lib%_precompile.js
-rem set out=--js_output_file %base%\%lib%\src\%lib%_compiled.js
-rem set level=--compilation_level SIMPLE_OPTIMIZATIONS
-rem set format=
-rem "%JAVA_HOME%\bin\java" -jar %compiler% %format% %level% %in% %out% >> %bat%build.log 
-rem del %base%\%lib%\src\%lib%_precompile.js
-rem ======== END SIMPLE ===================
+
+call %bat%example.bat mercator
+pause
 
 
-rem ======= START YUI LIB =====================
-rem set in=%base%\%lib%\src\%lib%.js 
-rem set out=-o %base%\%lib%\src\%lib%_min.js
-rem "%JAVA_HOME%\bin\java" -jar %yui% %out% %in%
-rem ======= END YUI LIB =====================
+
  
