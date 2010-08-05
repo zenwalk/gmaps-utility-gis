@@ -1,8 +1,11 @@
 (function(){/*
  http://google-maps-utility-library-v3.googlecode.com
 */
-var f = Math.PI / 180, i = 0, j = google.maps, k, n, o, p = {};
-function q() {
+var f = Math.PI / 180, h = 0, j = google.maps, k, m, n, o = {proxyUrl:null, alwaysUseProxy:false}, p = {}, q = {};
+function r() {
+  j.event.trigger.apply(this, arguments)
+}
+function s() {
   if(typeof XMLHttpRequest === "undefined") {
     try {
       return new ActiveXObject("Msxml2.XMLHTTP.6.0")
@@ -21,34 +24,35 @@ function q() {
     return new XMLHttpRequest
   }
 }
-function r(a) {
+var u = "esriGeometryPoint", v = "esriGeometryMultipoint", w = "esriGeometryPolyline", x = "esriGeometryPolygon", y = "esriGeometryEnvelope";
+function z(a) {
   var b = a;
   if(a && a.splice && a.length > 0) {
     b = a[0]
   }
   if(b instanceof j.LatLng || b instanceof j.Marker) {
-    return a && a.splice && a.length > 1 ? "esriGeometryMultipoint" : "esriGeometryPoint"
+    return a && a.splice && a.length > 1 ? v : u
   }else {
     if(b instanceof j.Polyline) {
-      return"esriGeometryPolyline"
+      return w
     }else {
       if(b instanceof j.Polygon) {
-        return"esriGeometryPolygon"
+        return x
       }else {
         if(b instanceof j.LatLngBounds) {
-          return"esriGeometryEnvelope"
+          return y
         }else {
           if(b.x !== undefined && b.y !== undefined) {
-            return"esriGeometryPoint"
+            return u
           }else {
             if(b.points) {
-              return"esriGeometryMultipoint"
+              return v
             }else {
               if(b.paths) {
-                return"esriGeometryPolyline"
+                return w
               }else {
                 if(b.rings) {
-                  return"esriGeometryPolygon"
+                  return x
                 }
               }
             }
@@ -59,7 +63,20 @@ function r(a) {
   }
   return null
 }
-function s(a, b) {
+function A(a) {
+  var b = a;
+  if(a && a.splice && a.length > 0) {
+    b = a[0]
+  }
+  if(b && b.splice && b.length > 0) {
+    b = b[0]
+  }
+  if(b instanceof j.LatLng || b instanceof j.Marker || b instanceof j.Polyline || b instanceof j.Polygon || b instanceof j.LatLngBounds) {
+    return true
+  }
+  return false
+}
+function B(a, b) {
   for(var c = [], e, d = 0, g = a.getLength();d < g;d++) {
     e = a.getAt(d);
     c.push("[" + e.lng() + "," + e.lat() + "]")
@@ -67,35 +84,28 @@ function s(a, b) {
   b && c.length > 0 && c.push("[" + a.getAt(0).lng() + "," + a.getAt(0).lat() + "]");
   return c.join(",")
 }
-function t(a) {
+function C(a) {
   var b;
   if(typeof a === "object") {
     if(a && a.splice) {
       b = [];
       for(var c = 0, e = a.length;c < e;c++) {
-        b.push(t(a[c]))
+        b.push(C(a[c]))
       }
       return"[" + b.join(",") + "]"
     }else {
-      if((b = a) && a.splice && a.length > 0) {
-        b = a[0]
-      }
-      if(b && b.splice && b.length > 0) {
-        b = b[0]
-      }
-      b = b instanceof j.LatLng || b instanceof j.Marker || b instanceof j.Polyline || b instanceof j.Polygon || b instanceof j.LatLngBounds ? true : false;
-      if(b) {
+      if(A(a)) {
         var d;
         e = "{";
-        switch(r(a)) {
-          case "esriGeometryPoint":
+        switch(z(a)) {
+          case u:
             d = a && a.splice ? a[0] : a;
             if(d instanceof j.Marker) {
               d = d.getPosition()
             }
             e += "x:" + d.lng() + ",y:" + d.lat();
             break;
-          case "esriGeometryMultipoint":
+          case v:
             c = [];
             for(b = 0;b < a.length;b++) {
               d = a[b] instanceof j.Marker ? a[b].getPosition() : a[b];
@@ -103,24 +113,24 @@ function t(a) {
             }
             e += "points: [" + c.join(",") + "]";
             break;
-          case "esriGeometryPolyline":
+          case w:
             c = [];
             a = a && a.splice ? a : [a];
             for(b = 0;b < a.length;b++) {
-              c.push("[" + s(a[b].getPath()) + "]")
+              c.push("[" + B(a[b].getPath()) + "]")
             }
             e += "paths:[" + c.join(",") + "]";
             break;
-          case "esriGeometryPolygon":
+          case x:
             c = [];
             d = a && a.splice ? a[0] : a;
             a = d.getPaths();
             for(b = 0;b < a.getLength();b++) {
-              c.push("[" + s(a.getAt(b), true) + "]")
+              c.push("[" + B(a.getAt(b), true) + "]")
             }
             e += "rings:[" + c.join(",") + "]";
             break;
-          case "esriGeometryEnvelope":
+          case y:
             d = a && a.splice ? a[0] : a;
             e += "xmin:" + d.getSouthWest().lng() + ",ymin:" + d.getSouthWest().lat() + ",xmax:" + d.getNorthEast().lng() + ",ymax:" + d.getNorthEast().lat();
             break
@@ -138,7 +148,7 @@ function t(a) {
               if(b.length > 0) {
                 b += ", "
               }
-              b += c + ":" + t(a[c])
+              b += c + ":" + C(a[c])
             }
           }
           return"{" + b + "}"
@@ -148,104 +158,135 @@ function t(a) {
   }
   return a.toString()
 }
-function u(a) {
+function D(a) {
   var b = "";
   if(a) {
     a.f = a.f || "json";
     for(var c in a) {
       if(a.hasOwnProperty(c) && a[c] !== null && a[c] !== undefined) {
-        var e = t(a[c]);
+        var e = C(a[c]);
         b += c + "=" + (escape ? escape(e) : encodeURIComponent(e)) + "&"
       }
     }
   }
   return b
 }
-function v(a, b, c, e) {
-  var d = "ags_jsonp_" + i++ + "_" + Math.floor(Math.random() * 1E6), g = null;
+function E(a, b, c, e) {
+  var d = "ags_jsonp_" + h++ + "_" + Math.floor(Math.random() * 1E6), g = null;
   b = b || {};
   b[c || "callback"] = d + " && " + d;
-  b = u(b);
-  var l = document.getElementsByTagName("head")[0];
-  if(!l) {
+  b = D(b);
+  var t = document.getElementsByTagName("head")[0];
+  if(!t) {
     throw new Error("document must have header tag");
   }
   window[d] = function() {
     delete window[d];
-    g && l.removeChild(g);
+    g && t.removeChild(g);
     g = null;
-    e.apply(null, arguments)
+    e.apply(null, arguments);
+    r(q, "jsonpend", d)
   };
-  if((b + a).length < 2E3) {
+  if((b + a).length < 2E3 && !o.g) {
     g = document.createElement("script");
     g.src = a + (a.indexOf("?") === -1 ? "?" : "&") + b;
     g.id = d;
-    l.appendChild(g)
+    t.appendChild(g)
   }else {
     c = window.location;
     c = c.protocol + "//" + c.hostname + (!c.port || c.port === 80 ? "" : ":" + c.port + "/");
-    var m = true;
+    var l = true;
     if(a.toLowerCase().indexOf(c.toLowerCase()) !== -1) {
-      m = false
+      l = false
     }
-    if(m) {
+    if(o.g) {
+      l = true
+    }
+    if(l && !o.j) {
       throw new Error("No proxyUrl property in Config is defined");
     }
-    var h = q();
-    h.onreadystatechange = function() {
-      if(h.readyState === 4) {
-        if(h.status === 200) {
-          eval(h.responseText)
+    var i = s();
+    i.onreadystatechange = function() {
+      if(i.readyState === 4) {
+        if(i.status === 200) {
+          eval(i.responseText)
         }else {
-          throw new Error("Error code " + h.status);
+          throw new Error("Error code " + i.status);
         }
       }
     };
-    h.open("POST", m ? "null?" + a : a, true);
-    h.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    h.send(b)
+    i.open("POST", l ? o.j + "?" + a : a, true);
+    i.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    i.send(b)
   }
+  r(q, "jsonpstart", d);
   return d
 }
-function w(a) {
+q.h = function(a, b, c, e) {
+  E(a, b, c, e)
+};
+q.a = function(a, b) {
+  if(b && b.splice) {
+    for(var c, e = 0, d = b.length;e < d;e++) {
+      if((c = b[e]) && c.splice) {
+        q.a(a, c)
+      }else {
+        A(c) && c.setMap(a)
+      }
+    }
+  }
+};
+q.o = function(a, b) {
+  q.a(null, a);
+  if(b) {
+    a.length = 0
+  }
+};
+function F(a) {
   a = a || {};
   this.wkid = a.wkid;
   this.wkt = a.wkt
 }
-w.prototype.toJSON = function() {
+F.prototype.b = function() {
+  return 360
+};
+F.prototype.toJSON = function() {
   return"{" + (this.wkid ? " wkid:" + this.wkid : "wkt: '" + this.wkt + "'") + "}"
 };
-function x(a) {
+function G(a) {
   a = a || {};
-  w.call(this, a)
+  F.call(this, a)
 }
-x.prototype = new w;
-function y(a) {
+G.prototype = new F;
+function H(a) {
   a = a || {};
-  w.call(this, a);
-  this.h = (a.c || 6378137) / (a.d || 1);
-  this.i = (a.a || 0) * f
+  F.call(this, a);
+  this.e = (a.q || 6378137) / (a.s || 1);
+  this.l = (a.k || 0) * f
 }
-y.prototype = new w;
-k = new x({wkid:4326});
-n = new x({wkid:4269});
-o = new y({wkid:102113, c:6378137, a:0, d:1});
-p = {"4326":k, "4269":n, "102113":o, "102100":new y({wkid:102100, c:6378137, a:0, d:1})};
+H.prototype = new F;
+H.prototype.b = function() {
+  return Math.PI * 2 * this.e
+};
+k = new G({wkid:4326});
+m = new G({wkid:4269});
+n = new H({wkid:102113, semi_major:6378137, central_meridian:0, unit:1});
+p = {"4326":k, "4269":m, "102113":n, "102100":new H({wkid:102100, semi_major:6378137, central_meridian:0, unit:1})};
 new (function(a) {
-  this.e = a ? a.lods : null;
-  this.g = a ? p[a.spatialReference.wkid || a.spatialReference.wkt] : o;
-  if(!this.g) {
+  this.i = a ? a.lods : null;
+  this.d = a ? p[a.spatialReference.wkid || a.spatialReference.wkt] : n;
+  if(!this.d) {
     throw new Error("unsupported Spatial Reference");
   }
-  this.b = a ? a.lods[0].resolution : 156543.033928;
-  this.minZoom = Math.floor(Math.log(360 / this.b / 256) / Math.LN2 + 0.5);
-  this.maxZoom = a ? this.minZoom + this.e.length - 1 : 20;
+  this.c = a ? a.lods[0].resolution : 156543.033928;
+  this.minZoom = Math.floor(Math.log(this.d.b() / this.c / 256) / Math.LN2 + 0.5);
+  this.maxZoom = a ? this.minZoom + this.i.length - 1 : 20;
   if(j.Size) {
-    this.m = a ? new j.Size(a.cols, a.rows) : new j.Size(256, 256)
+    this.r = a ? new j.Size(a.cols, a.rows) : new j.Size(256, 256)
   }
-  this.l = Math.pow(2, this.minZoom) * this.b;
-  this.j = a ? a.origin.x : -2.0037508342787E7;
-  this.k = a ? a.origin.y : 2.0037508342787E7;
+  this.p = Math.pow(2, this.minZoom) * this.c;
+  this.m = a ? a.origin.x : -2.0037508342787E7;
+  this.n = a ? a.origin.y : 2.0037508342787E7;
   if(a) {
     for(var b, c = 0;c < a.lods.length - 1;c++) {
       b = a.lods[c].resolution / a.lods[c + 1].resolution;
@@ -255,8 +296,9 @@ new (function(a) {
     }
   }
 });
-new j.OverlayView;window.onload = function() {
-  v("http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/BloomfieldHillsMichigan/Parcels/MapServer", {}, "callback", function(a) {
+j.OverlayView && new j.OverlayView;
+var I = q;window.onload = function() {
+  I.h("http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/BloomfieldHillsMichigan/Parcels/MapServer", {}, "callback", function(a) {
     a = "layerdesc:" + a.serviceDescription;
     var b = document.getElementById("log");
     b.innerHTML = b.innerHTML + a + "</br>"
