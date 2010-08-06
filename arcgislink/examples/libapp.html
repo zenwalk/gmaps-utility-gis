@@ -16,12 +16,12 @@
             | <a href='libapp_lib_compiled.html'>Compiled Lib + Uncompiled App</a>
             | <a href='libapp_all_compiled.html'>(Lib+App) Compiled Together</a>
         </div>
-        <select id='services' onchange="load()">
+        <select id='services'>
             <option>http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/BloomfieldHillsMichigan/Parcels/MapServer</option>
             <option>http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/BloomfieldHillsMichigan/LandusePlanning/MapServer</option>
             <option>http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/TaxParcel/AssessorsBasemap/MapServer</option>
         </select>
-        <button onclick='load()'>
+        <button onclick='loadSvc()'>
             Load
         </button>
         <pre>
