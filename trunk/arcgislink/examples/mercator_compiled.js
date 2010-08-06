@@ -277,7 +277,7 @@ function L(a, b, c, d) {
   x(t, "jsonpstart", e);
   return e
 }
-t.ga = function(a, b, c, d) {
+t.ha = function(a, b, c, d) {
   L(a, b, c, d)
 };
 t.O = function(a, b) {
@@ -291,7 +291,7 @@ t.O = function(a, b) {
     }
   }
 };
-t.ia = function(a, b) {
+t.ja = function(a, b) {
   t.O(null, a);
   if(b) {
     a.length = 0
@@ -550,7 +550,7 @@ function V(a, b) {
   var c = a.split("/");
   this.name = c[c.length - 2].replace(/_/g, " ");
   b = b || {};
-  b.deferLoad || this.load()
+  b.fa || this.load()
 }
 V.prototype.load = function() {
   var a = this;
@@ -616,7 +616,7 @@ function W(a, b) {
           g = null
         }
         e.z.push(g);
-        g.ha = e
+        g.ia = e
       }
     }
   }
@@ -692,7 +692,7 @@ function fa(a, b, c, d) {
     }
     e.transparent = b.transparent === false ? false : true;
     if(b.time) {
-      e.time = y(b.time, b.fa)
+      e.time = y(b.time, b.ga)
     }
     e.aa = b.aa;
     if(e.f === "image") {
