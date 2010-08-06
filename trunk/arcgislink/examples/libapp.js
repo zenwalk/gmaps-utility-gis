@@ -7,12 +7,12 @@ function log(s) {
 function showInfo(svc) {
   log('description:' + svc.description);
   log('layers:');
-  var layers = svc.getLayers();
+  var layers = svc.layers;
   for (var i = 0; i < layers.length; i++) {
     var layer = layers[i];
     log('  layer' + layer.id + ':' + layer.name + ' (' + layer.url);
   }
-  var tables = svc.getTables();
+  var tables = svc.tables;
   if (tables) {
     log('tables:');
     for (var i = 0; i < tables.length; i++) {
@@ -75,5 +75,5 @@ function init() {
   //testSRregister();
 }
 
-//window['loadSvc'] = loadSvc;
+window['loadSvc'] = loadSvc;
 window.onload = init;

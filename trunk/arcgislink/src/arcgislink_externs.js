@@ -14,7 +14,7 @@ CSSProperties.prototype.filters;
 CSSProperties.prototype.filters.alpha;
 
 /** @type {object } */
-var JSONRequest = {
+var REST_JSON = {
   f: null,
   inSpatialReference: null,
   outSpatialReference: null,
@@ -42,7 +42,8 @@ var JSONRequest = {
   layerDefs: null,
   layerIds: null,
   layerOption: null,
-  x: null
+  transparent:false
+  
 
 };
 /** @type {object } */
@@ -97,7 +98,9 @@ var JSONResponse = {
     Subject: null,
     Category: null,
     Keywords: null
-  }
+  },
+  extent:null,
+  bounds: null
 };
 var JSONGeometry = {
   geometry: null,

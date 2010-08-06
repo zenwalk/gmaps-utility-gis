@@ -1,4 +1,3 @@
-(function(){  
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -3555,4 +3554,3 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
   };
   
 
-window.gmaps = gmaps; })()  
