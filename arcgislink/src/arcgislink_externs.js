@@ -15,6 +15,16 @@ CSSProperties.prototype.filters.alpha;
 
 /** @type {object } */
 var REST_JSON = {
+  geometry: null,
+  x: 0,
+  y: 0,
+  paths: null,
+  points: null,
+  rings: null,
+  xmin: 0,
+  ymin: 0,
+  xmax: 0,
+  ymax: 0,
   f: null,
   inSpatialReference: null,
   outSpatialReference: null,
@@ -42,12 +52,7 @@ var REST_JSON = {
   layerDefs: null,
   layerIds: null,
   layerOption: null,
-  transparent:false
-  
-
-};
-/** @type {object } */
-var JSONResponse = {
+  transparent:false,
   error: null,
   serviceDescription: null,
   mapName: null,
@@ -60,7 +65,7 @@ var JSONResponse = {
     parentLayerId: -1,
     subLayerIds: null
   }],
-  tables: [],
+  tables: null,
   spatialReference: {
     wkid: 4326,
     wkt: null
@@ -72,22 +77,14 @@ var JSONResponse = {
     dpi: 96,
     format: null,
     compressionQuality: 75,
-    origin: {
-      x: -130.0,
-      y: 50.0
-    },
+    origin: null,
     lods: [{
       level: 0,
-      resolution: 8.46,
-      scale: 32000.0
+      resolution: 0,
+      scale: 0
     }]
   },
-  initialExtent: {
-    xmin: -109.55,
-    ymin: 25.76,
-    xmax: -86.39,
-    ymax: 49.94
-  },
+  initialExtent: null,
   fullExtent: null,
   units: null,
   supportedImageFormatTypes: null,
@@ -102,20 +99,8 @@ var JSONResponse = {
   extent:null,
   bounds: null
 };
-var JSONGeometry = {
-  geometry: null,
-  x: 0,
-  y: 0,
-  paths: null,
-  points: null,
-  rings: null,
-  xmin: 0,
-  ymin: 0,
-  xmax: 0,
-  ymax: 0
-};
 
-var ObjOptions = {
-  deferLoad: false
-}
+
+
+
 
