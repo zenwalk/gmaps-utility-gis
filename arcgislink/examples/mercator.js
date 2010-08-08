@@ -18,4 +18,3 @@ function init() {
  setTimeout("window.scrollTo(0,60);",2000);
 
 }
-window.onload = init;
