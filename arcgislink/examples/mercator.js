@@ -15,6 +15,7 @@ function init() {
   });
   map.mapTypes.set('arcgis', agsType);
   map.setMapTypeId('arcgis');
- setTimeout("window.scrollTo(0,60);",2000);
+ 
 
 }
+window.onload = init;
