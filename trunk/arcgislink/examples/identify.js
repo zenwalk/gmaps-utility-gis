@@ -2,69 +2,70 @@ goog.require('goog.dom');
 goog.require('goog.ui.Tab');
 goog.require('goog.ui.TabBar');
        
-(function(){       
-       var svc, map, res, iw, ovs=[], layers;
-        var ovOptions = {
-          polylineOptions: {
-            strokeColor: '#FF0000',
-            strokeWeight: 4
-          },
-          polygonOptions: {
-            fillColor: '#FFFF99',
-            fillOpacity: 0.5,
-            strokeWeight : 2,
-            strokeColor: '#FF0000'
-          }
-        };
-        window['init'] = function() {
-          var myOptions = {
-            'zoom': 17,
-            'center': new google.maps.LatLng(45.5, -122.7),
-            'mapTypeId': google.maps.MapTypeId.HYBRID,
-            'draggableCursor': 'pointer', // every pixel is clickable.
-            'streetViewControl': true //my favorite feature in V3!
-          }
-          map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-          var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
-          svc = new gmaps.ags.MapService(url);
-          var agsType = new gmaps.ags.MapType([new gmaps.ags.TileLayer(svc)], {
-            'opacity': 0.5
-          });
-          map.overlayMapTypes.insertAt(0, agsType);
-          google.maps.event.addListener(map, 'click', identify);
-        }
+  
+var svc, map, res, iw, ovs = [], layers;
+var ovOptions = {
+  polylineOptions: {
+    strokeColor: '#FF0000',
+    strokeWeight: 4
+  },
+  polygonOptions: {
+    fillColor: '#FFFF99',
+    fillOpacity: 0.5,
+    strokeWeight: 2,
+    strokeColor: '#FF0000'
+  }
+};
+function init() {
+  var myOptions = {
+    'zoom': 17,
+    'center': new google.maps.LatLng(45.5, -122.7),
+    'mapTypeId': google.maps.MapTypeId.HYBRID,
+    'draggableCursor': 'pointer', // every pixel is clickable.
+    'streetViewControl': true //my favorite feature in V3!
+  };
+  map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+  var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer';
+  svc = new gmaps.ags.MapService(url);
+  var agsType = new gmaps.ags.MapType([new gmaps.ags.TileLayer(svc)], {
+    'opacity': 0.5
+  });
+  map.overlayMapTypes.insertAt(0, agsType);
+  google.maps.event.addListener(map, 'click', identify);
+}
         
-        function identify(evt) {
-          clearOverlays();
-          if (res) res.length = 0;
-          svc.identify({
-            'geometry' : evt.latLng,
-            'tolerance' : 3,
-            'layerIds' : [ 2, 3, 4 ],
-            'layerOption' : 'all',
-            'bounds' : map.getBounds(),
-            'width': map.getDiv().offsetWidth,
-            'height': map.getDiv().offsetHeight,
-            'overlayOptions': ovOptions
-          }, function (results, err){
-            if (err) {
-              alert(err.message + err.details.join('\n'));
-            } else {
-              addResultToMap(results, evt.latLng);
-            }
-          });
-        }
-        
-        function clearOverlays() {
-          if (ovs) {
-            for (var i = 0; i < ovs.length; i++) {
-              ovs[i].setMap(null);
-            } 
-            ovs.length = 0;
-          }
-          
-        }
-        function addResultToMap(idresults, latlng) {
+function identify(evt) {
+  clearOverlays();
+  if (res) 
+    res.length = 0;
+  svc.identify({
+    'geometry': evt.latLng,
+    'tolerance': 3,
+    'layerIds': [2, 3, 4],
+    'layerOption': 'all',
+    'bounds': map.getBounds(),
+    'width': map.getDiv().offsetWidth,
+    'height': map.getDiv().offsetHeight,
+    'overlayOptions': ovOptions
+  }, function(results, err) {
+    if (err) {
+      alert(err.message + err.details.join('\n'));
+    } else {
+      addResultToMap(results, evt.latLng);
+    }
+  });
+}
+
+function clearOverlays() {
+  if (ovs) {
+    for (var i = 0; i < ovs.length; i++) {
+      ovs[i].setMap(null);
+    }
+    ovs.length = 0;
+  }
+}
+
+function addResultToMap(idresults, latlng) {
           res = idresults.results;
           layers = { "2": [], "3": [], "4": [] };
           for (var i = 0; i < res.length; i++) {
@@ -97,7 +98,9 @@ goog.require('goog.ui.TabBar');
               case "3":
                 label = "Buildings";
                 content = "Total features returned: <b>" + count + "</b>";
-                if (count == 0) break;
+                if (count === 0) {
+                  break;
+                }
                 content += "<table><th>Building ID</th><th>Area</th>";
                 for (var j = 0; j < count; j++) {
                   var attributes = results[j].feature.attributes;
@@ -111,10 +114,12 @@ goog.require('goog.ui.TabBar');
               case "4":
                 label = "Zoning";
                 content = "Total features returned: <b>" + count + "</b>";
-                if (count == 0) break;
+                if (count === 0) {
+                  break;
+                }
                 content += "<table><th>ID</th><th>Zone</th><th>Zone Class</th><th>General Class</th>";
-                for (var j = 0; j < count; j++) {
-                  var attributes = results[j].feature.attributes;
+                for (j = 0; j < count; j++) {
+                  attributes = results[j].feature.attributes;
                   content += "<tr>";
                   content += "<td><a href='javascript:void(0)' onclick='showFeature(" + layerId + "," + j + ")'>" + attributes["OBJECTID"]  + "</td>";
                   content += "<td>" + attributes["ZONE"]  + "</td>";
@@ -130,7 +135,7 @@ goog.require('goog.ui.TabBar');
             // =======START  TAB UI ================ 
             
             var tabBar = new goog.ui.TabBar();
-            for (var i = 0; i < tabs.length; i++) {
+            for (i = 0; i < tabs.length; i++) {
               var tab = new goog.ui.Tab(tabs[i].label);
               tab.content = tabs[i].content;
               tabBar.addChild(tab, true);
@@ -163,10 +168,10 @@ goog.require('goog.ui.TabBar');
           }
         }
         
-        window['showFeature'] = function (layerId, index) {
+        function showFeature(layerId, index) {
           window.status = 'showFeature';
           clearOverlays();
-          var idResult  = layers[layerId][index];
+          var idResult = layers[layerId][index];
           var f = idResult.feature;
           if (f.geometry) {
             for (var i = 0; i < f.geometry.length; i++) {
@@ -175,4 +180,6 @@ goog.require('goog.ui.TabBar');
             }
           }
         }
-    })();   
+        
+        window.onload = init;
+        window['showFeature'] = showFeature;

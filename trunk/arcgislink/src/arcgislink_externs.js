@@ -9,9 +9,9 @@
    
 
 /** @type {object} */
-CSSProperties.prototype.filters;
+CSSProperties.prototype.filters = {};
 /** @type {number} */
-CSSProperties.prototype.filters.alpha;
+CSSProperties.prototype.filters.alpha = 0;
 
 /** @type {object } */
 var REST_JSON = {
@@ -97,7 +97,19 @@ var REST_JSON = {
     Keywords: null
   },
   extent:null,
-  bounds: null
+  bounds: null,
+  results:null,
+  result: null,
+  imageDisplay:null,
+  sr:null,
+  mapExtent:null,
+  tolerance:0,
+  //query
+  where:null,
+  features:null
+  
+  
+  
 };
 
 

@@ -1416,7 +1416,7 @@ SpatialReference.WEB_MERCATOR_AUX = WEB_MERCATOR_AUX;
    * @param {Object} wktOrSR
    * @return {SpatialReference} registered SR
    */
-SpatialReference.register = function(wkidt, wktOrSR) {
+Util.registerSR = function(wkidt, wktOrSR) {
     var sr = spatialReferences_['' + wkidt];
     if (sr) {
       return sr;
@@ -1930,7 +1930,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    */
   MapService.prototype.getVisibleLayerIds_ = function () {
     var ret = [];
-    if (this.layers) { // in case service not loaded
+    if (this.layers) { // in case service not loaded_
       var layer;
       // a special behavior of REST (as of 9.3.1): 
       // if partial group then parent must be off
@@ -2338,7 +2338,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
  */
   function GeocodeService(url) {
     this.url = url;
-    this.loaded = false;
+    this.loaded_ = false;
     var me = this;
     getJSON_(url, {}, '', function (json) {
       me.init_(json);
@@ -2637,11 +2637,11 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    */
   function GPService(url) {
     this.url = url;
-    this.loaded = false;
+    this.loaded_ = false;
     var me = this;
     getJSON_(url, {}, '', function (json) {
       augmentObject_(json, me);
-      me.loaded = true;
+      me.loaded_ = true;
       /**
      * This event is fired when the service and it's service info is loaded.
      * @name GPService#load
@@ -2679,11 +2679,11 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    */
   function GPTask(url) {
     this.url = url;
-    this.loaded = false;
+    this.loaded_ = false;
     var me = this;
     getJSON_(url, {}, '', function (json) {
       augmentObject_(json, me);
-      me.loaded = true;
+      me.loaded_ = true;
       /**
      * This event is fired when the service and it's service info is loaded.
      * @name GPService#load
@@ -2761,13 +2761,13 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    */
   function NetworkService(url) {
     this.url = url;
-    this.loaded = false;
+    this.loaded_ = false;
     var me = this;
     getJSON_(url, {
       
     }, '', function (json) {
       augmentObject_(json, me);
-      me.loaded = true;
+      me.loaded_ = true;
      /**
      * This event is fired when the service and it's service info is loaded.
      * @name NetworkService#load
@@ -2887,6 +2887,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    * <li><code>tileInfo</code> tiling information. An instance of {@link TileInfo}
    * </ul>Applications normally do not create instances of this class directly.
    * @name Projection
+   * @implements {google.maps.Projection}
    * @constructor
    * @class This class (<code>Projection</code>) implements a custom
    * <a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a>
@@ -2948,6 +2949,8 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     point.y = (this.originY_ - coords[1]) / this.scale_;
     return point;
   };
+  // somehow externs was ignored in adv mode.
+  Projection.prototype['fromLatLngToPoint'] = Projection.prototype.fromLatLngToPoint;
   /**
    * See <a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a>.
    * @param {Point} pixel
@@ -2964,6 +2967,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     var geo = this.spatialReference_.inverse([x, y]);
     return new G.LatLng(geo[1], geo[0]);
   };
+  //Projection.prototype['fromLatLngToPoint'] = Projection.prototype.fromLatLngToPoint;
   /**
    * Get the scale at given level;
    * @param {Number} zoom
@@ -3025,7 +3029,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     this.name = this.name || this.mapService_.name;
     this.maxZoom = this.maxZoom || 19;
     this.minZoom = this.minZoom || 0;
-    if (this.mapService_.loaded) {
+    if (this.mapService_.loaded_) {
       this.init_(opt_layerOpts);
     } else {
       var me = this;
