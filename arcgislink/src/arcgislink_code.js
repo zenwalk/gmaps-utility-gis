@@ -362,7 +362,7 @@ function augmentObject_(src, dest, force) {
       return null;
     }
     // for 9.3 compatibility, return wkid if possible.
-    return isNumber(sr) ? sr : sr.wkid ? sr.wkid : sr.toJSON();
+    return isNumber_(sr) ? sr : sr.wkid ? sr.wkid : sr.toJSON();
   }
   
   /**
@@ -1338,22 +1338,22 @@ Albers.prototype.getCircum = function() {
   };
   
 WGS84 = new Geographic({
-  'wkid': 4326
+  wkid: 4326
   });
 NAD83 = new Geographic({
-  'wkid': 4269
+  wkid: 4269
   });
 WEB_MERCATOR = new SphereMercator({
-    'wkid': 102113,
-    'semi_major': 6378137.0,
-    'central_meridian': 0,
-    'unit': 1
+    wkid: 102113,
+    semi_major: 6378137.0,
+    central_meridian: 0,
+    unit: 1
 });
 WEB_MERCATOR_AUX = new SphereMercator({
-      'wkid': 102100,
-      'semi_major': 6378137.0,
-      'central_meridian': 0,
-      'unit': 1
+      wkid: 102100,
+      semi_major: 6378137.0,
+      central_meridian: 0,
+      unit: 1
     });
 	
   // declared early but assign here to avoid dependency error by jslint
@@ -1366,6 +1366,7 @@ WEB_MERCATOR_AUX = new SphereMercator({
   
 SpatialReference.WGS84 = WGS84;
 SpatialReference.NAD83 = NAD83;
+//TODO: check advanced compile impact
 SpatialReference.WEB_MERCATOR = WEB_MERCATOR;
 SpatialReference.WEB_MERCATOR_AUX = WEB_MERCATOR_AUX;
     
