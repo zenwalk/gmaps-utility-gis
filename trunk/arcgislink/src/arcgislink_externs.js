@@ -54,6 +54,7 @@ var REST_JSON = {
   layerOption: null,
   transparent:false,
   error: null,
+  details:null,
   serviceDescription: null,
   mapName: null,
   description: null,
@@ -106,8 +107,50 @@ var REST_JSON = {
   tolerance:0,
   //query
   where:null,
-  features:null
-  
+  features:null,
+  searchText:null,
+  contains:null,
+  searchFields:null,
+  layerName:null,
+  foundFieldName:null,
+  // geocode
+  serviceDescription:null,
+  addressFields:{
+   name: null,
+   alias: null,
+   required: false, type:null  
+  },
+  candidateFields:null,
+  intersectionCandidateFields:null,
+  locatorProperties:null,
+  outFields:null,
+  outSR:null,
+  candidates:null,
+  address:null,
+  location:null,
+  score:null,
+  attributes:null,
+  distance:null,
+  // buffer:
+  bufferSpatialReference:null,
+  bufferSR:null,
+  distances:null,
+  unit:null,
+  unionResults: false,
+  //GP
+  features:null,
+  parameters:null,
+  // route:
+  stops:null,
+  barriers:null,
+  polylineBarriers:null,
+  polygonBarriers:null,
+  attributeParameterValues:null,
+  returnDirections:null,
+  returnRoutes:null,
+  returnStops:null,
+  returnBarriers:null,
+  findBestSequence:null
   
   
 };
