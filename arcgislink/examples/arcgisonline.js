@@ -8,7 +8,7 @@ function init() {
     'Terrain': ['World_Terrain_Base'],
     'Labeled Terrain': ['World_Terrain_Base', 'Reference/World_Reference_Overlay']
   };
-  var agsIds = [];
+  var agsIds = [google.maps.MapTypeId.ROADMAP];
   var agsTypes = [];
   for (var x in services) {
     if (services.hasOwnProperty(x)) {
@@ -34,6 +34,7 @@ function init() {
   for (var i = 0; i < agsIds.length; i++) {
     map.mapTypes.set(agsIds[i], agsTypes[i]);
   }
-  map.setMapTypeId('World Topo')
+  map.setMapTypeId('World Topo');
+  var cpc = new gmaps.ags.CopyrightControl(map);
 }
 window.onload = init;
