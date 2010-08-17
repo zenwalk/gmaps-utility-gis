@@ -86,7 +86,7 @@ function doBuffer() {
       bufferSpatialReference: 102113,//gmaps.ags.SpatialReference.WEB_MERCATOR,
       distances: [500, 1000],
       unit: 9001,
-      unionResults: true
+      unionResults: true, overlayOptions:{clickable:false}
     };
     svc.buffer(params, function(results, err) {
       if (!err) {

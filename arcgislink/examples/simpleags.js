@@ -39,7 +39,7 @@ function loadMapService() {
       if (bnds.getSouthWest().lng() > bnds.getNorthEast().lng()) {
         map.setCenter(new google.maps.LatLng(40, -100));
         map.setZoom(4);
-      } else {
+      } else if (!bnds.contains(map.getCenter())){
         map.fitBounds(bnds);
       }
     }

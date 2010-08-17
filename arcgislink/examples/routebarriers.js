@@ -20,11 +20,13 @@ function init() {
   
   showHelp();
 }
-function showBusy(b){
-   map.setOptions({
-      draggableCursor: b?'wait':'default'
-    });
+
+function showBusy(b) {
+  map.setOptions({
+    draggableCursor: b ? 'wait' : 'default'
+  });
 }
+
 function addPoint(evt) {
   if (iw) {
     iw.close();
@@ -70,7 +72,8 @@ function route() {
     overlayOptions: {
       strokeColor: '#0000BB',
       strokeWeight: 8,
-      strokeOpacity: 0.5
+      strokeOpacity: 0.5,
+      clickable: false
     }
   }, processResults, handleErr);
   
@@ -85,7 +88,6 @@ function processResults(results) {
       routes = routes.concat(r[i].geometry);
     }
   }
-  
 }
 
 function handleErr(err) {

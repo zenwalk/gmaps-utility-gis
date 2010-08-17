@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <title>ArcGIS Server Link for Google Maps API: Examples</title><!-- nofollow -->
+    <title>ArcGIS Server Link for Google Maps API: Examples</title>
     <link rel="stylesheet" type="text/css" href="http://code.google.com/css/codesite.css"/>
     <link rel="stylesheet" type="text/css" href="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/util/docs/template/local_extensions.css"/>
     <script type="text/javascript" src="http://code.google.com/js/prettify.js"></script>
@@ -68,7 +68,11 @@
    </td>
    <td>
     <ul>
-   <li><a href="#Compile">Compile </a></li>
+   <li><a href="#Generic">Generic</a></li>
+        <li><a href="#Compile">Compile </a></li>
+        </ul>
+       <p>
+           &nbsp;</p>
    </td>
   </tr>
 </table>
@@ -939,8 +943,8 @@ Note the input result geometry may not be a Google API overlay such as Marker, P
 </p>
 </div>
 
-<div style="display:none">
-<h2><a name="Overlay"></a>Map Service Viewer</h2>
+<div>
+<h2><a name="Generic"></a>Map Service Viewer</h2>
 <p>The following example combines several tools together. It loads a map service, add it as an overlay. 
 There is a table of contents (TOC) that lists layers, and gray out them if not visible at current scale. 
 The map click is also wired to identify operation with layer options (top most, all etc).
@@ -993,6 +997,60 @@ The map click is also wired to identify operation with layer options (top most, 
 <a href="#Top">Back to top</a>
 </p>
 </div>
+<div>
+<h2><a name="Compile"></a>Compile with Advanced Optimization</h2>
+<p>Google released a JavaScript compiler named <a href="http://code.google.com/closure/compiler">Closure Compiler</a>. One of the most important feature is 
+    &quot;deadcode removal&quot; in advanced mode. It basically will not include or compress 
+    the code that it not been used in the application. This library is written in a 
+    syntax format that can take advantage of that feature. To use that feature, download compiler, then
+    include &quot;arcgislink_code.js&quot; and your application code as input, and 
+    &quot;arcgis_extern.js&quot; and a downloaded copy of <a href="http://closure-compiler.googlecode.com/svn/trunk/contrib/externs/maps/google_maps_api_v3.js">Google Maps V3 extern</a> as external 
+    file (for JSON stuff).
+
+   </p> 
+<pre class="prettyprint">
+    
+    java -jar compiler.jar 
+         --externs arcgis_externs.js --externs google_maps_api_v3.js 
+         --output_wrapper &quot;(function(){%output%})()&quot; 
+         --compilation_level ADVANCED_OPTIMIZATIONS
+         --js arcgis_code.js --js myapp.js
+         --js_output_file myapp_compiled.js 
+</pre>
+    <p>After compilation, reference the compiled javascript <b>WITHOUT</b> the library because the used code in the lib is included in the compiled code. 
+        The following is a list of samples with fully compiled code:</p>
+ <p> <a href="../examples/mercator_all_compiled.html">Cached Map</a>
+ | <a href="../examples/dynamap_all_compiled.html">Overlay</a>
+ | <a href="../examples/combined_all_compiled.html">Combined</a>
+ | <a href="../examples/maptypeoverlay_all_compiled.html">Cached Overlay</a>
+ | <a href="../examples/dynatype_lib_compiled.html">Non-Cached MapType</a>
+ | <a href="../examples/stateplane_lib_compiled.html">State Plane</a>
+ | <a href="../examples/arcgisonline_all_compiled.html">ArcGISOnline</a>
+ | <a href="../examples/hosts_all_compiled.html">Rotating Hosts</a>
+ | <a href="../examples/identify_all_compiled.html">Identify</a>
+ | <a href="../examples/layerdef_all_compiled.html">Layer Def</a>
+ | <a href="../examples/layervis_all_compiled.html">Layer TOC</a>
+ | <a href="../examples/hourglass_all_compiled.html">Hourglass</a>
+ | <a href="../examples/layerquery_all_compiled.html">Layer Query</a>
+ | <a href="../examples/find_all_compiled.html">Find</a>
+ | <a href="../examples/geocode_all_compiled.html">Geocode</a>
+ | <a href="../examples/reverse_all_compiled.html">ReverseGeocode</a>
+ | <a href="../examples/project_all_compiled.html">Project</a>
+ | <a href="../examples/buffer_all_compiled.html">Buffer</a>
+ | <a href="../examples/coverarea_all_compiled.html">Driving Time</a>
+ | <a href="../examples/routebarriers_all_compiled.html">Routing</a>
+ | <a href="../examples/simpleags_all_compiled.html">Generic</a>
+ | <a href="#Top">Back to top</a>
+</p>
+</div>
+
+<p>
+</p>
+<p>
+</p>
+<p>
+</p>
+
 <script type="text/javascript">
 
     var _gaq = _gaq || [];
