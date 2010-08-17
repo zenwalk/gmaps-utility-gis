@@ -1626,7 +1626,7 @@ Layer.prototype.isInScale = function(scale) {
     TOUCHES: 'esriSpatialRelTouches',
     WITHIN: 'esriSpatialRelWithin'
   };
-   /**
+  /**
    * @name QueryOptions
    * @class This class represent the parameters needed in an query operation for a {@link Layer}.
    *   There is no constructor, use JavaScript object literal.
@@ -1642,11 +1642,11 @@ Layer.prototype.isInScale = function(scale) {
    *    include intersects, contains, envelope intersects, within, etc.
    *    The default spatial relationship is intersects. See {@link SpatialRelationship}
    * @property {String} [where] A where clause for the query filter. Any legal SQL where clause operating on the fields in the layer is allowed.
- * @property {Array.string} [outFields] The list of fields to be included in the returned resultset.
+   * @property {Array.string} [outFields] The list of fields to be included in the returned resultset.
    * @property {Boolean} [returnGeometry] If true, If true, the resultset will include the geometries associated with each result.
- * @property {Array.number} [objectIds] The object IDs of this layer / table to be queried
+   * @property {Array.number} [objectIds] The object IDs of this layer / table to be queried
    * @property {Number} [maxAllowableOffset] This option can be used to specify the maximum allowable offset  to be used for generalizing geometries returned by the query operation
-   * @property {Boolean} [returnIdsOnly] If true, the response only includes an array of object IDs. Otherwise the response is a feature set. The default is false. 
+   * @property {Boolean} [returnIdsOnly] If true, the response only includes an array of object IDs. Otherwise the response is a feature set. The default is false.
    * @property {OverlayOptions} [overlayOptions] See {@link OverlayOptions}
    */
   /**
@@ -1657,9 +1657,9 @@ Layer.prototype.isInScale = function(scale) {
    * @property {String} [displayFieldName] display Field Name for layer
    * @property {Object} [fieldAliases] Field Name's Aliases. key is field name, value is alias.
    * @property {GemetryType} [geometryType] esriGeometryPoint | esriGeometryMultipoint | esriGeometryPolygon | esriGeometryPolyline
- * @property {Array.feature} [features] result as array of {@link Feature}
+   * @property {Array.feature} [features] result as array of {@link Feature}
    * @property {String} [objectIdFieldName] objectIdFieldName when returnIdsOnly=true
- * @property {Array.int} [objectIds] objectIds when returnIdsOnly=true
+   * @property {Array.int} [objectIds] objectIds when returnIdsOnly=true
    */
   /**
    * The query operation is performed on a layer resource. The result of this operation is a resultset resource that will be
@@ -1669,12 +1669,12 @@ Layer.prototype.isInScale = function(scale) {
    * @param {Function} callback
    * @param {Function} errback
    */
-Layer.prototype.query = function(p, callback, errback) {
+  Layer.prototype.query = function(p, callback, errback) {
     if (!p) {
       return;
     }
     // handle text, where, relationParam, objectIds, maxAllowableOffset
-  var params = augmentObject_(p, {});
+    var params = augmentObject_(p, {});
     if (p.geometry && !isString_(p.geometry)) {
       params.geometry = fromOverlaysToJSON_(p.geometry);
       params.geometryType = getGeometryType_(p.geometry);
@@ -1684,7 +1684,7 @@ Layer.prototype.query = function(p, callback, errback) {
       params.spatialRel = p.spatialRelationship;
       delete params.spatialRelationship;
     }
-    if (p.outFields && !isArray_(p.outFields)) {
+    if (p.outFields && isArray_(p.outFields)) {
       params.outFields = p.outFields.join(',');
     }
     if (p.objectIds) {
@@ -1697,7 +1697,7 @@ Layer.prototype.query = function(p, callback, errback) {
     params.returnGeometry = p.returnGeometry === false ? false : true;
     params.returnIdsOnly = p.returnIdsOnly === true ? true : false;
     delete params.overlayOptions;
-    getJSON_(this.url + '/query', params, '', function (json) {
+    getJSON_(this.url + '/query', params, '', function(json) {
       parseFeatures_(json.features, p.overlayOptions);
       callback(json, json.error);
       handleErr_(errback, json);
@@ -1780,9 +1780,9 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    * @property {String} [mapName] map frame Name inside the map document
    * @property {String} [description] description
    * @property {String} [copyrightText] copyrightText
-   * @property {Array.Layer} [layers] array of Layers.
+   * @property {Array.Layer} [layers] array of {@link Layer}s.
    * @property {Array.Layer} [tables] array of Tables of type {@link Layer}.
-   * @property {SpatialReference} [spatialReference] spatialReference
+   * @property {SpatialReference} [spatialReference] see {@link SpatialReference}
    * @property {Boolean} [singleFusedMapCache] if map cache is singleFused
    * @property {TileInfo} [tileInfo] See {@link TileInfo}
    * @property {TimeInfo} [timeInfo] see {@link TimeInfo}
@@ -1797,19 +1797,19 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     this.name = tks[tks.length - 2].replace(/_/g, ' ');
     opts = opts || {};
     if (!opts.deferLoad) {
-      this.load();
+      this.loadServiceInfo();
     }
   }
 
- /**
- * Load serviceInfo
- */
-  MapService.prototype.load = function () {
+  /**
+   * Load serviceInfo
+   */
+  MapService.prototype.loadServiceInfo = function() {
     var me = this;
     getJSON_(this.url, {}, '', function(json) {
       me.init_(json);
     });
-  }; 
+  };
   /**
    * initialize an ArcGIS Map Service from the meta data information.
    * The <code>json</code> parameter is the json object returned by Map Service.
@@ -1878,7 +1878,6 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     /**
      * This event is fired when the service and it's service info is loaded.
      * @name MapService#load
-     * @param {MapService} service
      * @event
      */
     triggerEvent_(this, "load");
@@ -1903,11 +1902,11 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     return null;
   };
 
-/**
- * Get the layer definitions.
- * @return {Object} key as id, value as string of definition expression. 
- */
-  MapService.prototype.getLayerDefs_ = function () {
+  /**
+   * Get the layer definitions.
+   * @return {Object} key as id, value as string of definition expression.
+   */
+  MapService.prototype.getLayerDefs_ = function() {
     var ret = {};
     if (this.layers) {
       for (var i = 0, c = this.layers.length; i < c; i++) {
@@ -2019,7 +2018,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
  * @class This is the result of {@link MapService}.exportMap operation.
  *   There is no constructor, use as JavaScript object literal.
  * @property {String} [href] URL of image
- * @property {LatLngBounds} [bounds] The bounding box of the exported image. 
+ * @property {google.maps.LatLngBounds} [bounds] The bounding box of the exported image. 
  * @property {Number} [width] width of the exported image.
  * @property {Number} [height] height of the exported image.
  * @property {Number} [scale] scale of the exported image.
@@ -2127,7 +2126,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
   }
 }
  * </pre>
- * @property {Array.OverlayView} [geometry] geometry
+ * @property {Array.OverlayView} [geometry] geometries. Array of Marker, Polyline or Polygon.
  * @property {Object} [attributes] attributes as name-value JSON object.
  */
   /**
@@ -2894,7 +2893,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    * @class This class (<code>Projection</code>) implements a custom
    * <a href  = 'http://code.google.com/apis/maps/documentation/javascript/reference.html#Projection'>google.maps.Projection</a>
    * from the core Google Maps API.
-   *   It carries a real {@link SpatialReference} object to convert LatLng from/to
+   *   It includes a real {@link SpatialReference} object to convert LatLng from/to
    *   map coordinates, and tiling scheme informations to convert
    *   map coordinates from/to pixel coordinates.
    * @param {TileInfo} tileInfo
@@ -3006,9 +3005,8 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    * @name TileLayer
    * @constructor
    * @class This class (<code>TileLayer</code>) provides access to a cached ArcGIS Server
-   * map service. There is no GTileLayer class in Google Maps API V3, but this class is kept to allow
+   * map service. There is no <code>GTileLayer</code> class in Google Maps API V3, this class is kept to allow
    * finer control of zoom levels for each individual tile sets within a map type, such as zoom level range and opacity.
-   * <br/> This class can be used in {@link MapType}
    * @param {MapService} service
    * @param {TileLayerOptions} opt_layerOpts
    */
@@ -3028,9 +3026,9 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
       this.urlTemplate_ = pro + '://' + opt_layerOpts.hosts + path;
       this.numOfHosts_ = parseInt(extractString_(opt_layerOpts.hosts, '[', ']'), 10);
     }
-    this.name = this.name || this.mapService_.name;
-    this.maxZoom = this.maxZoom || 19;
-    this.minZoom = this.minZoom || 0;
+    this.name = opt_layerOpts.name || this.mapService_.name;
+    this.maxZoom = opt_layerOpts.maxZoom || 19;
+    this.minZoom = opt_layerOpts.minZoom || 0;
     if (this.mapService_.loaded_) {
       this.init_(opt_layerOpts);
     } else {
@@ -3119,7 +3117,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     return this.opacity_;
   };
   /**
-   * get the underline Map Service
+   * get the underline {@link MapService}
    * @return {MapService}
    */
   TileLayer.prototype.getMapService = function () {
@@ -3135,26 +3133,18 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    * @property {String} [alt] Alt text to display when this MapType's button is hovered over in the MapTypeControl. Optional.
    * @property {Number} [maxZoom] The maximum zoom level for the map when displaying this MapType. Required for base MapTypes, ignored for overlay MapTypes.
    * @property {Number} [minZoom] The minimum zoom level for the map when displaying this MapType. Optional; defaults to 0.
-   * @property {Number} [radius] Radius of the planet for the map, in meters. Optional; defaults to Earth's equatorial radius of 6378137 meters.
-   * @property {google.maps.Size} [tileSize] The dimensions of each tile. Required.
-   * @property {google.maps.Map} [map] The map instance. Can be useful for copyright info.
-   *   May not need if API provides access to map instance later.
+   * @property {google.maps.Size} [tileSize] The dimensions of each tile.
    */
+  // * @property {Number} [radius] Radius of the planet for the map, in meters. Optional; defaults to Earth's equatorial radius of 6378137 meters.
   /**
-   * Creates a MapType, with a array of TileLayers, or a single URL as shortcut.
+   * Creates a MapType, with a array of {@link TileLayer}s, or a single URL as shortcut.
    * @name MapType
    * @constructor
-   * @class This class (<code>MapType</code>) extends the Google Maps API's
+   * @class This class implements the Google Maps API's
    * <a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#MapType>GMapType</a>.
    * It holds a list of {@link TileLayer}s.
-   * <p> Because all tileLayers are loaded asynchronously, and currently the
-   * core API does not have method to refresh tiles on demand, if you do not load the default
-   * Google maps, you should either 1) add to
-   * map after it 'load' event is fired, or) trigger an map type change to force refresh.
-   * See <a href  = http://code.google.com/p/gmaps-api-issues/issues/detail?id  = 279&can  = 1&q  = refresh&colspec  = ID%20Type%20Status%20Introduced%20Fixed%20Summary%20Stars%20ApiType%20Internal>Issue 279</a>
-   * </p>
    * <p> Note: all tiled layer in the same map type must use same spatial reference and tile scheme.</p>
-   * @param {TileArray.Layer|String} tileLayers
+   * @param {Array.TileLayer|String} tileLayers
    * @param {MapTypeOptions} opt_typeOpts
    */
   function MapType(tileLayers, opt_typeOpts) {
@@ -3206,6 +3196,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
   /**
    * Get a tile for given tile coordinates Returns a tile for the given tile coordinate (x, y) and zoom level.
    * This tile will be appended to the given ownerDocument.
+   * @private not meant to be called directly.
    * @param {Point} tileCoord
    * @param {Number} zoom
    * @return {Node}
@@ -3254,6 +3245,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
   MapType.prototype['getTile'] = MapType.prototype.getTile;
   /**
    * Release tile and cleanup
+   * @private not meant to be called directly.
    * @param {Node} node
    */
   MapType.prototype.releaseTile = function (node) {
@@ -3287,7 +3279,10 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
       }
     }
   };
-  
+  /**
+   * get opacity
+   * @return {Number}
+   */
   MapType.prototype.getOpacity = function () {
     return this.opacity_;
   };
@@ -3314,8 +3309,8 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    * @class This class (<code>MapOverlay</code>) extends the Google Maps API's
    * <a href  = http://code.google.com/apis/maps/documentation/reference.html#OverlayView>OverlayView</a>
    * that draws map images from data source on the fly. It is also known as "<b>Dynamic Maps</b>".
-   * It can be added to the map via <code>GMap.addOverlay </code> method.
-   * The similar class in the core GMap API is <a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#GroundOverlay>google.maps.GroundOverlay</a>,
+   * It can be added to the map via <code>setMap(map) </code> method.
+   * The similar class in the core Map API is <a href  = http://code.google.com/apis/maps/documentation/javascript/reference.html#GroundOverlay>google.maps.GroundOverlay</a>,
    * however, the instance of this class always cover the viewport exactly, and will redraw itself as map moves.
    * @constructor
    * @param {String|MapService} service
@@ -3325,8 +3320,8 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     opt_overlayOpts = opt_overlayOpts || {};
     this.mapService_ = (service instanceof MapService) ? service : new MapService(service);
     
-    //this.minZoom  = opt_overlayOpts.minZoom;
-    //this.maxZoom  = opt_overlayOpts.maxZoom;
+    this.minZoom  = opt_overlayOpts.minZoom;
+    this.maxZoom  = opt_overlayOpts.maxZoom;
     this.opacity_ = opt_overlayOpts.opacity || 1;
     this.exportOptions_ = opt_overlayOpts.exportOptions || {};
     this.drawing_ = false;
@@ -3341,6 +3336,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
   }
   MapOverlay.prototype = new G.OverlayView();
   /**
+   * Called by API not by app code.
    * Handler when overlay is added. Interface method.
    * This will be called after setMap(map) is called.
    */
@@ -3363,7 +3359,9 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     });
   };
   MapOverlay.prototype['onAdd'] = MapOverlay.prototype.onAdd;
-  /** remove overlay
+  /** 
+   * Called by API not by app code.
+   * Handler when overlay is removed.
    */
   MapOverlay.prototype.onRemove = function() {
     G.event.removeListener(this.boundsChangedListener_);
@@ -3372,15 +3370,8 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
   };
   MapOverlay.prototype['onRemove'] = MapOverlay.prototype.onRemove;
   /**
-   * The API invokes a separate draw() method on the overlay whenever it needs to draw
-   * the overlay on the map (including when first added).
-   * Implement this method to draw or update the overlay.
-   * This method is called after onAdd() and when
-   * the position from projection.fromLatLngToPixel()
-   * would return a new value for a given LatLng.
-   * This can happen on change of zoom, center, or
-   * map type. It is not necessarily called on drag or resize.
-   * See OverlayView.draw.
+   * Called by API not by app code.
+   * See OverlayView.draw in core API docs.
    */
   MapOverlay.prototype.draw = function () {
     if (!this.drawing_ || this.needsNewRefresh_ === true) {
@@ -3507,6 +3498,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
   };
   /**
    * If this in zoom range
+   * @private
    * @return {Boolean}
    */
   MapOverlay.prototype.isInZoomRange_ = function () {
