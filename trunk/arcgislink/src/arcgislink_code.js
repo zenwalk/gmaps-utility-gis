@@ -683,7 +683,16 @@ function augmentObject_(src, dest, force) {
     }
     return query;
   }
-  
+  /** create a callback closure
+   * @private 
+   * @param {Object} fn
+   * @param {Object} obj
+   */
+  function callback_(fn, obj){
+    return function(){
+      fn.apply(obj, arguments);
+    };
+  }
  
 function getJSON_(url, params, callbackName, callbackFn) {
   var sid = 'ags_jsonp_' + (jsonpID_++) + '_' + Math.floor(Math.random() * 1000000);
@@ -1761,7 +1770,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
   /**
    * @name MapSerivceOptions
    * @class provides options to construct a {@link MapService}
-   * @property {Boolean} deferLoad whether to defer load meta data on construction.
+   * @property {Number} delayLoad number of seconds to delay loading meta data on construction.
    */
   /**
    * Creates a MapService objects that can be used by UI components.
@@ -1795,7 +1804,12 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     var tks = url.split("/");
     this.name = tks[tks.length - 2].replace(/_/g, ' ');
     opts = opts || {};
-    if (!opts.deferLoad) {
+    if (opts.delayLoad) {
+      var me = this;
+      window.setTimeout(function() {
+        me.loadServiceInfo();
+      }, opts.delayLoad * 1000);
+    } else {
       this.loadServiceInfo();
     }
   }
@@ -3292,6 +3306,28 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
   MapType.prototype.getTileLayers = function () {
     return this.tileLayers_;
   };
+   /**
+   * get list of {@link TileLayer} in this map type
+   * @return {Array.TileLayer}
+   */
+  MapType.prototype.getCopyrights = function () {
+    var cp = [];
+    var me = this;
+    //this.copyrightsPending_ = false;
+    for (var i = 0, c = this.tileLayers_.length; i < c; i++){
+      var service = this.tileLayers_[i].getMapService();
+      if (service.copyrightText){
+        cp.push(service.copyrightText);
+      }//else {
+       // G.event.addListenerOnce(service, 'load', function(){
+       //    triggerEvent_(me, 'copyright_changed');
+       // });
+       // this.copyrightsPending_ = true;
+     // }
+    }
+    return cp.join('|');
+  };
+  
   /**
    * @name MapOverlayOptions
    * @class Instance of this class are used in the {@link opt_ovelayOpts} argument
@@ -3525,6 +3561,42 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     this.div_.style.visibility = 'hidden';
   };
 
+/**
+ * Creates a copyright control
+ * @constructor
+ * @param {google.maps.Map} map
+ */
+  function CopyrightControl(map){
+    this.map_ = map;
+    var div = document.createElement('div');
+    div.style.fontFamily = 'Arial,sans-serif';
+    div.style.fontSize = '9px';
+    map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(div);
+    G.event.addListener(map, 'maptypeid_changed', callback_(this.setCopyright, this));
+    if (!map.getProjection()) {
+      G.event.addListenerOnce(map, 'projection_changed', callback_(this.setCopyright, this));
+    }
+    this.div_ = div;
+    this.setCopyright();
+  }
+  /**
+   * Set copyright info.
+   */
+  CopyrightControl.prototype.setCopyright = function () {
+    var map = this.map_;
+    var type = map.mapTypes.get(map.getMapTypeId());
+    if (type instanceof MapType){
+      var cp = type.getCopyrights();
+      this.div_.innerHTML = cp;
+      //if (type.copyrightsPending_){
+      //  G.event.addListenerOnce(type, 'copyright_changed', callback_(this.setCopyright, this));
+      // }
+    }else {
+      this.div_.innerHTML = '';
+    }
+    
+  };
+
   gmaps.ags = {
     SpatialReference: SpatialReference,
     Geographic: Geographic,
@@ -3547,7 +3619,8 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     Projection: Projection,
     TileLayer: TileLayer,
     MapOverlay: MapOverlay,
-    MapType: MapType
+    MapType: MapType,
+    CopyrightControl:CopyrightControl
   };
   
 
