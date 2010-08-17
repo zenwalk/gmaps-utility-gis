@@ -1,27 +1,16 @@
 
 
-var svc, map, res, iw, ovs = [], results;
-var ovOptions = {
-  polylineOptions: {
-    strokeColor: '#FF0000',
-    strokeWeight: 4
-  },
-  polygonOptions: {
-    fillColor: '#FFFF99',
-    fillOpacity: 0.5,
-    strokeWeight: 2,
-    strokeColor: '#FF0000'
-  }
-};
+var locator, map, marker, iw, res;
+var sp83 = gmaps.ags.Util.registerSR(2264, 'PROJCS["NAD_1983_StatePlane_North_Carolina_FIPS_3200_Feet",GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Lambert_Conformal_Conic"],PARAMETER["False_Easting",2000000.002616666],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",-79.0],PARAMETER["Standard_Parallel_1",34.33333333333334],PARAMETER["Standard_Parallel_2",36.16666666666666],PARAMETER["Latitude_Of_Origin",33.75],UNIT["Foot_US",0.3048006096012192]]');
+var map, locator, iw;
 function init() {
   var myOptions = {
     zoom: 16,
     center: new google.maps.LatLng(35.227, -80.843),
     mapTypeId: 'cbm',
     mapTypeControlOptions: {
-      mapTypeIds: ['cbm', 'coc']
+      mapTypeIds: ['cbm', google.maps.MapTypeId.ROADMAP, 'coc']
     },
-    draggableCursor: 'pointer',
     streetViewControl: true
   };
   map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
@@ -29,99 +18,110 @@ function init() {
     name: 'Community'
   });
   map.mapTypes.set('cbm', cbmType);
-  var url = 'http://maps.ci.charlotte.nc.us/arcgis/rest/services/GET/BaseMapWM/MapServer';
-  svc = new gmaps.ags.MapService(url);
-  var agsType = new gmaps.ags.MapType([new gmaps.ags.TileLayer(svc)], {
+  var cocType = new gmaps.ags.MapType('http://maps.ci.charlotte.nc.us/arcgis/rest/services/GET/BaseMapWM/MapServer', {
     name: 'Charlotte'
   });
-  map.mapTypes.set('coc', agsType);
-  google.maps.event.addListener(map, 'click', identify);
-}
-
-function identify(evt) {
-
-  clearOverlays();
-  if (res) 
-    res.length = 0;
-  svc.identify({
-    geometry: evt.latLng,
-    tolerance: 3,
-    //layerIds: [2, 3, 4],
-    layerOption: 'top',
-    bounds: map.getBounds(),
-    width: map.getDiv().offsetWidth,
-    height: map.getDiv().offsetHeight,
-    overlayOptions: ovOptions
-  }, function(results, err) {
-    if (err) {
-      alert(err.message + err.details.join('\n'));
-    } else {
-      addResultToMap(results, evt.latLng);
-    }
+  map.mapTypes.set('coc', cocType);
+  var url = 'http://maps.ci.charlotte.nc.us/arcgis/rest/services/GET/MATLocator/GeocodeServer';
+  locator = new gmaps.ags.GeocodeService(url);
+  geocoder = new google.maps.Geocoder();
+  
+  google.maps.event.addListener(map, 'click', function(evt) {
+    reverseGeocode(evt.latLng);
   });
-}
-
-function clearOverlays() {
-  if (ovs) {
-    for (var i = 0; i < ovs.length; i++) {
-      ovs[i].setMap(null);
-    }
-    ovs.length = 0;
-  }
-}
-
-function addResultToMap(idresults, latlng) {
-  results = idresults.results;
+  iw = new google.maps.InfoWindow({
+    maxWidth: 180
+  });
   
-  var count = results.length;
-  var label = "", content = "";
-  content = "<strong>Total features returned: " + count + "</strong>";
-  for (var j = 0; j < count; j++) {
-    var attributes = results[j].feature.attributes;
-    content += "<table>";
-    for (var x in attributes) {
-      
-      if (attributes.hasOwnProperty(x)) {
-        if (x=='OBJECTID') continue;
-        var val = attributes[x] || '';
-        if (val =='Null') continue;
-        content +='<tr><td style="background-color:#E5ECF9">'+x+'</td><td>'+ val +'</td></tr>';
+}
+
+function reverseGeocode(latlng) {
+  if (latlng) {
+    var params = {
+      location: latlng,
+      distance: 100
+    }
+    var latlngHtml = "<b>Latlng</b>: (" + latlng.toUrlValue() + ")<br/>";
+    var allHtml = "";
+    locator.reverseGeocode(params, function(result) {
+      var chtml = '<b>City</b>: ';
+      if (result.address) {
+        chtml += result.address['Street'];
+        
+      } else {
+        chtml += ' not found';
       }
-    }
-    content += "</table>";
+      if (allHtml) {
+        showResults(latlng, latlngHtml + allHtml + '<br/>' + chtml);
+      } else {
+        allHtml = chtml;
+      }
+    });
+    geocoder.geocode({
+      'latLng': latlng
+    }, function(results, status) {
+      var ghtml = '<b>Google</b>: ';
+      if (status == google.maps.GeocoderStatus.OK) {
+        if (results[0]) {
+          ghtml += results[0]['formatted_address'];
+        } else {
+          ghtml += "No results found";
+        }
+      } else {
+        ghtml += 'Geocoder failed due to:' + status;
+      }
+      if (allHtml) {
+        showResults(latlng, latlngHtml + allHtml + '<br/>' + ghtml);
+      } else {
+        allHtml = ghtml;
+      }
+    });
   }
-  
-  
-  var container = document.createElement('div');
-  container.style.height='200px';
-  container.style.overflow='auto';
-  
-  container.innerHTML = content;
-  // =======END  TAB UI ================ 
+}
+
+
+
+function showResults(latlng, html) {
+  if (!marker) {
+    marker = new google.maps.Marker({
+      position: latlng,
+      draggable: true,
+      map: map
+    });
+    
+    google.maps.event.addListener(marker, 'dragend', function(evt) {
+      reverseGeocode(evt.latLng);
+    });
+    google.maps.event.addListener(marker, 'dragstart', function(evt) {
+      iw.close();
+    });
+  } else {
+    marker.setPosition(latlng);
+    marker.setMap(map);
+  }
   if (!iw) {
     iw = new google.maps.InfoWindow({
-      content: container,
+      maxWidth: 180,
+      content: html,
       position: latlng
     });
   } else {
-    iw.setContent(container);
+    iw.setContent(html);
     iw.setPosition(latlng);
+    
   }
   iw.open(map);
-  
 }
 
-function showFeature(index) {
-  window.status = 'showFeature';
-  clearOverlays();
-  var idResult = results[index];
-  var f = idResult.feature;
-  if (f.geometry) {
-    for (var i = 0; i < f.geometry.length; i++) {
-      ovs.push(f.geometry[i]);
-      f.geometry[i].setMap(map);
-    }
-  }
+function clearOverlays() {
+  marker.setMap(null);
 }
 
 window.onload = init;
+
+
+
+
+
+
+
