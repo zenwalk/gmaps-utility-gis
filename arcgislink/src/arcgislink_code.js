@@ -656,7 +656,7 @@ function augmentObject_(src, dest, force) {
 
   function log_(msg) {
     if (window.console) {
-      window.console.log_(msg);
+      window.console.log(msg);
     } else {
       var l = document.getElementById('_ags_log');
       if (l) {
@@ -692,6 +692,23 @@ function augmentObject_(src, dest, force) {
     return function(){
       fn.apply(obj, arguments);
     };
+  }
+  /**
+   * Find copyright control in the map
+   * @param {Object} map
+   */
+  function findCopyrightControl_(map) {
+    if (map) {
+      var mvc = map.controls[G.ControlPosition.BOTTOM_RIGHT];
+      if (mvc) {
+        for (var i = 0, c = mvc.getLength(); i < c; i++) {
+          if (mvc.getAt(i).copyrightControl_){
+            return mvc.getAt(i).copyrightControl_;
+          }
+        }
+      }
+    }
+    return null;
   }
  
 function getJSON_(url, params, callbackName, callbackFn) {
@@ -3042,6 +3059,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     this.name = opt_layerOpts.name || this.mapService_.name;
     this.maxZoom = opt_layerOpts.maxZoom || 19;
     this.minZoom = opt_layerOpts.minZoom || 0;
+    this.dynaZoom = opt_layerOpts.dynaZoom || this.maxZoom;
     if (this.mapService_.loaded_) {
       this.init_(opt_layerOpts);
     } else {
@@ -3082,9 +3100,9 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
       if (this.urlTemplate_) {
         u = this.urlTemplate_.replace('[' + this.numOfHosts_ + ']', '' + ((tile.y + tile.x) % this.numOfHosts_));
       }
-      if (this.mapService_.singleFusedMapCache === false) {
+      if (this.mapService_.singleFusedMapCache === false || zoom > this.dynaZoom) {
         // dynamic map service
-        var prj = this.projection_ || this.map_ ? this.map_.getProjection() : Projection.WEB_MECATOR;
+        var prj = this.projection_ || (this.map_ ? this.map_.getProjection() : Projection.WEB_MECATOR);
         if (!prj instanceof Projection) {
           // if use Google's image 
           prj = Projection.WEB_MECATOR;
@@ -3094,10 +3112,9 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
         var gworldsw = new G.Point(tile.x * size.width / numOfTiles, (tile.y + 1) * size.height / numOfTiles);
         var gworldne = new G.Point((tile.x + 1) * size.width / numOfTiles, tile.y * size.height / numOfTiles);
         var bnds = new G.LatLngBounds(prj.fromPointToLatLng(gworldsw), prj.fromPointToLatLng(gworldne));
-        var params = {
-          'f': 'image'
-        };
+        var params = {'f':'image'};
         params.bounds = bnds;
+        params.format = 'png32';
         params.width = size.width;
         params.height = size.height;
         params.imageSR = prj.spatialReference_;
@@ -3161,7 +3178,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    * @param {MapTypeOptions} opt_typeOpts
    */
   function MapType(tileLayers, opt_typeOpts) {
-    //TODO: handle copyright info.
+    
     opt_typeOpts = opt_typeOpts || {};
     var i;
     if (opt_typeOpts.opacity) {
@@ -3388,10 +3405,9 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     if (this.opacity_) {
       setNodeOpacity_(div, this.opacity_);
     }
-    var me = this;
-    this.boundsChangedListener_ = G.event.addListener(this.getMap(), 'bounds_changed', function () {
-      me.refresh();
-    });
+    //var me = this;
+    this.boundsChangedListener_ = G.event.addListener(this.getMap(), 'bounds_changed', callback_(this.refresh, this));
+    this.checkCopyrights_();
   };
   MapOverlay.prototype['onAdd'] = MapOverlay.prototype.onAdd;
   /** 
@@ -3402,6 +3418,10 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     G.event.removeListener(this.boundsChangedListener_);
     this.div_.parentNode.removeChild(this.div_);
     this.div_ = null;
+    var cpc = findCopyrightControl_(this.getMap());
+    if (cpc) {
+      cpc.removeOverlayCopyright_(this.mapService_.copyrightText);
+    }
   };
   MapOverlay.prototype['onRemove'] = MapOverlay.prototype.onRemove;
   /**
@@ -3411,6 +3431,24 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
   MapOverlay.prototype.draw = function () {
     if (!this.drawing_ || this.needsNewRefresh_ === true) {
       this.refresh();
+    }
+    
+  };
+  MapOverlay.prototype.checkCopyrights_ = function() {
+    // because MapControls are added async, this can not be done in 'onAdd'
+    if (!this.cpchecked_) {
+      var cpc = findCopyrightControl_(this.getMap());
+      if (cpc) {
+        if (this.mapService_.hasLoaded()) {
+          cpc.addOverlayCopyright_(this.mapService_.copyrightText);
+        } else {
+          var me = this;
+          G.event.addListenerOnce(this.mapService_, 'load', function() {
+            cpc.addOverlayCopyright_(me.mapService_.copyrightText);
+          });
+        }
+        this.cpchecked_ = true;
+      }
     }
   };
   MapOverlay.prototype['draw'] = MapOverlay.prototype.draw;
@@ -3570,31 +3608,40 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     this.map_ = map;
     var div = document.createElement('div');
     div.style.fontFamily = 'Arial,sans-serif';
-    div.style.fontSize = '9px';
-    map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(div);
-    G.event.addListener(map, 'maptypeid_changed', callback_(this.setCopyright, this));
-    if (!map.getProjection()) {
-      G.event.addListenerOnce(map, 'projection_changed', callback_(this.setCopyright, this));
-    }
+    div.style.fontSize = '10px';
+    div.style.textAlign = 'right';
+    div.copyrightControl_ = this;
+    map.controls[G.ControlPosition.BOTTOM_RIGHT].push(div);//div);
+    G.event.addListener(map, 'maptypeid_changed', callback_(this.setCopyrights_, this));
     this.div_ = div;
-    this.setCopyright();
+    // test show maptypeid_changed will fire after tile loaded, so skip setCopyright in construction
+    //if (!map.getProjection()) {G.event.addListenerOnce(map, 'projection_changed', callback_(this.setCopyright, this)); }
+    //this.setCopyright();
+    this.overlayCopyrights_ = [];
   }
   /**
    * Set copyright info.
    */
-  CopyrightControl.prototype.setCopyright = function () {
+  CopyrightControl.prototype.setCopyrights_ = function () {
     var map = this.map_;
     var type = map.mapTypes.get(map.getMapTypeId());
+    var cp = this.overlayCopyrights_.join('|');
     if (type instanceof MapType){
-      var cp = type.getCopyrights();
-      this.div_.innerHTML = cp;
-      //if (type.copyrightsPending_){
-      //  G.event.addListenerOnce(type, 'copyright_changed', callback_(this.setCopyright, this));
-      // }
-    }else {
-      this.div_.innerHTML = '';
+      cp += (cp ? '|' : '') + type.getCopyrights();
     }
-    
+    this.div_.innerHTML = cp.replace('|', '<br/>');;
+  };
+  CopyrightControl.prototype.addOverlayCopyright_ = function (text) {
+    this.overlayCopyrights_.push(text);
+    this.setCopyrights_();
+  };
+  CopyrightControl.prototype.removeOverlayCopyright_ = function (text) {
+    for (var i = 0, c =  this.overlayCopyrights_.length; i < c; i++){
+      if (this.overlayCopyrights_[i] == text){
+        this.overlayCopyrights_.splice(i, 1);
+      }
+    }
+    this.setCopyrights_();
   };
 
   gmaps.ags = {
