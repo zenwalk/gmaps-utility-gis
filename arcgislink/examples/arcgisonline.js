@@ -17,9 +17,13 @@ function init() {
       for (var i = 0; i < urls.length; i++) {
         urls[i] = 'http://services.arcgisonline.com/ArcGIS/rest/services/' + urls[i] + '/MapServer';
       }
-      agsTypes.push(new gmaps.ags.MapType(urls, {
+      var opts = {
         name: x
-      }));
+      };
+      if (x.indexOf('Imagery') != -1) {
+        opts.negative = true;
+      }
+      agsTypes.push(new gmaps.ags.MapType(urls, opts));
     }
   }
   var myOptions = {
@@ -31,10 +35,11 @@ function init() {
     }
   }
   var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-  for (var i = 0; i < agsIds.length; i++) {
-    map.mapTypes.set(agsIds[i], agsTypes[i]);
+  for (var i = 1; i < agsIds.length; i++) {
+    map.mapTypes.set(agsIds[i], agsTypes[i-1]);
   }
+  var cp = new gmaps.ags.CopyrightControl(map);
   map.setMapTypeId('World Topo');
-  var cpc = new gmaps.ags.CopyrightControl(map);
+  
 }
 window.onload = init;

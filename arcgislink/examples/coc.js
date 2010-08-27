@@ -18,7 +18,9 @@ function init() {
     name: 'Community'
   });
   map.mapTypes.set('cbm', cbmType);
-  var cocType = new gmaps.ags.MapType('http://maps.ci.charlotte.nc.us/arcgis/rest/services/GET/BaseMapWM/MapServer', {
+  var cocType = new gmaps.ags.MapType([new gmaps.ags.TileLayer('http://myrs-imsdev-01/arcgis/rest/services/CACHE/BaseMapWM/MapServer', {
+    dynaZoom: 15
+  })], {
     name: 'Charlotte'
   });
   map.mapTypes.set('coc', cocType);
