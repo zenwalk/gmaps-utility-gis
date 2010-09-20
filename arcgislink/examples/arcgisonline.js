@@ -28,7 +28,7 @@ function init() {
   }
   var myOptions = {
     zoom: 13,
-    center: new google.maps.LatLng(35.227, -80.84),//36.215471,-112.332458),
+    center: new google.maps.LatLng(35.227, -80.84),
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     mapTypeControlOptions: {
       mapTypeIds: agsIds
