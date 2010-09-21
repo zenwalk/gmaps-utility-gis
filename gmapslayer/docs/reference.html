@@ -9,7 +9,7 @@
   <body>
     <h1>Google Maps Layer for ArcGIS Server JavaScript API</h1>
     <p>
-<p><a href="examples.html">Examples</a>  </p>  <p>This script lets you add google maps as a layer in ArcGIS Server JavaScript API. It uses Google API to access tiles, so it will conform to API terms of use. However, if apps are to deployed in Intranet, a Google Maps Premium license is still needed, which is separate from API TOU.  </p></p>
+<p>Use Google Maps in application built on ESRI ArcGIS Server JavaScript API and dojo </p></p>
     <p>For a description and examples of how to use this library, check out the <a href="examples.html">how-to</a>.</p>
     
       <h2><a name="GoogleMapsLayer"></a>class GoogleMapsLayer</h2>
@@ -49,13 +49,23 @@
             </tr>
             
               <tr class="odd">
-                <td><code>setMapType(<span class="type">mapTypeId?:String|google.maps.MapTypeId</span>)</code></td>
+                <td><code>getGMap()</code></td>
+                
+                  
+                    <td><code>google.maps.Map</code></td>
+                  
+                
+                <td>get the wrapped <code>google.maps.Map</code> instance</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>setMapTypeId(<span class="type">id?:String|google.maps.MapTypeId</span>)</code></td>
                 
                   
                     <td><code>None</code></td>
                   
                 
-                <td>set map type id, one of one of google.maps.MapTypeId.ROADMAP|HYBRID|STELLITE|TERRIAN.</td>
+                <td>set map type id, one of <code>google.maps.MapTypeId.ROADMAP|HYBRID|STELLITE|TERRIAN</code>.</td>
               </tr>
             
           </tbody>
@@ -100,13 +110,13 @@
               </tr>
             
               <tr class="odd">
-                <td><code>mapType</code></td>
+                <td><code>mapTypeId</code></td>
                 
                   
                     <td><code>String|google.maps.MapTypeId</code></td>
                   
                 
-                <td>optional. default map type.</td>
+                <td>optional. default map type id. Note you can only use <code>google.maps.MapTypeId</code> constant if you pre-load Google API before construct.</td>
               </tr>
             
               <tr class="even">

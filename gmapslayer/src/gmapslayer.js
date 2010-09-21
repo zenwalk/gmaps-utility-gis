@@ -2,12 +2,8 @@
  * @name Google Maps Layer for ArcGIS Server JavaScript API
  * @version 1.0
  * @author: Nianwei Liu (nianwei at gmail dot com)
- * @fileoverview 
- *  <p><a href="examples.html">Examples</a>
- *   </p> 
- *  <p>This script lets you add google maps as a layer in ArcGIS Server JavaScript API. It uses Google API to access tiles, so it will conform to API terms of use.
- *  However, if apps are to deployed in Intranet, a Google Maps Premium license is still needed, which is separate from API TOU.
- *   </p>
+ * @fileoverview
+ * <p>Use Google Maps in application built on ESRI ArcGIS Server JavaScript API and dojo </p>
  */
 /*global dojo esri  gmaps */
 dojo.provide('gmaps');
@@ -16,7 +12,8 @@ dojo.declare("gmaps.GoogleMapsLayer", esri.layers.Layer, {
   /**
    * @name GoogleMapsLayerOptions
    * @class This is an object literal that specify the option to construct a {@link GoogleMapsLayer}.
-   * @property {String|google.maps.MapTypeId} [mapType] optional. default map type.
+   * @property {String|google.maps.MapTypeId} [mapTypeId] optional. default map type id. 
+   * Note you can only use <code>google.maps.MapTypeId</code> constant if you pre-load Google API before construct.
    * @property {Number} [opacity] opacity (0-1)
    * @property {Boolean} [sensor] whether GPS device is used. default to false;
    * @property {Number} [version] API version, 3, 3.1 etc. default to 3.
@@ -34,7 +31,7 @@ dojo.declare("gmaps.GoogleMapsLayer", esri.layers.Layer, {
   constructor: function (opts) {
     opts = opts || {};
     // this tileInfo does not actually do anything. It simply tricks nav control to 
-    // show a slider bar if only gmaps are used. 
+    // show a slider bar if only gmaps are used, which should be a rare case.
     this.tileInfo = new esri.layers.TileInfo({
       rows: 256,
       cols: 256,
@@ -134,10 +131,20 @@ dojo.declare("gmaps.GoogleMapsLayer", esri.layers.Layer, {
    * set map type id.
    * @param {google.maps.MapTypeId|String} mapTypeId, one of google.maps.MapTypeId.ROADMAP|HYBRID|STELLITE|TERRIAN
    */
-  setMapType: function (/** google.maps.MapTypeId|String*/mapTypeId) {
+  setMapTypeId: function (mapTypeId) {
+    //console.log('mapTypeId'+ mapTypeId)
     if (this._gmap) {
       this._gmap.setMapTypeId(mapTypeId);
+    } else {
+      this._options.mapTypeId = mapTypeId;
     }
+  },
+  /**
+   * get the wrapped <code>google.maps.Map</code>.
+   * @return {google.maps.Map}
+   */
+  getGMap: function () {
+    return this._gmap;
   },
   _setMap: function (map, layersDiv, index, a, b, c) {
     // This overrides an undocumented private method from ESRI API. 
@@ -185,11 +192,11 @@ dojo.declare("gmaps.GoogleMapsLayer", esri.layers.Layer, {
       var bnds = this._esriExtentToLatLngBounds(ext || this.initialExtent);
       var level = this._map.getLevel();
       var myOptions = {
-        mapTypeId: this._options.mapType || google.maps.MapTypeId.ROADMAP,
+        mapTypeId: this._options.mapTypeId || google.maps.MapTypeId.ROADMAP,
         disableDefaultUI: true,
-        draggable: false,
-        center: bnds.getCenter(),
-        zoom: (level > -1) ? level : 1
+        draggable: false, // maybe makes no difference because mouse events intercepted by ESRI JS.
+        center: this._options.center || bnds.getCenter(),
+        zoom: this._options.zoom || (level > -1) ? level : 1
       };
       var gmap = new google.maps.Map(this._div, myOptions);
       if (level < 0) {
@@ -202,10 +209,12 @@ dojo.declare("gmaps.GoogleMapsLayer", esri.layers.Layer, {
       this.onLoad(this);
     } else if (gmaps.onApiLoad) {
       // did another instance already started loading GMaps API but not done?
+      // this should be very very rare because one instance of this layer would be suffient with setMapTypeId.
       dojo.connect(gmaps, 'onApiLoad', this, this._initGMap);
     } else {
       // this is the first instance that tries to load GMaps API on-demand
       gmaps.onApiLoad = function () {
+        // do nothing, just needed to dispatch event.
       };
       dojo.connect(gmaps, 'onApiLoad', this, this._initGMap);
       var script = document.createElement('script');
@@ -263,16 +272,15 @@ dojo.declare("gmaps.GoogleMapsLayer", esri.layers.Layer, {
           dojo.disconnect(this._extentChangeHandle);
           this._extentChangeHandle = null;
         }
-        
       }
     }
   },
   _resizeHandler: function (extent, height, width) {
     dojo.style(this._div, {
-      width: width + "px",
-      height: height + "px"
+      width: this._map.width  + "px",
+      height: this._map.height + "px"
     });
-    google.maps.event.trigger(this._map, 'resize');
+    google.maps.event.trigger(this._gmap, 'resize');
   },
   _extentChangeHandler: function (extent, delta, levelChange, lod) {
     if (levelChange) {
@@ -289,11 +297,10 @@ dojo.declare("gmaps.GoogleMapsLayer", esri.layers.Layer, {
     if (lv >= 0) {
       var ct = this._esriPointToLatLng(extent.getCenter());
       this._gmap.setCenter(ct);
-      this._gmap.setZoom(this._map.getLevel());
+      this._gmap.setZoom(lv);
     } else {
       this._gmap.fitBounds(this._esriExtentToLatLngBounds(extent));
     }
-    
   },
   _esriPointToLatLng: function (pt) {
     var ll = esri.geometry.webMercatorToGeographic(pt);
