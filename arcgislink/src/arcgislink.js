@@ -2509,6 +2509,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     getJSON_(this.url + '/findAddressCandidates', params, '', function (json) {
       if (json.candidates) {
         var res, loc;
+        var cands = [];
         for (var i = 0; i < json.candidates.length; i++) {
           res = json.candidates[i];
           loc = res.location;
@@ -2518,10 +2519,13 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
               ll = me.spatialReference.inverse(ll);
             }
             res.location = new G.LatLng(ll[1], ll[0]);
+            cands[cands.length] = res;
           }
         }
       }
-      callback(json);
+      callback({
+        candidates:cands
+      });
       handleErr_(errback, json);
     });
   };
@@ -3419,6 +3423,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     if (opt_overlayOpts.map) {
       this.setMap(opt_overlayOpts.map);
     }
+    this.map_ = null;
   }
 
   MapOverlay.prototype = new G.OverlayView();
@@ -3444,6 +3449,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     map.agsOverlays = map.agsOverlays || new G.MVCArray();
     map.agsOverlays.push(this);
     setCopyrightInfo_(map);
+    this.map_ = map;
   };
   MapOverlay.prototype['onAdd'] = MapOverlay.prototype.onAdd;
   /** 
@@ -3454,7 +3460,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     G.event.removeListener(this.boundsChangedListener_);
     this.div_.parentNode.removeChild(this.div_);
     this.div_ = null;
-    var map = this.getMap();
+    var map = this.map_;// getMap();
     var agsOvs = map.agsOverlays;
     if (agsOvs) {
       for (var i = 0, c = agsOvs.getLength(); i < c; i++) {
@@ -3465,6 +3471,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
       }
     }
     setCopyrightInfo_(map);
+    this.map_ = null;
   };
   MapOverlay.prototype['onRemove'] = MapOverlay.prototype.onRemove;
   /**
