@@ -154,6 +154,7 @@ var REST_JSON = {
   
   
 };
+google.maps.Map.prototype.agsOverlays= {};
 
 
 
