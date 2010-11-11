@@ -64,7 +64,8 @@ var REST_JSON = {
     name: null,
     defaultVisibility: true,
     parentLayerId: -1,
-    subLayerIds: null
+    subLayerIds: null,
+    subLayers:[]
   }],
   tables: null,
   spatialReference: {
