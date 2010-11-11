@@ -1139,7 +1139,7 @@ la.prototype.J = function() {
 var ma = K;window.onload = function() {
   var a = {zoom:13, center:new google.maps.LatLng(45.5, -122.7), mapTypeId:"arcgis", mapTypeControlOptions:{mapTypeIds:["arcgis", google.maps.MapTypeId.ROADMAP]}, streetViewControl:true};
   a = new google.maps.Map(document.getElementById("map_canvas"), a);
-  var b = new ma("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Portland/ESRI_LandBase_WebMercator/MapServer", {name:"ArcGIS"});
+  var b = new ma("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer", {name:"ArcGIS"});
   a.mapTypes.set("arcgis", b);
   new la(a);
   (new $("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer")).setMap(a)
