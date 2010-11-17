@@ -4,8 +4,8 @@ function init() {
   t.myPublicProperty = 'newProp';
   myns.MyConfig.configKey = 'newValue';
   t.usedPublicMethod({
-    myVeryLongJSONProperty: {
-      anotherJSONProperty: 'myVeryLongJSONProperty -- anotherJSONProperty'
+    'myVeryLongJSONProperty': {
+      'anotherJSONProperty': 'myVeryLongJSONProperty -- anotherJSONProperty'
     }
   });
   alert('expected myns.MyEnum.TWO=2:' + myns.MyEnum.TWO);

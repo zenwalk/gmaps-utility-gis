@@ -15,7 +15,7 @@ function e(a, d, b) {
 f.a = function(a) {
   g("inside MyUtil.usedPublicMethod;" + a)
 };
-f.d = function() {
+f.f = function() {
   g("MyUtil.privateMethod")
 };
 f.b = function() {
@@ -30,7 +30,7 @@ function g(a) {
 var i = {configKey:"defaultConfigValue"};
 function j() {
   this.myPublicProperty = "MyClass.myPublicProperty_Default";
-  this.c = "MyClass.myPrivateProperty_Default"
+  this.d = "MyClass.myPrivateProperty_Default"
 }
 j.prototype.a = function(a) {
   g("MyClass.prototype.usedPublicMethod");
@@ -38,7 +38,7 @@ j.prototype.a = function(a) {
 };
 function k(a, d) {
   g("inside MyClass.prototype.myPrivateMethod_");
-  f.a("myConfig:" + i.configKey + " json  " + d.myVeryLongJSONProperty.anotherJSONProperty + "  myProp:" + a.myPublicProperty)
+  f.a("myConfig:" + i.configKey + " json  " + d.e.c + "  myProp:" + a.myPublicProperty)
 }
 j.prototype.b = function(a) {
   g("inside MyClass.prototype.unusedPublicMethod");

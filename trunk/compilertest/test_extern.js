@@ -1,10 +1,11 @@
 // json and enums here.
-
+/*
 var MyMessage = {
   myVeryLongJSONProperty: {
     anotherJSONProperty:null
   }
 };
+*/
 var MyConfig_ = {
   configKey:null
 };

@@ -10,7 +10,7 @@ function c(a) {
 var e = "defaultConfigValue";
 function f() {
   this.myPublicProperty = "MyClass.myPublicProperty_Default";
-  this.a = "MyClass.myPrivateProperty_Default"
+  this.b = "MyClass.myPrivateProperty_Default"
 }
 ;window.onload = function() {
   var a = new f;
@@ -19,7 +19,7 @@ function f() {
   e = "newValue";
   c("MyClass.prototype.usedPublicMethod");
   c("inside MyClass.prototype.myPrivateMethod_");
-  b("myConfig:" + e + " json  " + {myVeryLongJSONProperty:{anotherJSONProperty:"myVeryLongJSONProperty -- anotherJSONProperty"}}.myVeryLongJSONProperty.anotherJSONProperty + "  myProp:" + a.myPublicProperty);
+  b("myConfig:" + e + " json  " + {myVeryLongJSONProperty:{anotherJSONProperty:"myVeryLongJSONProperty -- anotherJSONProperty"}}.c.a + "  myProp:" + a.myPublicProperty);
   alert("expected myns.MyEnum.TWO=2:2");
   b("app calling myns.MyUtil.usedPublicMethod")
 };
