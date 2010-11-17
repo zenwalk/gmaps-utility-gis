@@ -29,18 +29,18 @@
     this.myPrivateProperty_ = 'MyClass.myPrivateProperty_Default';
   };
   
-  myns.MyClass.prototype.usedPublicMethod = function(json){
-     log_('MyClass.prototype.usedPublicMethod');
+  
+  myns.MyClass.prototype.usedPublicMethod = function(/** @type {myns.MyMessage}*/json){
+    log_('MyClass.prototype.usedPublicMethod');
     this.myPrivateMethod_(json);
 
   };
-  myns.MyClass.prototype.myPrivateMethod_ = function(/** @type {MyMessage}*/json){
+  myns.MyClass.prototype.myPrivateMethod_ = function(/** @type {myns.MyMessage}*/json){
      log_('inside MyClass.prototype.myPrivateMethod_');
      myns.MyUtil.usedPublicMethod('myConfig:'+myns.MyConfig.configKey+' json  '+json.myVeryLongJSONProperty.anotherJSONProperty + '  myProp:'+ this.myPublicProperty);
 
   };
-  myns.MyClass.prototype.unusedPublicMethod = function(json){
-    
+  myns.MyClass.prototype.unusedPublicMethod = function(/** @type {myns.MyMessage}*/json){
     log_('inside MyClass.prototype.unusedPublicMethod');
     this.myPrivateMethod_(json);
   };
