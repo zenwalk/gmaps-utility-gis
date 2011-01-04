@@ -661,5 +661,5 @@ function oa(a, b, c) {
 window.onload = function() {
   var a = {zoom:6, center:new google.maps.LatLng(43, -106), mapTypeId:google.maps.MapTypeId.ROADMAP};
   X = new google.maps.Map(document.getElementById("map_canvas"), a);
-  (new ja("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/3")).query({returnGeometry:true, where:"STATE_NAME <> 'Utah'", outFields:["NAME", "POP2000", "POP2007", "POP00_SQMI", "POP07_SQMI"], overlayOptions:$}, la)
+  (new ja("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/3")).query({returnGeometry:true, where:"STATE_NAME = 'Utah'", outFields:["NAME", "POP2000", "POP2007", "POP00_SQMI", "POP07_SQMI"], overlayOptions:$}, la)
 };})()
