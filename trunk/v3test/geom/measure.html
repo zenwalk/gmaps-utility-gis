@@ -55,15 +55,8 @@
                           // Update the text field 
                           document.getElementById('lineLength').value = google.maps.geometry.spherical.computeLength(lpath.getArray());
                           if (gpath.getLength()>2){
-                            var garray = [];
-                            gpath.forEach(function(ll,num){
-                              garray.push(ll);
-                            });
-                            // close loop. 
-                            garray.push(gpath.getAt(0));
-                            // bug? Always return 0.
+                            var garray = gpath.getArray();
                             var a = google.maps.geometry.spherical.computeArea(garray);
-                            
                             document.getElementById('polyArea').value = a;
                           }
                         }
@@ -75,7 +68,7 @@
         <div id="map_canvas" style="float:left;width:100%; height:80%">
         </div>
         <div style="text-align:center">
-            Click on map to draw lines 
+            Click on map to draw lines. To get area value, zoom way out to draw lines. Looks like a bug. 
             <br/>
             Length:<input type="text" id="lineLength" size="30">Area:<input type="text" id="polyArea" size="30">
         </div>
