@@ -151,6 +151,7 @@ dojo.declare("gmaps.GoogleMapsLayer", esri.layers.Layer, {
     // It's possible not to do this, but it requires
     // map instance implicitly set to the layer instance, which is a little bit inconvenient.
     // console.log('_setMap');
+    // this is likely called inside esriMap.addLayer()
     this._map = map;
     var div = document.createElement('div');
     if (this._options.id) {
@@ -167,6 +168,10 @@ dojo.declare("gmaps.GoogleMapsLayer", esri.layers.Layer, {
     this._div = div;
     this._visibilityChangeHandle = dojo.connect(this, 'onVisibilityChange', this, this._visibilityChangeHandler);
     this._opacityChangeHandle = dojo.connect(this, 'onOpacityChange', this, this._onOpacityChangeHandler);
+    var vis = (this._options.visible === undefined) ? true : this._options.visible;
+    if (vis) {
+      this._initGMap();
+    }
     return div;
   },
   _unsetMap: function (map, layersDiv) {

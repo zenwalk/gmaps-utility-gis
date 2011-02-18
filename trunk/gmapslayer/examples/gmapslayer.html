@@ -32,10 +32,10 @@
             dojo.require("dijit.layout.ContentPane");
             
             var map;
-            var streetMap, esriTopo, gMap;
+            var esriTopo, googleLayer;
             
             function init() {
-              var initExtent = new esri.geometry.Extent({
+               var initExtent = new esri.geometry.Extent({
                 "xmin": -14628212,
                 "ymin": 714227,
                 "xmax": 7718305,
@@ -45,59 +45,27 @@
                 }
               });
               map = new esri.Map("map", {
-                extent: initExtent,
-                logo: false
+                extent: initExtent
               });
-              
-              streetMap = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer", {
-                id: "streetMap"
-              });
-              map.addLayer(streetMap);
-              
-              esriTopo = initLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer", "esriTopo");
-              gMap = new gmaps.GoogleMapsLayer({
-                visible: false,
-                id: 'googlemaps'
-              });
-              map.addLayer(gMap);
-              //resize the map when the browser resizes - view the 'Resizing and repositioning the map' section in 
-              //the following help topic for more details http://help.esri.com/EN/webapi/javascript/arcgis/help/jshelp_start.htm#jshelp/inside_guidelines.htm
-              var resizeTimer;
-              dojo.connect(map, 'onLoad', function(theMap) {
-                dojo.connect(dijit.byId('map'), 'resize', function() { //resize the map if the div is resized
-                  clearTimeout(resizeTimer);
-                  resizeTimer = setTimeout(function() {
-                    map.resize();
-                    map.reposition();
-                  }, 500);
-                });
-              });
+              googleLayer = new gmaps.GoogleMapsLayer();
+              map.addLayer(googleLayer);
+              esriTopo = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer", {id:'topo',visible:false});
+              map.addLayer(esriTopo);
             }
             
-            function initLayer(url, id) {
-              var layer = new esri.layers.ArcGISTiledMapServiceLayer(url, {
-                id: id,
-                visible: false
-              });
-              map.addLayer(layer);
-              return layer;
-            }
             
-            function changeMap(layers) {
-              hideImageTiledLayers(layers);
-              for (var i = 0; i < layers.length; i++) {
-                layers[i].show();
-              }
-            }
-            
-            function hideImageTiledLayers(layers) {
+            function changeMap(onLayer) {
               for (var j = 0, jl = map.layerIds.length; j < jl; j++) {
                 var layer = map.getLayer(map.layerIds[j]);
-                if (dojo.indexOf(layers, layer) == -1) {
+                if (layer != onLayer) {
                   layer.hide();
+                } else {
+                  layer.show();
                 }
               }
             }
+            
+           
             
             dojo.addOnLoad(init);
         </script>
@@ -107,23 +75,22 @@
             <div id="map" dojotype="dijit.layout.ContentPane" region="center" style="border:1px solid #000;">
             </div>
             <div id="buttons" style="position:absolute; right:75px; top:20px; z-Index:999;">
-                <button dojoType="dijit.form.Button" onClick="changeMap([streetMap]);">
-                    ESRI Street Map
-                </button>
-                <button dojoType="dijit.form.Button" onClick="changeMap([esriTopo]);">
-                    ESRI Topo Map
-                </button>
-                <button dojoType="dijit.form.Button" onClick="changeMap([gMap]);gMap.setMapTypeId('roadmap')">
+              
+               
+                <button dojoType="dijit.form.Button" onClick="changeMap(googleLayer);googleLayer.setMapTypeId('roadmap')">
                     Google Street
                 </button>
-                <button dojoType="dijit.form.Button" onClick="changeMap([gMap]);gMap.setMapTypeId('satellite')">
+                <button dojoType="dijit.form.Button" onClick="changeMap(googleLayer);googleLayer.setMapTypeId('satellite')">
                     Google Statellite
                 </button>
-                <button dojoType="dijit.form.Button" onClick="changeMap([gMap]);gMap.setMapTypeId('hybrid')">
+                <button dojoType="dijit.form.Button" onClick="changeMap(googleLayer);googleLayer.setMapTypeId('hybrid')">
                     Google Hybrid
                 </button>
-                <button dojoType="dijit.form.Button" onClick="changeMap([gMap]);gMap.setMapTypeId('terrain')">
+                <button dojoType="dijit.form.Button" onClick="changeMap(googleLayer);googleLayer.setMapTypeId('terrain')">
                     Google Terrain
+                </button>
+                <button dojoType="dijit.form.Button" onClick="changeMap(esriTopo);">
+                    ESRI Topo Map
                 </button>
                  <button dojoType="dijit.form.Button" onClick="location='../docs/examples.html'">
                     About
