@@ -3,6 +3,9 @@
 <head>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
     <title>Birds Eye/45 Deg/Oblique(where available)</title>
     <link href="http://code.google.com/apis/maps/documentation/javascript/examples/standard.css" rel="stylesheet"
           type="text/css"/>
@@ -86,7 +89,7 @@
                 zoom: 18,
                 mapTypeId:'North',
                 mapTypeControlOptions: {
-                    mapTypeIds: ['North','East','South','West',google.maps.MapTypeId.ROADMAP,google.maps.MapTypeId.SATELLITE ]
+                    mapTypeIds: ['North','East','South','West',google.maps.MapTypeId.SATELLITE ]
                 }
             });
             var nType = new ObliqueMercatorMapType({heading:0, name:'North', isPng:false});
