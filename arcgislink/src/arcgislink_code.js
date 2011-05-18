@@ -677,8 +677,8 @@ function formatParams_(params) {
     for (var x in params) {
       if (params.hasOwnProperty(x) && params[x] !== null && params[x] !== undefined) { // wont sent undefined.
         //jslint complaint about escape cause NN does not support it.
-        var val = formatRequestString_(params[x]);
-        query += (x + '=' + (escape ? escape(val) : encodeURIComponent(val)) + '&');
+        var val = formatRequestString_(params[x]); 
+        query += (query.length > 0?'&':'')+(x + '=' + (escape ? escape(val) : encodeURIComponent(val)));
       }
     }
   }
@@ -1909,6 +1909,9 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    */
   MapService.prototype.init_ = function (json) {
     var me = this;
+    if (json.error) {
+      throw new Error(json.error.message);
+    }
     augmentObject_(json, this);
     if (json.spatialReference.wkt) {
       this.spatialReference = Util.registerSR(json.spatialReference.wkt);
@@ -1919,11 +1922,27 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
       // v10.0 +
       getJSON_(this.url + '/layers', {}, '', function (json2) {
         me.initLayers_(json2);
+        // V10 SP1 
+        getJSON_(me.url + '/legend', {}, '', function (json3){
+          me.initLegend_(json3);
+          me.setLoaded_();
+        });
       });
     } else {
       // v9.3
       me.initLayers_(json);
+      me.setLoaded_();
     }
+  };
+   
+  MapService.prototype.setLoaded_ = function() {
+    this.loaded_ = true;
+    /**
+     * This event is fired when the service and it's service info is loaded.
+     * @name MapService#load
+     * @event
+     */
+    triggerEvent_(this, "load");
   };
    /**
    * initialize an Layers.
@@ -1965,13 +1984,25 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
         }
       }
     }
-    this.loaded_ = true;
-    /**
-     * This event is fired when the service and it's service info is loaded.
-     * @name MapService#load
-     * @event
-     */
-    triggerEvent_(this, "load");
+    
+  };
+  /**
+   * initialize an Layers.
+   * The <code>json</code> parameter is the json object returned by Map Service or layers operation(v10+).
+   * @private
+   * @param {Object} json2
+   */ 
+  MapService.prototype.initLegend_ = function(json3) {
+    // if not AGS10 SP1, server will return error.
+    var layers = this.layers;
+    if (json3.layers) {
+      var layer, i, c, info;
+      for (i = 0, c = json3.layers.length; i < c; i++) {
+        info = json3.layers[i];
+        layer = layers[info.layerId]; // layers id should same as index.
+        augmentObject_(info, layer);
+      }
+    }
   };
   /**
    * Get a map layer by it's name(String) or id (Number), return {@link Layer}.
