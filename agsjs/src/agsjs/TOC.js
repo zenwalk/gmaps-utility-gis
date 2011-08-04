@@ -412,8 +412,6 @@ dojo.declare("agsjs.TOC", [dijit._Widget], {
   },
   destroy: function() {
     dojo.disconnect(this._zoomHandler);
-    dojo.disconnect(this._visHandler);
-    
   }
   
   
