@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9" />
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
-        <title>TOC</title>
+        <title>Table of Contents (TOC) widget for ArcGIS Server JavaScript API</title>
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.4/js/dojo/dijit/themes/claro/claro.css">
         <style>
             html, body {
@@ -31,8 +31,9 @@
             #rightPane {
                 width: 250px;
             }
-            /* this line hide layers when out of scale for the inline TOC */
+            
             #inlineDiv .agsTOCOutScale {
+            /* uncomment this line to hide layers when out of scale for the inline TOC */
              /* display:none;*/
             }
         </style>
@@ -76,16 +77,7 @@
               var basemap = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer");
               map.addLayer(basemap);
               
-              /*
-              var census = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer", {
-                id: 'census'
-              });
-              
-              tocLayers.push({
-                layer: census,
-                title: "Census"
-              });
-              */
+             
               var operational = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer", {
                 id: 'operational'
               });
@@ -94,10 +86,7 @@
                 layer: operational,
                 title: "Operational Layers"
               });
-              tocLayers.push({
-                layer: basemap,
-                title: "Base Layers"
-              });
+              
               dojo.connect(map, 'onLayersAddResult', function(results) {
                 var inlineTOC = new agsjs.TOC({
                   map: map,
@@ -129,26 +118,14 @@
               });
               
             }
-            dojo.connect(map, 'onExtentChange', function(extent) {
-                var s = "xmin: " + extent.xmin + ", " +
-                "ymin: " +
-                extent.ymin +
-                ", " +
-                "xmax: " +
-                extent.xmax +
-                ", " +
-                "ymax: " +
-                extent.ymax;
-                dojo.byId("footer").innerHTML = s;
-                
-              })
+            
             dojo.addOnLoad(init);
         </script>
     </head>
     <body class="claro">
         <div id="content" dojotype="dijit.layout.BorderContainer" design="headline" gutters="true" style="width: 100%; height: 100%; margin: 0;">
             <div id="header" dojotype="dijit.layout.ContentPane" region="top">
-                ArcGIS Server JS API Table of Content Widget
+                ArcGIS Server JS API Table of Contents (TOC) Widget
                 <div id="subheader">
                     This examples contains 2 TOC widgets in different tabs: "<b>inline</b>" style put legend swatch in front of layer name when possible. 
                     "<b>standard</b>" style has a typical tree structure, and swatches are nested underneath layer name. 
