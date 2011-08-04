@@ -1,5 +1,5 @@
 /**
- * @name ArcGIS Server JS API TOC widget
+ * @name Table of Contents (TOC) widget for ArcGIS Server JavaScript API 
  * @version 1.0
  * @author: Nianwei Liu (nianwei at gmail dot com)
  * @fileoverview
