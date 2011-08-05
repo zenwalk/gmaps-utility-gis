@@ -1,5 +1,5 @@
 /**
- * @name Table of Contents (TOC) widget for ArcGIS Server JavaScript API 
+ * @name Table of Contents (TOC) widget for ArcGIS Server JavaScript API
  * @version 1.0
  * @author: Nianwei Liu (nianwei at gmail dot com)
  * @fileoverview
@@ -12,6 +12,7 @@ dojo.provide('agsjs.dijit.TOC');
 dojo.require('dijit._Widget');
 dojo.require('dijit._Templated');
 dojo.require('dijit.form.Slider');
+dojo.require("dojo.fx");
 
 (function() {
   var link = dojo.create("link", {
@@ -28,20 +29,20 @@ dojo.require('dijit.form.Slider');
  */
 dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
   //templateString: dojo.cache('agsjs.dijit', 'templates/tocNode.html'),
-  templateString:'<div class="agsTOCNode">'+
-    '<div data-dojo-attach-point="rowNode" data-dojo-attach-event="onclick:_onClick">'+
-         '<span data-dojo-attach-point="contentNode" class="agsTOCContent">'+
-          '<img src="${_blankGif}" alt="" data-dojo-attach-point="iconNode" />'+
-          '<input type="checkbox" data-dojo-attach-point="checkNode"/>'+
-          '<span data-dojo-attach-point="labelNode">'+
-          '</span></span></div>'+
-          '<div data-dojo-attach-point="containerNode" style="display: none;"> </div></div>',
+  templateString: '<div class="agsTOCNode">' +
+  '<div data-dojo-attach-point="rowNode" data-dojo-attach-event="onclick:_onClick">' +
+  '<span data-dojo-attach-point="contentNode" class="agsTOCContent">' +
+  '<img src="${_blankGif}" alt="" data-dojo-attach-point="iconNode" />' +
+  '<input type="checkbox" data-dojo-attach-point="checkNode"/>' +
+  '<span data-dojo-attach-point="labelNode">' +
+  '</span></span></div>' +
+  '<div data-dojo-attach-point="containerNode" style="display: none;"> </div></div>',
+  service:null,
+  layer: null,
+  legend: null,
+  serviceTOC: null,
   constructor: function(params, srcNodeRef) {
-    // no need to define domNode in templates 
-    this.service = params.service;
-    this.layer = params.layer;
-    this.legend = params.legend;
-    this.serviceTOC = params.serviceTOC;
+   dojo.mixin(this, params);
   },
   // extension point. called automatically after widget DOM ready.
   postCreate: function() {
@@ -72,7 +73,13 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
           }
         }
       })
-      
+    }
+    if (this.containerNode) {
+      this.toggler = new dojo.fx.Toggler({
+        node: this.containerNode,
+        showFunc: dojo.fx.wipeIn,
+        hideFunc: dojo.fx.wipeOut
+      })
     }
     this.labelNode.innerHTML = title;
     if (this.checkNode) {
@@ -102,10 +109,8 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
         },
         layoutAlign: 'right'
       });
-      
       this.slider.placeAt(this.rowNode, 'last');
     }
-    
     this._createChildrenNodes(service.tocInfos, 'layer');
   },
   _createLayerNode: function(layer) {
@@ -118,7 +123,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     } else {
       dojo.addClass(this.rowNode, 'agsTOCLayer');
       dojo.addClass(this.labelNode, 'agsTOCLayerLabel');
-      if (this.service instanceof esri.layers.TiledMapServiceLayer){
+      if (this.service instanceof esri.layers.TiledMapServiceLayer) {
         dojo.destroy(this.checkNode);
       }
       if (layer.legends) {
@@ -167,8 +172,10 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     this.serviceTOC._currentIndent--;
   },
   _toggleContainer: function(on) {
+    
     if (dojo.hasClass(this.iconNode, 'dijitTreeExpandoClosed') ||
     dojo.hasClass(this.iconNode, 'dijitTreeExpandoOpened')) {
+      // make sure its not clicked on legend swatch
       if (on) {
         dojo.removeClass(this.iconNode, 'dijitTreeExpandoClosed');
         dojo.addClass(this.iconNode, 'dijitTreeExpandoOpened');
@@ -179,7 +186,12 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
         dojo.toggleClass(this.iconNode, 'dijitTreeExpandoClosed');
         dojo.toggleClass(this.iconNode, 'dijitTreeExpandoOpened');
       }
-      dojo.style(this.containerNode, 'display', dojo.hasClass(this.iconNode, 'dijitTreeExpandoOpened') ? 'block' : 'none');
+      if (dojo.hasClass(this.iconNode, 'dijitTreeExpandoOpened')) {
+        this.toggler.show();
+      } else {
+        this.toggler.hide();
+      }
+      
     }
   },
   _adjustToState: function() {
@@ -193,12 +205,9 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
         dojo.removeClass(this.domNode, 'agsTOCOutScale');
       }
       if (this.checkNode) {
-          this.checkNode.disabled = outScale;
+        this.checkNode.disabled = outScale;
       }
-      if (this.serviceTOC.toc.hideOutScale){
-        dojo.style(this.domNode, 'display', outScale?'none':'block');
-      }
-    }
+     }
   },
   _onClick: function(evt) {
     var t = evt.target;
@@ -319,6 +328,7 @@ dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
       service: service
     });
     this._serviceNode.placeAt(this.domNode);
+    
     this._visHandler = dojo.connect(service, "onVisibilityChange", this, "_adjustToState");
     // this will make sure all TOC linked to a Map synchronized.
     this._visLayerHandler = dojo.connect(service, "setVisibleLayers", this, "_adjustToState");
@@ -347,6 +357,10 @@ dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
 });
 
 dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
+  indentSize: 18,
+  style: 'standard',
+  layerInfos: null,
+  slider: false,
   /**
    * @name TOCOptions
    * @class This is an object literal that specify the option to construct a {@link TOC}.
@@ -371,11 +385,7 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
     if (!params.map) {
       throw new Error('no map defined in params for TOC');
     }
-    this.map = params.map;
-    this.layerInfos = params.layerInfos;// TODO: make it optional
-    this.indentSize = params.indentSize || 18;
-    this.style = params.style || 'standard';//inline|
-    this.slider = params.slider || false;
+    dojo.mixin(this, params);
     this._serviceWidgets = [];
     if (!this.layerInfos) {
       this.layerInfos = [];
