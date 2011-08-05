@@ -8,7 +8,7 @@
 /*global dojo esri*/
 // reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
 
-dojo.provide('agsjs.TOC');
+dojo.provide('agsjs.dijit.TOC');
 dojo.require('dijit._Widget');
 dojo.require('dijit._Templated');
 dojo.require('dijit.form.Slider');
@@ -17,7 +17,7 @@ dojo.require('dijit.form.Slider');
   var link = dojo.create("link", {
     type: "text/css",
     rel: "stylesheet",
-    href: dojo.moduleUrl("agsjs", "css/TOC.css")
+    href: dojo.moduleUrl("agsjs.dijit", "css/TOC.css")
   });
   dojo.doc.getElementsByTagName("head")[0].appendChild(link);
 }());
@@ -26,8 +26,8 @@ dojo.require('dijit.form.Slider');
  * _TOCNode is a node, with 4 possible types: service|group|layer|legend
  * @private
  */
-dojo.declare("agsjs._TOCNode", [dijit._Widget, dijit._Templated], {
-  //templateString: dojo.cache('agsjs', 'templates/tocNode.html'),
+dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
+  //templateString: dojo.cache('agsjs.dijit', 'templates/tocNode.html'),
   templateString:'<div class="agsTOCNode">'+
     '<div data-dojo-attach-point="rowNode" data-dojo-attach-event="onclick:_onClick">'+
          '<span data-dojo-attach-point="contentNode" class="agsTOCContent">'+
@@ -161,7 +161,7 @@ dojo.declare("agsjs._TOCNode", [dijit._Widget, dijit._Templated], {
         legend: this.legend
       };
       params[type] = child;
-      var node = new agsjs._TOCNode(params);
+      var node = new agsjs.dijit._TOCNode(params);
       node.placeAt(this.containerNode);
     }, this);
     this.serviceTOC._currentIndent--;
@@ -232,7 +232,7 @@ dojo.declare("agsjs._TOCNode", [dijit._Widget, dijit._Templated], {
   
 });
 
-dojo.declare('agsjs._ServiceTOC', [dijit._Widget], {
+dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
   _currentIndent: 0,
   service: null,
   _layerWidgets: [],
@@ -314,7 +314,7 @@ dojo.declare('agsjs._ServiceTOC', [dijit._Widget], {
       }
     });
     service.tocInfos = tocInfos;
-    this._serviceNode = new agsjs._TOCNode({
+    this._serviceNode = new agsjs.dijit._TOCNode({
       serviceTOC: this,
       service: service
     });
@@ -346,7 +346,7 @@ dojo.declare('agsjs._ServiceTOC', [dijit._Widget], {
   }
 });
 
-dojo.declare("agsjs.TOC", [dijit._Widget], {
+dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
   /**
    * @name TOCOptions
    * @class This is an object literal that specify the option to construct a {@link TOC}.
@@ -397,7 +397,7 @@ dojo.declare("agsjs.TOC", [dijit._Widget], {
     for (var i = 0, c = this.layerInfos.length; i < c; i++) {
       // attach a title to service layer itself
       var service = this.layerInfos[i].layer;
-      var svcTOC = new agsjs._ServiceTOC({
+      var svcTOC = new agsjs.dijit._ServiceTOC({
         service: service,
         toc: this
       });

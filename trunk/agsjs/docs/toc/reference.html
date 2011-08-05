@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Table of Contents (TOC) widget for ArcGIS Server JavaScript API v1.0 Reference</title>
+    <link rel="stylesheet" type="text/css" href="http://code.google.com/css/codesite.css"></link>
+    <link rel="stylesheet" type="text/css" href="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/util/docs/template/local_extensions.css"/>
+  </head>
+  <body>
+    <h1>Table of Contents (TOC) widget for ArcGIS Server JavaScript API</h1>
+    <p>
+<p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p></p>
+    <p>For a description and examples of how to use this library, check out the <a href="examples.html">how-to</a>.</p>
+    
+      <h2><a name="TOC"></a>class TOC</h2>
+      <p>This class is a Table Of Content widget.</p>
+      
+        <h3>Constructor</h3>
+        <table summary="class TOC - Constructor" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Constructor</th>
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>TOC(<span class="type">opts:ags.TOCOptions</span>, <span class="type">srcNodeRef:DOMNode|id</span>)</code></td>
+                
+                <td>Create a Table Of Contents (TOC)</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="TOCOptions"></a>class TOCOptions</h2>
+      <p>This is an object literal that specify the option to construct a <code><a href="reference.html#TOC">TOC</a></code>.  There is no constructor for this class.  Instead, this class is instantiated as a javascript object literal.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class TOCOptions - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>indentSize</code></td>
+                
+                  
+                    <td><code>Number</code></td>
+                  
+                
+                <td>indent size of tree nodes. default to 18.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>layerInfos</code></td>
+                
+                  
+                    <td><code>Object[]</code></td>
+                  
+                
+                <td>a subset of layers in the map to show in TOC. Each object has two                     property: layer (only ArcGISTiledMapServiceLayer,ArcGISDynamicMapServiceLayer supported)                     title: title. if not specified, service name is used.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>map</code></td>
+                
+                  
+                    <td><code>esri.Map</code></td>
+                  
+                
+                <td>the map instance. required.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>slider</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>whether to show slider for each service to adjust transparency. default is false.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>style</code></td>
+                
+                  
+                    <td><code>String</code></td>
+                  
+                
+                <td>how legend swatches should be positioned. <code>inline|standard</code>. See example docs for details.</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+  </body>
+</html>
