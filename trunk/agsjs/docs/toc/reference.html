@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Table of Contents (TOC) widget for ArcGIS Server JavaScript API v1.0 Reference</title>
+    <title>Table of Contents (TOC) widget for ArcGIS Server JavaScript API v1.0, 1.2 Reference</title>
     <link rel="stylesheet" type="text/css" href="http://code.google.com/css/codesite.css"></link>
     <link rel="stylesheet" type="text/css" href="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/util/docs/template/local_extensions.css"/>
   </head>
@@ -29,6 +29,87 @@
                 <td><code>TOC(<span class="type">opts:ags.TOCOptions</span>, <span class="type">srcNodeRef:DOMNode|id</span>)</code></td>
                 
                 <td>Create a Table Of Contents (TOC)</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    
+      <h2><a name="TOCLayerInfo"></a>class TOCLayerInfo</h2>
+      <p>This is an object literal that specify the options for each map service layer.</p>
+      
+        <h3>Properties</h3>
+        <table summary="class TOCLayerInfo - Properties" width="90%">
+          
+          <tbody>
+            <tr>
+              <th>Properties</th>
+              
+                
+                  <th>Type</th>
+                
+              
+              <th>Description</th>
+            </tr>
+            
+              <tr class="odd">
+                <td><code>layer:</code></td>
+                
+                  
+                    <td><code>esri.layers.ArcGISTiledMapServiceLayer | esri.layers.ArcGISDynamicMapServiceLayer</code></td>
+                  
+                
+                <td>ArcGIS Server layer.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>noLayers</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>whether to skip the sub layers inside a service layer.  This typically for services (such as raster)that you only want to turn on/off but do not care what's inside.  default is false.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>noLegend</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>whether to skip the legend, and only display layers. default is false.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>showGroupCount</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>whether to add number of sub layers after group layer. default is false.</td>
+              </tr>
+            
+              <tr class="odd">
+                <td><code>slider</code></td>
+                
+                  
+                    <td><code>Boolean</code></td>
+                  
+                
+                <td>whether to show slider for each service to adjust transparency. default is false.</td>
+              </tr>
+            
+              <tr class="even">
+                <td><code>title</code></td>
+                
+                  
+                    <td><code>string</code></td>
+                  
+                
+                <td>title. optional. If not specified, service name is used.</td>
               </tr>
             
           </tbody>
@@ -69,7 +150,7 @@
                     <td><code>Object[]</code></td>
                   
                 
-                <td>a subset of layers in the map to show in TOC. Each object has two                     property: layer (only ArcGISTiledMapServiceLayer,ArcGISDynamicMapServiceLayer supported)                     title: title. if not specified, service name is used.</td>
+                <td>a subset of layers in the map to show in TOC. each object is a <code><a href="reference.html#TOCLayerInfo">TOCLayerInfo</a></code></td>
               </tr>
             
               <tr class="odd">
@@ -83,16 +164,6 @@
               </tr>
             
               <tr class="even">
-                <td><code>slider</code></td>
-                
-                  
-                    <td><code>Boolean</code></td>
-                  
-                
-                <td>whether to show slider for each service to adjust transparency. default is false.</td>
-              </tr>
-            
-              <tr class="odd">
                 <td><code>style</code></td>
                 
                   

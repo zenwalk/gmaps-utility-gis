@@ -6,12 +6,12 @@
 .agsTOCContent {
     white-space: nowrap;
 }
-.agsTOCOutScale {
+.agsTOCOutOfScale {
   color: grey;
   opacity: 0.5;
 }
 .agsTOCService {
-    background-color: #A9D0F5
+    /*background-color: #A9D0F5*/
 }
 
 .agsTOCServiceLabel {
@@ -20,12 +20,14 @@
 }
 
 .agsTOCGroup {
-    background-color: #CEE3F6
+   /* background-color: #CEE3F6 */
+}
+.agsTOCSlider {
+  padding:5px 20px 5px 30px;
 }
 
 .agsTOCGroupLabel {
     font-size: 10pt;
-    font-weight: bold;
 }
 
 .agsTOCLayerLabel {
@@ -33,7 +35,7 @@
 }
 
 .agsTOCLegendIcon {
-    width: 50px;
+   /* width: 50px;*/
 }
 
 .agsTOCLegendLabel {
