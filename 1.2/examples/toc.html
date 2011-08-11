@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9" />
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+        <title>Table of Contents (TOC) widget for ArcGIS Server JavaScript API</title>
+        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.4/js/dojo/dijit/themes/claro/claro.css">
+        <style>
+            html, body {
+                height: 98%;
+                width: 98%;
+                margin: 0;
+                padding: 5px;
+                font-family: helvetica, arial, sans-serif;
+                font-size: 90%;
+            }
+            
+            #header {
+                font-size: 16pt;
+            }
+            
+            #subheader {
+                font-size: 12pt;
+            }
+            
+            #leftPane {
+                width: 250px;
+            }
+            
+            #rightPane {
+                width: 250px;
+            }
+            
+            #scaleDiv .agsTOCOutOfScale {
+              display:none; 
+            }
+        </style>
+        <script type="text/javascript">
+            var djConfig = {
+              parseOnLoad: true,
+              baseUrl: './',
+              modulePaths: {
+                'agsjs': '../build/agsjs'
+              }
+            };
+        </script>
+        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.4">
+        </script>
+        <script type="text/javascript">
+            dojo.require("dijit.dijit"); // optimize: load dijit layer
+            dojo.require("dijit.layout.BorderContainer");
+            dojo.require("dijit.layout.ContentPane");
+            dojo.require("esri.map");
+            dojo.require("dijit.layout.AccordionContainer");
+            dojo.require("agsjs.dijit.TOC");
+        </script>
+        <script type="text/javascript">
+            var map;
+            function init() {
+              var initialExtent = new esri.geometry.Extent({
+                xmin: -9549126.170705408,
+                ymin: 4612089.574063576,
+                xmax: -9542304.165930964,
+                ymax: 4617851.015070564,
+                "spatialReference": {
+                  "wkid": 102100
+                }
+              });
+              map = new esri.Map("map", {
+                extent: initialExtent
+              });
+              
+              
+              //Add the terrain service to the map. View the ArcGIS Online site for services http://arcgisonline/home/search.html?t=content&f=typekeywords:service    
+              var basemap = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer");
+              map.addLayer(basemap);
+              
+              var operational = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer", {
+                id: 'operational',
+                opacity: 0.8
+              });
+              
+              dojo.connect(map, 'onLayersAddResult', function(results) {
+                var standardTOC = new agsjs.dijit.TOC({
+                  map: map
+                }, 'standardDiv');
+                standardTOC.startup();
+                var inlineTOC = new agsjs.dijit.TOC({
+                  map: map,
+                  style: 'inline'
+                }, 'inlineDiv');
+                inlineTOC.startup();
+                var sliderTOC = new agsjs.dijit.TOC({
+                  map: map,
+                  layerInfos: [{
+                    layer: operational,
+                    title: "Operational Layers",
+                    noLegend: true,
+                    slider: true
+                  }, {
+                    layer: basemap,
+                    title: "BaseMap",
+                    noLayers: true
+                  }]
+                }, 'sliderDiv');
+                sliderTOC.startup();
+                var scaleTOC = new agsjs.dijit.TOC({
+                  map: map
+                }, 'scaleDiv');
+                scaleTOC.startup();
+              });
+              map.addLayers([operational]);
+              
+              
+              
+              //resize the map when the browser resizes - view the 'Resizing and repositioning the map' section in
+              //the following help topic for more details http://help.esri.com/EN/webapi/javascript/arcgis/help/jshelp_start.htm#jshelp/inside_guidelines.htm      
+              var resizeTimer;
+              dojo.connect(map, 'onLoad', function(theMap) {
+                dojo.connect(dijit.byId('map'), 'resize', function() { //resize the map if the div is resized
+                  clearTimeout(resizeTimer);
+                  resizeTimer = setTimeout(function() {
+                    map.resize();
+                    map.reposition();
+                  }, 500);
+                });
+              });
+              
+            }
+            
+            dojo.addOnLoad(init);
+        </script>
+    </head>
+    <body class="claro">
+        <div id="content" dojotype="dijit.layout.BorderContainer" design="headline" gutters="true" style="width: 100%; height: 100%; margin: 0;">
+            <div id="header" dojotype="dijit.layout.ContentPane" region="top">
+                ArcGIS Server JS API Table of Contents (TOC) Widget
+                <div id="subheader">
+                    This examples contains several TOC widgets in different panes: "<b>inline</b>" and "<b>standard</b>" style; Other customizations possible: show transparency slider; show services layer without sub layer; show layer list without legend; hide layer that is out of scale, etc 
+                    See <a href="../docs/toc/examples.html">documentation</a>
+                    for more info.
+                </div>
+            </div>
+            <div dojotype="dijit.layout.ContentPane" id="leftPane" region="left" splitter="true">
+                <div dojotype="dijit.layout.AccordionContainer">
+                    <div dojotype="dijit.layout.ContentPane" title="Standard Style">
+                        Legend nested under layer name
+                        <div id="standardDiv">
+                        </div>
+                    </div>
+                    <div dojotype="dijit.layout.ContentPane" title="Inline Style">
+                        Legend before layer if possible
+                        <div id="inlineDiv">
+                        </div>
+                    </div>
+                    <div dojotype="dijit.layout.ContentPane" title="Slider, BaseMap, No Legend, etc">
+                        <div id="sliderDiv">
+                        </div>
+                    </div>
+                    <div dojotype="dijit.layout.ContentPane" title="Hide Out-of-Scale Layer">
+                        <div id="scaleDiv">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="map" dojotype="dijit.layout.ContentPane" region="center">
+            </div>
+        </div>
+    </body>
+</html>
