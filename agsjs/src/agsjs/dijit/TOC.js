@@ -4,7 +4,11 @@
  * @author: Nianwei Liu (nianwei at gmail dot com)
  * @fileoverview
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
+ * @version 1.2 
  */
+// change log: 
+// 2010-08-11: support for not showing legend or layer list; slider at service level config; removed style background.
+
 /*global dojo esri*/
 // reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
 
@@ -37,42 +41,29 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
   '<span data-dojo-attach-point="labelNode">' +
   '</span></span></div>' +
   '<div data-dojo-attach-point="containerNode" style="display: none;"> </div></div>',
-  service:null,
+  service: null,
   layer: null,
   legend: null,
   serviceTOC: null,
   constructor: function(params, srcNodeRef) {
-   dojo.mixin(this, params);
+    dojo.mixin(this, params);
   },
   // extension point. called automatically after widget DOM ready.
   postCreate: function() {
     dojo.style(this.rowNode, 'paddingLeft', '' + this.serviceTOC.toc.indentSize * this.serviceTOC._currentIndent + 'px');
     // using the availability of certain property to decide what kind of node to create
     var data = null;
-    var title = ''
     var blank = this.iconNode.src;
     if (this.legend) {
       data = this.legend;
       this._createLegendNode(this.legend);
-      title = data.label;
     } else if (this.layer) {
       data = this.layer;
       this._createLayerNode(this.layer);
-      title = data.name;
       this._adjustToState();
     } else if (this.service) {
       data = this.service;
       this._createServiceNode(this.service);
-      dojo.forEach(this.serviceTOC.toc.layerInfos, function(info) {
-        if (data == info.layer) {
-          title = info.title;
-          if (!title) {
-            var start = data.url.toLowerCase().indexOf('/rest/services/');
-            var end = data.url.toLowerCase().indexOf('/mapserver', start);
-            title = data.url.substring(start + 15, end);
-          }
-        }
-      })
     }
     if (this.containerNode) {
       this.toggler = new dojo.fx.Toggler({
@@ -81,7 +72,6 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
         hideFunc: dojo.fx.wipeOut
       })
     }
-    this.labelNode.innerHTML = title;
     if (this.checkNode) {
       this.checkNode.checked = data.visible;
     }
@@ -97,28 +87,46 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
   _createServiceNode: function(service) {
     dojo.addClass(this.rowNode, 'agsTOCService');
     dojo.addClass(this.labelNode, 'agsTOCServiceLabel');
-    if (this.serviceTOC.toc.slider) {
+    var title = this.serviceTOC.info.title;
+    if (!title) {
+        var start = service.url.toLowerCase().indexOf('/rest/services/');
+        var end = service.url.toLowerCase().indexOf('/mapserver', start);
+        title = service.url.substring(start + 15, end);
+    }
+    this.labelNode.innerHTML = title;
+    if (this.serviceTOC.info.slider) {
+      this.sliderNode = dojo.create('div', {
+        'class': 'agsTOCSlider'
+      }, this.rowNode, 'last');//
       this.slider = new dijit.form.HorizontalSlider({
         showButtons: false,
         value: service.opacity * 100,
         intermediateChanges: true,
-        style: "width:100%;padding:0 20px 0 20px",
+        //style: "width:100%;padding:0 20px 0 20px",
         tooltip: 'adjust transparency',
         onChange: function(value) {
           service.setOpacity(value / 100);
         },
         layoutAlign: 'right'
       });
-      this.slider.placeAt(this.rowNode, 'last');
+      this.slider.placeAt(this.sliderNode);
     }
-    this._createChildrenNodes(service.tocInfos, 'layer');
+    if (!this.serviceTOC.info.noLayers){
+       this._createChildrenNodes(service.tocInfos, 'layer');
+    } else {
+      dojo.style(this.iconNode, 'visibility', 'hidden');
+    }
   },
   _createLayerNode: function(layer) {
     // layer: layerInfo with nested subLayerInfos
+    this.labelNode.innerHTML = layer.name;
     if (layer.subLayerInfos) {
       dojo.destroy(this.checkNode);
       dojo.addClass(this.rowNode, 'agsTOCGroup');
       dojo.addClass(this.labelNode, 'agsTOCGroupLabel');
+      if (this.serviceTOC.info.showGroupCount){
+        this.labelNode.innerHTML = layer.name + ' ('+layer.subLayerInfos.length+')';
+      }
       this._createChildrenNodes(layer.subLayerInfos, 'layer');
     } else {
       dojo.addClass(this.rowNode, 'agsTOCLayer');
@@ -126,13 +134,16 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
       if (this.service instanceof esri.layers.TiledMapServiceLayer) {
         dojo.destroy(this.checkNode);
       }
-      if (layer.legends) {
+      if (layer.legends && !this.serviceTOC.info.noLegend) {
         if (this.serviceTOC.toc.style == 'inline' && layer.legends.length == 1) {
           this.iconNode.src = this._getLegendIconUrl(layer.legends[0]);
           dojo.destroy(this.containerNode);
         } else {
           this._createChildrenNodes(layer.legends, 'legend');
         }
+      } else {
+        dojo.destroy(this.iconNode);
+        dojo.destroy(this.containerNode);
       }
     }
     this.serviceTOC._layerWidgets.push(this);
@@ -143,6 +154,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     dojo.destroy(this.containerNode);
     dojo.addClass(this.labelNode, 'agsTOCLegendLabel');
     this.iconNode.src = this._getLegendIconUrl(legend);
+    this.labelNode.innerHTML = legend.label;
   },
   _getLegendIconUrl: function(legend) {
     var src = legend.url;
@@ -172,7 +184,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     this.serviceTOC._currentIndent--;
   },
   _toggleContainer: function(on) {
-    
+  
     if (dojo.hasClass(this.iconNode, 'dijitTreeExpandoClosed') ||
     dojo.hasClass(this.iconNode, 'dijitTreeExpandoOpened')) {
       // make sure its not clicked on legend swatch
@@ -200,14 +212,14 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
       var scale = esri.geometry.getScale(this.serviceTOC.toc.map);
       var outScale = (this.layer.maxScale != 0 && scale < this.layer.maxScale) || (this.layer.minScale != 0 && scale > this.layer.minScale);
       if (outScale) {
-        dojo.addClass(this.domNode, 'agsTOCOutScale');
+        dojo.addClass(this.domNode, 'agsTOCOutOfScale');
       } else {
-        dojo.removeClass(this.domNode, 'agsTOCOutScale');
+        dojo.removeClass(this.domNode, 'agsTOCOutOfScale');
       }
       if (this.checkNode) {
         this.checkNode.disabled = outScale;
       }
-     }
+    }
   },
   _onClick: function(evt) {
     var t = evt.target;
@@ -248,9 +260,10 @@ dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
   constructor: function(params, srcNodeRef) {
     this.service = params.service;
     this.toc = params.toc;
+    this.info = params.info || {};
   },
   postCreate: function() {
-    if (this.service.legendResponse) {
+    if (this.service.legendResponse || this.info.noLegend || this.info.noLayers) {
       this._createServiceTOC();
     } else {
       this._getLegendInfo();
@@ -361,16 +374,27 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
   style: 'standard',
   layerInfos: null,
   slider: false,
+  
+  /**
+   * @name TOCLayerInfo
+   * @class This is an object literal that specify the options for each map service layer.
+   * @property {esri.layers.ArcGISTiledMapServiceLayer | esri.layers.ArcGISDynamicMapServiceLayer} layer: ArcGIS Server layer.
+   * @property {string} [title] title. optional. If not specified, service name is used.
+   * @property {Boolean} [slider] whether to show slider for each service to adjust transparency. default is false.
+   * @property {Boolean} [noLayers] whether to skip the sub layers inside a service layer.
+   *   This typically for services (such as raster)that you only want to turn on/off but do not care what's inside.
+   *   default is false.
+   * @property {Boolean} [noLegend] whether to skip the legend, and only display layers. default is false.
+   * @property {Boolean} [showGroupCount] whether to add number of sub layers after group layer. default is false.
+   *
+   */
   /**
    * @name TOCOptions
    * @class This is an object literal that specify the option to construct a {@link TOC}.
    * @property {esri.Map} [map] the map instance. required.
-   * @property {Object[]} [layerInfos] a subset of layers in the map to show in TOC. Each object has two
-   *                      property: layer (only ArcGISTiledMapServiceLayer,ArcGISDynamicMapServiceLayer supported)
-   *                      title: title. if not specified, service name is used.
+   * @property {Object[]} [layerInfos] a subset of layers in the map to show in TOC. each object is a {@link TOCLayerInfo}
    * @property {Number} [indentSize] indent size of tree nodes. default to 18.
    * @property {String} [style] how legend swatches should be positioned. <code>inline|standard</code>. See example docs for details.
-   * @property {Boolean} [slider] whether to show slider for each service to adjust transparency. default is false.
    */
   /** 
    * Create a Table Of Contents (TOC)
@@ -409,6 +433,7 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
       var service = this.layerInfos[i].layer;
       var svcTOC = new agsjs.dijit._ServiceTOC({
         service: service,
+        info: this.layerInfos[i],
         toc: this
       });
       this._serviceWidgets.push(svcTOC);

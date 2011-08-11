@@ -32,9 +32,8 @@
                 width: 250px;
             }
             
-            #inlineDiv .agsTOCOutScale {
-            /* uncomment this line to hide layers when out of scale for the inline TOC */
-             /* display:none;*/
+            #scaleDiv .agsTOCOutOfScale {
+              display:none; 
             }
         </style>
         <script type="text/javascript">
@@ -53,12 +52,11 @@
             dojo.require("dijit.layout.BorderContainer");
             dojo.require("dijit.layout.ContentPane");
             dojo.require("esri.map");
-            dojo.require("dijit.layout.TabContainer");
+            dojo.require("dijit.layout.AccordionContainer");
             dojo.require("agsjs.dijit.TOC");
         </script>
         <script type="text/javascript">
             var map;
-            var tocLayers = [];
             function init() {
               var initialExtent = new esri.geometry.Extent({
                 xmin: -9549126.170705408,
@@ -73,35 +71,47 @@
                 extent: initialExtent
               });
               
+              
               //Add the terrain service to the map. View the ArcGIS Online site for services http://arcgisonline/home/search.html?t=content&f=typekeywords:service    
               var basemap = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer");
               map.addLayer(basemap);
               
-             
               var operational = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer", {
-                id: 'operational'
-              });
-              
-              tocLayers.push({
-                layer: operational,
-                title: "Operational Layers"
+                id: 'operational',
+                opacity: 0.8
               });
               
               dojo.connect(map, 'onLayersAddResult', function(results) {
-                var inlineTOC = new agsjs.dijit.TOC({
-                  map: map,
-                  layerInfos: tocLayers,
-                  style: 'inline',
-                  slider: true
-                }, 'inlineDiv');
-                inlineTOC.startup();
-             
                 var standardTOC = new agsjs.dijit.TOC({
                   map: map
                 }, 'standardDiv');
                 standardTOC.startup();
+                var inlineTOC = new agsjs.dijit.TOC({
+                  map: map,
+                  style: 'inline'
+                }, 'inlineDiv');
+                inlineTOC.startup();
+                var sliderTOC = new agsjs.dijit.TOC({
+                  map: map,
+                  layerInfos: [{
+                    layer: operational,
+                    title: "Operational Layers",
+                    noLegend: true,
+                    slider: true
+                  }, {
+                    layer: basemap,
+                    title: "BaseMap",
+                    noLayers: true
+                  }]
+                }, 'sliderDiv');
+                sliderTOC.startup();
+                var scaleTOC = new agsjs.dijit.TOC({
+                  map: map
+                }, 'scaleDiv');
+                scaleTOC.startup();
               });
               map.addLayers([operational]);
+              
               
               
               //resize the map when the browser resizes - view the 'Resizing and repositioning the map' section in
@@ -127,27 +137,34 @@
             <div id="header" dojotype="dijit.layout.ContentPane" region="top">
                 ArcGIS Server JS API Table of Contents (TOC) Widget
                 <div id="subheader">
-                    This examples contains 2 TOC widgets in different tabs: "<b>inline</b>" style put legend swatch in front of layer name when possible. 
-                    "<b>standard</b>" style has a typical tree structure, and swatches are nested underneath layer name. 
-                    See <a href="../docs/toc/examples.html">documentation</a> for more info.
+                    This examples contains several TOC widgets in different panes: "<b>inline</b>" and "<b>standard</b>" style; Other customizations possible: show transparency slider; show services layer without sub layer; show layer list without legend; hide layer that is out of scale, etc 
+                    See <a href="../docs/toc/examples.html">documentation</a>
+                    for more info.
                 </div>
             </div>
             <div dojotype="dijit.layout.ContentPane" id="leftPane" region="left" splitter="true">
-                <div dojotype="dijit.layout.TabContainer">
-                    <div dojotype="dijit.layout.ContentPane" title="Standard">
+                <div dojotype="dijit.layout.AccordionContainer">
+                    <div dojotype="dijit.layout.ContentPane" title="Standard Style">
+                        Legend nested under layer name
                         <div id="standardDiv">
                         </div>
                     </div>
-                    <div dojotype="dijit.layout.ContentPane" title="Custom Inline">
+                    <div dojotype="dijit.layout.ContentPane" title="Inline Style">
+                        Legend before layer if possible
                         <div id="inlineDiv">
+                        </div>
+                    </div>
+                    <div dojotype="dijit.layout.ContentPane" title="Slider, BaseMap, No Legend, etc">
+                        <div id="sliderDiv">
+                        </div>
+                    </div>
+                    <div dojotype="dijit.layout.ContentPane" title="Hide Out-of-Scale Layer">
+                        <div id="scaleDiv">
                         </div>
                     </div>
                 </div>
             </div>
             <div id="map" dojotype="dijit.layout.ContentPane" region="center">
-            </div>
-            <div id="footer" dojotype="dijit.layout.ContentPane" region="bottom">
-                this is the footer section
             </div>
         </div>
     </body>
