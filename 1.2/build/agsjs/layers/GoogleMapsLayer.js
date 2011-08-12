@@ -27,7 +27,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {constructor:fun
   this._div = c;
   this._visibilityChangeHandle = dojo.connect(this, "onVisibilityChange", this, this._visibilityChangeHandler);
   this._opacityChangeHandle = dojo.connect(this, "onOpacityChange", this, this._onOpacityChangeHandler);
-  (this._options.visible === undefined ? true : this._options.visible) && this._initGMap();
+  (this.visible = this._options.visible === undefined ? true : this._options.visible) && this._initGMap();
   return c
 }, _unsetMap:function(a, b) {
   b && b.removeChild(this._div);
@@ -40,10 +40,10 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {constructor:fun
   dojo.disconnect(this._opacityChangeHandle)
 }, _initGMap:function() {
   if(window.google && google.maps) {
-    var a = this._esriExtentToLatLngBounds(this._map.extent || this.initialExtent), b = this._map.getLevel(), c = {mapTypeId:this._options.mapTypeId || google.maps.MapTypeId.ROADMAP, disableDefaultUI:true, draggable:false, center:this._options.center || a.getCenter(), zoom:this._options.zoom || b > -1 ? b : 1};
-    c = new google.maps.Map(this._div, c);
-    b < 0 && c.fitBounds(a);
-    this._gmap = c;
+    var a = this._map.extent, b = this._options.center || this._esriPointToLatLng(a.getCenter()), c = this._map.getLevel() + 1;
+    b = new google.maps.Map(this._div, {mapTypeId:this._options.mapTypeId || google.maps.MapTypeId.ROADMAP, disableDefaultUI:true, draggable:false, center:b, zoom:this._options.zoom || c > -1 ? c : 1});
+    c < 1 && b.fitBounds(this._esriExtentToLatLngBounds(a));
+    this._gmap = b;
     this._extentChangeHandle = dojo.connect(this._map, "onExtentChange", this, this._extentChangeHandler);
     this._panHandle = dojo.connect(this._map, "onPan", this, this._panHandler);
     this._resizeHandle = dojo.connect(this._map, "onResize", this, this._resizeHandler);
@@ -57,19 +57,21 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {constructor:fun
       dojo.connect(agsjs, "onGMapsApiLoad", this, this._initGMap);
       a = document.createElement("script");
       a.type = "text/javascript";
-      b = window.location.protocol + "//maps.google.com/maps/api/js?sensor=" + (this._options.sensor ? "true" : "false");
+      c = window.location.protocol + "//maps.google.com/maps/api/js?sensor=" + (this._options.sensor ? "true" : "false");
       if(this._options.client) {
-        b += "&client=" + this._options.client
+        c += "&client=" + this._options.client
       }
       if(this._options.version) {
-        b += "&v" + this._options.version
+        c += "&v" + this._options.version
       }
-      b += "&callback=agsjs.onGMapsApiLoad";
-      a.src = b;
+      c += "&callback=agsjs.onGMapsApiLoad";
+      a.src = c;
       document.getElementsByTagName("head").length > 0 ? document.getElementsByTagName("head")[0].appendChild(a) : document.body.appendChild(a)
     }
   }
 }, _opacityChangeHandler:function(a) {
+  this.setOpacity(a)
+}, setOpacity:function(a) {
   if(this._div) {
     a = Math.min(Math.max(a, 0), 1);
     var b = this._div.style;
@@ -85,9 +87,11 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {constructor:fun
       }
     }
   }
+  this.opacity = a
 }, _visibilityChangeHandler:function(a) {
   if(a) {
     esri.show(this._div);
+    this.visible = true;
     if(this._gmap) {
       google.maps.event.trigger(this._gmap, "resize");
       this._setExtent(this._map.extent);
@@ -99,6 +103,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {constructor:fun
   }else {
     if(this._div) {
       esri.hide(this._div);
+      this.visible = false;
       if(this._panHandle) {
         dojo.disconnect(this._panHandle);
         this._panHandle = null
@@ -117,10 +122,12 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {constructor:fun
 }, _panHandler:function(a) {
   this._gmap.setCenter(this._esriPointToLatLng(a.getCenter()))
 }, _setExtent:function(a) {
-  var b = this._map.getLevel();
+  console.log("setextent");
+  var b = this._map.getLevel() + 1;
   if(b >= 0) {
-    this._gmap.setCenter(this._esriPointToLatLng(a.getCenter()));
-    this._gmap.setZoom(b)
+    a = this._esriPointToLatLng(a.getCenter());
+    this._gmap.setZoom(b);
+    this._gmap.setCenter(a)
   }else {
     this._gmap.fitBounds(this._esriExtentToLatLngBounds(a))
   }
