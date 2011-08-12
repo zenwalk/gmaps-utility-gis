@@ -4,7 +4,7 @@
  * @author: Nianwei Liu (nianwei at gmail dot com)
  * @fileoverview
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
- * @version 1.2 
+ * @version 1.2
  */
 // change log: 
 // 2010-08-11: support for not showing legend or layer list; slider at service level config; removed style background.
@@ -89,9 +89,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     dojo.addClass(this.labelNode, 'agsTOCServiceLabel');
     var title = this.serviceTOC.info.title;
     if (!title) {
-        var start = service.url.toLowerCase().indexOf('/rest/services/');
-        var end = service.url.toLowerCase().indexOf('/mapserver', start);
-        title = service.url.substring(start + 15, end);
+      title = service.id;
     }
     this.labelNode.innerHTML = title;
     if (this.serviceTOC.info.slider) {
@@ -111,8 +109,8 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
       });
       this.slider.placeAt(this.sliderNode);
     }
-    if (!this.serviceTOC.info.noLayers){
-       this._createChildrenNodes(service.tocInfos, 'layer');
+    if (!this.serviceTOC.info.noLayers) {
+      this._createChildrenNodes(service.tocInfos, 'layer');
     } else {
       dojo.style(this.iconNode, 'visibility', 'hidden');
     }
@@ -124,14 +122,14 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
       dojo.destroy(this.checkNode);
       dojo.addClass(this.rowNode, 'agsTOCGroup');
       dojo.addClass(this.labelNode, 'agsTOCGroupLabel');
-      if (this.serviceTOC.info.showGroupCount){
-        this.labelNode.innerHTML = layer.name + ' ('+layer.subLayerInfos.length+')';
+      if (this.serviceTOC.info.showGroupCount) {
+        this.labelNode.innerHTML = layer.name + ' (' + layer.subLayerInfos.length + ')';
       }
       this._createChildrenNodes(layer.subLayerInfos, 'layer');
     } else {
       dojo.addClass(this.rowNode, 'agsTOCLayer');
       dojo.addClass(this.labelNode, 'agsTOCLayerLabel');
-      if (this.service instanceof esri.layers.TiledMapServiceLayer) {
+      if (this.service.tileInfo) {//} instanceof esri.layers.TiledMapServiceLayer) {
         dojo.destroy(this.checkNode);
       }
       if (layer.legends && !this.serviceTOC.info.noLegend) {
@@ -261,6 +259,16 @@ dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
     this.service = params.service;
     this.toc = params.toc;
     this.info = params.info || {};
+    if ((this.service instanceof (esri.layers.ArcGISDynamicMapServiceLayer) ||
+    this.service instanceof (esri.layers.ArcGISTiledMapServiceLayer))) {
+      if (!this.info.title) {
+        var start = this.service.url.toLowerCase().indexOf('/rest/services/');
+        var end = this.service.url.toLowerCase().indexOf('/mapserver', start);
+        this.info.title = this.service.url.substring(start + 15, end);
+      }
+    } else {
+      this.info.noLayers = true;
+    }
   },
   postCreate: function() {
     if (this.service.legendResponse || this.info.noLegend || this.info.noLayers) {

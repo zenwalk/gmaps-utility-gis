@@ -1,9 +1,11 @@
 /**
  * @name Google Maps Layer for ArcGIS Server JavaScript API
- * @version 1.0
+ * @version 1.2
  * @author: Nianwei Liu (nianwei at gmail dot com)
  * @fileoverview
- * <p>Use Google Maps in application built on ESRI ArcGIS Server JavaScript API and dojo </p>
+ * <p>Use Google Maps in application built on ESRI ArcGIS Server JavaScript API and dojo. 
+ * Change log: 2011-08-11: fixed zoom difference. changed package name.
+ *  </p>
  */
 /*global dojo esri  agsjs */
 dojo.provide('agsjs.layers.GoogleMapsLayer');
@@ -168,8 +170,8 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     this._div = div;
     this._visibilityChangeHandle = dojo.connect(this, 'onVisibilityChange', this, this._visibilityChangeHandler);
     this._opacityChangeHandle = dojo.connect(this, 'onOpacityChange', this, this._onOpacityChangeHandler);
-    var vis = (this._options.visible === undefined) ? true : this._options.visible;
-    if (vis) {
+    this.visible = (this._options.visible === undefined) ? true : this._options.visible;
+    if (this.visible) {
       this._initGMap();
     }
     return div;
@@ -194,18 +196,18 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     // // console.log('_initGMap');
     if (window.google && google.maps) {
       var ext = this._map.extent;
-      var bnds = this._esriExtentToLatLngBounds(ext || this.initialExtent);
-      var level = this._map.getLevel();
+      var center = this._options.center || this._esriPointToLatLng(ext.getCenter());
+      var level = this._map.getLevel()+1;
       var myOptions = {
         mapTypeId: this._options.mapTypeId || google.maps.MapTypeId.ROADMAP,
         disableDefaultUI: true,
         draggable: false, // maybe makes no difference because mouse events intercepted by ESRI JS.
-        center: this._options.center || bnds.getCenter(),
+        center: center,
         zoom: this._options.zoom || (level > -1) ? level : 1
       };
       var gmap = new google.maps.Map(this._div, myOptions);
-      if (level < 0) {
-        gmap.fitBounds(bnds);
+      if (level < 1) {
+        gmap.fitBounds(this._esriExtentToLatLngBounds(ext));
       }
       this._gmap = gmap;
       this._extentChangeHandle = dojo.connect(this._map, 'onExtentChange', this, this._extentChangeHandler);
@@ -241,7 +243,10 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     }
   },
   _opacityChangeHandler: function (opacity) {
-    // this probably should be handled in the core API using the div returned from _setMap().
+     // this probably should be handled in the core API using the div returned from _setMap().
+    this.setOpacity(opacity);
+  },
+  setOpacity: function(opacity) {
     if (this._div) {
       opacity = Math.min(Math.max(opacity, 0), 1);
       var st = this._div.style;
@@ -253,11 +258,13 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
         st.filter = "alpha(opacity:" + Math.floor(opacity * 100) + ")";
       }
     }
+    this.opacity = opacity;
   },
   _visibilityChangeHandler: function (v) {
     // console.log('_visibilityChangeHandler' + v);
     if (v) {
       esri.show(this._div);
+      this.visible = true;
       if (this._gmap) {
         google.maps.event.trigger(this._gmap, 'resize');
         this._setExtent(this._map.extent);
@@ -269,6 +276,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     } else {
       if (this._div) {
         esri.hide(this._div);
+        this.visible = false;
         if (this._panHandle) {
           dojo.disconnect(this._panHandle);
           this._panHandle = null;
@@ -295,14 +303,17 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     }
   },
   _panHandler: function (extent, delta) {
+    //this._setExtent(extent);
     this._gmap.setCenter(this._esriPointToLatLng(extent.getCenter()));
+    
   },
   _setExtent: function (extent) {
-    var lv = this._map.getLevel();
+    console.log('setextent');
+    var lv = this._map.getLevel()+1;
     if (lv >= 0) {
       var ct = this._esriPointToLatLng(extent.getCenter());
-      this._gmap.setCenter(ct);
       this._gmap.setZoom(lv);
+      this._gmap.setCenter(ct);
     } else {
       this._gmap.fitBounds(this._esriExtentToLatLngBounds(extent));
     }
@@ -316,3 +327,4 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     return new google.maps.LatLngBounds(new google.maps.LatLng(llb.ymin, llb.xmin, true), new google.maps.LatLng(llb.ymax, llb.xmax, true));
   }
 });
+

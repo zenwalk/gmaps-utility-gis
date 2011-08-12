@@ -45,15 +45,13 @@ service:null, layer:null, legend:null, serviceTOC:null, constructor:function(a) 
   dojo.addClass(this.labelNode, "agsTOCServiceLabel");
   var b = this.serviceTOC.info.title;
   if(!b) {
-    b = a.url.toLowerCase().indexOf("/rest/services/");
-    var d = a.url.toLowerCase().indexOf("/mapserver", b);
-    b = a.url.substring(b + 15, d)
+    b = a.id
   }
   this.labelNode.innerHTML = b;
   if(this.serviceTOC.info.slider) {
     this.sliderNode = dojo.create("div", {"class":"agsTOCSlider"}, this.rowNode, "last");
-    this.slider = new dijit.form.HorizontalSlider({showButtons:false, value:a.opacity * 100, intermediateChanges:true, tooltip:"adjust transparency", onChange:function(c) {
-      a.setOpacity(c / 100)
+    this.slider = new dijit.form.HorizontalSlider({showButtons:false, value:a.opacity * 100, intermediateChanges:true, tooltip:"adjust transparency", onChange:function(d) {
+      a.setOpacity(d / 100)
     }, layoutAlign:"right"});
     this.slider.placeAt(this.sliderNode)
   }
@@ -71,7 +69,7 @@ service:null, layer:null, legend:null, serviceTOC:null, constructor:function(a) 
   }else {
     dojo.addClass(this.rowNode, "agsTOCLayer");
     dojo.addClass(this.labelNode, "agsTOCLayerLabel");
-    this.service instanceof esri.layers.TiledMapServiceLayer && dojo.destroy(this.checkNode);
+    this.service.tileInfo && dojo.destroy(this.checkNode);
     if(a.legends && !this.serviceTOC.info.noLegend) {
       if(this.serviceTOC.toc.style == "inline" && a.legends.length == 1) {
         this.iconNode.src = this._getLegendIconUrl(a.legends[0]);
@@ -157,7 +155,16 @@ service:null, layer:null, legend:null, serviceTOC:null, constructor:function(a) 
 dojo.declare("agsjs.dijit._ServiceTOC", [dijit._Widget], {_currentIndent:0, service:null, _layerWidgets:[], constructor:function(a) {
   this.service = a.service;
   this.toc = a.toc;
-  this.info = a.info || {}
+  this.info = a.info || {};
+  if(this.service instanceof esri.layers.ArcGISDynamicMapServiceLayer || this.service instanceof esri.layers.ArcGISTiledMapServiceLayer) {
+    if(!this.info.title) {
+      a = this.service.url.toLowerCase().indexOf("/rest/services/");
+      var b = this.service.url.toLowerCase().indexOf("/mapserver", a);
+      this.info.title = this.service.url.substring(a + 15, b)
+    }
+  }else {
+    this.info.noLayers = true
+  }
 }, postCreate:function() {
   this.service.legendResponse || this.info.noLegend || this.info.noLayers ? this._createServiceTOC() : this._getLegendInfo()
 }, _getLegendInfo:function() {
