@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9" />
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
-        <title>Table of Contents (TOC) widget for ArcGIS Server JavaScript API</title>
+        <title>TOC</title>
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.4/js/dojo/dijit/themes/claro/claro.css">
         <style>
             html, body {
@@ -25,15 +25,14 @@
             }
             
             #leftPane {
-                width: 250px;
+                width: 300px;
             }
             
-            #rightPane {
-                width: 250px;
-            }
             
+            
+            /* this line hide layers when out of scale for the inline TOC */
             #scaleDiv .agsTOCOutOfScale {
-              display:none; 
+                display: none;
             }
         </style>
         <script type="text/javascript">
@@ -96,17 +95,21 @@
                   layerInfos: [{
                     layer: operational,
                     title: "Operational Layers",
-                    noLegend: true,
                     slider: true
                   }, {
                     layer: basemap,
                     title: "BaseMap",
                     noLayers: true
-                  }]
+                  }], style:'inline'
                 }, 'sliderDiv');
                 sliderTOC.startup();
                 var scaleTOC = new agsjs.dijit.TOC({
-                  map: map
+                  map: map,
+                  layerInfos: [{
+                    layer: operational,
+                    title: "Operational Layers",
+                    showGroupCount: true
+                  }]
                 }, 'scaleDiv');
                 scaleTOC.startup();
               });
@@ -145,20 +148,21 @@
             <div dojotype="dijit.layout.ContentPane" id="leftPane" region="left" splitter="true">
                 <div dojotype="dijit.layout.AccordionContainer">
                     <div dojotype="dijit.layout.ContentPane" title="Standard Style">
-                        Legend nested under layer name
+                        (Legend nested under layer name)
                         <div id="standardDiv">
                         </div>
                     </div>
                     <div dojotype="dijit.layout.ContentPane" title="Inline Style">
-                        Legend before layer if possible
+                        (Legend before layer if possible)
                         <div id="inlineDiv">
                         </div>
                     </div>
-                    <div dojotype="dijit.layout.ContentPane" title="Slider, BaseMap, No Legend, etc">
+                    <div dojotype="dijit.layout.ContentPane" title="Customization: Slider, No Legend, etc" selected="true">
                         <div id="sliderDiv">
                         </div>
                     </div>
                     <div dojotype="dijit.layout.ContentPane" title="Hide Out-of-Scale Layer">
+                       (Zoom in/out to see layer list grow/shrink)
                         <div id="scaleDiv">
                         </div>
                     </div>
