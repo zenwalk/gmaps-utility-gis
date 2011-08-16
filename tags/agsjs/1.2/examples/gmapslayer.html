@@ -15,8 +15,9 @@
                 margin: 0;
                 padding: 0;
             }
+            
             #map {
-               height: 100%;
+                height: 100%;
                 width: 100%;
             }
         </style>
@@ -42,10 +43,10 @@
             
             function init() {
               var initExtent = new esri.geometry.Extent({
-                "xmin": -14628212,
-                "ymin": 714227,
-                "xmax": 7718305,
-                "ymax": 9832858,
+                "xmin": -15402290.83,
+                "ymin": 1830513.79,
+                "xmax": -6596745.17,
+                "ymax": 7700877.56,
                 "spatialReference": {
                   "wkid": 102100
                 }
@@ -94,8 +95,9 @@
     <body class="claro">
         <div id="content" dojotype="dijit.layout.BorderContainer" design="headline" gutters="true" style="width: 100%; height: 100%; margin: 0;">
             <div id="center" dojotype="dijit.layout.ContentPane" region="center">
-              <div id="map" ></div>
-              <div style="position:absolute; right:75px; top:20px; z-Index:999;">
+                <div id="map">
+                </div>
+                <div style="position:absolute; right:75px; top:20px; z-Index:999;">
                     <button dojoType="dijit.form.Button" onClick="changeMap(googleLayer);googleLayer.setMapTypeId('roadmap')">
                         Google Street
                     </button>
