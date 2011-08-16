@@ -75,11 +75,14 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     if (this.checkNode) {
       this.checkNode.checked = data.visible;
     }
+    var show = data.visible;
+    if (data.collapsed) show = false;
     if (this.iconNode.src == blank) {
       dojo.addClass(this.iconNode, 'dijitTreeExpando');
-      dojo.addClass(this.iconNode, data.visible ? 'dijitTreeExpandoOpened' : 'dijitTreeExpandoClosed');
+      dojo.addClass(this.iconNode, show ? 'dijitTreeExpandoOpened' : 'dijitTreeExpandoClosed');
     }
-    dojo.style(this.containerNode, 'display', data.visible ? 'block' : 'none');
+    dojo.style(this.containerNode, 'display', show ? 'block' : 'none');
+    
     if (this.serviceTOC.toc.style == 'inline') {
       dojo.place(this.iconNode, this.checkNode, 'after');
     }
@@ -87,11 +90,9 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
   _createServiceNode: function(service) {
     dojo.addClass(this.rowNode, 'agsTOCService');
     dojo.addClass(this.labelNode, 'agsTOCServiceLabel');
-    var title = this.serviceTOC.info.title;
-    if (!title) {
-      title = service.id;
-    }
-    this.labelNode.innerHTML = title;
+    
+    var title = this.serviceTOC.info.title || service.id;
+    service.collapsed = this.serviceTOC.info.collapsed;
     if (this.serviceTOC.info.slider) {
       this.sliderNode = dojo.create('div', {
         'class': 'agsTOCSlider'
@@ -114,6 +115,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     } else {
       dojo.style(this.iconNode, 'visibility', 'hidden');
     }
+    this.labelNode.innerHTML = title;
   },
   _createLayerNode: function(layer) {
     // layer: layerInfo with nested subLayerInfos
@@ -129,7 +131,19 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     } else {
       dojo.addClass(this.rowNode, 'agsTOCLayer');
       dojo.addClass(this.labelNode, 'agsTOCLayerLabel');
-      if (this.service.tileInfo) {//} instanceof esri.layers.TiledMapServiceLayer) {
+      if (agsjs.layers && this.service instanceof agsjs.layers.GoogleMapsLayer){
+        var mapid = '';
+        var gmap = this.service.getGMap();
+        if (gmap)  mapid = gmap.getMapTypeId();
+        var value = layer.name.toLowerCase();// may need change in future version.
+        this.radioNode = dojo.create('input', {
+          'type': 'radio',
+          name: 'gmaps' + this.service.id,
+          value: value,
+          checked: mapid == value
+        }, this.checkNode, 'replace');
+        
+      } else if (this.service.tileInfo) {//} instanceof esri.layers.TiledMapServiceLayer) {
         dojo.destroy(this.checkNode);
       }
       if (layer.legends && !this.serviceTOC.info.noLegend) {
@@ -206,7 +220,6 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
   },
   _adjustToState: function() {
     if (this.layer) {
-      this.checkNode.checked = this.layer.visible;
       var scale = esri.geometry.getScale(this.serviceTOC.toc.map);
       var outScale = (this.layer.maxScale != 0 && scale < this.layer.maxScale) || (this.layer.minScale != 0 && scale > this.layer.minScale);
       if (outScale) {
@@ -216,7 +229,15 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
       }
       if (this.checkNode) {
         this.checkNode.disabled = outScale;
-      }
+        this.checkNode.checked = this.layer.visible;
+      } 
+      if (this.radioNode) {
+        var checked = false;
+        if (this.service.getGMap() != null){
+          checked = this.radioNode.value == this.service.getGMap().getMapTypeId()
+        }
+        this.radioNode.checked =  checked;
+      } 
     }
   },
   _onClick: function(evt) {
@@ -246,6 +267,10 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
       }
     } else if (t == this.iconNode) {
       this._toggleContainer();
+    } else if (t == this.radioNode){
+      if (this.service.setMapTypeId) {
+        this.service.setMapTypeId(t.value);
+      }
     }
   }
   
@@ -259,6 +284,9 @@ dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
     this.service = params.service;
     this.toc = params.toc;
     this.info = params.info || {};
+    
+  },
+  postCreate: function() {
     if ((this.service instanceof (esri.layers.ArcGISDynamicMapServiceLayer) ||
     this.service instanceof (esri.layers.ArcGISTiledMapServiceLayer))) {
       if (!this.info.title) {
@@ -266,12 +294,24 @@ dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
         var end = this.service.url.toLowerCase().indexOf('/mapserver', start);
         this.info.title = this.service.url.substring(start + 15, end);
       }
+    } else if (agsjs.layers && this.service instanceof (agsjs.layers.GoogleMapsLayer)) {
+      if (!this.info.title) {
+        this.info.title = 'Google Maps';
+      }
+      // may need change in future version. use this naming convention to avoid the requirement of loading gmaps api
+      this.service.tocInfos = [{
+        'name': 'Hybrid'
+      }, {
+        'name': 'RoadMap'
+      }, {
+        'name': 'Satellite'
+      }, {
+        'name': 'Terrain'
+      }];
     } else {
       this.info.noLayers = true;
     }
-  },
-  postCreate: function() {
-    if (this.service.legendResponse || this.info.noLegend || this.info.noLayers) {
+    if (this.service.legendResponse || !this.service.url || this.info.noLegend || this.info.noLayers) {
       this._createServiceTOC();
     } else {
       this._getLegendInfo();
@@ -307,43 +347,44 @@ dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
     this._createServiceTOC();
   },
   _createServiceTOC: function() {
-  
     var service = this.service;
-    // create a lookup map, key=layerId, value=LayerInfo
-    // generally id = index, this is to assure we find the right layer by ID
-    var layerLookup = {};
-    dojo.forEach(service.layerInfos, function(layerInfo) {
-      layerLookup['' + layerInfo.id] = layerInfo;
-      // used for later reference.
-      layerInfo.visible = layerInfo.defaultVisibility;
-    });
-    // attached legend Info to layer info
-    if (service.legendResponse) {
-      dojo.forEach(service.legendResponse.layers, function(legendInfo) {
-        var layerInfo = layerLookup['' + legendInfo.layerId];
-        if (layerInfo && legendInfo.legend) {
-          layerInfo.legends = legendInfo.legend;
+    if (!service.tocInfos) {
+      // create a lookup map, key=layerId, value=LayerInfo
+      // generally id = index, this is to assure we find the right layer by ID
+      var layerLookup = {};
+      dojo.forEach(service.layerInfos, function(layerInfo) {
+        layerLookup['' + layerInfo.id] = layerInfo;
+        // used for later reference.
+        layerInfo.visible = layerInfo.defaultVisibility;
+      });
+      // attached legend Info to layer info
+      if (service.legendResponse) {
+        dojo.forEach(service.legendResponse.layers, function(legendInfo) {
+          var layerInfo = layerLookup['' + legendInfo.layerId];
+          if (layerInfo && legendInfo.legend) {
+            layerInfo.legends = legendInfo.legend;
+          }
+        });
+      }
+      // nest layer Infos
+      dojo.forEach(service.layerInfos, function(layerInfo) {
+        if (layerInfo.subLayerIds) {
+          var subLayerInfos = [];
+          dojo.forEach(layerInfo.subLayerIds, function(id, i) {
+            subLayerInfos[i] = layerLookup[id];
+          });
+          layerInfo.subLayerInfos = subLayerInfos;
         }
       });
+      //finalize the tree structure in tocInfos, skipping all sublayers because they were nested already.
+      var tocInfos = [];
+      dojo.forEach(service.layerInfos, function(layerInfo) {
+        if (layerInfo.parentLayerId == -1) {
+          tocInfos.push(layerInfo);
+        }
+      });
+      service.tocInfos = tocInfos;
     }
-    // nest layer Infos
-    dojo.forEach(service.layerInfos, function(layerInfo) {
-      if (layerInfo.subLayerIds) {
-        var subLayerInfos = [];
-        dojo.forEach(layerInfo.subLayerIds, function(id, i) {
-          subLayerInfos[i] = layerLookup[id];
-        });
-        layerInfo.subLayerInfos = subLayerInfos;
-      }
-    });
-    //finalize the tree structure in tocInfos, skipping all sublayers because they were nested already.
-    var tocInfos = [];
-    dojo.forEach(service.layerInfos, function(layerInfo) {
-      if (layerInfo.parentLayerId == -1) {
-        tocInfos.push(layerInfo);
-      }
-    });
-    service.tocInfos = tocInfos;
     this._serviceNode = new agsjs.dijit._TOCNode({
       serviceTOC: this,
       service: service
@@ -353,7 +394,9 @@ dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
     this._visHandler = dojo.connect(service, "onVisibilityChange", this, "_adjustToState");
     // this will make sure all TOC linked to a Map synchronized.
     this._visLayerHandler = dojo.connect(service, "setVisibleLayers", this, "_adjustToState");
-    
+    if (agsjs.layers && this.service instanceof (agsjs.layers.GoogleMapsLayer)){
+      this._maptypeIdHandler = dojo.connect(service, "onMapTypeIdChanged", this, "_adjustToState");
+    }
   },
   _refreshLayer: function() {
     var service = this.service;
@@ -363,7 +406,7 @@ dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
     }
     this._refreshTimer = window.setTimeout(function() {
       service.setVisibleLayers(service.visibleLayers);
-    }, 2000);
+    }, 1000);
   },
   _adjustToState: function() {
     this._serviceNode.checkNode.checked = this.service.visible;
@@ -374,6 +417,7 @@ dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
   destroy: function() {
     dojo.disconnect(this._visHandler);
     dojo.disconnect(this._visLayerHandler);
+    dojo.disconnect(this._maptypeIdHandler);
   }
 });
 
@@ -394,6 +438,7 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
    *   default is false.
    * @property {Boolean} [noLegend] whether to skip the legend, and only display layers. default is false.
    * @property {Boolean} [showGroupCount] whether to add number of sub layers after group layer. default is false.
+   * @property {Boolean} [collapsed] whether to collapsed the service layer at beginning. default is false, which means expand if visible, collapse if not.
    *
    */
   /**
@@ -421,7 +466,7 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
     this._serviceWidgets = [];
     if (!this.layerInfos) {
       this.layerInfos = [];
-      for (var i = this.map.layerIds.length - 1; i > 0; i--) {
+      for (var i = this.map.layerIds.length - 1; i >= 0; i--) {
         var layer = this.map.getLayer(this.map.layerIds[i]);
         this.layerInfos.push({
           layer: layer

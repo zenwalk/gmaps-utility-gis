@@ -45,7 +45,12 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       spatialReference: {
         wkid: 102100
       },
-      lods: [{
+      lods: [
+      {
+        level: 0,
+        resolution: 156543.033928,
+        scale: 591657527.591555
+      },{
         level: 1,
         resolution: 78271.5169639999,
         scale: 295828763.795777
@@ -131,6 +136,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
   },
   /**
    * set map type id.
+   * @public
    * @param {google.maps.MapTypeId|String} mapTypeId, one of google.maps.MapTypeId.ROADMAP|HYBRID|STELLITE|TERRIAN
    */
   setMapTypeId: function (mapTypeId) {
@@ -140,6 +146,10 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     } else {
       this._options.mapTypeId = mapTypeId;
     }
+    this._mapTypeChangeHandler();
+  },
+  onMapTypeIdChanged: function(mapTypeId) {
+    // event
   },
   /**
    * get the wrapped <code>google.maps.Map</code>.
@@ -155,18 +165,18 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     // console.log('_setMap');
     // this is likely called inside esriMap.addLayer()
     this._map = map;
-    var div = document.createElement('div');
+    var div = dojo.create('div', layersDiv);
     if (this._options.id) {
       div.id = this.id;
     }
-    dojo.style(div, {
+    var style = {
       position: 'absolute',
       top: '0px',
       left: '0px',
       width: (map.width || layersDiv.offsetWidth) + 'px',
       height: (map.height || layersDiv.offsetHeight) + 'px'
-    });
-    layersDiv.appendChild(div);
+    };
+    dojo.style(div, style);
     this._div = div;
     this._visibilityChangeHandle = dojo.connect(this, 'onVisibilityChange', this, this._visibilityChangeHandler);
     this._opacityChangeHandle = dojo.connect(this, 'onOpacityChange', this, this._onOpacityChangeHandler);
@@ -174,6 +184,8 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     if (this.visible) {
       this._initGMap();
     }
+    //this._controlDiv = dojo.create('div', {id:div.id + '_controls'}, layersDiv, 'after');
+    //dojo.style(this._controlDiv, style);
     return div;
   },
   _unsetMap: function (map, layersDiv) {
@@ -190,6 +202,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     dojo.disconnect(this._resizeHandle);
     dojo.disconnect(this._visibilityChangeHandle);
     dojo.disconnect(this._opacityChangeHandle);
+    dojo.disconnect(this._gmapTypeChangeHandle);
   },
   // delayed init and Api loading.
   _initGMap: function () {
@@ -197,13 +210,15 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     if (window.google && google.maps) {
       var ext = this._map.extent;
       var center = this._options.center || this._esriPointToLatLng(ext.getCenter());
-      var level = this._map.getLevel()+1;
+      var level = this._map.getLevel();//+1;
       var myOptions = {
         mapTypeId: this._options.mapTypeId || google.maps.MapTypeId.ROADMAP,
         disableDefaultUI: true,
-        draggable: false, // maybe makes no difference because mouse events intercepted by ESRI JS.
         center: center,
-        zoom: this._options.zoom || (level > -1) ? level : 1
+        zoom: this._options.zoom || (level > -1) ? level : 1,
+        panControl: false,
+        streetViewControl: false,
+        zoomControl: false
       };
       var gmap = new google.maps.Map(this._div, myOptions);
       if (level < 1) {
@@ -213,6 +228,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       this._extentChangeHandle = dojo.connect(this._map, 'onExtentChange', this, this._extentChangeHandler);
       this._panHandle = dojo.connect(this._map, 'onPan', this, this._panHandler);
       this._resizeHandle = dojo.connect(this._map, 'onResize', this, this._resizeHandler);
+      this._gmapTypeChangeHandle = google.maps.event.addListener(this._gmap, 'maptypeid_changed', dojo.hitch(this, this._mapTypeChangeHandler));
       this.onLoad(this);
     } else if (agsjs.onGMapsApiLoad) {
       // did another instance already started loading agsjs API but not done?
@@ -222,6 +238,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       // this is the first instance that tries to load agsjs API on-demand
       agsjs.onGMapsApiLoad = function () {
         // do nothing, just needed to dispatch event.
+       
       };
       dojo.connect(agsjs, 'onGMapsApiLoad', this, this._initGMap);
       var script = document.createElement('script');
@@ -267,9 +284,9 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       this.visible = true;
       if (this._gmap) {
         google.maps.event.trigger(this._gmap, 'resize');
-        this._setExtent(this._map.extent);
         this._panHandle = this._panHandle || dojo.connect(this._map, "onPan", this, "_panHandler");
         this._extentChangeHandle = this._extentChangeHandle || dojo.connect(this._map, "onExtentChange", this, "_extentChangeHandler");
+        this._setExtent(this._map.extent);
       } else {
         this._initGMap();
       }
@@ -307,13 +324,39 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     this._gmap.setCenter(this._esriPointToLatLng(extent.getCenter()));
     
   },
+  _mapTypeChangeHandler: function(){
+    this._checkZoomLevel();
+    this.onMapTypeIdChanged(this._gmap.getMapTypeId());
+  },
+  _checkZoomLevel: function(){
+    var id = this._gmap.getMapTypeId();
+    var types = this._gmap.mapTypes;
+    var maptype = null;
+    for (var x in types) {
+      if (types.hasOwnProperty(x) && x == id) {
+        maptype = types[x]; break;
+      }
+    }
+    // prevent the case when switch to terrain causing misalignment because terrain only up to level 15.
+    if (maptype!=null){
+      var mi = maptype.minZoom;
+      var mx = maptype.maxZoom;
+      var z = this._map.getLevel();
+      if (mx !== undefined && z > mx) {
+        this._map.setLevel(mx);
+      }
+      if (mi != undefined && z < mi) {
+        this._map.setLevel(mi);
+      }
+    }
+  },
   _setExtent: function (extent) {
-    console.log('setextent');
-    var lv = this._map.getLevel()+1;
+    var lv = this._map.getLevel();//+1;
     if (lv >= 0) {
       var ct = this._esriPointToLatLng(extent.getCenter());
       this._gmap.setZoom(lv);
       this._gmap.setCenter(ct);
+      this._checkZoomLevel();
     } else {
       this._gmap.fitBounds(this._esriExtentToLatLngBounds(extent));
     }
