@@ -76,7 +76,8 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
       this.checkNode.checked = data.visible;
     }
     var show = data.visible;
-    if (data.collapsed) show = false;
+    if (data.collapsed) 
+      show = false;
     if (this.iconNode.src == blank) {
       dojo.addClass(this.iconNode, 'dijitTreeExpando');
       dojo.addClass(this.iconNode, show ? 'dijitTreeExpandoOpened' : 'dijitTreeExpandoClosed');
@@ -131,17 +132,21 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     } else {
       dojo.addClass(this.rowNode, 'agsTOCLayer');
       dojo.addClass(this.labelNode, 'agsTOCLayerLabel');
-      if (agsjs.layers && this.service instanceof agsjs.layers.GoogleMapsLayer){
+      if (agsjs.layers && this.service instanceof agsjs.layers.GoogleMapsLayer) {
         var mapid = '';
         var gmap = this.service.getGMap();
-        if (gmap)  mapid = gmap.getMapTypeId();
+        if (gmap) 
+          mapid = gmap.getMapTypeId();
         var value = layer.name.toLowerCase();// may need change in future version.
-        this.radioNode = dojo.create('input', {
-          'type': 'radio',
-          name: 'gmaps' + this.service.id,
-          value: value,
-          checked: mapid == value
-        }, this.checkNode, 'replace');
+        if (layer.type == 'base') {
+          this.radioNode = dojo.create('input', {
+            'type': 'radio',
+            name: 'gmaps' + this.service.id,
+            value: value,
+            checked: mapid == value
+          }, this.checkNode, 'replace');
+        }
+        
         
       } else if (this.service.tileInfo) {//} instanceof esri.layers.TiledMapServiceLayer) {
         dojo.destroy(this.checkNode);
@@ -230,44 +235,53 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
       if (this.checkNode) {
         this.checkNode.disabled = outScale;
         this.checkNode.checked = this.layer.visible;
-      } 
+      }
       if (this.radioNode) {
         var checked = false;
-        if (this.service.getGMap() != null){
+        if (this.service.getGMap() != null) {
           checked = this.radioNode.value == this.service.getGMap().getMapTypeId()
         }
-        this.radioNode.checked =  checked;
-      } 
+        this.radioNode.checked = checked;
+      }
     }
   },
   _onClick: function(evt) {
     var t = evt.target;
     if (t == this.checkNode) {
-      if (this.serviceTOC.toc.style == 'inline') {
-        this._toggleContainer(this.checkNode.checked);
-      }
       if (this.layer) {
         this.layer.visible = this.checkNode.checked;
-        var vis = [];
-        dojo.forEach(this.service.layerInfos, function(layerInfo) {
-          if (layerInfo.subLayerIds) {
-            // if a group layer is set to vis, all sub layer will be drawn
-            return;
+        if (agsjs.layers && this.service instanceof agsjs.layers.GoogleMapsLayer) {
+          if (this.layer.type == 'overlay') {// service node has no layer info
+            this.service.setOverlay(this.layer.name, this.checkNode.checked);
           }
-          if (layerInfo.visible) 
-            vis.push(layerInfo.id);
-        });
-        if (vis.length === 0) {
-          vis.push(-1);
+        } else {
+          var vis = [];
+          dojo.forEach(this.service.layerInfos, function(layerInfo) {
+            if (layerInfo.subLayerIds) {
+              // if a group layer is set to vis, all sub layer will be drawn
+              return;
+            }
+            if (layerInfo.visible) 
+              vis.push(layerInfo.id);
+          });
+          if (vis.length === 0) {
+            vis.push(-1);
+          }
+          this.service.setVisibleLayers(vis, false);
+          this.serviceTOC._refreshLayer();
         }
-        this.service.setVisibleLayers(vis, false);
-        this.serviceTOC._refreshLayer();
+        
       } else if (this.service) {
         this.service.setVisibility(this.checkNode.checked);
       }
+      if (this.serviceTOC.toc.style == 'inline') {
+        this._toggleContainer(this.checkNode.checked);
+      }
+      
     } else if (t == this.iconNode) {
       this._toggleContainer();
-    } else if (t == this.radioNode){
+    } else if (t == this.radioNode) {
+      // google
       if (this.service.setMapTypeId) {
         this.service.setMapTypeId(t.value);
       }
@@ -300,13 +314,23 @@ dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
       }
       // may need change in future version. use this naming convention to avoid the requirement of loading gmaps api
       this.service.tocInfos = [{
-        'name': 'Hybrid'
+        'name': 'Traffic',
+        'type': 'overlay'
       }, {
-        'name': 'RoadMap'
+        'name': 'Bicycling',
+        'type': 'overlay'
       }, {
-        'name': 'Satellite'
+        'name': 'Hybrid',
+        'type': 'base'
       }, {
-        'name': 'Terrain'
+        'name': 'RoadMap',
+        'type': 'base'
+      }, {
+        'name': 'Satellite',
+        'type': 'base'
+      }, {
+        'name': 'Terrain',
+        'type': 'base'
       }];
     } else {
       this.info.noLayers = true;
@@ -394,7 +418,7 @@ dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
     this._visHandler = dojo.connect(service, "onVisibilityChange", this, "_adjustToState");
     // this will make sure all TOC linked to a Map synchronized.
     this._visLayerHandler = dojo.connect(service, "setVisibleLayers", this, "_adjustToState");
-    if (agsjs.layers && this.service instanceof (agsjs.layers.GoogleMapsLayer)){
+    if (agsjs.layers && this.service instanceof (agsjs.layers.GoogleMapsLayer)) {
       this._maptypeIdHandler = dojo.connect(service, "onMapTypeIdChanged", this, "_adjustToState");
     }
   },

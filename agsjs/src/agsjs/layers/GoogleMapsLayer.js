@@ -7,6 +7,8 @@
  * Change log: 2011-08-11: fixed zoom difference. changed package name.
  *  </p>
  */
+window.google = window.google || {};
+      
 /*global dojo esri  agsjs */
 dojo.provide('agsjs.layers.GoogleMapsLayer');
 
@@ -133,6 +135,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     this._options = opts;
     this._gmap = null;
     this.loaded = true;// it seems _setMap will only get called if loaded = true;
+    this._glayers = {};
   },
   /**
    * set map type id.
@@ -165,7 +168,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     // console.log('_setMap');
     // this is likely called inside esriMap.addLayer()
     this._map = map;
-    var div = dojo.create('div', layersDiv);
+    var div = dojo.create('div', {}, layersDiv);
     if (this._options.id) {
       div.id = this.id;
     }
@@ -178,6 +181,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     };
     dojo.style(div, style);
     this._div = div;
+    this._layersDiv = layersDiv;
     this._visibilityChangeHandle = dojo.connect(this, 'onVisibilityChange', this, this._visibilityChangeHandler);
     this._opacityChangeHandle = dojo.connect(this, 'onOpacityChange', this, this._onOpacityChangeHandler);
     this.visible = (this._options.visible === undefined) ? true : this._options.visible;
@@ -190,9 +194,6 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
   },
   _unsetMap: function (map, layersDiv) {
     // see _setMap. Undocumented method, but probably should be public.
-    if (layersDiv) {
-      layersDiv.removeChild(this._div);
-    }
     dojo.destroy(this._div);
     this._map = null;
     this._div = null;
@@ -211,18 +212,23 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       var ext = this._map.extent;
       var center = this._options.center || this._esriPointToLatLng(ext.getCenter());
       var level = this._map.getLevel();//+1;
+      
       var myOptions = {
         mapTypeId: this._options.mapTypeId || google.maps.MapTypeId.ROADMAP,
-        disableDefaultUI: true,
+        disableDefaultUI: false,
         center: center,
         zoom: this._options.zoom || (level > -1) ? level : 1,
         panControl: false,
-        streetViewControl: false,
+        streetViewControl: true,
+        mapTypeControl: false,
         zoomControl: false
       };
       var gmap = new google.maps.Map(this._div, myOptions);
-      if (level < 1) {
-        gmap.fitBounds(this._esriExtentToLatLngBounds(ext));
+      if (level < 0) {
+       dojo.connect(this._map, 'onLoad', dojo.hitch(this, function(){
+         this._setExtent(ext);
+       }));
+       //gmap.fitBounds(this._esriExtentToLatLngBounds(ext));
       }
       this._gmap = gmap;
       this._extentChangeHandle = dojo.connect(this._map, 'onExtentChange', this, this._extentChangeHandler);
@@ -230,12 +236,14 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       this._resizeHandle = dojo.connect(this._map, 'onResize', this, this._resizeHandler);
       this._gmapTypeChangeHandle = google.maps.event.addListener(this._gmap, 'maptypeid_changed', dojo.hitch(this, this._mapTypeChangeHandler));
       this.onLoad(this);
+     
     } else if (agsjs.onGMapsApiLoad) {
       // did another instance already started loading agsjs API but not done?
       // this should be very very rare because one instance of this layer would be suffient with setMapTypeId.
-      dojo.connect(agsjs, 'onGMapsApiLoad', this, this._initGMap);
+      //dojo.connect(agsjs, 'onGMapsApiLoad', this, this._initGMap);
     } else {
       // this is the first instance that tries to load agsjs API on-demand
+      
       agsjs.onGMapsApiLoad = function () {
         // do nothing, just needed to dispatch event.
        
@@ -278,14 +286,14 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     this.opacity = opacity;
   },
   _visibilityChangeHandler: function (v) {
-    // console.log('_visibilityChangeHandler' + v);
     if (v) {
       esri.show(this._div);
       this.visible = true;
       if (this._gmap) {
+        //
         google.maps.event.trigger(this._gmap, 'resize');
-        this._panHandle = this._panHandle || dojo.connect(this._map, "onPan", this, "_panHandler");
-        this._extentChangeHandle = this._extentChangeHandle || dojo.connect(this._map, "onExtentChange", this, "_extentChangeHandler");
+        this._panHandle = this._panHandle || dojo.connect(this._map, "onPan", this, this._panHandler);
+        this._extentChangeHandle = this._extentChangeHandle || dojo.connect(this._map, "onExtentChange", this, this._extentChangeHandler);
         this._setExtent(this._map.extent);
       } else {
         this._initGMap();
@@ -294,6 +302,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       if (this._div) {
         esri.hide(this._div);
         this.visible = false;
+        //this._moveDown();
         if (this._panHandle) {
           dojo.disconnect(this._panHandle);
           this._panHandle = null;
@@ -361,6 +370,39 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       this._gmap.fitBounds(this._esriExtentToLatLngBounds(extent));
     }
   },
+  setOverlay: function(layerName, visible) {
+    var ov;
+    if (!visible){
+      ov = this._glayers[layerName];
+      if (ov) {
+        ov.setMap(null);
+      }
+      delete this._glayers[layerName];
+    } else {
+      switch (layerName.toLowerCase()){
+      case 'traffic':
+         ov = new google.maps.TrafficLayer();
+         break;
+      case 'bicycling':
+         ov = new google.maps.BicyclingLayer();
+         break;
+      }
+      if (ov) {
+        ov.setMap(this._gmap);
+        this._glayers[layerName] = ov;
+      }
+    }
+    
+  },
+  // move teh div on top of ags layer Divs to recieve events
+  _moveUp: function(){
+    this._placeHolder = dojo.create('div', {}, this._div, 'replace');
+    dojo.place(this._div, this._map.id, 'last');//
+  },
+  _moveDown: function(){
+    dojo.place(this._div, this._placeHolder, 'replace');
+  },
+ 
   _esriPointToLatLng: function (pt) {
     var ll = esri.geometry.webMercatorToGeographic(pt);
     return new google.maps.LatLng(ll.y, ll.x);

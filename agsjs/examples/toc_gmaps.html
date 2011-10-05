@@ -51,8 +51,8 @@
             dojo.require("dijit.dijit"); // optimize: load dijit layer
             dojo.require("dijit.layout.BorderContainer");
             dojo.require("dijit.layout.ContentPane");
-            dojo.require("esri.map");
             dojo.require("dijit.layout.AccordionContainer");
+            dojo.require("esri.map");
             dojo.require("agsjs.dijit.TOC");
             dojo.require("agsjs.layers.GoogleMapsLayer");
         </script>
@@ -71,16 +71,19 @@
               map = new esri.Map("map", {
                 extent: initialExtent
               });
+              dojo.connect(map, 'onLoad', function(map) {
+                dojo.connect(dijit.byId('map'), 'resize', resizeMap);
+              });
               
+              //Add the terrain service to the map. View the ArcGIS Online site for services http://arcgisonline/home/search.html?t=content&f=typekeywords:service    
               var googlemap = new agsjs.layers.GoogleMapsLayer({
                 id: 'googlemaps',
                 visible: true
-              });
+              });//
               map.addLayer(googlemap);
-              
               var basemap = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer", {
                 visible: false,
-                opacity: 0.8,
+                opacity: 0.5,
                 id: 'topo'
               });
               map.addLayer(basemap);
@@ -92,45 +95,37 @@
               
               dojo.connect(map, 'onLayersAddResult', function(results) {
               
-                var toc = new agsjs.dijit.TOC({
+                var sliderTOC = new agsjs.dijit.TOC({
                   map: map,
                   layerInfos: [{
                     layer: operational,
-                    title: "Dynamic Map Service",
+                    title: "Operational Layers",
                     slider: true,
-                    collapsed: true // initial state
+                    collapsed: true
                   }, {
                     layer: basemap,
-                    title: "ArcGIS Tiled Map Service",
-                    slider: true,
-                    noLayers: true // hide detailed layer list
+                    title: "ArcGIS BaseMap",
+                    slider: true, noLayers: true
                   }, {
                     layer: googlemap,
                     title: "Google Maps",
-                    slider: false
+                    slider: true
                   }]
-                }, 'tocDiv');
-                toc.startup();
+                }, 'sliderDiv');
+                sliderTOC.startup();
               });
               map.addLayers([operational]);
-              /*
-               * ,
-               */
-              //resize the map when the browser resizes - view the 'Resizing and repositioning the map' section in
-              //the following help topic for more details http://help.esri.com/EN/webapi/javascript/arcgis/help/jshelp_start.htm#jshelp/inside_guidelines.htm      
-              var resizeTimer;
-              dojo.connect(map, 'onLoad', function(theMap) {
-                dojo.connect(dijit.byId('map'), 'resize', function() { //resize the map if the div is resized
-                  clearTimeout(resizeTimer);
-                  resizeTimer = setTimeout(function() {
-                    map.resize();
-                    map.reposition();
-                  }, 500);
-                });
-              });
-              
             }
-            
+            var resizeTimer;
+            function resizeMap() {
+              //resize the map when the browser resizes - view the 'Resizing and repositioning the map' section in 
+              //the following help topic for more details http://help.esri.com/EN/webapi/javascript/arcgis/help/jshelp_start.htm#jshelp/inside_faq.htm
+              clearTimeout(resizeTimer);
+              resizeTimer = setTimeout(function() {
+                map.resize();
+                map.reposition();
+              }, 500);
+            }
             dojo.addOnLoad(init);
         </script>
     </head>
@@ -138,12 +133,9 @@
         <div id="content" dojotype="dijit.layout.BorderContainer" design="headline" gutters="true" style="width: 100%; height: 100%; margin: 0;">
             <div id="header" dojotype="dijit.layout.ContentPane" region="top">
                 TOC widget: ArcGIS Tiled Map Service, Google Maps, Dynamic Service
-                <div id="subheader">
-                  
-                </div>
             </div>
             <div dojotype="dijit.layout.ContentPane" id="leftPane" region="left" splitter="true">
-                <div id="tocDiv">
+                <div id="sliderDiv">
                 </div>
             </div>
             <div id="map" dojotype="dijit.layout.ContentPane" region="center">
