@@ -419,7 +419,7 @@ dojo.declare('agsjs.dijit._ServiceTOC', [dijit._Widget], {
     // this will make sure all TOC linked to a Map synchronized.
     this._visLayerHandler = dojo.connect(service, "setVisibleLayers", this, "_adjustToState");
     if (agsjs.layers && this.service instanceof (agsjs.layers.GoogleMapsLayer)) {
-      this._maptypeIdHandler = dojo.connect(service, "onMapTypeIdChanged", this, "_adjustToState");
+     // this._maptypeIdHandler = dojo.connect(service, "onMapTypeIdChanged", this, "_adjustToState");
     }
   },
   _refreshLayer: function() {
