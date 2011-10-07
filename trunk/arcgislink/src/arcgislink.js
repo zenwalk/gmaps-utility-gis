@@ -2188,7 +2188,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     '' +
     bnds.getNorthEast().lat();
     //delete params.bounds;
-    
+    //log_('send '+bnds.toUrlValue());
     params.size = '' + p.width + ',' + p.height;
     params.dpi = p.dpi;
     
@@ -2240,6 +2240,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
       getJSON_(this.url + '/export', params, '', function (json) {
         if (json.extent) {
           json.bounds = fromEnvelopeToLatLngBounds_(json.extent);
+          //log_('got '+json.bounds.toUrlValue());
           delete json.extent;
           callback(json); 
         } else {
@@ -3472,6 +3473,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     this.drawing_ = false;
     // do we need another refresh. Normally happens bounds changed before server returns image.
     this.needsNewRefresh_ = false;
+    this.overlay_ = null;
     this.div_ = null;
     // Once the LatLng and text are set, add the overlay to the map.  This will
     // trigger a call to panes_changed which should in turn call draw.
@@ -3479,6 +3481,7 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
       this.setMap(opt_overlayOpts.map);
     }
     this.map_ = null;
+    this.listeners_= [];
   }
 
   MapOverlay.prototype = new G.OverlayView();
@@ -3488,18 +3491,14 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    * This will be called after setMap(map) is called.
    */
   MapOverlay.prototype.onAdd = function() {
-    var div = document.createElement("div");
-    div.style.position = "absolute";
-    
-    div.style.border = 'none'; //'1px solid red';
-    this.div_ = div;
-    
-    var panes = this.getPanes();
-    panes.overlayLayer.appendChild(div);
-    if (this.opacity_) {
-      setNodeOpacity_(div, this.opacity_);
-    }
-    this.boundsChangedListener_ = G.event.addListener(this.getMap(), 'bounds_changed', callback_(this.refresh, this));
+    var me = this;
+    this.listeners_.push(G.event.addListener(this.getMap(), 'bounds_changed', callback_(this.refresh, this)));
+    this.listeners_.push(G.event.addListener(this.getMap(), 'dragstart', function(){
+      me.dragging = true; 
+    }));
+    this.listeners_.push(G.event.addListener(this.getMap(), 'dragend', function(){
+      me.dragging = false; 
+    }));
     var map = this.getMap();
     map.agsOverlays = map.agsOverlays || new G.MVCArray();
     map.agsOverlays.push(this);
@@ -3512,9 +3511,13 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    * Handler when overlay is removed.
    */
   MapOverlay.prototype.onRemove = function() {
-    G.event.removeListener(this.boundsChangedListener_);
-    this.div_.parentNode.removeChild(this.div_);
-    this.div_ = null;
+    for (var i = 0, j = this.listeners_.length; i < j; i++){
+      G.event.removeListener(this.listeners_[i]);
+    }
+    //G.event.removeListener(this.zoomChangedListener_);
+    //this.div_.parentNode.removeChild(this.div_);
+    //this.div_ = null;
+    if (this.overlay_) this.overlay_.setMap(null);
     var map = this.map_;// getMap();
     var agsOvs = map.agsOverlays;
     if (agsOvs) {
@@ -3535,9 +3538,8 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    */
   MapOverlay.prototype.draw = function () {
     if (!this.drawing_ || this.needsNewRefresh_ === true) {
-      this.refresh();
+      this.refresh(); 
     }
-    
   };
 
   MapOverlay.prototype['draw'] = MapOverlay.prototype.draw;
@@ -3555,8 +3557,9 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
   MapOverlay.prototype.setOpacity = function (opacity) {
     var op = Math.min(Math.max(opacity, 0), 1);
     this.opacity_ = op;
-    var img = this.div_;
-    setNodeOpacity_(img, op);
+    if (this.overlay_) {
+      setNodeOpacity_(this.overlay_.div_, op);
+    }
   };
   /**
    * Gets underline {@link MapService}.
@@ -3569,7 +3572,6 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
    * Refresh the map image in current view port.
    */
   MapOverlay.prototype.refresh = function () {
-  
     if (this.drawing_ === true) {
       this.needsNewRefresh_ = true;
       return;
@@ -3602,32 +3604,27 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     triggerEvent_(this, 'drawstart');
     var me = this;
     this.drawing_ = true;
-    this.div_.style.backgroundImage = '';
+    if (!this.dragging && this.overlay_){
+      this.overlay_.setMap(null);
+      this.overlay_ = null;
+    }
+    //this.div_.style.backgroundImage = '';
+    
     this.mapService_.exportMap(params, function (json) {
       me.drawing_ = false;
+      
       if (me.needsNewRefresh_ === true) {
         me.needsNewRefresh_ = false;
         me.refresh();
         return;
       }
       if (json.href) {
-        // Size and position the overlay. We use a southwest and northeast
-        // position of the overlay to peg it to the correct position and size.
-        // We need to retrieve the projection from this overlay to do this.
-        var overlayProjection = me.getProjection();
-        
-        var bounds = json.bounds;//this.getMap().getBounds();
-        var sw = overlayProjection.fromLatLngToDivPixel(bounds.getSouthWest());
-        var ne = overlayProjection.fromLatLngToDivPixel(bounds.getNorthEast());
-        
-        // Resize the image's DIV to fit the indicated dimensions.
-        var div = me.div_;
-        div.style.left = sw.x + 'px';
-        div.style.top = ne.y + 'px';
-        div.style.width = (ne.x - sw.x) + 'px';
-        div.style.height = (sw.y - ne.y) + 'px';
-        me.div_.style.backgroundImage = 'url(' + json.href + ')';
-        me.setOpacity(me.opacity_);
+        if (me.overlay_) {
+          me.overlay_.setMap(null);
+          me.overlay_ = null;
+        }
+       me.overlay_ = new ImageOverlay(json.bounds, json.href, me.map_);
+       
       }
       /**
        * This event is fired after the the drawing request was returned by server.
@@ -3676,6 +3673,63 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     this.div_.style.visibility = 'hidden';
   };
   
+  /**
+   * @class simply an image overaly. Added due to some unknown problems related to 
+   * overlayLayer pane after bounds change since gmaps API v3.4. 
+   * this class is based on sample code USGSOverlay
+   * @constructor
+   * @param {Object} bounds
+   * @param {Object} url
+   * @param {Object} map
+   */
+  function ImageOverlay(bounds, url, map) {
+    this.bounds_ = bounds;
+    this.url_ = url;
+    this.map_ = map;
+    this.div_ = null;
+    this.setMap(map);
+  }
+  
+  ImageOverlay.prototype = new G.OverlayView();
+  ImageOverlay.prototype.onAdd = function() {
+    var div = document.createElement('DIV');
+    div.style.border = "none";
+    div.style.borderWidth = "0px";
+    div.style.position = "absolute";
+    div.style.backgroundImage = 'url(' + this.url_ + ')';
+    
+    // Set the overlay's div_ property to this DIV
+    this.div_ = div;
+    
+    // We add an overlay to a map via one of the map's panes.
+    // We'll add this overlay to the overlayImage pane.
+    var panes = this.getPanes();
+    panes.overlayLayer.appendChild(div);
+  };
+  ImageOverlay.prototype.draw = function() {
+  
+    // Size and position the overlay. We use a southwest and northeast
+    // position of the overlay to peg it to the correct position and size.
+    // We need to retrieve the projection from this overlay to do this.
+    var overlayProjection = this.getProjection();
+    
+    // Retrieve the southwest and northeast coordinates of this overlay
+    // in latlngs and convert them to pixels coordinates.
+    // We'll use these coordinates to resize the DIV.
+    var sw = overlayProjection.fromLatLngToDivPixel(this.bounds_.getSouthWest());
+    var ne = overlayProjection.fromLatLngToDivPixel(this.bounds_.getNorthEast());
+    
+    // Resize the image's DIV to fit the indicated dimensions.
+    var div = this.div_;
+    div.style.left = sw.x + 'px';
+    div.style.top = ne.y + 'px';
+    div.style.width = (ne.x - sw.x) + 'px';
+    div.style.height = (sw.y - ne.y) + 'px';
+  };
+  ImageOverlay.prototype.onRemove = function() {
+    this.div_.parentNode.removeChild(this.div_);
+    this.div_ = null;
+  }
   /**
  * Creates a copyright control
  * @name CopyrightControl
