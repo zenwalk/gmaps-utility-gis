@@ -219,7 +219,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
         center: center,
         zoom: this._options.zoom || (level > -1) ? level : 1,
         panControl: false,
-        streetViewControl: true,
+        streetViewControl: this._options.streetViewControl || false,
         mapTypeControl: false,
         zoomControl: false
       };
