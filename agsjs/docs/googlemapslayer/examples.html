@@ -19,7 +19,7 @@
         <div>
             <h2><a name="About"></a>About</h2>
             <p>
-                This script lets you add google maps as a layer in ArcGIS Server JavaScript API. It uses Google API to access tiles, thus it conforms to API terms of use.
+                This script lets you add google maps as a layer in ArcGIS Server JavaScript API. It uses Google API to access tiles, thus it conforms to API terms of use(TOU).
                 However, if apps are to deployed in Intranet, a Google Maps Premium license is still needed, which is separate from API TOU.
             </p>
             <p>
@@ -71,7 +71,7 @@
             <h2>Add a Google Maps Layer</h2>
             <p>
                 After the script is loaded, you can simply treat Google Maps as other layer in 
-                your application. 
+                your application. The constructor takes a few parameters to customize the layer such as API version, mapOptions etc. See reference doc for details. 
             </p>
             <pre class="prettyprint">
        map = new esri.Map("map", {
@@ -79,7 +79,13 @@
          logo: false
        });
        ... 
-       var gMapLayer = new agsjs.layers.GoogleMapsLayer({visible:false, id:&#39;googlemaps&#39;});
+       var gMapLayer = new agsjs.layers.GoogleMapsLayer({
+            visible:false, 
+            id:&#39;googlemaps&#39;,
+            apiOptions: {
+                v: '3.6'
+           }
+        });
        map.addLayer(gMapLayer);
         </pre>
             <p>
@@ -93,7 +99,36 @@
                 <a href="../../examples/gmapslayer.html">View example </a>
             </p>
         </div>
-       
+        <div>
+            <h2>Street View Control</h2>
+            <p>
+                By default, the Street View Control (pegman) is enabled. If you drag the icon and place it on a blue street, street view image will be displayed. If you do not want to have this feature, set <code>streetViewControl:false</code>
+            </p>
+            <pre class="prettyprint">
+       var gMapLayer = new agsjs.layers.GoogleMapsLayer({
+            visible:false, 
+            id:&#39;googlemaps&#39;,
+            mapOptions: {
+              streetViewControl: false
+            }
+        });
+        </pre>
+        </div>
+        <div>
+            <h2>Sub Layers</h2>
+            <p>
+              To simulate ArcGIS layers, the <code>layerInfos</code> property and <code>setVisibileLayer(ids)</code> make it possible to customize 
+              Google maps, sort of "dynamic tiled layer". Currently, traffic, bicyling, and some high level features such as adminitrative, road, transit etc can be turned on/off. 
+              See <a href="../../examples/gmapslayer.html">example</a> for how to use it.
+            </p>
+        </div>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        
+        
         <script type="text/javascript">
             
             var _gaq = _gaq || [];
