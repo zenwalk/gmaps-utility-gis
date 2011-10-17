@@ -134,7 +134,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
       dojo.addClass(this.labelNode, 'agsTOCLayerLabel');
       if (agsjs.layers && this.service instanceof agsjs.layers.GoogleMapsLayer) {
         var mapid = '';
-        var gmap = this.service.getGMap();
+        var gmap = this.service.getGoogleMapInstance();
         if (gmap) 
           mapid = gmap.getMapTypeId();
         var value = layer.name.toLowerCase();// may need change in future version.
@@ -238,8 +238,8 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
       }
       if (this.radioNode) {
         var checked = false;
-        if (this.service.getGMap() != null) {
-          checked = this.radioNode.value == this.service.getGMap().getMapTypeId()
+        if (this.service.getGoogleMapInstance() != null) {
+          checked = this.radioNode.value == this.service.getGoogleMapInstance().getMapTypeId()
         }
         this.radioNode.checked = checked;
       }
