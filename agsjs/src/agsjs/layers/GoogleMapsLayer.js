@@ -1,12 +1,15 @@
 /**
  * @name Google Maps Layer for ArcGIS Server JavaScript API
- * @version 1.2
  * @author: Nianwei Liu (nianwei at gmail dot com)
  * @fileoverview
  * <p>Use Google Maps in application built on ESRI ArcGIS Server JavaScript API and dojo.
  *  </p>
  */
-// Change log: 2011-08-11: fixed zoom difference. changed package name.
+// Change log: 
+//2011-11-18: v1.04, xd built
+//2011-11-17: v1.03, added support for StreetView, Sub layers (Traffic, Point of Interest etc)
+//2011-10-05: fixed issues with Chrome, IE7, IE8
+//2011-08-11: updated for JSAPI 2.4. changed package.
 
 window.google = window.google || {}; // somehow IE needs this, otherwise complain google.maps namespace;
 /*global dojo esri  agsjs */
@@ -261,7 +264,6 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
   // delayed init and Api loading.
   _initGMap: function() {
     if (window.google && google.maps) {
-      console.log(google.maps.ControlPosition.TOP_LEFT);
       var ext = this._map.extent;
       var center = this._mapOptions.center || this._esriPointToLatLng(ext.getCenter());
       var level = this._map.getLevel();//+1;
@@ -671,7 +673,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       }
       layerInfos.push(layerInfo);
     }
-    console.log(dojo.toJson(layerInfos, true));
+    //console.log(dojo.toJson(layerInfos, true));
     return layerInfos;
   }
   
