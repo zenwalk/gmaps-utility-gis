@@ -382,7 +382,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     for (i = 0, j = this._overlayLayerNames.length; i < j; i++) {
       var ov = this._overlayLayerNames[i];
       layer = this._glayers[ov.key];
-      if (layerIds.indexOf('' + (i)) != -1) {
+      if (dojo.indexOf(layerIds,'' + (i)) != -1) {
         // visible
         if (layer == null) {
           switch (ov.key) {
@@ -413,7 +413,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     for (i = 0, j = this._featureTypeNames.length; i < j; i++) {
       var style = {};
       item = this._featureTypeNames[i];
-      var enabled = layerIds.indexOf('' + (i + this._overlayLayerNames.length)) != -1;
+      var enabled = dojo.indexOf(layerIds,'' + (i + this._overlayLayerNames.length)) != -1;
       if (!enabled) {
         style['featureType'] = item.key;
         style['elementType'] = 'all';
