@@ -30,7 +30,9 @@
               parseOnLoad: true,
               baseUrl: './',
               modulePaths: {
-                'agsjs': '../build/agsjs'
+                // if use local copy, make sure the path reference is relative to 'baseUrl', e.g.:
+                // 'agsjs': '../build/agsjs'
+                'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/1.04/build/agsjs'
               }
             };
         </script>
