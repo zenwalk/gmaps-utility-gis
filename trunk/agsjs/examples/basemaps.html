@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=7" />
+        <!--The viewport meta tag is used to improve the presentation and behavior of the samples
+        on iOS devices-->
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+        <title></title>
+        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.4/js/dojo/dijit/themes/claro/claro.css">
+        <style type="text/css">
+            html, body {
+                height: 100%;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            
+            body {
+                overflow: hidden;
+            }
+            
+            #map {
+                overflow: hidden;
+                padding: 0;
+            }
+        </style>
+        <script type="text/javascript">
+            var djConfig = {
+              parseOnLoad: true,
+              baseUrl: './',
+              modulePaths: {
+                // if use local copy, make sure the path reference is relative to 'baseUrl', e.g.:
+                'agsjs': '../src/agsjs'
+                //'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/1.04/build/agsjs'
+              }
+            };
+        </script>
+       <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.1">
+        </script>
+        <script type="text/javascript">
+            dojo.require("dijit.dijit"); // optimize: load dijit googleLayer
+            dojo.require("dijit.form.Button");
+            dojo.require("dijit.layout.BorderContainer");
+            dojo.require("dijit.layout.ContentPane");
+            dojo.require("dijit.layout.TabContainer");
+            dojo.require("esri.map");
+            dojo.require("agsjs.layers.GoogleMapsLayer");
+            dojo.require("agsjs.dijit.BasemapControl");
+            
+            function init() {
+              //US: "xmin": -13220472,  "ymin": 3459539, "xmax": -8817699, "ymax": 6394721,
+              var initExtent = new esri.geometry.Extent({
+                "xmin": -9031493,
+                "ymin": 4170327,
+                "xmax": -8962700,
+                "ymax": 4216189,
+                "spatialReference": {
+                  "wkid": 102100
+                }
+              });
+              
+              
+              map = new esri.Map("map", {
+                extent: initExtent
+              });
+              createBasemapGallery();
+              dojo.connect(map, 'onLoad', function(map) {
+                dojo.connect(dijit.byId('map'), 'resize', resizeMap);
+                
+              });
+              
+              
+            }
+            
+            function createBasemapGallery() {
+              //manually create basemaps to add to basemap gallery
+              var basemaps = [{
+                title: 'BaseMaps',
+                layers: [{
+                  name: 'City GIS',
+                  url: 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/WEB/BaseMap/MapServer',
+                  visible: true
+                }, {
+                  name: 'Topo/Community',
+                  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer'
+                
+                }, {
+                  name: 'Open Street',
+                  type: 'OpenStreetMap'
+                }]
+              }, {
+                title: 'Imagery',
+                slider: {
+                  intermediateChanges: true
+                },
+                layers: [{
+                  name: '2007',
+                  url: 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/WEB/Aerial07/MapServer'
+                }, {
+                  name: '2009',
+                  url: 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/WEB/Aerial09/MapServer'
+                }, {
+                  name: '2010',
+                  url: 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/WEB/Aerial10/MapServer'
+                }, {
+                  name: '2011',
+                  url: 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/WEB/Aerial11/MapServer'
+                }, {
+                  name: 'Labels',
+                  isReference: true,
+                  url: 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/WEB/Label/MapServer'
+                }]
+              }, {
+                title: 'Google',
+                layers: [{
+                  name: 'RoadMap',
+                  type: 'GoogleMapsRoadMap'
+                },{
+                  name: 'Satellite',
+                  type: 'GoogleMapsSatellite'
+                }, {
+                  name: 'Hybrid',
+                  type: 'GoogleMapsHybrid',visible:true
+                }, {
+                  name: 'Terrain',
+                  type: 'GoogleMapsTerrain'
+                }]
+              }, {
+                title: 'Bing',
+                layers: [ {
+                  name: 'Road',
+                  type: 'BingMapsRoad',
+                  bingMapsKey: 'AhhSX32tBxgd7cclMFyS8SptdgFzTJhmzSIX-P14KUkcD5uSvTnTtpoWAcAK31eO'//Ah29HpXlpKwqVbjHzm6mlwMwgw69CYjaMIiW_YOdfTEMFvMr5SNiltLpYAcIocsi'
+
+                },{
+                  name: 'Aerial',
+                  type: 'BingMapsAerial'
+                }, {
+                  name: 'Hybrid',
+                  type: 'BingMapsHybrid'
+                }]
+              }];
+              
+              
+              var basemapControl= new agsjs.dijit.BasemapControl({
+                basemaps: basemaps,
+                map: map
+              }, 'basemapControl');
+              basemapControl.startup();
+              
+              dojo.connect(basemapControl, "onError", function(error) {
+                console.log(error)
+              });
+            }
+            
+            
+            
+            var resizeTimer;
+            function resizeMap() {
+              //resize the map when the browser resizes - view the 'Resizing and repositioning the map' section in 
+              //the following help topic for more details http://help.esri.com/EN/webapi/javascript/arcgis/help/jshelp_start.htm#jshelp/inside_faq.htm
+              
+              clearTimeout(resizeTimer);
+              resizeTimer = setTimeout(function() {
+                map.resize();
+                map.reposition();
+              }, 500);
+            }
+            
+            //
+            dojo.addOnLoad(init);
+        </script>
+    </head>
+    <body class="claro">
+        <div id="content" dojotype="dijit.layout.BorderContainer" design="headline" gutters="true" style="width: 100%; height: 100%;">
+            <div id="header" dojotype="dijit.layout.ContentPane" region="top" style="padding:2px;">
+                <b>Base Map Groups</b>
+            </div>
+            <div id="map" dojotype="dijit.layout.ContentPane" region="center">
+                <div style="position:absolute; right:20px; top:10px; z-Index:999;">
+                    <div id="a" dojoType="dijit.layout.ContentPane" style="width:320px">
+                        <div id="basemapControl">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

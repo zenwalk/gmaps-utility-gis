@@ -34,7 +34,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
    * @property {String} [language] language to use for text such as the names for controls, etc, e.g. cn, ja
    * @property {String} [dir] Bi-directional (Bidi) text. rtl or ltr;
    * @property {String} [libraries] Additonal libraries (geometry|places|adsense);
-   * 
+   *
    */
   /** 
    * Create a GoogleMapsLayer using config {@link GoogleMapsLayerOptions}
@@ -196,9 +196,51 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     }, opts.apiOptions || {});
     this._gmap = null;
     this._glayers = {};
-    this.loaded = true;// it seems _setMap will only get called if loaded = true, so set it here first.
+    this.loaded = false;// it seems _setMap will only get called if loaded = true, so set it here first.
+    this._loadGAPI();
   },
-  
+  //loadAPI
+  _loadGAPI: function() {
+    if (window.google && google.maps) {
+      if (!this.loaded) {
+        if (google.maps.panoramio) {
+          this._overlayLayerNames.push({
+            key: 'panoramio'
+          });
+        }
+        this.layerInfos = this._createLayerInfos();
+        this.loaded = true;
+        this.onLoad(this);
+      }
+    } else if (agsjs.onGMapsApiLoad) {
+      // did another instance already started loading agsjs API but not done?
+      // this should be very very rare because one instance of this layer would be sufficient with setMapTypeId.
+      //dojo.connect(agsjs, 'onGMapsApiLoad', this, this._initGMap);
+    } else {
+      // this is the first instance that tries to load agsjs API on-demand
+      agsjs.onGMapsApiLoad = function() {
+        // do nothing, just needed to dispatch event.
+      };
+      dojo.connect(agsjs, 'onGMapsApiLoad', this, this._loadGAPI);
+      var script = document.createElement('script');
+      script.type = 'text/javascript';
+      var src = window.location.protocol + '//maps.google.com/maps/api/js?callback=agsjs.onGMapsApiLoad';
+      this._apiOptions = dojo.mixin({
+        sensor: false
+      }, this._apiOptions);
+      for (var x in this._apiOptions) {
+        if (this._apiOptions.hasOwnProperty(x)) {
+          src += '&' + x + '=' + this._apiOptions[x];
+        }
+      }
+      script.src = src;
+      if (document.getElementsByTagName('head').length > 0) {
+        document.getElementsByTagName('head')[0].appendChild(script);
+      } else {
+        document.body.appendChild(script);
+      }
+    }
+  },
   
   /**
    * get the wrapped <code>google.maps.Map</code> for further customization.
@@ -210,13 +252,14 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     return this._gmap;
   },
   _setMap: function(map, layersDiv, index, a, b, c) {
+    console.log('setmap');
     // This overrides an undocumented private method from ESRI API. 
     // It's possible not to do this, but it requires
     // map instance implicitly set to the layer instance, which is a little bit inconvenient.
     // this is likely called inside esriMap.addLayer()
     this._map = map;
     var div = dojo.create('div', {}, layersDiv);
-    if (this._mapOptions.id) {
+    if (this.id) {
       div.id = this.id;
     }
     var style = {
@@ -232,10 +275,6 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     this._layersDiv = layersDiv;
     this._visibilityChangeHandle = dojo.connect(this, 'onVisibilityChange', this, this._visibilityChangeHandler);
     this._opacityChangeHandle = dojo.connect(this, 'onOpacityChange', this, this._onOpacityChangeHandler);
-    this.visible = (this._mapOptions.visible === undefined) ? true : this._mapOptions.visible;
-    if (this.visible) {
-      this._initGMap();
-    }
     var cdiv = dojo.create('div', {}, map.id);
     cdiv.id = 'gmaps_controls_' + div.id;
     dojo.style(cdiv, dojo.mixin(style, {
@@ -245,22 +284,36 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       left: '5px'
     }));
     this._controlDiv = cdiv;
+    
+    
+    this.visible = (this.visible === undefined) ? true : this.visible;
+    if (this.visible) {
+      this._initGMap();
+    }
     return div;
   },
   _unsetMap: function(map, layersDiv) {
     // see _setMap. Undocumented method, but probably should be public.
-    dojo.destroy(this._div);
-    this._map = null;
-    this._div = null;
-    this._gmap = null;
+   // console.log('unsetmap');
+    if (google.maps.event) {
+      if (this._gmapTypeChangeHandle) 
+        google.maps.event.removeListener(this._gmapTypeChangeHandle);
+      if (this._svVisibleHandle) 
+        google.maps.event.removeListener(this._svVisibleHandle);
+    }
     dojo.disconnect(this._extentChangeHandle);
     dojo.disconnect(this._panHandle);
     dojo.disconnect(this._resizeHandle);
     dojo.disconnect(this._visibilityChangeHandle);
     dojo.disconnect(this._opacityChangeHandle);
-    google.maps.event.removeListener(this._gmapTypeChangeHandle);
-    google.maps.event.removeListener(this._svVisibleHandle);
-  },
+    dojo.destroy(this._div);
+    dojo.destroy(this._controlDiv);
+    this._map = null;
+    this._div = null;
+    this._controlDiv = null;
+    this._gmap = null;
+   },
+  
   // delayed init and Api loading.
   _initGMap: function() {
     if (window.google && google.maps) {
@@ -296,43 +349,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
         this._svHandle = dojo.connect(this._map, 'onMouseMove', dojo.hitch(this, this._moveStreetViewControl));
       }
       this._gmapTypeChangeHandle = google.maps.event.addListener(this._gmap, 'maptypeid_changed', dojo.hitch(this, this._mapTypeChangeHandler));
-      if (google.maps.panoramio ){
-        this._overlayLayerNames.push({
-          key:'panoramio'
-        });
-      }
-      this.layerInfos = this._createLayerInfos();
       
-      this.onLoad(this);
-    } else if (agsjs.onGMapsApiLoad) {
-      // did another instance already started loading agsjs API but not done?
-      // this should be very very rare because one instance of this layer would be sufficient with setMapTypeId.
-      //dojo.connect(agsjs, 'onGMapsApiLoad', this, this._initGMap);
-    } else {
-      // this is the first instance that tries to load agsjs API on-demand
-      
-      agsjs.onGMapsApiLoad = function() {
-        // do nothing, just needed to dispatch event.
-      
-      };
-      dojo.connect(agsjs, 'onGMapsApiLoad', this, this._initGMap);
-      var script = document.createElement('script');
-      script.type = 'text/javascript';
-      var src = window.location.protocol + '//maps.google.com/maps/api/js?callback=agsjs.onGMapsApiLoad';
-      this._apiOptions = dojo.mixin({
-        sensor: false
-      }, this._apiOptions);
-      for (var x in this._apiOptions) {
-        if (this._apiOptions.hasOwnProperty(x)) {
-          src += '&' + x + '=' + this._apiOptions[x];
-        }
-      }
-      script.src = src;
-      if (document.getElementsByTagName('head').length > 0) {
-        document.getElementsByTagName('head')[0].appendChild(script);
-      } else {
-        document.body.appendChild(script);
-      }
     }
   },
   /**
@@ -342,13 +359,12 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
    * @param {String} mapTypeId one of GoogleMapsLayer.MAP_TYPE_ROADMAP|MAP_TYPE_HYBRID|MAP_TYPE_STELLITE|MAP_TYPE_TERRIAN
    */
   setMapTypeId: function(mapTypeId) {
-    //console.log('mapTypeId'+ mapTypeId)
     if (this._gmap) {
       this._gmap.setMapTypeId(this._getGMapTypeId(mapTypeId));
+      this._mapTypeChangeHandler();
     } else {
       this._mapOptions.mapTypeId = mapTypeId;
     }
-    this._mapTypeChangeHandler();
     return;
   },
   /**
@@ -384,7 +400,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     for (i = 0, j = this._overlayLayerNames.length; i < j; i++) {
       var ov = this._overlayLayerNames[i];
       layer = this._glayers[ov.key];
-      if (dojo.indexOf(layerIds,'' + (i)) != -1) {
+      if (dojo.indexOf(layerIds, '' + (i)) != -1) {
         // visible
         if (layer == null) {
           switch (ov.key) {
@@ -412,10 +428,11 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     }
     
     var styles = [];
+    var atLeastOneFeature = false;
     for (i = 0, j = this._featureTypeNames.length; i < j; i++) {
       var style = {};
       item = this._featureTypeNames[i];
-      var enabled = dojo.indexOf(layerIds,'' + (i + this._overlayLayerNames.length)) != -1;
+      var enabled = dojo.indexOf(layerIds, '' + (i + this._overlayLayerNames.length)) != -1;
       if (!enabled) {
         style['featureType'] = item.key;
         style['elementType'] = 'all';
@@ -423,11 +440,18 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
           'visibility': (enabled ? 'on' : 'off')
         }];
         styles.push(style);
+      } else {
+        atLeastOneFeature = true;
       }
     }
-    this._gmap.setOptions({
-      'styles': styles
-    });
+    // if there is no feature is set to be on, ignore request.
+    // This is typicall for cases when TOC only show overlays such as traffic
+    if (atLeastOneFeature) {
+      this._gmap.setOptions({
+        'styles': styles
+      });
+    }
+    
   },
   /**
    * Fired when Google Map Type (ROAD, SATERLLITE etc) changed
@@ -444,13 +468,13 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     // there is a slight chance they are out of sync, so fix here.
     if (google && google.maps) {
       switch (type) {
-      case agsjs.layers.GoogleMapsLayer.MAPTYPE_ROADMAP:
+      case agsjs.layers.GoogleMapsLayer.MAP_TYPE_ROADMAP:
         return google.maps.MapTypeId.ROADMAP;
-      case agsjs.layers.GoogleMapsLayer.MAPTYPE_HYBRID:
+      case agsjs.layers.GoogleMapsLayer.MAP_TYPE_HYBRID:
         return google.maps.MapTypeId.HYBRID;
-      case agsjs.layers.GoogleMapsLayer.MAPTYPE_SATELLITE:
+      case agsjs.layers.GoogleMapsLayer.MAP_TYPE_SATELLITE:
         return google.maps.MapTypeId.SATELLITE;
-      case agsjs.layers.GoogleMapsLayer.MAPTYPE_TERRAIN:
+      case agsjs.layers.GoogleMapsLayer.MAP_TYPE_TERRAIN:
         return google.maps.MapTypeId.TERRAIN;
       }
     }
@@ -556,16 +580,21 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
   // but as long as stick to a certain version, should still be workable.
   _moveStreetViewControl: function() {
     if (this._svHandle) {
-      this._streetView = this._gmap.getStreetView();
-      if (this._streetView) {
-        var sv = dojo.query('.gmnoprint img[src*="cb_scout_sprite"]', this._div);
-        if (sv.length > 0) {
-          dojo.forEach(sv, function(s, idx) {
-            dojo.place(s.parentNode.parentNode, this._controlDiv);
-          }, this);
-          dojo.disconnect(this._svHandle);
-          this._svHandle = null;
-          this._svVisibleHandle = google.maps.event.addListener(this._streetView, 'visible_changed', dojo.hitch(this, this._streetViewVisibilityChangeHandler));
+      if (!this._gmap) {
+        dojo.disconnect(this._svHandle);
+        this._svHandle = null;
+      } else {
+        this._streetView = this._gmap.getStreetView();
+        if (this._streetView) {
+          var sv = dojo.query('.gmnoprint img[src*="cb_scout_sprite"]', this._div);
+          if (sv.length > 0) {
+            dojo.forEach(sv, function(s, idx) {
+              dojo.place(s.parentNode.parentNode, this._controlDiv);
+            }, this);
+            dojo.disconnect(this._svHandle);
+            this._svHandle = null;
+            this._svVisibleHandle = google.maps.event.addListener(this._streetView, 'visible_changed', dojo.hitch(this, this._streetViewVisibilityChangeHandler));
+          }
         }
       }
       
@@ -608,31 +637,24 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     var llb = esri.geometry.webMercatorToGeographic(ext);
     return new google.maps.LatLngBounds(new google.maps.LatLng(llb.ymin, llb.xmin, true), new google.maps.LatLng(llb.ymax, llb.xmax, true));
   },
-  _formatName: function(key) {
-    // replace dots and put first char upper case
-    var pcs = []
-    dojo.forEach(key.split('.'), function(s) {
-      pcs.push((s.substr(0, 1).toUpperCase() + s.substring(1)).replace('_', ' '));
-    });
-    return pcs.join(' ');
-  },
   _createLayerInfos: function() {
     var layerInfo;
     var features = this._featureTypeNames;
     var overlays = this._overlayLayerNames;
     var layerInfos = [];
     dojo.forEach(overlays, function(ov, idx) {
-      layerInfo ={
+      layerInfo = {
         defaultVisibility: false,
         id: idx,
-        name: ov.name || ov.key ,
-        parentLayerId: -1
-      }; 
+        name: ov.name || ov.key,
+        parentLayerId: -1,
+        type: 'overlay'
+      };
       if (ov.minZoom) {
-        layerInfo.minScale = this.tileInfo.lods[ov.minZoom].scale*1.5;
+        layerInfo.minScale = this.tileInfo.lods[ov.minZoom].scale * 1.5;
       }
       if (ov.maxZoom) {
-        layerInfo.maxScale = this.tileInfo.lods[ov.maxZoom].scale*0.75;
+        layerInfo.maxScale = this.tileInfo.lods[ov.maxZoom].scale * 0.75;
       }
       layerInfos.push(layerInfo)
     }, this);
@@ -643,9 +665,9 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       var id = i + overlays.length;
       var layerInfo = {
         defaultVisibility: true,
-        name:feat.name || feat.key,
+        name: feat.name || feat.key,
         id: id,
-        //type: 'featureType',
+        type: 'feature',
         parentLayerId: -1
       }
       if (groupLayer == null) {
@@ -666,10 +688,10 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       lastInfo = layerInfo;
       //layerInfo.name = this._formatName(name);
       if (feat.minZoom) {
-        layerInfo.minScale = this.tileInfo.lods[feat.minZoom].scale*1.5;
+        layerInfo.minScale = this.tileInfo.lods[feat.minZoom].scale * 1.5;
       }
       if (feat.maxZoom) {
-        layerInfo.maxScale = this.tileInfo.lods[feat.maxZoom].scale*0.75;
+        layerInfo.maxScale = this.tileInfo.lods[feat.maxZoom].scale * 0.75;
       }
       layerInfos.push(layerInfo);
     }
