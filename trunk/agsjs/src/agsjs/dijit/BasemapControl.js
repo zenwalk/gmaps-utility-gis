@@ -13,12 +13,11 @@
 // reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
 
 dojo.provide('agsjs.dijit.BasemapControl');
+
 dojo.require('dijit._Widget');
 dojo.require('dijit.layout.TabContainer');
 dojo.require('dijit.layout.ContentPane');
 dojo.require('dijit.form.Slider');
-dojo.require('esri.layers.osm');
-dojo.require('agsjs.layers.GoogleMapsLayer');
 
 dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
   maps: null,
@@ -51,24 +50,28 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
       // split layers into 2 groups
       b._refs = [];// references
       b._bases = []; // actual layers;
+      var atLeastOneVisible = false;
       dojo.forEach(b.layers, function(lay, j) {
         if (!lay.id) {
           lay.id = 'basemap_' + i + '_' + j;
         }
-        lay.visible = lay.visible || false;// undefined became false;
+        lay.visible = lay.visible || false;// undefined became false so layer constructor won't create as visible
         if (lay.isReference) {
           b._refs.push(lay);
         } else {
           // regular base layer
           b._bases.push(lay);
           if (lay.visible) {
-            b._selectedLayer = lay;
+            //b._selectedLayer = lay;
+            atLeastOneVisible = true;
           }
         }
       }, this);
-      if (!b._selectedLayer) {
-        b._selectedLayer = b._bases[0];
-        b._selectedLayer.visible = true;
+      // if (!b._selectedLayer) {
+      if (!atLeastOneVisible) {
+        //b._selectedLayer = b._bases[0];
+        //b._selectedLayer.visible = true;
+        b._bases[0].visible = true;
       }
     }, this);
     if (!this._selectedBase) {
@@ -84,7 +87,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
   },
   // extension point
   postCreate: function() {
-    this._createControl();
+    this._createUI();
     //this._zoomHandler = dojo.connect(this.map, "onZoomEnd", this, "_adjustToState");
   },
   _selectBase: function(bmap, force) {
@@ -137,7 +140,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
         bases.push(layer);
       }
     }, this);
-    console.log('toremove' + bases.length);
+    
     if (bases.length > 0) {
       dojo.forEach(bases, function(layer) {
         try {
@@ -150,7 +153,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
           if (console) 
             console.error(e);
         };
-      }, this);
+              }, this);
     }
   },
   _createLayer: function(lay) {
@@ -173,24 +176,32 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
     return layer;
   },
   _createGoogleLayer: function(lay) {
+    if (!(agsjs && agsjs.layers && agsjs.layers.GoogleMapsLayer)) {
+      throw "use dojo.require('agsjs.layers.GoogleMapsLayer') before using this widget";
+      ;
+    }
     var maptype = {
       'GoogleMapsRoadMap': agsjs.layers.GoogleMapsLayer.MAP_TYPE_ROADMAP,
       'GoogleMapsSatellite': agsjs.layers.GoogleMapsLayer.MAP_TYPE_SATELLITE,
       'GoogleMapsHybrid': agsjs.layers.GoogleMapsLayer.MAP_TYPE_HYBRID,
       'GoogleMapsTerrain': agsjs.layers.GoogleMapsLayer.MAP_TYPE_TERRAIN
     }[lay.type];
-    lay._subtype=maptype;
+    lay._subtype = maptype;
     if (!this._googleLayer) {
       this._googleLayer = new agsjs.layers.GoogleMapsLayer(dojo.mixin({
         mapOptions: {
           mapTypeId: maptype
         }
       }, lay));
+      this.onGoogleMapsLayerCreate(this._googleLayer);
     } else if (lay.visible) {
       this._googleLayer.setMapTypeId(maptype);
       this._googleLayer.show();
     }
     return this._googleLayer;
+  },
+  onGoogleMapsLayerCreate: function(layer) {
+    // event
   },
   _createBingLayer: function(lay) {
     var maptype = {
@@ -198,39 +209,67 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
       'BingMapsAerial': esri.virtualearth.VETiledLayer.MAP_STYLE_AERIAL,
       'BingMapsHybrid': esri.virtualearth.VETiledLayer.MAP_STYLE_AERIAL_WITH_LABELS
     }[lay.type];
-    lay._subtype=maptype;
+    lay._subtype = maptype;
     if (!this._bingLayer) {
       this._bingLayer = new esri.virtualearth.VETiledLayer(dojo.mixin({
         mapStyle: maptype
       }, lay));
+      this.onBingMapsLayerCreate(this._bingLayer);
     } else if (lay.visible) {
       this._bingLayer.setMapStyle(maptype);
       this._bingLayer.show();
     }
     return this._bingLayer;
   },
-  _switchLayer: function(lay) {
+  onBingMapsLayerCreate: function(layer) {
+    // event
+  },
+  _switchLayer: function(name, name2, op) {
     var b = this._selectedBase;
-    dojo.forEach(b.layers, function (lay){
-      if (lay._layer){
-        lay._layer.hide();
+    var isRef = false;
+    dojo.forEach(b._refs, function(lay) {
+      if (lay.name == name) {
+        lay.visible = !lay.visible;
+        if (lay._layer) {
+          lay._layer.setVisibility(lay.visible);
+        }
+        isRef = true;
+      }
+    }, this);
+    if (isRef) 
+      return;
+    // hide all other layers.
+    // since for Google/Bings the later subtypes may mess up with different groups
+    // safer to do 2 loops.
+    dojo.forEach(b._bases, function(lay) {
+      if (lay.name != name && lay.name != name2) {
+        lay.visible = false;
+        if (lay._layer) 
+          lay._layer.hide();
       }
     });
-    var layer = lay._layer;
-    b._selectedLayer = lay;
-    if (layer) {
-      if (layer == this._googleLayer){
-        layer.setMapTypeId(lay._subtype);
-      } else if (layer == this._bingLayer){
-        layer.setMapStyle(lay._subtype);
+    dojo.forEach(b._bases, function(lay) {
+      if (lay.name == name || lay.name == name2) {
+        var layer = lay._layer;
+        if (layer == this._googleLayer) {
+          layer.setMapTypeId(lay._subtype);
+        } else if (layer == this._bingLayer) {
+          layer.setMapStyle(lay._subtype);
+        }
+        layer.show();
+        if (lay.name == name) {
+          layer.setOpacity(op);
+        } else {
+          layer.setOpacity(1 - op);
+        }
       }
-      layer.show();
-    }
+    }, this);
+    
   },
   onLoad: function() {
     // dispatch event
   },
-  _createControl: function() {
+  _createUI: function() {
     var tc = new dijit.layout.TabContainer({
       doLayout: false
     });
@@ -239,28 +278,47 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
         title: b.title,
         selected: b.selected
       });
-      var refCount = 0;
-      dojo.forEach(b.layers, function(layer) {
-        if (layer.isReference) {
-          refCount++;
-          var cont = tab.get('content');
-          cont += '<input type="checkbox" name="' + layer.name + '" >' + layer.name;
-          tab.set('content', cont);
+      var cont = '';
+      dojo.forEach(b._refs, function(lay) {
+        var chk;
+        
+        if (dijit.form && dijit.form.CheckBox) {
+          chk = new dijit.form.CheckBox({
+            value : lay.name
+          });
+          chk.placeAt(tab.domNode);
+        } else {
+          chk = dojo.create('input', {
+            type: 'checkbox',
+            value : lay.name
+          }, tab.domNode);
         }
+        chk.checked = lay.visible;
+        tab.domNode.appendChild(dojo.doc.createTextNode(lay.name));
+        
       });
+      if (b._refs.length > 0) {
+        dojo.create('br', null, tab.domNode);
+      }
       if (b.slider != undefined) {
-        var count = b.layers.length - refCount;
+        var count = b._bases.length;
+        // find out current slider from last visible layer
+        var val = count - 1;
+        for (var i = val; i >= 0; i--) {
+          if (b._bases[i].visible) {
+            val = i;
+            break;
+          }
+        }
         var opts = dojo.mixin({
           showButtons: false,
           style: "width:95%",
-          maximum: count,
-          value: count
+          maximum: count - 1,
+          value: val
         }, b.slider);
         var labels = [];
-        dojo.forEach(b.layers, function(layer) {
-          if (layer.isReference) 
-            return;
-          labels.push(layer.name);
+        dojo.forEach(b._bases, function(lay) {
+          labels.push(lay.name);
         });
         var ruleOpts = {
           labels: labels,
@@ -285,16 +343,32 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
         slider.startup();
         sliderRule.startup();
         sliderLabels.startup();
-        
+        dojo.connect(slider, 'onChange', this, this._onSliderChanged);
       } else {
-        dojo.forEach(b.layers, function(layer) {
-          if (layer.isReference) 
-            return;
-          var tp = layer.type || '';
-          var cont = tab.get('content');
-          cont += '<input type="radio" name="' + b.title + '"' + (layer.visible ? " checked" : "") + ' value="'+layer.id+'">' + layer.name;
-          tab.set('content', cont);
+        var names = {};
+        //cont = tab.get('content');
+        dojo.forEach(b._bases, function(lay) {
+          if (!names[lay.name]) {
+            var ra = null;
+            if (dijit.form && dijit.form.RadioButton) {
+              ra = new dijit.form.RadioButton({
+                name: b.title,
+                value: lay.name
+              });
+              ra.placeAt(tab.domNode);
+            } else {
+              ra = dojo.create('input', {
+                type: 'radio',
+                name: b.title,
+                value: lay.name
+              }, tab.domNode);
+            }
+            ra.checked = lay.visible;
+            tab.domNode.appendChild(dojo.doc.createTextNode(lay.name));
+            names[lay.name] = ra;
+          }
         });
+        //tab.set('content', cont);
       }
       dojo.connect(tab, 'onClick', this, this._onTabClicked);
       tc.addChild(tab);
@@ -304,32 +378,42 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
     tc.startup();
     this._onTabChangeHandle = dojo.connect(tc, "selectChild", this, this._onTabChangeHandler);
   },
-  _onTabChangeHandler: function(child){
+  _onTabChangeHandler: function(child) {
     dojo.every(this.basemaps, function(b) {
-        console.log(b.title);
-        if (b.title == child.title) {
-          this._selectBase(b);
-          return false;
-        }
-        return true;
-      }, this);
-  },
-  _onTabClicked: function (evt){
-    var t = evt.target;
-    var b = this._selectedBase;
-    var id = null;
-    if (t.tagName == 'INPUT'){
-      console.log('clicked'+t.value);
-      id = t.value;
-    }
-    dojo.every(b.layers, function(lay){
-      if (lay.id == id){
-        this._switchLayer(lay);
+      if (b.title == child.title) {
+        this._selectBase(b);
         return false;
       }
       return true;
     }, this);
-    
+  },
+  _onTabClicked: function(evt) {
+    var t = evt.target;
+    var b = this._selectedBase;
+    if (t.tagName == 'INPUT') {
+      var name = null;
+      var w = dijit.getEnclosingWidget(t); // pass a domNode
+      if (w && (w.declaredClass == 'dijit.form.CheckBox' || w.declaredClass == 'dijit.form.RadioButton' )) {
+        this._switchLayer(w.value);
+      } else {
+        this._switchLayer(t.value);
+      }
+      
+    }
+  },
+  _onSliderChanged: function(value) {
+  
+    var bases = this._selectedBase._bases;
+    var first = Math.floor(value);
+    var op = 1 - (value - first);
+    var second = Math.min(bases.length - 1, first + 1);
+    //if (first != second){
+    this._switchLayer(bases[first].name, bases[second].name, op);
+    //} else {
+  
+    //}
+  
+  
   },
   // extention point
   destroy: function() {
