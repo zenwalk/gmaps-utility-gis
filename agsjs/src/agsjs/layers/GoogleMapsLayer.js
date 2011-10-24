@@ -6,8 +6,9 @@
  *  </p>
  */
 // Change log: 
-//2011-11-18: v1.04, xd built
-//2011-11-17: v1.03, added support for StreetView, Sub layers (Traffic, Point of Interest etc)
+//2011-10-24: v1.05, working with basemapcontrol
+//2011-10-18: v1.04, xd built
+//2011-10-17: v1.03, added support for StreetView, Sub layers (Traffic, Point of Interest etc)
 //2011-10-05: fixed issues with Chrome, IE7, IE8
 //2011-08-11: updated for JSAPI 2.4. changed package.
 
@@ -138,6 +139,10 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
         level: 19,
         resolution: 0.298582141647617,
         scale: 1128.497176
+      }, {
+        level: 20,
+        resolution: 0.149291070823808,
+        scale: 564.248588
       }]
     });
     this._overlayLayerNames = [{
@@ -295,6 +300,9 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
   _unsetMap: function(map, layersDiv) {
     // see _setMap. Undocumented method, but probably should be public.
    // console.log('unsetmap');
+    if (this._streetView) {
+      this._streetView.setVisible(false);
+    }
     if (google.maps.event) {
       if (this._gmapTypeChangeHandle) 
         google.maps.event.removeListener(this._gmapTypeChangeHandle);
@@ -601,6 +609,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     }
   },
   _streetViewVisibilityChangeHandler: function() {
+    console.log('_streetViewVisibilityChangeHandler');
     if (this._streetView) {
       var vis = this._streetView.getVisible();
       if (vis) {
@@ -701,7 +710,6 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
   
 });
 
-
 dojo.mixin(agsjs.layers.GoogleMapsLayer, {
   /**
    * @name GoogleMapsLayer#MAP_TYPE_SATELLITE
@@ -721,3 +729,4 @@ dojo.mixin(agsjs.layers.GoogleMapsLayer, {
    */
   MAP_TYPE_TERRAIN: "terrain"
 });
+
