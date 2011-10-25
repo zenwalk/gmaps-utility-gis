@@ -257,7 +257,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     return this._gmap;
   },
   _setMap: function(map, layersDiv, index, a, b, c) {
-    console.log('setmap');
+    //console.log('setmap');
     // This overrides an undocumented private method from ESRI API. 
     // It's possible not to do this, but it requires
     // map instance implicitly set to the layer instance, which is a little bit inconvenient.
@@ -533,7 +533,6 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     google.maps.event.trigger(this._gmap, 'resize');
   },
   _extentChangeHandler: function(extent, delta, levelChange, lod) {
-    //console.log('extentchange:'+extent.xmin+','+extent.ymin+','+extent.xmax+','+extent.ymax);
     if (levelChange) {
       this._setExtent(extent);
     } else {
@@ -587,11 +586,13 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
   // this method sort of move it up so it can be dragged. A little bit hack, 
   // but as long as stick to a certain version, should still be workable.
   _moveStreetViewControl: function() {
+   
     if (this._svHandle) {
       if (!this._gmap) {
         dojo.disconnect(this._svHandle);
         this._svHandle = null;
       } else {
+         
         this._streetView = this._gmap.getStreetView();
         if (this._streetView) {
           var sv = dojo.query('.gmnoprint img[src*="cb_scout_sprite"]', this._div);
@@ -609,7 +610,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     }
   },
   _streetViewVisibilityChangeHandler: function() {
-    console.log('_streetViewVisibilityChangeHandler');
+    //console.log('_streetViewVisibilityChangeHandler');
     if (this._streetView) {
       var vis = this._streetView.getVisible();
       if (vis) {

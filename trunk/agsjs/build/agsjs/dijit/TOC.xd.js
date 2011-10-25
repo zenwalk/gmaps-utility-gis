@@ -1,4 +1,4 @@
-/** built on 2011-10-18 */ 
+/** built on 2011-10-24 */ 
 dojo._xdResourceLoaded(function(){ return {  
 depends: [["provide", "agsjs.dijit.TOC"]],defineResource: function(dojo) { 
 dojo.provide("agsjs.dijit.TOC");dojo.require("dijit._Widget");dojo.require("dijit._Templated");dojo.require("dijit.form.Slider");dojo.require("dojo.fx");(function(){var a=dojo.create("link",{type:"text/css",rel:"stylesheet",href:dojo.moduleUrl("agsjs.dijit","css/TOC.css")});dojo.doc.getElementsByTagName("head")[0].appendChild(a)})();
