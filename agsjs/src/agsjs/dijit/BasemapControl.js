@@ -88,7 +88,6 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
   // extension point
   postCreate: function() {
     this._createUI();
-    //this._zoomHandler = dojo.connect(this.map, "onZoomEnd", this, "_adjustToState");
   },
   _selectBase: function(bmap, force) {
     if (!force && (bmap == this._selectedBase)) 
@@ -119,7 +118,6 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
               this.map.addLayer(layer, 0);
               layer._addedToMap = true;
             }
-            
           } else {
             this.map.addLayer(layer, 0);
           }
@@ -153,7 +151,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
           if (console) 
             console.error(e);
         };
-              }, this);
+      }, this);
     }
   },
   _createLayer: function(lay) {
@@ -193,6 +191,13 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
           mapTypeId: maptype
         }
       }, lay));
+      dojo.connect(this._googleLayer, "onStreetViewVisibilityChange", this, function(v) {
+        if (v) {
+          esri.hide(this.domNode);
+        } else {
+          esri.show(this.domNode);
+        }
+      });
       this.onGoogleMapsLayerCreate(this._googleLayer);
     } else if (lay.visible) {
       this._googleLayer.setMapTypeId(maptype);
@@ -269,114 +274,124 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
   onLoad: function() {
     // dispatch event
   },
-  _createUI: function() {
-    var tc = new dijit.layout.TabContainer({
-      doLayout: false
+  // create a single set of basemaps
+  _createBasemapUI: function(b) {
+    var tab = new dijit.layout.ContentPane({
+      title: b.title,
+      selected: b.selected
     });
-    dojo.forEach(this.basemaps, function(b, i) {
-      var tab = new dijit.layout.ContentPane({
-        title: b.title,
-        selected: b.selected
-      });
-      var cont = '';
-      dojo.forEach(b._refs, function(lay) {
-        var chk;
-        
-        if (dijit.form && dijit.form.CheckBox) {
-          chk = new dijit.form.CheckBox({
-            value : lay.name
-          });
-          chk.placeAt(tab.domNode);
-        } else {
-          chk = dojo.create('input', {
-            type: 'checkbox',
-            value : lay.name
-          }, tab.domNode);
-        }
-        chk.checked = lay.visible;
-        tab.domNode.appendChild(dojo.doc.createTextNode(lay.name));
-        
-      });
-      if (b._refs.length > 0) {
-        dojo.create('br', null, tab.domNode);
-      }
-      if (b.slider != undefined) {
-        var count = b._bases.length;
-        // find out current slider from last visible layer
-        var val = count - 1;
-        for (var i = val; i >= 0; i--) {
-          if (b._bases[i].visible) {
-            val = i;
-            break;
-          }
-        }
-        var opts = dojo.mixin({
-          showButtons: false,
-          style: "width:95%",
-          maximum: count - 1,
-          value: val
-        }, b.slider);
-        var labels = [];
-        dojo.forEach(b._bases, function(lay) {
-          labels.push(lay.name);
+    dojo.forEach(b._refs, function(lay) {
+      var chk;
+      if (dijit.form && dijit.form.CheckBox) {
+        chk = new dijit.form.CheckBox({
+          value: lay.name
         });
-        var ruleOpts = {
-          labels: labels,
-          container: "bottomDecoration",
-          count: count,
-          style: "height:0.5em;font-size:75%"
-        };
-        
-        var sliderNode = dojo.create('div', {}, tab.domNode);
-        var sliderRule = new dijit.form.HorizontalRule(ruleOpts, dojo.create('div', {
-          style: {
-            height: "2px"
-          }
-        }, sliderNode));
-        
-        var sliderLabels = new dijit.form.HorizontalRuleLabels(ruleOpts, dojo.create('div', {
-          style: {
-            height: "2px"
-          }
-        }, sliderNode));
-        var slider = new dijit.form.HorizontalSlider(opts, sliderNode);
-        slider.startup();
-        sliderRule.startup();
-        sliderLabels.startup();
-        dojo.connect(slider, 'onChange', this, this._onSliderChanged);
+        chk.placeAt(tab.domNode);
       } else {
-        var names = {};
-        //cont = tab.get('content');
-        dojo.forEach(b._bases, function(lay) {
-          if (!names[lay.name]) {
-            var ra = null;
-            if (dijit.form && dijit.form.RadioButton) {
-              ra = new dijit.form.RadioButton({
-                name: b.title,
-                value: lay.name
-              });
-              ra.placeAt(tab.domNode);
-            } else {
-              ra = dojo.create('input', {
-                type: 'radio',
-                name: b.title,
-                value: lay.name
-              }, tab.domNode);
-            }
-            ra.checked = lay.visible;
-            tab.domNode.appendChild(dojo.doc.createTextNode(lay.name));
-            names[lay.name] = ra;
-          }
-        });
-        //tab.set('content', cont);
+        chk = dojo.create('input', {
+          type: 'checkbox',
+          value: lay.name
+        }, tab.domNode);
       }
-      dojo.connect(tab, 'onClick', this, this._onTabClicked);
-      tc.addChild(tab);
-    }, this);
+      chk.checked = lay.visible;
+      tab.domNode.appendChild(dojo.doc.createTextNode(lay.name));
+      
+    });
+    if (b._refs.length > 0) {
+      dojo.create('br', null, tab.domNode);
+    }
+    if (b.slider != undefined) {
+      var count = b._bases.length;
+      // find out current slider from last visible layer
+      var val = count - 1;
+      for (var i = val; i >= 0; i--) {
+        if (b._bases[i].visible) {
+          val = i;
+          break;
+        }
+      }
+      var opts = dojo.mixin({
+        showButtons: false,
+        style: "width:95%",
+        maximum: count - 1,
+        value: val
+      }, b.slider);
+      var labels = [];
+      dojo.forEach(b._bases, function(lay) {
+        labels.push(lay.name);
+      });
+      var ruleOpts = {
+        labels: labels,
+        container: "bottomDecoration",
+        count: count,
+        style: "height:0.5em;font-size:75%"
+      };
+      
+      var sliderNode = dojo.create('div', {}, tab.domNode);
+      var sliderRule = new dijit.form.HorizontalRule(ruleOpts, dojo.create('div', {
+        style: {
+          height: "2px"
+        }
+      }, sliderNode));
+      
+      var sliderLabels = new dijit.form.HorizontalRuleLabels(ruleOpts, dojo.create('div', {
+        style: {
+          height: "2px"
+        }
+      }, sliderNode));
+      var slider = new dijit.form.HorizontalSlider(opts, sliderNode);
+      slider.startup();
+      sliderRule.startup();
+      sliderLabels.startup();
+      dojo.connect(slider, 'onChange', this, this._onSliderChanged);
+    } else {
+      var names = {};
+      dojo.forEach(b._bases, function(lay) {
+        if (!names[lay.name]) {
+          var ra = null;
+          if (dijit.form && dijit.form.RadioButton) {
+            ra = new dijit.form.RadioButton({
+              name: b.title,
+              value: lay.name
+            });
+            ra.placeAt(tab.domNode);
+          } else {
+            ra = dojo.create('input', {
+              type: 'radio',
+              name: b.title,
+              value: lay.name
+            }, tab.domNode);
+          }
+          ra.checked = lay.visible;
+          tab.domNode.appendChild(dojo.doc.createTextNode(lay.name));
+          names[lay.name] = ra;
+        }
+      });
+    }
+    dojo.connect(tab, 'onClick', this, this._onTabClicked);
+    return tab;
+  },
+  _createUI: function() {
+    if (this.basemaps.length == 1 && this.noTabs) {
+      var tab = this._createBasemapUI(this.basemaps[0]);
+      dojo.addClass(tab.domNode, 'dijitTabPaneWrapper');
+      tab.domNode.style.borderWidth = '1px';
+      tab.domNode.style.borderStyle = 'solid';
+      tab.placeAt(this.domNode);
+      tab.startup();
+    } else {
+      var tc = new dijit.layout.TabContainer({
+        doLayout: false
+      });
+      this._onTabChangeHandle = dojo.connect(tc, "selectChild", this, this._onTabChangeHandler);
+      dojo.forEach(this.basemaps, function(b, i) {
+        var tab = this._createBasemapUI(b);
+        tc.addChild(tab);
+      }, this);
+      tc.placeAt(this.domNode);
+      tc.startup();
+    }
     
-    tc.placeAt(this.domNode);
-    tc.startup();
-    this._onTabChangeHandle = dojo.connect(tc, "selectChild", this, this._onTabChangeHandler);
   },
   _onTabChangeHandler: function(child) {
     dojo.every(this.basemaps, function(b) {
@@ -393,7 +408,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
     if (t.tagName == 'INPUT') {
       var name = null;
       var w = dijit.getEnclosingWidget(t); // pass a domNode
-      if (w && (w.declaredClass == 'dijit.form.CheckBox' || w.declaredClass == 'dijit.form.RadioButton' )) {
+      if (w && (w.declaredClass == 'dijit.form.CheckBox' || w.declaredClass == 'dijit.form.RadioButton')) {
         this._switchLayer(w.value);
       } else {
         this._switchLayer(t.value);
