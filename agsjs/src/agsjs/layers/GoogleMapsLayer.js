@@ -6,7 +6,7 @@
  *  </p>
  */
 // Change log: 
-//2011-10-24: v1.05, working with basemapcontrol
+//2011-10-24: v1.05, working with basemapcontrol, styled options
 //2011-10-18: v1.04, xd built
 //2011-10-17: v1.03, added support for StreetView, Sub layers (Traffic, Point of Interest etc)
 //2011-10-05: fixed issues with Chrome, IE7, IE8
@@ -199,6 +199,11 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     this._apiOptions = dojo.mixin({
       sensor: false
     }, opts.apiOptions || {});
+    
+    // split the map style to vis and others such as hue etc.
+    this._visibilityOptions; // the current vis opts;
+    this._styleOpyions;
+    
     this._gmap = null;
     this._glayers = {};
     this.loaded = false;// it seems _setMap will only get called if loaded = true, so set it here first.
@@ -229,7 +234,11 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       dojo.connect(agsjs, 'onGMapsApiLoad', this, this._loadGAPI);
       var script = document.createElement('script');
       script.type = 'text/javascript';
-      var src = window.location.protocol + '//maps.google.com/maps/api/js?callback=agsjs.onGMapsApiLoad';
+      var pro = window.location.protocol;
+      if (pro.toLowerCase().indexOf('http')==-1){
+        pro = 'http:';
+      }
+      var src = pro + '//maps.googleapis.com/maps/api/js?callback=agsjs.onGMapsApiLoad';
       this._apiOptions = dojo.mixin({
         sensor: false
       }, this._apiOptions);
@@ -299,7 +308,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
   },
   _unsetMap: function(map, layersDiv) {
     // see _setMap. Undocumented method, but probably should be public.
-   // console.log('unsetmap');
+    // console.log('unsetmap');
     if (this._streetView) {
       this._streetView.setVisible(false);
     }
@@ -320,7 +329,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     this._div = null;
     this._controlDiv = null;
     this._gmap = null;
-   },
+  },
   
   // delayed init and Api loading.
   _initGMap: function() {
@@ -341,6 +350,10 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
         myOptions.mapTypeId = this._getGMapTypeId(myOptions.mapTypeId);
       } else {
         myOptions.mapTypeId = google.maps.MapTypeId.ROADMAP;
+      }
+      if (this._mapOptions.styles){
+        // can be more complicated to split them but use simplified approach here.
+        this._visibilityOptions = this._styleOptions = this._mapOptions.styles;
       }
       var gmap = new google.maps.Map(this._div, myOptions);
       if (level < 0) {
@@ -372,6 +385,25 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       this._mapTypeChangeHandler();
     } else {
       this._mapOptions.mapTypeId = mapTypeId;
+    }
+    return;
+  },
+  /**
+   * set map style for customized base map. The style specs are available at <a href="http://code.google.com/apis/maps/documentation/javascript/styling.html">Google Documentation</a>. 
+   * This class privide a few pre-defined styles: MAP_STYLE_GRAY|MAP_STYLE_NIGHT.
+   * @name GoogleMapsLayer#setMapStyle
+   * @function
+   * @param {Object[]} styles
+   */
+  setMapStyles: function(styles) {
+    styles = styles || [];
+    if (this._gmap) {
+      this._styleOptions = styles;
+      this._gmap.setOptions({
+        styles: styles.concat(this._visibilityOptions||[])
+      });
+    } else {
+      this._mapOptions.styles = styles;
     }
     return;
   },
@@ -454,12 +486,13 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     }
     // if there is no feature is set to be on, ignore request.
     // This is typicall for cases when TOC only show overlays such as traffic
+    this._visibilityOptions = styles;
     if (atLeastOneFeature) {
+      
       this._gmap.setOptions({
-        'styles': styles
+        'styles': styles.concat(this._styleOptions || [])
       });
-    }
-    
+    } 
   },
   /**
    * Fired when Google Map Type (ROAD, SATERLLITE etc) changed
@@ -586,13 +619,13 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
   // this method sort of move it up so it can be dragged. A little bit hack, 
   // but as long as stick to a certain version, should still be workable.
   _moveStreetViewControl: function() {
-   
+  
     if (this._svHandle) {
       if (!this._gmap) {
         dojo.disconnect(this._svHandle);
         this._svHandle = null;
       } else {
-         
+      
         this._streetView = this._gmap.getStreetView();
         if (this._streetView) {
           var sv = dojo.query('.gmnoprint img[src*="cb_scout_sprite"]', this._div);
@@ -728,6 +761,28 @@ dojo.mixin(agsjs.layers.GoogleMapsLayer, {
   /**
    * @constant
    */
-  MAP_TYPE_TERRAIN: "terrain"
+  MAP_TYPE_TERRAIN: "terrain",
+  MAP_STYLE_GRAY: [{
+    featureType: 'all',
+    stylers: [{
+      saturation: -80
+    }, {
+      lightness: 20
+    }]
+  }],
+  MAP_STYLE_LIGHT_GRAY: [{
+    featureType: 'all',
+    stylers: [{
+      saturation: -80
+    }, {
+      lightness: 60
+    }]
+  }],
+  MAP_STYLE_NIGHT: [{
+    featureType: 'all',
+    stylers: [{
+      invert_lightness: 'true'
+    }]
+  }]
 });
 

@@ -31,8 +31,8 @@
               baseUrl: './',
               modulePaths: {
                 // if use local copy, make sure the path reference is relative to 'baseUrl', e.g.:
-                // 'agsjs': '../build/agsjs'
-                'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/1.04/build/agsjs'
+                'agsjs': '../build/agsjs'
+               // 'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/1.05/build/agsjs'
               }
             };
         </script>
@@ -40,13 +40,14 @@
         </script>
         
         <script type="text/javascript">
-            dojo.require("dijit.dijit"); // optimize: load dijit googleLayer
+             dojo.require("dijit.dijit"); 
             dojo.require("dijit.form.Button");
             dojo.require("dijit.layout.BorderContainer");
             dojo.require("dijit.layout.ContentPane");
             dojo.require("esri.map");
+            
             dojo.require("agsjs.layers.GoogleMapsLayer");
-            var map,googleLayer, esriTopo;
+            var map, googleLayer, esriTopo;
             var visible = [];
             
             function init() {
@@ -63,7 +64,8 @@
               
               
               map = new esri.Map("map", {
-                extent: initExtent
+                extent: initExtent,
+                logo: false
               });
               dojo.connect(map, 'onLoad', function(map) {
                 dojo.connect(dijit.byId('map'), 'resize', resizeMap);
@@ -78,7 +80,12 @@
                 }
               });
               map.addLayer(googleLayer);
-              dojo.connect(googleLayer,'onLoad', buildLayerList);
+              if (googleLayer.loaded){
+                buildLayerList();
+              } else {
+                dojo.connect(googleLayer, 'onLoad', buildLayerList);
+              }
+              
               
               dojo.connect(googleLayer, "onStreetViewVisibilityChange", function(v) {
                 if (v) {
@@ -96,22 +103,57 @@
             }
             
             
-            function changeMap(onLayer) {
-              for (var j = 0, jl = map.layerIds.length; j < jl; j++) {
-                var layer = map.getLayer(map.layerIds[j]);
-                if (layer instanceof esri.layers.ArcGISTiledMapServiceLayer || layer instanceof agsjs.layers.GoogleMapsLayer) {
-                  if (layer != onLayer) {
-                    layer.hide();
-                    if (layer == googleLayer) {
-                       esri.hide(dojo.byId("layer_list"));
-                    }
-                  } else {
-                    layer.show();
-                    if (layer == googleLayer){
-                      esri.show(dojo.byId("layer_list"));
-                    }
-                  }
+            function changeMap(evt) {
+              var name = dojo.trim(dijit.getEnclosingWidget(evt.target).label);
+              if (name.indexOf('G-') != -1) {
+                esriTopo.hide();
+                googleLayer.show();
+                esri.show(dojo.byId("layer_list"));
+                switch (name) {
+                case 'G-Street':
+                  googleLayer.setMapTypeId(agsjs.layers.GoogleMapsLayer.MAP_TYPE_ROADMAP);
+                  googleLayer.setMapStyles(null);
+                  break;
+                case 'G-Satellite':
+                  googleLayer.setMapTypeId(agsjs.layers.GoogleMapsLayer.MAP_TYPE_SATELLITE);
+                  break;
+                case 'G-Hybrid':
+                  googleLayer.setMapTypeId(agsjs.layers.GoogleMapsLayer.MAP_TYPE_HYBRID);
+                  googleLayer.setMapStyles(null);
+                  break;
+                case 'G-Terrain':
+                  googleLayer.setMapTypeId(agsjs.layers.GoogleMapsLayer.MAP_TYPE_TERRAIN);
+                  googleLayer.setMapStyles(null);
+                  break;
+                case 'G-Gray':
+                  googleLayer.setMapTypeId(agsjs.layers.GoogleMapsLayer.MAP_TYPE_ROADMAP);
+                  googleLayer.setMapStyles(agsjs.layers.GoogleMapsLayer.MAP_STYLE_GRAY);
+                  
+                  break;
+                case 'G-Night':
+                  googleLayer.setMapTypeId(agsjs.layers.GoogleMapsLayer.MAP_TYPE_ROADMAP);
+                  googleLayer.setMapStyles(agsjs.layers.GoogleMapsLayer.MAP_STYLE_NIGHT);
+                  
+                  break;
+                case 'G-Random':
+                  googleLayer.setMapTypeId(agsjs.layers.GoogleMapsLayer.MAP_TYPE_ROADMAP);
+                  googleLayer.setMapStyles([{
+                    stylers: [{
+                      hue: '#' + Math.floor(Math.random() * parseInt('ffffff', 16)).toString(16)
+                    }, {
+                      lightness: Math.floor((Math.random() - 0.5) * 200)
+                    }, {
+                      saturation: Math.floor((Math.random() - 0.5) * 200)
+                    }]
+                  }]);
+                  
+                  break;
                 }
+                
+              } else {
+                esri.hide(dojo.byId("layer_list"));
+                googleLayer.hide();
+                esriTopo.show();
               }
             }
             
@@ -127,8 +169,9 @@
             }
             
             function updateLayerVisibility() {
-              if (!googleLayer.visible) return;
-                
+              if (!googleLayer.visible) 
+                return;
+              
               
               var inputs = dojo.query(".list_item"), input;
               
@@ -164,40 +207,56 @@
     </head>
     <body class="claro">
         <div id="content" dojotype="dijit.layout.BorderContainer" design="headline" gutters="true" style="width: 100%; height: 100%;">
-            <div id="header" dojotype="dijit.layout.ContentPane" region="top" style="padding:2px">
-                <div><b>Use Google Maps in ESRI ArcGIS JSAPI</b></div>
-                <ul style="margin:2px"><li>Click buttons to switch base map between ESRI and Google.</li>
-                <li>Drag pegman icon on top left corner to map to see street view(hold mouse for preview). </li>
-                <li>Check layer on/off to customize base map. 
-                Note not all sub layer visible at all scales.</li>
-                </ul>  
+            <div id="header" dojotype="dijit.layout.ContentPane" region="top">
+                <div>
+                    <b>Use Google Maps in ESRI ArcGIS JSAPI</b>
+                    | <a href="../docs/googlemapslayer/examples.html#GMaps">Documentation</a>
+                </div>
+                <ul style="margin:2px">
+                    <li>
+                        Click buttons to switch base map between ESRI and Google. Note the "Gray", "Night" and "Random" styles. The "random" will show differently each time clicked. 
+                    </li>
+                    <li>
+                        Drag pegman icon on top left corner to map to see street view(hold mouse for preview). 
+                    </li>
+                    <li>
+                        Check layer on/off to customize base map. 
+                        Note not all sub layer visible at all scales.
+                    </li>
+                </ul>
             </div>
-            <div id="tocPane" dojotype="dijit.layout.ContentPane" region="left" >
+            <div id="tocPane" dojotype="dijit.layout.ContentPane" region="left">
                 <div>
                     Google Maps Sub Layers(features)
                 </div>
                 <div id="layer_list">
                 </div>
-              </div>
+            </div>
             <div id="map" dojotype="dijit.layout.ContentPane" region="center">
                 <div id="buttons" style="position:absolute; right:75px; top:20px; z-Index:999;">
-                    <button dojoType="dijit.form.Button" onClick="changeMap(googleLayer);googleLayer.setMapTypeId(agsjs.layers.GoogleMapsLayer.MAP_TYPE_ROADMAP)">
-                        Google Street
+                    <button dojoType="dijit.form.Button" onClick="changeMap">
+                        G-Street
                     </button>
-                    <button dojoType="dijit.form.Button" onClick="changeMap(googleLayer);googleLayer.setMapTypeId(agsjs.layers.GoogleMapsLayer.MAP_TYPE_SATELLITE)">
-                        Google Satellite
+                    <button dojoType="dijit.form.Button" onClick="changeMap">
+                        G-Gray
                     </button>
-                    <button dojoType="dijit.form.Button" onClick="changeMap(googleLayer);googleLayer.setMapTypeId(agsjs.layers.GoogleMapsLayer.MAP_TYPE_HYBRID)">
-                        Google Hybrid
+                    <button dojoType="dijit.form.Button" onClick="changeMap">
+                        G-Night
                     </button>
-                    <button dojoType="dijit.form.Button" onClick="changeMap(googleLayer);googleLayer.setMapTypeId(agsjs.layers.GoogleMapsLayer.MAP_TYPE_TERRAIN)">
-                        Google Terrain
+                    <button dojoType="dijit.form.Button" onClick="changeMap">
+                        G-Random
                     </button>
-                    <button dojoType="dijit.form.Button" onClick="changeMap(esriTopo);">
-                        ESRI Topo Map
+                    <button dojoType="dijit.form.Button" onClick="changeMap">
+                        G-Satellite
                     </button>
-                    <button dojoType="dijit.form.Button" onClick="location='../docs/googlemapslayer/examples.html#GMaps'">
-                        About
+                    <button dojoType="dijit.form.Button" onClick="changeMap">
+                        G-Hybrid
+                    </button>
+                    <button dojoType="dijit.form.Button" onClick="changeMap">
+                        G-Terrain
+                    </button>
+                    <button dojoType="dijit.form.Button" onClick="changeMap">
+                        ESRI-Topo
                     </button>
                 </div>
             </div>

@@ -115,11 +115,34 @@
         </pre>
         </div>
         <div>
-            <h2>Sub Layers</h2>
+            <h2>Sub Layers and Features</h2>
             <p>
               To simulate ArcGIS layers, the <code>layerInfos</code> property and <code>setVisibileLayer(ids)</code> make it possible to customize 
               Google maps, sort of "dynamic tiled layer". Currently, traffic, bicyling, and some high level features such as adminitrative, road, transit etc can be turned on/off. 
               See <a href="../../examples/gmapslayer.html">example</a> for how to use it.
+            </p>
+        </div>
+        <div>
+            <h2>Hue, Saturation Styles</h2>
+            <p>
+             In some cases, it's nice to have base map displayed in a partular tone or paled out to let operational layers standout.
+              This can be accomplished by setting the style on Google Maps. 
+              This class came with 2 pre-defined style: 'GRAY' and 'NIGHT'. 
+              You can also define your own style using this tool from Google: <a href="http://gmaps-samples-v3.googlecode.com/svn/trunk/styledmaps/wizard/index.html"> Style Wizard </a>
+               and <a href="http://code.google.com/apis/maps/documentation/javascript/styling.html">Google Documentation</a>
+               <pre class="prettyprint">
+         gMapLayer.setMapStyle(agsjs.layers.GoogleMapsLayer.MAP_STYLE_GRAY);
+          // or customized
+         gMapLayer.setMapStyle([{
+         stylers: [{
+              saturation: -80
+             }, {
+              lightness: 60
+             }]
+         }]);
+        
+        </pre>
+             
             </p>
         </div>
         <br/>
