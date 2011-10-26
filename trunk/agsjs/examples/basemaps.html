@@ -18,6 +18,8 @@
             
             body {
                 overflow: hidden;
+                font-family: Helvetica, Arial, sans-serif;
+                font-size:small;
             }
             
             #map {
@@ -30,20 +32,16 @@
               parseOnLoad: true,
               baseUrl: './',
               modulePaths: {
-                'agsjs': '../src/agsjs'
+                'agsjs': '../build/agsjs'
               }
             };
         </script>
-        <!--
-        < script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.4">
-        </ script>
-        <script type="text/javascript" src="../src/agsjs/layers/GoogleMapsLayer.js">
+        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.4">
         </script>
-        -->
-        <script type="text/javascript" src="/arcgis_js_api/library/2.4/arcgis/?v=2.4">
-        </script>
-        <script type="text/javascript">
-            dojo.require("dijit.dijit"); // optimize: load dijit googleLayer
+       <script type="text/javascript">
+            dojo.require("dijit.dijit"); 
+            dojo.require("dijit.form.RadioButton");
+            dojo.require("dijit.form.CheckBox");
             dojo.require("dijit.form.Button");
             dojo.require("dijit.layout.BorderContainer");
             dojo.require("dijit.layout.ContentPane");
@@ -57,11 +55,9 @@
             
             function init() {
               //US: "xmin": -13220472,  "ymin": 3459539, "xmax": -8817699, "ymax": 6394721,
+              //COC: "xmin": -9031493,  "ymin": 4170327,  "xmax": -8962700,"ymax": 4216189,
               var initExtent = new esri.geometry.Extent({
-                "xmin": -9031493,
-                "ymin": 4170327,
-                "xmax": -8962700,
-                "ymax": 4216189,
+                "xmin": -13220472,  "ymin": 3459539, "xmax": -8817699, "ymax": 6394721,
                 "spatialReference": {
                   "wkid": 102100
                 }
@@ -85,36 +81,41 @@
                   url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer',
                   visible: true
                 }, {
+                  name: 'Gray',
+                  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer'
+                 
+                },{
                   name: 'Open Street',
                   type: 'OpenStreetMap'
                 }]
               }, {
-                title: 'Imagery',
+                title: 'Transitions',
                 slider: {
                   intermediateChanges: true
                 },
                 layers: [{
-                  name: '2007',
-                  url: 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/WEB/Aerial07/MapServer'
-                }, {
-                  name: '2009',
-                  url: 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/WEB/Aerial09/MapServer'
-                }, {
-                  name: '2010',
-                  url: 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/WEB/Aerial10/MapServer'
-                }, {
-                  name: '2011',
-                  url: 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/WEB/Aerial11/MapServer',
+                  name: 'World',
+                  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
                   visible: true
+                }, {
+                  name: 'Physical',
+                  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer'
+                }, {
+                  name: 'Relief',
+                  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer'
+                }, {
+                  name: 'Terrain',
+                  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer'
+                  
                 }, {
                   name: 'Labels',
                   isReference: true,
-                  url: 'http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/WEB/Label/MapServer'
+                  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer'
                 }]
               }, {
                 title: 'Google',
                 layers: [{
-                  name: 'RoadMap',
+                  name: 'Road',
                   type: 'GoogleMapsRoadMap',
                   visible: true
                 }, {
@@ -124,8 +125,13 @@
                   name: 'Hybrid',
                   type: 'GoogleMapsHybrid'
                 }, {
-                  name: 'Terrain',
-                  type: 'GoogleMapsTerrain'
+                  name: 'Night',
+                  type: 'GoogleMapsRoadMap',
+                  styles: agsjs.layers.GoogleMapsLayer.MAP_STYLE_NIGHT
+                }, {
+                  name: 'Gray',
+                  type: 'GoogleMapsRoadMap',
+                  styles: agsjs.layers.GoogleMapsLayer.MAP_STYLE_GRAY
                 }]
               }, {
                 title: 'Bing',

@@ -118,6 +118,16 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
               this.map.addLayer(layer, 0);
               layer._addedToMap = true;
             }
+            if (lay.visible && layer == this._googleLayer) {
+              layer.setMapTypeId(lay._subtype);
+              if (lay.styles) {
+                layer.setMapStyles(lay.styles);
+              } else {
+                layer.setMapStyles(null);
+              }
+              
+            }
+            
           } else {
             this.map.addLayer(layer, 0);
           }
@@ -151,7 +161,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
           if (console) 
             console.error(e);
         };
-      }, this);
+              }, this);
     }
   },
   _createLayer: function(lay) {
@@ -198,6 +208,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
           esri.show(this.domNode);
         }
       });
+      
       this.onGoogleMapsLayerCreate(this._googleLayer);
     } else if (lay.visible) {
       this._googleLayer.setMapTypeId(maptype);
@@ -258,10 +269,17 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
         var layer = lay._layer;
         if (layer == this._googleLayer) {
           layer.setMapTypeId(lay._subtype);
+          if (lay.styles) {
+            layer.setMapStyles(lay.styles);
+          } else {
+            layer.setMapStyles(null);
+          }
+          
         } else if (layer == this._bingLayer) {
           layer.setMapStyle(lay._subtype);
         }
         layer.show();
+        lay.visible = true;
         if (lay.name == name) {
           layer.setOpacity(op);
         } else {
@@ -284,7 +302,8 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
       var chk;
       if (dijit.form && dijit.form.CheckBox) {
         chk = new dijit.form.CheckBox({
-          value: lay.name
+          value: lay.name,
+          checked: lay.visible
         });
         chk.placeAt(tab.domNode);
       } else {
@@ -294,6 +313,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
         }, tab.domNode);
       }
       chk.checked = lay.visible;
+      
       tab.domNode.appendChild(dojo.doc.createTextNode(lay.name));
       
     });
@@ -312,7 +332,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
       }
       var opts = dojo.mixin({
         showButtons: false,
-        style: "width:95%",
+        style: "width:95%; margin-top:6px",
         maximum: count - 1,
         value: val
       }, b.slider);
@@ -352,7 +372,8 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
           if (dijit.form && dijit.form.RadioButton) {
             ra = new dijit.form.RadioButton({
               name: b.title,
-              value: lay.name
+              value: lay.name,
+              checked: lay.visible
             });
             ra.placeAt(tab.domNode);
           } else {
@@ -361,8 +382,9 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
               name: b.title,
               value: lay.name
             }, tab.domNode);
+            ra.checked = lay.visible;
           }
-          ra.checked = lay.visible;
+          
           tab.domNode.appendChild(dojo.doc.createTextNode(lay.name));
           names[lay.name] = ra;
         }
