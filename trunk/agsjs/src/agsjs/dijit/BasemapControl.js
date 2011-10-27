@@ -125,15 +125,11 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
               } else {
                 layer.setMapStyles(null);
               }
-              
             }
-            
           } else {
             this.map.addLayer(layer, 0);
           }
-          
         }
-        
       }
       
     }, this);
@@ -278,8 +274,10 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
         } else if (layer == this._bingLayer) {
           layer.setMapStyle(lay._subtype);
         }
-        layer.show();
-        lay.visible = true;
+        if (!layer.visible){
+          layer.show();
+          lay.visible = true;
+        }
         if (lay.name == name) {
           layer.setOpacity(op);
         } else {
@@ -413,7 +411,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
       tc.placeAt(this.domNode);
       tc.startup();
     }
-    
+    dojo.addClass(this.domNode, 'agsBasemapControl');
   },
   _onTabChangeHandler: function(child) {
     dojo.every(this.basemaps, function(b) {
@@ -444,17 +442,12 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
     var first = Math.floor(value);
     var op = 1 - (value - first);
     var second = Math.min(bases.length - 1, first + 1);
-    //if (first != second){
     this._switchLayer(bases[first].name, bases[second].name, op);
-    //} else {
-  
-    //}
-  
-  
   },
   // extention point
   destroy: function() {
     dojo.disconnect(this._onTabChangeHandle);
+    
   }
   
   

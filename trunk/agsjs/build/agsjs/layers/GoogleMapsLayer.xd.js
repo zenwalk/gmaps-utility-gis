@@ -1,4 +1,4 @@
-/** built on 2011-10-26 */ 
+/** built on 2011-10-27 */ 
 dojo._xdResourceLoaded(function(){ return {  
 depends: [["provide", "agsjs.layers.GoogleMapsLayer"]],defineResource: function(dojo) { 
 window.google=window.google||{};dojo.provide("agsjs.layers.GoogleMapsLayer");

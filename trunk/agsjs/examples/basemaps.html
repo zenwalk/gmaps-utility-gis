@@ -32,7 +32,10 @@
               parseOnLoad: true,
               baseUrl: './',
               modulePaths: {
-                'agsjs': '../build/agsjs'
+                // use relative path for downloaed and locally hosted copy
+                 'agsjs': '../build/agsjs' 
+                // use absolute path for online version. Note sometimes googlecode.com can be slow.
+                //'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/tags/ajsjs/1.05/build/ajsjs'
               }
             };
         </script>
@@ -40,8 +43,9 @@
         </script>
        <script type="text/javascript">
             dojo.require("dijit.dijit"); 
-            dojo.require("dijit.form.RadioButton");
-            dojo.require("dijit.form.CheckBox");
+            // require RadioButton and CheckBox if want dojo style control
+            //dojo.require("dijit.form.RadioButton");
+            //dojo.require("dijit.form.CheckBox");
             dojo.require("dijit.form.Button");
             dojo.require("dijit.layout.BorderContainer");
             dojo.require("dijit.layout.ContentPane");
@@ -54,16 +58,12 @@
             var map;
             
             function init() {
-              //US: "xmin": -13220472,  "ymin": 3459539, "xmax": -8817699, "ymax": 6394721,
-              //COC: "xmin": -9031493,  "ymin": 4170327,  "xmax": -8962700,"ymax": 4216189,
               var initExtent = new esri.geometry.Extent({
                 "xmin": -13220472,  "ymin": 3459539, "xmax": -8817699, "ymax": 6394721,
                 "spatialReference": {
                   "wkid": 102100
                 }
               });
-              
-              
               map = new esri.Map("map", {
                 extent: initExtent,
                 logo: false
@@ -89,7 +89,7 @@
                   type: 'OpenStreetMap'
                 }]
               }, {
-                title: 'Transitions',
+                title: 'Transitional',
                 slider: {
                   intermediateChanges: true
                 },
@@ -156,19 +156,10 @@
               basemapControl.startup();
               
             }
-            
-            
-            
-            
-            
-            
-            
-            
-            var resizeTimer;
+           var resizeTimer;
             function resizeMap() {
               //resize the map when the browser resizes - view the 'Resizing and repositioning the map' section in 
               //the following help topic for more details http://help.esri.com/EN/webapi/javascript/arcgis/help/jshelp_start.htm#jshelp/inside_faq.htm
-              
               clearTimeout(resizeTimer);
               resizeTimer = setTimeout(function() {
                 map.resize();
@@ -184,18 +175,20 @@
         <div id="content" dojotype="dijit.layout.BorderContainer" design="headline" gutters="true" style="width: 100%; height: 100%;">
             <div id="header" dojotype="dijit.layout.ContentPane" region="top" style="padding:2px">
                 <div>
-                    <b>Use Google Maps in ESRI ArcGIS JSAPI</b>
+                    <b>Base Map Control</b>  <a style="right:20px;position: absolute" href="../docs/basemapcontrol/examples.html">Documentation</a>
                 </div>
                 <ul style="margin:2px">
                     <li>
-                        Click buttons to switch base map between ESRI and Google.
+                        Click tabs to switch between different basemap groups.
                     </li>
                     <li>
-                        Drag pegman icon on top left corner to map to see street view(hold mouse for preview). 
+                        Inside each group, click radio buttons to switch between base map layers. Or drag slider to switch with transitional effects.   
                     </li>
                     <li>
-                        Check layer on/off to customize base map. 
-                        Note not all sub layer visible at all scales.
+                        Click check boxes to turn reference layers on/off.  
+                    </li>
+                    <li>
+                        For Google Maps, check out the customized style such as <i>Night</i> and <i>Gray</i>.  
                     </li>
                 </ul>
             </div>

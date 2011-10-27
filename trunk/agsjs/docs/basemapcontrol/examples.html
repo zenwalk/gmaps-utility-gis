@@ -148,12 +148,12 @@
               }
         </pre>
             </p>
-            <p>Each layer have a name, type, and additional information based on type. The default type is <code>ArcGISTiledMapServiceLayer</code>. This config is similar to <code>esri.dijit.BasemapLayer</code>'s constructor, 
+            <p>Each layer have a name, type, and additional information based on type. The default type is <code>ArcGISTiledMapServiceLayer</code>, which requires an <code>url</code>. This config is similar to <code>esri.dijit.BasemapLayer</code>'s constructor, 
             but support more types including Google maps. 
-                It use visibile property to set default basemap layer. If more than one layer 
-                have some name, they will be on/off together. If a layer has <coed>isReference</coed> property, it will be displayed as checkbox to turn on/off, typically for label/references over imagery.<p>Set bingMapsKey in the first BingMaps 
+                It uses visibile property to set default basemap layer. Also, any additional property will be passed into constructor. If more than one layer 
+                have same name, they will be on/off together(like a set). If a layer has <code>isReference</code> property, it will be displayed as checkbox to turn on/off, typically for label/references over imagery.<p>Set bingMapsKey in the first BingMaps 
                         type (<code>BingMapsRoad,BingMapsAerial,BingMapsHybrid</code>). For Google maps, supports 
-                       <code> GoogleMapsRoadMap|GoogleMapsSatellite|GoogleMapsHybrid</code>. You acn supply <code>styles</code> property to create customized style for Google maps<pre class="prettyprint">
+                       <code> GoogleMapsRoadMap|GoogleMapsSatellite|GoogleMapsHybrid</code>. You can supply <code>styles</code> property to create customized style for Google maps<pre class="prettyprint">
       [{
                   name: 'Road',
                   type: 'GoogleMapsRoadMap',
