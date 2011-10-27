@@ -18,6 +18,8 @@
             
             body {
                 overflow: hidden;
+                font-family: Helvetica, Arial, sans-serif;
+                font-size:small;
             }
             
             #map {
@@ -32,6 +34,7 @@
               modulePaths: {
                 // if use local copy, make sure the path reference is relative to 'baseUrl', e.g.:
                 'agsjs': '../build/agsjs'
+               // use absolute path for online version. Note sometimes googlecode.com can be slow.
                // 'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/1.05/build/agsjs'
               }
             };
@@ -40,7 +43,7 @@
         </script>
         
         <script type="text/javascript">
-             dojo.require("dijit.dijit"); 
+            dojo.require("dijit.dijit"); 
             dojo.require("dijit.form.Button");
             dojo.require("dijit.layout.BorderContainer");
             dojo.require("dijit.layout.ContentPane");
@@ -210,7 +213,7 @@
             <div id="header" dojotype="dijit.layout.ContentPane" region="top">
                 <div>
                     <b>Use Google Maps in ESRI ArcGIS JSAPI</b>
-                    | <a href="../docs/googlemapslayer/examples.html#GMaps">Documentation</a>
+                     <a style="right:20px;position:absolute" href="../docs/googlemapslayer/examples.html">Documentation</a>
                 </div>
                 <ul style="margin:2px">
                     <li>
