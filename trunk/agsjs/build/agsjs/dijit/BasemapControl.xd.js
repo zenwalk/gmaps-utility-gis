@@ -1,6 +1,8 @@
 /** built on 2011-10-27 */ 
 dojo._xdResourceLoaded(function(){ return {  
-depends: [["provide", "agsjs.dijit.BasemapControl"]],defineResource: function(dojo) { 
+depends: [["provide", "agsjs.dijit.BasemapControl"] 
+,['require','dijit.layout.TabContainer'],['require','dijit.layout.ContentPane'] 
+],defineResource: function(dojo) { 
 dojo.provide("agsjs.dijit.BasemapControl");dojo.require("dijit._Widget");dojo.require("dijit.layout.TabContainer");dojo.require("dijit.layout.ContentPane");dojo.require("dijit.form.Slider");
 dojo.declare("agsjs.dijit.BasemapControl",[dijit._Widget],{maps:null,basemaps:null,_selectedBase:null,constructor:function(b){b=b||{};if(!b.map)throw new Error("no map defined in params for TOC");dojo.mixin(this,b);this._init()},_init:function(){dojo.forEach(this.basemaps,function(b,a){if(b.selected)this._selectedBase=b;b._refs=[];b._bases=[];var c=false;dojo.forEach(b.layers,function(e,h){if(!e.id)e.id="basemap_"+a+"_"+h;e.visible=e.visible||false;if(e.isReference)b._refs.push(e);else{b._bases.push(e);
 if(e.visible)c=true}},this);if(!c)b._bases[0].visible=true},this);if(!this._selectedBase){this._selectedBase=this.basemaps[0];this._selectedBase.selected=true}this.map.layerIds.length==0&&this._selectedBase&&this._selectBase(this._selectedBase,true);this.loaded=true;this.onLoad()},postCreate:function(){this._createUI()},_selectBase:function(b,a){if(!(!a&&b==this._selectedBase)){this._selectedBase=b;this._removeBaseLayers();this._addBaseLayers(b._refs);this._addBaseLayers(b._bases)}},_addBaseLayers:function(b){var a;
