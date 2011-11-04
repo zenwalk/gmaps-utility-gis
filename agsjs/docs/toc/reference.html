@@ -36,7 +36,7 @@
       
     
       <h2><a name="TOCLayerInfo"></a>class TOCLayerInfo</h2>
-      <p>This is an object literal that specify the options for each map service layer.</p>
+      <p>This is an object literal that specify the options for each map layer subLayer.</p>
       
         <h3>Properties</h3>
         <table summary="class TOCLayerInfo - Properties" width="90%">
@@ -59,7 +59,7 @@
                     <td><code>Boolean</code></td>
                   
                 
-                <td>whether to collapsed the service layer at beginning. default is false, which means expand if visible, collapse if not.</td>
+                <td>whether to collapsed the layer subLayer at beginning. default is false, which means expand if visible, collapse if not.</td>
               </tr>
             
               <tr class="even">
@@ -69,20 +69,10 @@
                     <td><code>esri.layers.ArcGISTiledMapServiceLayer | esri.layers.ArcGISDynamicMapServiceLayer</code></td>
                   
                 
-                <td>ArcGIS Server layer.</td>
+                <td>ArcGIS Server subLayer.</td>
               </tr>
             
               <tr class="odd">
-                <td><code>noLayers</code></td>
-                
-                  
-                    <td><code>Boolean</code></td>
-                  
-                
-                <td>whether to skip the sub layers inside a service layer.  This typically for services (such as raster)that you only want to turn on/off but do not care what's inside.  default is false.</td>
-              </tr>
-            
-              <tr class="even">
                 <td><code>noLegend</code></td>
                 
                   
@@ -92,16 +82,6 @@
                 <td>whether to skip the legend, and only display layers. default is false.</td>
               </tr>
             
-              <tr class="odd">
-                <td><code>showGroupCount</code></td>
-                
-                  
-                    <td><code>Boolean</code></td>
-                  
-                
-                <td>whether to add number of sub layers after group layer. default is false.</td>
-              </tr>
-            
               <tr class="even">
                 <td><code>slider</code></td>
                 
@@ -109,7 +89,7 @@
                     <td><code>Boolean</code></td>
                   
                 
-                <td>whether to show slider for each service to adjust transparency. default is false.</td>
+                <td>whether to show slider for each layer to adjust transparency. default is false.</td>
               </tr>
             
               <tr class="odd">
@@ -119,7 +99,7 @@
                     <td><code>string</code></td>
                   
                 
-                <td>title. optional. If not specified, service name is used.</td>
+                <td>title. optional. If not specified, layer name is used.</td>
               </tr>
             
           </tbody>
@@ -171,16 +151,6 @@
                   
                 
                 <td>the map instance. required.</td>
-              </tr>
-            
-              <tr class="even">
-                <td><code>style</code></td>
-                
-                  
-                    <td><code>String</code></td>
-                  
-                
-                <td>how legend swatches should be positioned. <code>inline|standard</code>. See example docs for details.</td>
               </tr>
             
           </tbody>

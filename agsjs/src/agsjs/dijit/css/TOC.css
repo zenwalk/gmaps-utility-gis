@@ -1,43 +1,56 @@
-.agsTOCNode {
+.agsjsTOCNode {
     padding-top: 0px;
     padding-bottom: 1px;
 }
 
-.agsTOCContent {
+.agsjsTOCContent {
     white-space: nowrap;
 }
-.agsTOCOutOfScale {
+.agsjsTOCOutOfScale {
   color: grey;
   opacity: 0.5;
 }
-.agsTOCService {
+.agsjsTOCLayer {
     /*background-color: #A9D0F5*/
 }
 
-.agsTOCServiceLabel {
+.agsjsTOCLayerLabel {
     font-size: 11pt;
     font-weight: bold;
 }
 
-.agsTOCGroup {
+.agsjsTOCGroupLayer {
    /* background-color: #CEE3F6 */
-}
-.agsTOCSlider {
-  padding:5px 20px 5px 30px;
+  font-weight: bold;
 }
 
-.agsTOCGroupLabel {
+.agsjsTOCGroupLayerLabel {
+    font-size: 10pt;
+}
+.agsjsTOCGroupLayer {
+  font-weight: bold;
+}
+.agsjsTOCGroupOn {
+   opacity: 1;
+}
+
+.agsjsTOCGroupOff {
+   opacity: 0.5;
+}
+
+
+.agsjsTOCSubLayerLabel {
     font-size: 10pt;
 }
 
-.agsTOCLayerLabel {
-    font-size: 10pt;
-}
-
-.agsTOCLegendIcon {
+.agsjsTOCLegendIcon {
    /* width: 50px;*/
 }
 
-.agsTOCLegendLabel {
+.agsjsTOCLegendLabel {
     font-size: 8pt;
+}
+
+.agsjsTOCSlider {
+  padding:5px 20px 5px 30px;
 }
