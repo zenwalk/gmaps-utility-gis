@@ -529,7 +529,9 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
   _visibilityChangeHandler: function(v) {
     if (v) {
       esri.show(this._div);
-      esri.show(this._controlDiv);
+      if (!this._svDisabled) {
+        esri.show(this._controlDiv);
+      }
       this.visible = true;
       if (this._gmap) {
         google.maps.event.trigger(this._gmap, 'resize');
@@ -556,6 +558,20 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
           this._extentChangeHandle = null;
         }
       }
+    }
+  },
+  // hide sv control. This is private for now, to be used by using google maps in a slider basemap,
+  // in which case street view maybe covered by something else and can not response to events.
+  _disableStreetView: function(){
+    if (this._controlDiv){
+       esri.hide(this._controlDiv);
+       this._svDisabled = true;
+    }
+  },
+  _enableStreetView: function(){
+    if (this._controlDiv && this._streetView){
+       esri.show(this._controlDiv);
+       this._svDisabled = false;
     }
   },
   _resizeHandler: function(extent, height, width) {
@@ -632,6 +648,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
           if (sv.length > 0) {
             dojo.forEach(sv, function(s, idx) {
               dojo.place(s.parentNode.parentNode, this._controlDiv);
+              //dojo.style(s.parentNode.parentNode.parentNode, 'zIndex', 999999);
             }, this);
             dojo.disconnect(this._svHandle);
             this._svHandle = null;

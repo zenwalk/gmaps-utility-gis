@@ -19,37 +19,14 @@
         <div>
             <h2><a name="About"></a>About</h2>
             <p>
-                This library is a Table of Contents widget for ArcGIS Server JavaScript API. 
+                This library is a Table of Contents/Legend widget for ArcGIS Server JavaScript API. 
             </p>
             <p>
-                The widget provides a tree-like structure for layer list and legend combination. It provides 2 styles by setting the "
-                <code>
-                    style
-                </code>" value in constructor parameter:
-                <table>
-                    <tr>
-                        <td>
-                            standard
-                        </td>
-                        <td>
-                            It's similar to ArcMap's Table of Content. Legends are nested underneath layer name. 
-                            Click +/- icon to expand the legend or layer group. Click check box to turn on/off layers (dynamic layer only, tiled service will not display checkbox) 
-                            <br>
-                            <img src="standard.png"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            inline
-                        </td>
-                        <td>
-                            It's similar to Google Earth's "Layers" component. When possible, the legend icon is placed in front of layer name, instead of nested below. 
-                            It uses checkboxes in addition to +- button to toggle nested legends. When check on a layer, legend is expanded automatically, and vise versa.
+                The widget provides a tree-like structure for layer list and legend combination. If the layer has a Simple Renderer, the legend icon is placed in front of layer name, instead of nested below. 
+                            It uses checkboxes in addition to +- button to toggle nested legends. When turning on a layer, legend is expanded automatically, and vise versa.
                             <br>
                             <img src="inline.png"/>
-                        </td>
-                    </tr>
-                </table>
+
             </p>
             <p>
                 More features:
@@ -58,7 +35,7 @@
                         scale threshold: It respects the scale threshold of layers, if a layer is out of scale, it will be displayed differently and check box will be disabled. 
                         or you can hide it completely by add css class 
                         <code>
-                            agsTOCOutOfScale
+                            agsjsTOCOutOfScale
                         </code>
                         and set 
                         <code>
@@ -75,15 +52,15 @@
             </p>
             <p>
                 The library has a default css style sheet, but the following CSS class can be overriden for additional style needs: <pre><code>
-                    .agsTOCNode,
-                    .agsTOCContent,
-                    .agsTOCOutOfScale,
-                    .agsTOCService,
-                    .agsTOCServiceLabel,
-                    .agsTOCGroup,
-                    .agsTOCGroupLabel,
-                    .agsTOCLayerLabel,
-                    .agsTOCLegendLabel
+                    .agsjsTOCNode,
+                    .agsjsTOCContent,
+                    .agsjsTOCOutOfScale,
+                    .agsjsTOCLayer,
+                    .agsjsTOCLayerLabel,
+                    .agsjsTOCGroupLayer,
+                    .agsjsTOCGroupLayerLabel,
+                    .agsjsTOCSubLayerLabel,
+                    .agsjsTOCSubLegendLabel
                 </code></pre>
             </p>
         </div>
@@ -136,18 +113,7 @@
         </pre>
             </p>
         </div>
-                <div>
-            <h2>Choose a style: inline | standard (default). </h2>
-            <p>
-               The difference of two styles are explained above. use 'style' property in constructor: <pre class="prettyprint">
-                var toc = new agsjs.dijit.TOC({
-                  map: map,
-                  style: "inline"
-                }, 'tocDiv')
-            }
-        </pre>
-            </p>
-        </div>
+                
             <div>
             <h2>Add a Transparancy Slider</h2>
             <p>
@@ -169,18 +135,16 @@
         <div>
             <h2>TOC without Legend</h2>
             <p>
-               In some cases, such as base map, you may not want legend or even layer list. Set '<code>noLayers:true</code>' 
-               or <code>noLegend:true</code>in the correct entry in the <code>layerInfos</code> property of constructor: <pre class="prettyprint">
+               In some cases, such as base map, you may not want legend or layer list. Set <code>noLegend:true</code>in the correct entry in the <code>layerInfos</code> property of constructor: <pre class="prettyprint">
                var toc = new agsjs.dijit.TOC({
                   map: map,
                   layerInfos: [{
                     layer: operational,
-                    title: "Operational Layers",
-                    noLegend:true
+                    title: "Operational Layers"
                   },{
                     layer: basemap,
                     title:'Base Map',
-                    noLayers: true
+                    noLegend: true
                   }]
                 }, 'tocDiv');
             ..
@@ -192,7 +156,7 @@
             <h2>Hide Layers that are out of scale</h2>
             <p>
                One TOC type is to hide layer entry when they are out of scale. Simple add <code>display:none</code> to the <code>.agsTOCOutOfScale</code>. <pre class="prettyprint">
-            #scaleDiv .agsTOCOutOfScale {
+            #scaleDiv .agsjsTOCOutOfScale {
               display:none; 
             }
             

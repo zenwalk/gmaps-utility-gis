@@ -4,11 +4,10 @@
  * @fileoverview
  * <p>Base Map Groups widget. Typically placed on top right corner of the map, and organize base maps into groups that displayed as Tabs.
  * Can use Google maps, and can have slider for images.
- * @version 1.2
  */
 // change log: 
-// 2010-08-11: support for not showing legend or layer list; slider at service level config; removed style background.
-
+// 2011-11-02: google/bing changed from per widget to per basemap group, so street view can be disabled as needed, such as in slider case.
+// 2011-10-20: initial release
 /*global dojo esri*/
 // reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
 
@@ -92,14 +91,15 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
   _selectBase: function(bmap, force) {
     if (!force && (bmap == this._selectedBase)) 
       return;
-    this._selectedBase = bmap;
     this._removeBaseLayers();
     var layer;
     // then add all layers;
+    this._selectedBase = bmap;
     this._addBaseLayers(bmap._refs);
     this._addBaseLayers(bmap._bases);
   },
   _addBaseLayers: function(lays) {
+    var bmap = this._selectedBase;
     var layer;
     dojo.forEach(lays, function(lay) {
       layer = lay._layer;
@@ -110,21 +110,27 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
       if (layer) {
         if (lay.isReference) {
           layer._isReference = true;
-          this.map.addLayer(layer);
+          
+          this.map.addLayer(layer, this.map.layerIds.length);
         } else {
           layer._isBaseMap = true;
-          if (layer == this._googleLayer || layer == this._bingLayer) {
+          if (layer == bmap._googleLayer || layer == bmap._bingLayer) {
             if (!layer._addedToMap) {
               this.map.addLayer(layer, 0);
               layer._addedToMap = true;
             }
-            if (lay.visible && layer == this._googleLayer) {
+            if (layer == bmap._googleLayer) {//lay.visible && 
               layer.setMapTypeId(lay._subtype);
-              if (lay.styles) {
-                layer.setMapStyles(lay.styles);
-              } else {
-                layer.setMapStyles(null);
+              if (lay.visible) {
+                if (lay.styles) {
+                  layer.setMapStyles(lay.styles);
+                } else {
+                  layer.setMapStyles(null);
+                }
               }
+            }
+            if (layer == bmap._bingLayer) {//lay.visible && 
+              layer.setMapStyle(lay._subtype);
             }
           } else {
             this.map.addLayer(layer, 0);
@@ -136,6 +142,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
   },
   // remove all layers marked as base or reference
   _removeBaseLayers: function() {
+    var bmap = this._selectedBase;
     var ids = this.map.layerIds;
     var bases = [];
     dojo.forEach(ids, function(id) {
@@ -148,7 +155,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
     if (bases.length > 0) {
       dojo.forEach(bases, function(layer) {
         try {
-          if (layer == this._googleLayer || layer == this._bingLayer) {
+          if (layer == bmap._googleLayer || layer == bmap._bingLayer) {
             layer._addedToMap = false;
           }
           this.map.removeLayer(layer);
@@ -180,6 +187,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
     return layer;
   },
   _createGoogleLayer: function(lay) {
+    var bmap = this._selectedBase;
     if (!(agsjs && agsjs.layers && agsjs.layers.GoogleMapsLayer)) {
       throw "use dojo.require('agsjs.layers.GoogleMapsLayer') before using this widget";
       ;
@@ -191,13 +199,13 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
       'GoogleMapsTerrain': agsjs.layers.GoogleMapsLayer.MAP_TYPE_TERRAIN
     }[lay.type];
     lay._subtype = maptype;
-    if (!this._googleLayer) {
-      this._googleLayer = new agsjs.layers.GoogleMapsLayer(dojo.mixin({
+    if (!bmap._googleLayer) {
+      bmap._googleLayer = new agsjs.layers.GoogleMapsLayer(dojo.mixin({
         mapOptions: {
           mapTypeId: maptype
         }
       }, lay));
-      dojo.connect(this._googleLayer, "onStreetViewVisibilityChange", this, function(v) {
+      dojo.connect(bmap._googleLayer, "onStreetViewVisibilityChange", this, function(v) {
         if (v) {
           esri.hide(this.domNode);
         } else {
@@ -205,41 +213,47 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
         }
       });
       
-      this.onGoogleMapsLayerCreate(this._googleLayer);
+      this.onGoogleMapsLayerCreate(bmap._googleLayer);
     } else if (lay.visible) {
-      this._googleLayer.setMapTypeId(maptype);
-      this._googleLayer.show();
+      bmap._googleLayer.setMapTypeId(maptype);
+      bmap._googleLayer.show();
     }
-    return this._googleLayer;
+    return bmap._googleLayer;
   },
   onGoogleMapsLayerCreate: function(layer) {
     // event
   },
   _createBingLayer: function(lay) {
+    var bmap = this._selectedBase;
     var maptype = {
       'BingMapsRoad': esri.virtualearth.VETiledLayer.MAP_STYLE_ROAD,
       'BingMapsAerial': esri.virtualearth.VETiledLayer.MAP_STYLE_AERIAL,
       'BingMapsHybrid': esri.virtualearth.VETiledLayer.MAP_STYLE_AERIAL_WITH_LABELS
     }[lay.type];
     lay._subtype = maptype;
-    if (!this._bingLayer) {
-      this._bingLayer = new esri.virtualearth.VETiledLayer(dojo.mixin({
+    if (!bmap._bingLayer) {
+      if (lay.bingMapsKey){
+        this._bingMapsKey = lay.bingMapsKey;
+      } else {
+        lay.bingMapsKey = this._bingMapsKey;
+      }  
+      bmap._bingLayer = new esri.virtualearth.VETiledLayer(dojo.mixin({
         mapStyle: maptype
       }, lay));
       this.onBingMapsLayerCreate(this._bingLayer);
     } else if (lay.visible) {
-      this._bingLayer.setMapStyle(maptype);
-      this._bingLayer.show();
+      bmap._bingLayer.setMapStyle(maptype);
+      bmap._bingLayer.show();
     }
-    return this._bingLayer;
+    return bmap._bingLayer;
   },
   onBingMapsLayerCreate: function(layer) {
     // event
   },
   _switchLayer: function(name, name2, op) {
-    var b = this._selectedBase;
+    var bmap = this._selectedBase;
     var isRef = false;
-    dojo.forEach(b._refs, function(lay) {
+    dojo.forEach(bmap._refs, function(lay) {
       if (lay.name == name) {
         lay.visible = !lay.visible;
         if (lay._layer) {
@@ -253,28 +267,33 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
     // hide all other layers.
     // since for Google/Bings the later subtypes may mess up with different groups
     // safer to do 2 loops.
-    dojo.forEach(b._bases, function(lay) {
+    dojo.forEach(bmap._bases, function(lay) {
       if (lay.name != name && lay.name != name2) {
         lay.visible = false;
         if (lay._layer) 
           lay._layer.hide();
       }
     });
-    dojo.forEach(b._bases, function(lay) {
+    dojo.forEach(bmap._bases, function(lay) {
       if (lay.name == name || lay.name == name2) {
         var layer = lay._layer;
-        if (layer == this._googleLayer) {
+        if (layer == bmap._googleLayer) {
           layer.setMapTypeId(lay._subtype);
           if (lay.styles) {
             layer.setMapStyles(lay.styles);
           } else {
             layer.setMapStyles(null);
           }
+          if (name2 != null) {
+            layer._disableStreetView();
+          } else {
+            layer._enableStreetView();
+          }
           
-        } else if (layer == this._bingLayer) {
+        } else if (layer == bmap._bingLayer) {
           layer.setMapStyle(lay._subtype);
         }
-        if (!layer.visible){
+        if (!layer.visible) {
           layer.show();
           lay.visible = true;
         }
