@@ -1,56 +1,61 @@
 .agsjsTOCNode {
-    padding-top: 0px;
+    padding-top: 1px;
     padding-bottom: 1px;
 }
 
 .agsjsTOCContent {
     white-space: nowrap;
 }
+
 .agsjsTOCOutOfScale {
-  color: grey;
-  opacity: 0.5;
-}
-.agsjsTOCLayer {
-    /*background-color: #A9D0F5*/
+    color: grey;
+    opacity: 0.5;
 }
 
-.agsjsTOCLayerLabel {
+
+
+.agsjsTOCRootLayer {
+}
+
+.agsjsTOCRootLayerLabel {
     font-size: 11pt;
     font-weight: bold;
 }
 
 .agsjsTOCGroupLayer {
-   /* background-color: #CEE3F6 */
-  font-weight: bold;
+    font-weight: bold;
 }
 
 .agsjsTOCGroupLayerLabel {
     font-size: 10pt;
 }
+
 .agsjsTOCGroupLayer {
-  font-weight: bold;
+    font-weight: bold;
 }
+
 .agsjsTOCGroupOn {
-   opacity: 1;
+    opacity: 1;
 }
 
 .agsjsTOCGroupOff {
-   opacity: 0.5;
+    opacity: 0.8;
 }
 
-
-.agsjsTOCSubLayerLabel {
+.agsjsTOCLayerLabel {
     font-size: 10pt;
+    padding-left: 2px;
 }
 
 .agsjsTOCLegendIcon {
-   /* width: 50px;*/
+    /* width: 50px;*/
 }
 
 .agsjsTOCLegendLabel {
     font-size: 8pt;
+    padding-left: 2px;
 }
 
 .agsjsTOCSlider {
-  padding:5px 20px 5px 30px;
+    padding: 5px 20px 5px 30px;
 }

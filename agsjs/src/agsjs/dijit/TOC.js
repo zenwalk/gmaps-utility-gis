@@ -1,13 +1,12 @@
 /**
  * @name Table of Contents (TOC) widget for ArcGIS Server JavaScript API
- * @version 1.0
  * @author: Nianwei Liu (nianwei at gmail dot com)
  * @fileoverview
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
- * @version 1.2
+ * @version 1.06
  */
 // change log: 
-// 2011-11-02: change css class name. use layer-sublayer-legend instead of service-layer-legend as names. inline style as default. standard maybe dropped.
+// 2011-11-04: v1.06: uniquevalue renderer check on/off using definitions. group layer on/off. change css class name. inline style as default. deprecate standard style
 // 2011-08-11: support for not showing legend or layer list; slider at service level config; removed style background.
 
 /*global dojo esri*/
@@ -29,7 +28,7 @@ dojo.require("dojo.fx");
 }());
 
 /**
- * _TOCNode is a node, with 4 possible types: service|group|layer|legend
+ * _TOCNode is a node, with 3 possible types: layer(service)|layer|legend
  * @private
  */
 dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
@@ -37,34 +36,34 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
   templateString: '<div class="agsjsTOCNode">' +
   '<div data-dojo-attach-point="rowNode" data-dojo-attach-event="onclick:_onClick">' +
   '<span data-dojo-attach-point="contentNode" class="agsjsTOCContent">' +
-  '<input type="checkbox" data-dojo-attach-point="checkNode"/>' +
+  '<span data-dojo-attach-point="checkContainerNode"></span>' +//<input type="checkbox" data-dojo-attach-point="checkNode"/>' +
   '<img src="${_blankGif}" alt="" data-dojo-attach-point="iconNode" />' +
   '<span data-dojo-attach-point="labelNode">' +
   '</span></span></div>' +
   '<div data-dojo-attach-point="containerNode" style="display: none;"> </div></div>',
+  rootLayer: null,
   layer: null,
-  subLayer: null,
   legend: null,
-  layerTOC: null,
+  rootLayerTOC: null,
+  data: null,
+  _childTOCNodes: [],
   constructor: function(params, srcNodeRef) {
     dojo.mixin(this, params);
   },
   // extension point. called automatically after widget DOM ready.
   postCreate: function() {
-    dojo.style(this.rowNode, 'paddingLeft', '' + this.layerTOC.toc.indentSize * this.layerTOC._currentIndent + 'px');
+    dojo.style(this.rowNode, 'paddingLeft', '' + this.rootLayerTOC.toc.indentSize * this.rootLayerTOC._currentIndent + 'px');
     // using the availability of certain property to decide what kind of node to create
-    var data = null;
-    var blank = this.iconNode.src;
+    this.data = this.legend || this.layer || this.rootLayer;
+    this.blank = this.iconNode.src;
+    
     if (this.legend) {
-      data = this.legend;
       this._createLegendNode(this.legend);
-    } else if (this.subLayer) {
-      data = this.subLayer;
-      this._createSubLayerNode(this.subLayer);
-      this._adjustToState();
     } else if (this.layer) {
-      data = this.layer;
       this._createLayerNode(this.layer);
+      
+    } else if (this.rootLayer) {
+      this._createRootLayerNode(this.rootLayer);
     }
     if (this.containerNode) {
       this.toggler = new dojo.fx.Toggler({
@@ -73,14 +72,31 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
         hideFunc: dojo.fx.wipeOut
       })
     }
-    if (this.checkNode) {
-      this.checkNode.checked = data.visible;
+    
+    if (!this._noCheckNode) {
+      var chk;
+      if (dijit.form && dijit.form.CheckBox) {
+        chk = new dijit.form.CheckBox({ // looks a bug in dijit. image not renderered until mouse over. bug was closed but still exist.
+          // use attr('checked', true) not working either.
+          checked: this.data.visible
+        });
+        chk.placeAt(this.checkContainerNode);//contentNode, 'first');
+        chk.startup();
+      } else {
+        chk = dojo.create('input', {
+          type: 'checkbox',
+          checked: this.data.visible
+        }, this.checkContainerNode);//this.contentNode, 'first');
+      }
+      this.checkNode = chk;
     }
-    var show = data.visible;
-    // if it is a group subLayer and no child subLayer is visible, then collapse
-    if (data._subLayerInfos) {
+    
+    
+    var show = this.data.visible;
+    // if it is a group layer and no child layer is visible, then collapse
+    if (this.data._subLayerInfos) {
       var noneVisible = true;
-      dojo.every(data._subLayerInfos, function(info) {
+      dojo.every(this.data._subLayerInfos, function(info) {
         if (info.visible) {
           noneVisible = false;
           return false;
@@ -91,96 +107,103 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
         show = false;
     }
     
-    if (data.collapsed) 
+    if (this.data.collapsed) 
       show = false;
-    if (this.iconNode && this.iconNode.src == blank) {
+    if (this.iconNode && this.iconNode.src == this.blank) {
       dojo.addClass(this.iconNode, 'dijitTreeExpando');
       dojo.addClass(this.iconNode, show ? 'dijitTreeExpandoOpened' : 'dijitTreeExpandoClosed');
     }
     if (this.containerNode) 
       dojo.style(this.containerNode, 'display', show ? 'block' : 'none');
     
-    if (this.layerTOC.toc.style == 'inline' && this.iconNode && this.checkNode) {
-      dojo.place(this.iconNode, this.checkNode, 'after');
+    if (this.rootLayerTOC.toc.style == 'standard' && this.iconNode && this.checkNode) {
+      dojo.place(this.iconNode, this.checkNode.domNode || this.checkNode, 'before');
     }
+    
   },
   // root level node
-  _createLayerNode: function(layer) {
-    dojo.addClass(this.rowNode, 'agsjsTOCLayer');
-    dojo.addClass(this.labelNode, 'agsjsTOCLayerLabel');
+  _createRootLayerNode: function(rootLayer) {
+    dojo.addClass(this.rowNode, 'agsjsTOCRootLayer');
+    dojo.addClass(this.labelNode, 'agsjsTOCRootLayerLabel');
     
-    var title = this.layerTOC.info.title;// || layer.id;
-    layer.collapsed = this.layerTOC.info.collapsed;
-    if (this.layerTOC.info.slider) {
+    var title = this.rootLayerTOC.info.title;
+    if (title ===''){
+      esri.hide(this.rowNode);
+      rootLayer.show();
+      this.rootLayerTOC._currentIndent--;
+    }
+    rootLayer.collapsed = this.rootLayerTOC.info.collapsed;
+    if (this.rootLayerTOC.info.slider) {
       this.sliderNode = dojo.create('div', {
         'class': 'agsjsTOCSlider'
       }, this.rowNode, 'last');//
       this.slider = new dijit.form.HorizontalSlider({
         showButtons: false,
-        value: layer.opacity * 100,
+        value: rootLayer.opacity * 100,
         intermediateChanges: true,
         //style: "width:100%;padding:0 20px 0 20px",
         tooltip: 'adjust transparency',
         onChange: function(value) {
-          layer.setOpacity(value / 100);
+          rootLayer.setOpacity(value / 100);
         },
         layoutAlign: 'right'
       });
       this.slider.placeAt(this.sliderNode);
     }
-    if (!this.layerTOC.info.noLayers) {
-      this._createChildrenNodes(layer._tocInfos, 'subLayer');
+    if (!this.rootLayerTOC.info.noLegend) {
+      this._createChildrenNodes(rootLayer._tocInfos, 'layer');
     } else {
       dojo.style(this.iconNode, 'visibility', 'hidden');
     }
     this.labelNode.innerHTML = title;
+    dojo.attr(this.rowNode, 'title', title);
   },
   // a layer inside a map service.
-  _createSubLayerNode: function(subLayer) {
-    // subLayer: layerInfo with nested subLayerInfos
-    this.labelNode.innerHTML = subLayer.name;
-    if (subLayer._subLayerInfos) {
-      // not allowing group layer to check on/off for now.
-      //dojo.destroy(this.checkNode);
+  _createLayerNode: function(layer) {
+    // layer: layerInfo with nested subLayerInfos
+    this.labelNode.innerHTML = layer.name;
+    if (layer._subLayerInfos) {// group layer
       dojo.addClass(this.rowNode, 'agsjsTOCGroupLayer');
       dojo.addClass(this.labelNode, 'agsjsTOCGroupLayerLabel');
-      if (this.layerTOC.info.showGroupCount) {
-        this.labelNode.innerHTML = subLayer.name + ' (' + subLayer._subLayerInfos.length + ')';
+      if (this.rootLayerTOC.info.showGroupCount) {
+        this.labelNode.innerHTML = layer.name + ' (' + layer._subLayerInfos.length + ')';
       }
-      this._createChildrenNodes(subLayer._subLayerInfos, 'subLayer');
+      this._createChildrenNodes(layer._subLayerInfos, 'layer');
     } else {
-      dojo.addClass(this.rowNode, 'agsjsTOCSubLayer');
-      dojo.addClass(this.labelNode, 'agsjsTOCSubLayerLabel');
-      if (this.layer.tileInfo) {
+      dojo.addClass(this.rowNode, 'agsjsTOCLayer');
+      dojo.addClass(this.labelNode, 'agsjsTOCLayerLabel');
+      if (this.rootLayer.tileInfo) {
         // can not check on/off for tiled
-        dojo.destroy(this.checkNode);
-        this.checkNode = null;
+        // dojo.destroy(this.checkNode);
+        //this.checkNode = null;
+        this._noCheckNode = true;
       }
-      if (subLayer.renderer && !this.layerTOC.info.noLegend) {
-        if (this.layerTOC.toc.style == 'inline' && subLayer.renderer.symbol) {
-          this._setIconNode(subLayer.renderer, this.iconNode, this);
+      if (layer.renderer && !this.rootLayerTOC.info.noLegend && this.rootLayerTOC.info.mode != 'legend') {
+        if (this.rootLayerTOC.toc.style == 'inline' && layer.renderer.symbol) {
+          this._setIconNode(layer.renderer, this.iconNode, this);
           dojo.destroy(this.containerNode);
           this.containerNode = null;
-        } else if (subLayer.renderer instanceof esri.renderer.SimpleRenderer) {
-          this._createChildrenNodes([subLayer.renderer], 'legend');
+        } else if (layer.renderer instanceof esri.renderer.SimpleRenderer) {
+          this._createChildrenNodes([layer.renderer], 'legend');
         } else {
-          var rends = subLayer.renderer.infos;
-          if (subLayer.renderer.defaultSymbol) {
+          var rends = layer.renderer.infos;
+          if (layer.renderer.defaultSymbol) {
             rends = [{
-              symbol: subLayer.renderer.defaultSymbol,
-              label: subLayer.renderer.defaultLabel,
-              isDefault: true
-             }].concat(rends);
+              symbol: layer.renderer.defaultSymbol,
+              label: layer.renderer.defaultLabel,
+              isDefault: true,
+              value:"*"
+            }].concat(rends);
           }
           this._createChildrenNodes(rends, 'legend');
         }
-      } else if (subLayer.legends && !this.layerTOC.info.noLegend) {
-        if (this.layerTOC.toc.style == 'inline' && subLayer.legends.length == 1) {
-          this.iconNode.src = this._getLegendIconUrl(subLayer.legends[0]);
+      } else if (layer.legends && !this.rootLayerTOC.info.noLegend) {
+        if (this.rootLayerTOC.toc.style == 'inline' && layer.legends.length == 1) {
+          this.iconNode.src = this._getLegendIconUrl(layer.legends[0]);
           dojo.destroy(this.containerNode);
           this.containerNode = null;
         } else {
-          this._createChildrenNodes(subLayer.legends, 'legend');
+          this._createChildrenNodes(layer.legends, 'legend');
         }
       } else {
         dojo.destroy(this.iconNode);
@@ -189,56 +212,53 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
         this.containerNode = null;
       }
     }
-    this.layerTOC._layerWidgets.push(this);
+    //this.rootLayerTOC._layerWidgets.push(this);
   },
   _createLegendNode: function(rendLeg) {
     //{label:, url: , imageData}
-    // here we use a pre-defined rule: if there is a definition expression we will make this subLayer's unique value on/off
+    // here we use a pre-defined rule: if there is a definition expression we will make this layer's unique value on/off
     // note, there is a bug in ArcGIS server (as of 10.01) if the service expession has "OR", the request expression has no effect 
     // unless the service expression is enclosed with "()"
     // you can put a bugus "1=1" expression to flag this layer for definition operation.
-    rendLeg.visible = false; 
-    if (this.subLayer && this.subLayer.definitionExpression) {
+    rendLeg.visible = false;
+    if (this.layer && this.layer.definitionExpression) {
       // for now only support unique
-      if (this.subLayer.renderer && this.subLayer.renderer instanceof esri.renderer.UniqueValueRenderer) {
-        if (!rendLeg.isDefault && this.layerTOC.toc.style == 'inline') {
-          rendLeg.visible = true; 
+      if (this.layer.renderer && this.layer.renderer instanceof esri.renderer.UniqueValueRenderer && !this.layer.renderer.attributeField2) {
+        if (!rendLeg.isDefault && this.rootLayerTOC.toc.style == 'inline' && this.rootLayerTOC.info.mode != 'legend') {
+          rendLeg.visible = true;
         }
       }
     }
     if (!rendLeg.visible) {
-      dojo.style(this.checkNode, 'visibility', 'hidden');
+      //dojo.style(this.checkNode, 'visibility', 'hidden');
+      this._noCheckNode = true;
     }
     dojo.destroy(this.containerNode);
     dojo.addClass(this.labelNode, 'agsjsTOCLegendLabel');
     this._setIconNode(rendLeg, this.iconNode, this);
     this.labelNode.appendChild(document.createTextNode(rendLeg.label));
-    if (rendLeg.value) {
-      dojo.attr(this.labelNode, "datavalue", rendLeg.value);
-    }
+    
   },
   // set url or replace node
   _setIconNode: function(rendLeg, iconNode, tocNode) {
-    if (rendLeg.url) {
-      iconNode.src = this._getLegendIconUrl(rendLeg);
-    } else if (rendLeg.symbol) {
-      if (rendLeg.symbol.url) {
-        iconNode.src = this._getLegendIconUrl(rendLeg.symbol);
-        if (rendLeg.symbol.width && rendLeg.symbol.height) {
-          this.iconNode.width = rendLeg.symbol.width;
-          this.iconNode.height = rendLeg.symbol.height;
-        }
-      } else {
+    var src = this._getLegendIconUrl(rendLeg);
+    if (!src || this.rootLayerTOC.info.mode == 'layers') {
+      if (rendLeg.symbol) {
         var sym = this._createSymbol(rendLeg.symbol);
         dojo.place(sym, iconNode, 'replace');
         tocNode.iconNode = sym;
       }
+    } else {
+      iconNode.src = src;
+      if (rendLeg.symbol && rendLeg.symbol.width && rendLeg.symbol.height) {
+        iconNode.width = rendLeg.symbol.width;
+        iconNode.height = rendLeg.symbol.height;
+      }
     }
+    
   },
   _createSymbol: function(symbol) {
-  
-    var w = this.layerTOC.toc.swatchSize[0], h = this.layerTOC.toc.swatchSize[1];
-    
+    var w = this.rootLayerTOC.toc.swatchSize[0], h = this.rootLayerTOC.toc.swatchSize[1];
     if (symbol.width && symbol.height) {
       w = symbol.width;
       h = symbol.height;
@@ -257,33 +277,43 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
   },
   _getLegendIconUrl: function(legend) {
     var src = legend.url;
-    if (src.indexOf('data') == -1) {
+    // in some cases NULL value may cause #legend != #of renderer entry.
+    if (src != null && src.indexOf('data') == -1) {
       if (!dojo.isIE && legend.imageData && legend.imageData.length > 0) {
         src = "data:image/png;base64," + legend.imageData;
       } else {
         if (src.indexOf('http') !== 0) {
           // resolve relative url
-          src = this.layer.url + '/' + this.subLayer.id + '/images/' + src;
+          src = this.rootLayer.url + '/' + this.layer.id + '/images/' + src;
         }
       }
     }
     return src;
   },
-  _createChildrenNodes: function(children, type) {
-    this.layerTOC._currentIndent++;
-    dojo.forEach(children, function(child) {
+  _createChildrenNodes: function(chdn, type) {
+    this.rootLayerTOC._currentIndent++;
+    var c = [];
+    
+    
+    //dojo.forEach(chdn, function(chd) {
+     for (var i=0, n = chdn.length; i < n; i++) {
+       var chd = chdn[i];
       var params = {
-        layerTOC: this.layerTOC,
+        rootLayerTOC: this.rootLayerTOC,
+        rootLayer: this.rootLayer,
         layer: this.layer,
-        subLayer: this.subLayer,
         legend: this.legend
       };
-      params[type] = child;
-      params.data = child;
+      params[type] = chd;
+      params.data = chd;
       var node = new agsjs.dijit._TOCNode(params);
       node.placeAt(this.containerNode);
-    }, this);
-    this.layerTOC._currentIndent--;
+      
+      c.push(node);
+      
+    }//, this);
+    this._childTOCNodes = c;
+    this.rootLayerTOC._currentIndent--;
   },
   _toggleContainer: function(on) {
   
@@ -310,34 +340,55 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     }
   },
   _adjustToState: function() {
-    if (this.subLayer) {
-      var scale = esri.geometry.getScale(this.layerTOC.toc.map);
-      var outScale = (this.subLayer.maxScale != 0 && scale < this.subLayer.maxScale) || (this.subLayer.minScale != 0 && scale > this.subLayer.minScale);
+    if (this.checkNode) {
+      var checked = this.legend ? this.legend.visible : this.layer ? this.layer.visible : this.rootLayer ? this.rootLayer.visible : false;
+      if (this.checkNode.set) {
+        this.checkNode.set('checked', checked);
+      } else {
+        this.checkNode.checked = checked;
+      }
+      
+    }
+    if (this.layer) {
+      var scale = esri.geometry.getScale(this.rootLayerTOC.toc.map);
+      var outScale = (this.layer.maxScale != 0 && scale < this.layer.maxScale) || (this.layer.minScale != 0 && scale > this.layer.minScale);
       if (outScale) {
         dojo.addClass(this.domNode, 'agsjsTOCOutOfScale');
       } else {
         dojo.removeClass(this.domNode, 'agsjsTOCOutOfScale');
       }
       if (this.checkNode) {
-        this.checkNode.disabled = outScale;
-        this.checkNode.checked = this.subLayer.visible;
+        if (this.checkNode.set) {
+          this.checkNode.set('disabled', outScale);
+          
+        } else {
+          this.checkNode.disabled = outScale;
+          
+        }
       }
     }
+    if (this._childTOCNodes.length > 0) {
+      dojo.forEach(this._childTOCNodes, function(child) {
+        child._adjustToState();
+      });
+    }
+    
   },
   _onClick: function(evt) {
+  
     var t = evt.target;
-    if (t == this.checkNode) {
+    if (t == this.checkNode || dijit.getEnclosingWidget(t) == this.checkNode) {
       if (this.legend) {
         // this is a check legend
-        var renderer = this.subLayer.renderer;
+        var renderer = this.layer.renderer;
         this.legend.visible = this.checkNode.checked;
         var def = [];
         if (renderer instanceof esri.renderer.UniqueValueRenderer) {
           // find type of attribute field and decide if need quote
           var q = '';
-          if (this.subLayer.fields) {
-            dojo.forEach(this.subLayer.fields, function(field) {
-              if (field.name == renderer.attributeField) {
+          if (this.layer.fields) {
+            dojo.forEach(this.layer.fields, function(field) {
+              if (field.name.toLowerCase() == renderer.attributeField.toLowerCase()) {
                 switch (field.type) {
                 case 'esriFieldTypeString':
                   q = '\'';
@@ -358,42 +409,58 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
             
           }, this);
           if (def.length == renderer.infos.length) {
-            this.subLayer._definitionExpression = '';
+            this.layer._definitionExpression = '';
           } else if (def.length == 0) {
             // nothing is checked, so we set the sub layer off
-            this.subLayer.visible = false;
+            this.layer.visible = false;
             // even if the layer is checked on, if there is no sub type on, it should not show anything.
-            this.subLayer._definitionExpression = '1=2';
+            //this.layer._definitionExpression = '1=2';
           } else {
-            this.subLayer.visible = true;
-            this.subLayer._definitionExpression = renderer.attributeField + ' IN (' + def.join(',') + ')';// def.join(' OR ');
+            this.layer.visible = true;
+            this.layer._definitionExpression = renderer.attributeField + ' IN (' + def.join(',') + ')';// def.join(' OR ');
           }
         }
         
-        this.layer.setVisibleLayers(this._getVisibleLayers(), false);
-        this.layer.setLayerDefinitions(this._getLayerDefs(), false);
-        this.layerTOC._refreshLayer();
-      } else if (this.subLayer) {
-        this.subLayer.visible = this.checkNode.checked;
-        this.layer.setLayerDefinitions(this._getLayerDefs(), false);
-        this.layer.setVisibleLayers(this._getVisibleLayers(), false);
-        this.layerTOC._refreshLayer();
-        if (this.subLayer.subLayerIds) {
-          // give a visual clue on sublayers if group is on/off
-          if (this.checkNode.checked) {
-            dojo.addClass(this.containerNode, 'agsjsTOCGroupOn');
-            dojo.removeClass(this.containerNode, 'agsjsTOCGroupOff');
-          } else {
-            dojo.addClass(this.containerNode, 'agsjsTOCGroupOff');
-            dojo.removeClass(this.containerNode, 'agsjsTOCGroupOn');
-          }
-        }
+        this.rootLayer.setVisibleLayers(this._getVisibleLayers(), true);
+        this.rootLayer.setLayerDefinitions(this._getLayerDefs(), true);
+        this.rootLayerTOC._refreshLayer();
       } else if (this.layer) {
-        this.layer.setVisibility(this.checkNode.checked);
+        this.layer.visible = this.checkNode && this.checkNode.checked;
+        
+        // if a sublayer is checked on, force it's group layer to be on. 
+        if (this.layer._parentLayerInfo && !this.layer._parentLayerInfo.visible) {
+          this.layer._parentLayerInfo.visible = true;
+        }
+        // if a layer is on, it's service must be on.
+        if (this.layer.visible && !this.rootLayer.visible){
+          this.rootLayer.visible = true;
+        }
+        if (this.layer._subLayerInfos) {
+          // this is a group layer;
+          dojo.forEach(this.layer._subLayerInfos, function(info) {
+            info.visible = this.layer.visible;
+          }, this);
+        }
+        if (this.layer.renderer) {
+          dojo.forEach(this.layer.renderer.infos, function(info) {
+          
+            info.visible = this.layer.visible;
+            
+          }, this);
+          this.layer._definitionExpression='';
+        }
+        this.rootLayer.setLayerDefinitions(this._getLayerDefs(), true);
+        this.rootLayer.setVisibleLayers(this._getVisibleLayers(), true);
+        this.rootLayerTOC._refreshLayer();
+        
+      } else if (this.rootLayer) {
+        this.rootLayer.setVisibility(this.checkNode && this.checkNode.checked);
       }
-      if (this.layerTOC.toc.style == 'inline') {
-        this._toggleContainer(this.checkNode.checked);
+      // automatically expand/collapse?
+      if (this.rootLayerTOC.toc.style == 'inline') {
+        this._toggleContainer(this.checkNode && this.checkNode.checked);
       }
+      this.rootLayerTOC._adjustToState();
       
     } else if (t == this.iconNode) {
       this._toggleContainer();
@@ -401,14 +468,14 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
   },
   _getVisibleLayers: function() {
     var vis = [];
-    dojo.forEach(this.layer.layerInfos, function(layerInfo) {
+    dojo.forEach(this.rootLayer.layerInfos, function(layerInfo) {
       if (layerInfo.subLayerIds) {
-        // if a group subLayer is set to vis, all sub subLayer will be drawn regardless it's sublayer status
+        // if a group layer is set to vis, all sub layer will be drawn regardless it's sublayer status
         return;
       } else if (layerInfo.visible) {
-        if (!layerInfo._parentLayerInfo || layerInfo._parentLayerInfo.visible) {
-          vis.push(layerInfo.id);
-        }
+        //if (!layerInfo._parentLayerInfo || layerInfo._parentLayerInfo.visible) {
+        vis.push(layerInfo.id);
+        // }
       }
       
     });
@@ -419,7 +486,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
   },
   _getLayerDefs: function() {
     var defs = [];
-    dojo.forEach(this.layer.layerInfos, function(layerInfo, i) {
+    dojo.forEach(this.rootLayer.layerInfos, function(layerInfo, i) {
       if (layerInfo._definitionExpression) {
         defs[i] = layerInfo._definitionExpression;
       }
@@ -429,33 +496,32 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
   
 });
 
-dojo.declare('agsjs.dijit._LayerTOC', [dijit._Widget], {
+dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
   _currentIndent: 0,
-  layer: null,
-  _layerWidgets: [],
+  rootLayer: null,
   constructor: function(params, srcNodeRef) {
-    this.layer = params.layer;
+    this.rootLayer = params.rootLayer;
     this.toc = params.toc;
     this.info = params.info || {};
-   },
+  },
   // extenstion point called by framework
   postCreate: function() {
     this._getLayerInfos();
   },
   // retrieve sublayer/legend data
-  _getLayerInfos: function(){
-    if ((this.layer instanceof (esri.layers.ArcGISDynamicMapServiceLayer) ||
-    this.layer instanceof (esri.layers.ArcGISTiledMapServiceLayer))) {
+  _getLayerInfos: function() {
+    if ((this.rootLayer instanceof (esri.layers.ArcGISDynamicMapServiceLayer) ||
+    this.rootLayer instanceof (esri.layers.ArcGISTiledMapServiceLayer))) {
       if (this.info.title === undefined) {
-        var start = this.layer.url.toLowerCase().indexOf('/rest/services/');
-        var end = this.layer.url.toLowerCase().indexOf('/mapserver', start);
-        this.info.title = this.layer.url.substring(start + 15, end);
+        var start = this.rootLayer.url.toLowerCase().indexOf('/rest/services/');
+        var end = this.rootLayer.url.toLowerCase().indexOf('/mapserver', start);
+        this.info.title = this.rootLayer.url.substring(start + 15, end);
       }
     } else {
       this.info.noLayers = true;
     }
-    if (!this.layer.url || this.info.noLegend || this.info.noLayers) {
-      this._createLayerTOC();
+    if (!this.rootLayer.url || this.info.noLegend || this.info.noLayers) {
+      this._createRootLayerTOC();
     } else {
       // note: renderer info only has simple symbols. If the map layer has complex symbol,
       // the image returned from /legend is better than create from renderer.
@@ -473,12 +539,12 @@ dojo.declare('agsjs.dijit._LayerTOC', [dijit._Widget], {
   },
   _getLegendInfo: function() {
     var url = '';
-    if (this.layer.version >= 10.01) {
-      url = this.layer.url + '/legend';
+    if (this.rootLayer.version >= 10.01) {
+      url = this.rootLayer.url + '/legend';
     } else {
       url = 'http://www.arcgis.com/sharing/tools/legend';
-      var i = this.layer.url.toLowerCase().indexOf('/rest/');
-      var soap = this.layer.url.substring(0, i) + this.layer.url.substring(i + 5);
+      var i = this.rootLayer.url.toLowerCase().indexOf('/rest/');
+      var soap = this.rootLayer.url.substring(0, i) + this.rootLayer.url.substring(i + 5);
       url = url + '?soapUrl=' + escape(soap);
     }
     var handle = esri.request({
@@ -489,11 +555,11 @@ dojo.declare('agsjs.dijit._LayerTOC', [dijit._Widget], {
       callbackParamName: 'callback',
       handleAs: 'json',
       load: dojo.hitch(this, this._processLegendInfo),
-      error: dojo.hitch(this, this._createLayerTOC)
+      error: dojo.hitch(this, this._createRootLayerTOC)
     });
   },
   _getLayersInfo: function() {
-    var url = this.layer.url + '/layers';
+    var url = this.rootLayer.url + '/layers';
     var handle = esri.request({
       url: url,
       content: {
@@ -502,30 +568,30 @@ dojo.declare('agsjs.dijit._LayerTOC', [dijit._Widget], {
       callbackParamName: 'callback',
       handleAs: 'json',
       load: dojo.hitch(this, this._processLayersInfo),
-      error: dojo.hitch(this, this._createLayerTOC)
+      error: dojo.hitch(this, this._createRootLayerTOC)
     });
   },
   _processLegendError: function(err) {
     console.log(err);
-    this._createLayerTOC();
+    this._createRootLayerTOC();
   },
   _processLegendInfo: function(json) {
-    this.layer._legendResponse = json;
-    if (this.info.mode == 'legend' || this.layer._layersResponse) {
-      this._createLayerTOC();
+    this.rootLayer._legendResponse = json;
+    if (this.info.mode == 'legend' || this.rootLayer._layersResponse) {
+      this._createRootLayerTOC();
     }
   },
   _processLayersInfo: function(json) {
-    this.layer._layersResponse = json;
-    if (this.info.mode == 'layers' || this.layer._legendResponse) {
-      this._createLayerTOC();
+    this.rootLayer._layersResponse = json;
+    if (this.info.mode == 'layers' || this.rootLayer._legendResponse) {
+      this._createRootLayerTOC();
     }
   },
-  _createLayerTOC: function() {
-    var layer = this.layer;
+  _createRootLayerTOC: function() {
+    var layer = this.rootLayer;
     if (!layer._tocInfos) {
       // create a lookup map, key=layerId, value=LayerInfo
-      // generally id = index, this is to assure we find the right subLayer by ID
+      // generally id = index, this is to assure we find the right layer by ID
       // note: not all layers have an entry in legend response.
       var layerLookup = {};
       dojo.forEach(layer.layerInfos, function(layerInfo) {
@@ -547,7 +613,7 @@ dojo.declare('agsjs.dijit._LayerTOC', [dijit._Widget], {
         });
       }
       
-      // attached legend Info to subLayer info
+      // attached legend Info to layer info
       if (layer._legendResponse) {
         dojo.forEach(layer._legendResponse.layers, function(legInfo) {
           var layerInfo = layerLookup['' + legInfo.layerId];
@@ -556,24 +622,29 @@ dojo.declare('agsjs.dijit._LayerTOC', [dijit._Widget], {
             // merge legend symbol to renderers. Ideally the REST API already does that, but
             if (layerInfo.renderer) {
               if (layerInfo.renderer.infos) {
-                // assume renderer's infos same order as legends, avoid nested loop.
-                var offset = 0;
+                var legVals = {}; // lookup, key=label, val=legend
+                dojo.forEach(legInfo.legend, function(leg){
+                  legVals[leg.label] = leg;
+                });
+                // note, merge with renderer, not overwriting symbol so we have choice of using legend or draw symbol.
                 if (layerInfo.renderer.defaultSymbol) {
-                  offset = 1;
-                  dojo.mixin(layerInfo.renderer.defaultSymbol, legInfo.legend[0]);
+                  dojo.mixin(layerInfo.renderer, legInfo.legend[0]);//.defaultSymbol
                 }
                 dojo.forEach(layerInfo.renderer.infos, function(info, i) {
-                  dojo.mixin(info.symbol, legInfo.legend[i + offset]);
+                  var leg = legVals[info.label];
+                  if (leg){
+                    dojo.mixin(info, leg);
+                  }
                 });
               } else {
                 // simple, merge url, imageData, contentType. note merged to renderer, not renderer symbol, avoid loss data.
-                dojo.mixin(layerInfo.renderer.symbol, legInfo.legend[0]);
+                dojo.mixin(layerInfo.renderer, legInfo.legend[0]);//.symbol
               }
             }
           }
         });
       }
-      // nest subLayer Infos
+      // nest layer Infos
       dojo.forEach(layer.layerInfos, function(layerInfo) {
         if (layerInfo.subLayerIds) {
           var subLayerInfos = [];
@@ -593,31 +664,29 @@ dojo.declare('agsjs.dijit._LayerTOC', [dijit._Widget], {
       });
       layer._tocInfos = tocInfos;
     }
-    this._layerNode = new agsjs.dijit._TOCNode({
-      layerTOC: this,
-      layer: layer
+    this._rootLayerNode = new agsjs.dijit._TOCNode({
+      rootLayerTOC: this,
+      rootLayer: layer
     });
-    this._layerNode.placeAt(this.domNode);
+    this._rootLayerNode.placeAt(this.domNode);
     
     this._visHandler = dojo.connect(layer, "onVisibilityChange", this, "_adjustToState");
     // this will make sure all TOC linked to a Map synchronized.
     this._visLayerHandler = dojo.connect(layer, "setVisibleLayers", this, "_adjustToState");
+    this._adjustToState();
   },
   _refreshLayer: function() {
-    var layer = this.layer;
+    var rootLayer = this.rootLayer;
     if (this._refreshTimer) {
       window.clearTimeout(this._refreshTimer);
       this._refreshTimer = null;
     }
     this._refreshTimer = window.setTimeout(function() {
-      layer.setVisibleLayers(layer.visibleLayers);
+      rootLayer.setVisibleLayers(rootLayer.visibleLayers);
     }, 1000);
   },
   _adjustToState: function() {
-    this._layerNode.checkNode.checked = this.layer.visible;
-    dojo.forEach(this._layerWidgets, function(layerWidget) {
-      layerWidget._adjustToState();
-    });
+    this._rootLayerNode._adjustToState();
   },
   destroy: function() {
     dojo.disconnect(this._visHandler);
@@ -635,12 +704,12 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
   
   /**
    * @name TOCLayerInfo
-   * @class This is an object literal that specify the options for each map layer subLayer.
-   * @property {esri.layers.ArcGISTiledMapServiceLayer | esri.layers.ArcGISDynamicMapServiceLayer} layer: ArcGIS Server subLayer.
-   * @property {string} [title] title. optional. If not specified, layer name is used.
-   * @property {Boolean} [slider] whether to show slider for each layer to adjust transparency. default is false.
+   * @class This is an object literal that specify the options for each map rootLayer layer.
+   * @property {esri.layers.ArcGISTiledMapServiceLayer | esri.layers.ArcGISDynamicMapServiceLayer} rootLayer: ArcGIS Server layer.
+   * @property {string} [title] title. optional. If not specified, rootLayer name is used.
+   * @property {Boolean} [slider] whether to show slider for each rootLayer to adjust transparency. default is false.
    * @property {Boolean} [noLegend] whether to skip the legend, and only display layers. default is false.
-   * @property {Boolean} [collapsed] whether to collapsed the layer subLayer at beginning. default is false, which means expand if visible, collapse if not.
+   * @property {Boolean} [collapsed] whether to collapsed the rootLayer layer at beginning. default is false, which means expand if visible, collapse if not.
    *
    */
   /**
@@ -649,7 +718,7 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
    * @property {esri.Map} [map] the map instance. required.
    * @property {Object[]} [layerInfos] a subset of layers in the map to show in TOC. each object is a {@link TOCLayerInfo}
    * @property {Number} [indentSize] indent size of tree nodes. default to 18.
-    */
+   */
   /** 
    * Create a Table Of Contents (TOC)
    * @name TOC
@@ -664,36 +733,33 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
       throw new Error('no map defined in params for TOC');
     }
     dojo.mixin(this, params);
-    this._layerWidgets = [];
+    this._rootLayerTOCs = [];
     if (!this.layerInfos) {
       this.layerInfos = [];
       for (var i = this.map.layerIds.length - 1; i >= 0; i--) {
-        var layer = this.map.getLayer(this.map.layerIds[i]);
+        var rootLayer = this.map.getLayer(this.map.layerIds[i]);
         // these properties defined in BasemapControl widget.
         // since the basemap control add/remove them requently, it's better not to show.
-        if (!layer._isBaseMap && !layer._isReference) {
+        if (!rootLayer._isBaseMap && !rootLayer._isReference) {
           this.layerInfos.push({
-            layer: layer
+            layer: rootLayer
           });
         }
         
       }
     }
-    
-    
-    
   },
   // extension point
   postCreate: function() {
-    // do we have any layerInfos without layer created?
+    // do we have any layerInfos without rootLayer created?
     var createdLayers = [];
-    dojo.forEach(this.layerInfos, function(layerInfo){
-      if (!layerInfo.layer){
-        layerInfo.layer = this._createLayer(layerInfo);
+    dojo.forEach(this.layerInfos, function(layerInfo) {
+      if (!layerInfo.layer) {
+        layerInfo.layer = this._createRootLayer(layerInfo);
         createdLayers.push(layerInfo.layer);
       }
     }, this);
-    if (createdLayers.length ==0){
+    if (createdLayers.length == 0) {
       this._createTOC();
     } else {
       dojo.connect(this.map, 'onLayersAddResult', this, function(results) {
@@ -701,37 +767,37 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
       });
       this.map.addLayers(createdLayers);
     }
-   
+    
   },
-  _createLayer: function(lay) {
-    var layer = null;
+  _createRootLayer: function(lay) {
+    var rootLayer = null;
     var type = lay.type || 'ArcGISDynamic';
     switch (type) {
-      
-      case 'ArcGISDynamic':
-        layer = new esri.layers.ArcGISDynamicMapServiceLayer(lay.url, lay);
-        break;
-      }
     
-    return layer;
+    case 'ArcGISDynamic':
+      rootLayer = new esri.layers.ArcGISDynamicMapServiceLayer(lay.url, lay);
+      break;
+    }
+    
+    return rootLayer;
   },
   _createTOC: function() {
     for (var i = 0, c = this.layerInfos.length; i < c; i++) {
-      // attach a title to layer subLayer itself
-      var layer = this.layerInfos[i].layer;
-      var svcTOC = new agsjs.dijit._LayerTOC({
-        layer: layer,
+      // attach a title to rootLayer layer itself
+      var rootLayer = this.layerInfos[i].layer;
+      var svcTOC = new agsjs.dijit._RootLayerTOC({
+        rootLayer: rootLayer,
         info: this.layerInfos[i],
         toc: this
       });
-      this._layerWidgets.push(svcTOC);
+      this._rootLayerTOCs.push(svcTOC);
       svcTOC.placeAt(this.domNode);
     }
     this._zoomHandler = dojo.connect(this.map, "onZoomEnd", this, "_adjustToState");
   },
   _adjustToState: function() {
-    dojo.forEach(this._layerWidgets, function(layerWidget) {
-      layerWidget._adjustToState();
+    dojo.forEach(this._rootLayerTOCs, function(widget) {
+      widget._adjustToState();
     });
   },
   destroy: function() {
