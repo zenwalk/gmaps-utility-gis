@@ -34,14 +34,6 @@
     font-weight: bold;
 }
 
-.agsjsTOCGroupOn {
-    opacity: 1;
-}
-
-.agsjsTOCGroupOff {
-    opacity: 0.8;
-}
-
 .agsjsTOCLayerLabel {
     font-size: 10pt;
     padding-left: 2px;
