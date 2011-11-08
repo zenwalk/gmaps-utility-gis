@@ -105,7 +105,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
       layer = lay._layer;
       if (!layer) {
         layer = this._createLayer(lay);
-        lay._layer = layer;
+        lay.layer = layer;
       }
       if (layer) {
         if (lay.isReference) {
@@ -256,8 +256,8 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
     dojo.forEach(bmap._refs, function(lay) {
       if (lay.name == name) {
         lay.visible = !lay.visible;
-        if (lay._layer) {
-          lay._layer.setVisibility(lay.visible);
+        if (lay.layer) {
+          lay.layer.setVisibility(lay.visible);
         }
         isRef = true;
       }
@@ -270,13 +270,13 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
     dojo.forEach(bmap._bases, function(lay) {
       if (lay.name != name && lay.name != name2) {
         lay.visible = false;
-        if (lay._layer) 
-          lay._layer.hide();
+        if (lay.layer) 
+          lay.layer.hide();
       }
     });
     dojo.forEach(bmap._bases, function(lay) {
       if (lay.name == name || lay.name == name2) {
-        var layer = lay._layer;
+        var layer = lay.layer;
         if (layer == bmap._googleLayer) {
           layer.setMapTypeId(lay._subtype);
           if (lay.styles) {
@@ -471,3 +471,5 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
   
   
 });
+
+  

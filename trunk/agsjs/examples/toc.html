@@ -16,13 +16,6 @@
                 font-size: 90%;
             }
             
-            #header {
-                font-size: 16pt;
-            }
-            
-            #subheader {
-                font-size: 12pt;
-            }
             
             #leftPane {
                 width: 300px;
@@ -42,17 +35,18 @@
               modulePaths: {
                 // if use local copy, make sure the path reference is relative to 'baseUrl', e.g.:
                 // 'agsjs': '../build/agsjs'
-                'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/1.04/build/agsjs'
-  
+                'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/trunk/agsjs/build/agsjs'
               }
             };
         </script>
         <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.4">
         </script>
         <script type="text/javascript">
-            dojo.require("dijit.dijit"); // optimize: load dijit layer
+            dojo.require("dijit.dijit");
             dojo.require("dijit.layout.BorderContainer");
             dojo.require("dijit.layout.ContentPane");
+            // uncomment if want dojo widget style checkbox
+            //dojo.require('dijit.form.CheckBox');
             dojo.require("esri.map");
             dojo.require("dijit.layout.AccordionContainer");
             dojo.require("agsjs.dijit.TOC");
@@ -78,45 +72,33 @@
               var basemap = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer");
               map.addLayer(basemap);
               
-              var operational = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer", {
-                id: 'operational',
+               var census = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer", {
+                id: 'census',
                 opacity: 0.8
               });
-              
-              dojo.connect(map, 'onLayersAddResult', function(results) {
-                var standardTOC = new agsjs.dijit.TOC({
-                  map: map
-                }, 'standardDiv');
-                standardTOC.startup();
-                var inlineTOC = new agsjs.dijit.TOC({
-                  map: map,
-                  style: 'inline'
-                }, 'inlineDiv');
-                inlineTOC.startup();
-                var sliderTOC = new agsjs.dijit.TOC({
-                  map: map,
-                  layerInfos: [{
-                    layer: operational,
-                    title: "Operational Layers",
-                    slider: true
-                  }, {
-                    layer: basemap,
-                    title: "BaseMap",
-                    noLayers: true
-                  }], style:'inline'
-                }, 'sliderDiv');
-                sliderTOC.startup();
-                var scaleTOC = new agsjs.dijit.TOC({
-                  map: map,
-                  layerInfos: [{
-                    layer: operational,
-                    title: "Operational Layers",
-                    showGroupCount: true
-                  }]
-                }, 'scaleDiv');
-                scaleTOC.startup();
+               var safety = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer", {
+                id: 'publicsafety',
+                opacity: 0.8
               });
-              map.addLayers([operational]);
+             
+              dojo.connect(map, 'onLayersAddResult', function(results) {
+              
+                var toc = new agsjs.dijit.TOC({
+                  map: map,
+                  layerInfos: [{
+                    layer: safety,
+                    title: "Safety Operations"
+                  },{
+                    layer: census,
+                    title: "Census"
+                  }]
+                }, 'tocDiv');
+                toc.startup();
+                
+                
+              });
+              map.addLayers([census,safety]);
+              
               
               
               
@@ -141,35 +123,20 @@
     <body class="claro">
         <div id="content" dojotype="dijit.layout.BorderContainer" design="headline" gutters="true" style="width: 100%; height: 100%; margin: 0;">
             <div id="header" dojotype="dijit.layout.ContentPane" region="top">
-                ArcGIS Server JS API Table of Contents (TOC) Widget
-                <div id="subheader">
-                    This examples contains several TOC widgets in different panes: "<b>inline</b>" and "<b>standard</b>" style; Other customizations possible: show transparency slider; show services layer without sub layer; show layer list without legend; hide layer that is out of scale, etc 
-                    See <a href="../docs/toc/examples.html">documentation</a>
-                    for more info.
+                 <div>
+                    <b>Table Of Content (TOC/Legend) Widget</b>  <a style="right:20px;position: absolute" href="../docs/toc/examples.html">Documentation</a>
                 </div>
+                
+                   <ul style="margin:2px">
+                    <li>
+                        Click check box to turn on/off layers. When click on groups, all sublayers will be turned on/off.
+                    </li>
+                 </ul>
             </div>
             <div dojotype="dijit.layout.ContentPane" id="leftPane" region="left" splitter="true">
-                <div dojotype="dijit.layout.AccordionContainer">
-                    <div dojotype="dijit.layout.ContentPane" title="Standard Style">
-                        (Legend nested under layer name)
-                        <div id="standardDiv">
+                        <div id="tocDiv">
                         </div>
-                    </div>
-                    <div dojotype="dijit.layout.ContentPane" title="Inline Style">
-                        (Legend before layer if possible)
-                        <div id="inlineDiv">
-                        </div>
-                    </div>
-                    <div dojotype="dijit.layout.ContentPane" title="Customization: Slider, No Legend, etc" selected="true">
-                        <div id="sliderDiv">
-                        </div>
-                    </div>
-                    <div dojotype="dijit.layout.ContentPane" title="Hide Out-of-Scale Layer">
-                       (Zoom in/out to see layer list grow/shrink)
-                        <div id="scaleDiv">
-                        </div>
-                    </div>
-                </div>
+               
             </div>
             <div id="map" dojotype="dijit.layout.ContentPane" region="center">
             </div>
