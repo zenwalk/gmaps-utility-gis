@@ -1,12 +1,4 @@
-
-if (!google || !google.loader) {
-  document.write('<' + 'script type="text/javascript" src="http://www.google.com/jsapi"></' + 'script>');
-}
-if (!google.visualization) {
-  document.write('<' + 'script type="text/javascript"> google.load(\'visualization\', \'1\', {});</' + 'script>');
-}
-
-(function() {
+(function () {
   function FusionTipOverlay() {
     this.latlng_ = null;
     this.text_ = null;
@@ -23,7 +15,7 @@ if (!google.visualization) {
     div.style.fontSize = 'x-small';
     this.div_ = div;
     var panes = this.getPanes();
-    this.cursorNode = panes.overlayLayer.parentNode;
+    this.cursorNode = panes.overlayLayer;//.parentNode;
     panes.floatPane.appendChild(div);
     google.maps.event.trigger(this, 'add');
   };
@@ -93,17 +85,17 @@ if (!google.visualization) {
             if (!query) {
               google.maps.event.trigger(me, 'mouseover');
             } else {
-              if (opts.delay ==0){
+              if (opts.delay == 0) {
                 queryFusion();
               } else {
-                delayTimeout = window.setTimeout(queryFusion, opts.delay||300);
+                delayTimeout = window.setTimeout(queryFusion, opts.delay || 300);
               }
-            
+              
             }
           } else if (currentCursor == 'pointer') {
             google.maps.event.trigger(me, 'mouseout');
             maptip.hide();
-            if (delayTimeout!=null){
+            if (delayTimeout != null) {
               window.clearTimeout(delayTimeout);
               delayTimeout = null;
             }
@@ -177,6 +169,8 @@ if (!google.visualization) {
     google.maps.event.removeListener(this.showmaptipListener_);
     this.showmaptipListener_ = null;
   };
-  
-  
+  google.maps.event.trigger( google.maps.FusionTablesLayer, 'maptipscapable');
 })();
+
+
+
