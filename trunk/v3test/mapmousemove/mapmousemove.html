@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!--
+copyright (c) 2011 Google inc.
+You are free to copy and use this sample.
+License can be found here: http://code.google.com/apis/ajaxsearch/faq/#license
+-->
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+        <title></title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+            
+            #map_canvas {
+                height: 500px;
+                width: 600px;
+            }
+        </style>
+        <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false">
+        </script>
+      
+        <script type="text/javascript" id="script">
+            var tableid2 = 1670859;
+            var map, layer;
+            
+            
+            
+            function initialize() {
+              map = new google.maps.Map(document.getElementById('map_canvas'), {
+                center: new google.maps.LatLng(37.4, -122.1),
+                zoom: 4,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+              });
+              
+              google.maps.event.addListener(map,'mousemove', function(evt){
+                 document.getElementById('info').innerHTML = evt.latLng.toUrlValue();
+	        });
+              layer2 = new google.maps.FusionTablesLayer({
+                query: {
+                  select: 'geometry_simplified',
+                  from: tableid2
+                },
+                map: map
+              });
+              
+            }
+        </script>
+    </head>
+    <body onload="initialize();">
+        <div>Move mouse to see coords below map. Mousemove event not fired if there is overlay? That will cause problems for apps that depends on mouse move events and act on mouse location. Is that always like this or broken at some version?</div>
+        <div id="map_canvas">
+        </div>
+        <div id="info">
+        </div>
+    </body>
+</html>
