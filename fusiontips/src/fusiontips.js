@@ -34,7 +34,7 @@
     }
     this.div_ = div;
     var panes = this.getPanes();
-    this.cursorNode = panes.overlayLayer;//.parentNode;
+    this.cursorNode = panes.overlayLayer.parentNode;
     panes.floatPane.appendChild(div);
     google.maps.event.trigger(this, 'ready');
   };
