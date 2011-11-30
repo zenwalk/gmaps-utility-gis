@@ -255,7 +255,7 @@
       var script = document.createElement('script');
       // Note that a simplified geometry and the NAME column are being requested
       //http://www.google.com/fusiontables/api/query?sql=
-      var sid = 'fusiontips_query_' + scriptid++;
+      var sid = 'query_' + scriptid++;
       script.setAttribute('src', 'http://fusiontables.googleusercontent.com/fusiontables/api/query?sql=' + queryText + '&jsonCallback=fusiontips.' + sid);
       window.fusiontips[sid] = function(json) {
         delete window.fusiontips[sid];
