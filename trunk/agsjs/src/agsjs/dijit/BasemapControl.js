@@ -6,6 +6,7 @@
  * Can use Google maps, and can have slider for images.
  */
 // change log: 
+// 2011-11-10: generic layer type.
 // 2011-11-02: google/bing changed from per widget to per basemap group, so street view can be disabled as needed, such as in slider case.
 // 2011-10-20: initial release
 /*global dojo esri*/
@@ -182,6 +183,9 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
       case 'ArcGISTiled':
         layer = new esri.layers.ArcGISTiledMapServiceLayer(lay.url, lay);
         break;
+      default:
+        var cls = dojo.getObject(type);
+        layer = new cls(lay.url, lay);
       }
     }
     return layer;
@@ -190,7 +194,6 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
     var bmap = this._selectedBase;
     if (!(agsjs && agsjs.layers && agsjs.layers.GoogleMapsLayer)) {
       throw "use dojo.require('agsjs.layers.GoogleMapsLayer') before using this widget";
-      ;
     }
     var maptype = {
       'GoogleMapsRoadMap': agsjs.layers.GoogleMapsLayer.MAP_TYPE_ROADMAP,
@@ -232,11 +235,11 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
     }[lay.type];
     lay._subtype = maptype;
     if (!bmap._bingLayer) {
-      if (lay.bingMapsKey){
+      if (lay.bingMapsKey) {
         this._bingMapsKey = lay.bingMapsKey;
       } else {
         lay.bingMapsKey = this._bingMapsKey;
-      }  
+      }
       bmap._bingLayer = new esri.virtualearth.VETiledLayer(dojo.mixin({
         mapStyle: maptype
       }, lay));
@@ -284,11 +287,7 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
           } else {
             layer.setMapStyles(null);
           }
-          if (name2 != null) {
-            layer._disableStreetView();
-          } else {
-            layer._enableStreetView();
-          }
+         
           
         } else if (layer == bmap._bingLayer) {
           layer.setMapStyle(lay._subtype);
@@ -297,10 +296,15 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
           layer.show();
           lay.visible = true;
         }
-        if (lay.name == name) {
-          layer.setOpacity(op);
+        if (lay.name != name) {
+          op = 1 - op;
+        }
+        if (op > 0.9) 
+          op = 1;
+        if (op < 0.1) {
+          layer.hide();
         } else {
-          layer.setOpacity(1 - op);
+          layer.setOpacity(op);
         }
       }
     }, this);
@@ -315,24 +319,28 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
       title: b.title,
       selected: b.selected
     });
-    dojo.forEach(b._refs, function(lay) {
-      var chk;
-      if (dijit.form && dijit.form.CheckBox) {
-        chk = new dijit.form.CheckBox({
-          value: lay.name,
-          checked: lay.visible
-        });
-        chk.placeAt(tab.domNode);
-      } else {
-        chk = dojo.create('input', {
-          type: 'checkbox',
-          value: lay.name
-        }, tab.domNode);
+     var names = {};
+     dojo.forEach(b._refs, function(lay) {
+      if (!names[lay.name]) {
+        
+        var chk;
+        if (dijit.form && dijit.form.CheckBox) {
+          chk = new dijit.form.CheckBox({
+            value: lay.name,
+            checked: lay.visible
+          });
+          chk.placeAt(tab.domNode);
+        } else {
+          chk = dojo.create('input', {
+            type: 'checkbox',
+            value: lay.name
+          }, tab.domNode);
+        }
+        chk.checked = lay.visible;
+        
+        tab.domNode.appendChild(dojo.doc.createTextNode(lay.name));
+        names[lay.name] = chk;
       }
-      chk.checked = lay.visible;
-      
-      tab.domNode.appendChild(dojo.doc.createTextNode(lay.name));
-      
     });
     if (b._refs.length > 0) {
       dojo.create('br', null, tab.domNode);
@@ -471,5 +479,3 @@ dojo.declare("agsjs.dijit.BasemapControl", [dijit._Widget], {
   
   
 });
-
-  
