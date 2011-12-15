@@ -433,7 +433,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
         }
         // if a layer is on, it's service must be on.
         if (this.layer.visible && !this.rootLayer.visible){
-          this.rootLayer.visible = true;
+          this.rootLayer.show();//.visible = true;
         }
         if (this.layer._subLayerInfos) {
           // this is a group layer;
@@ -481,6 +481,8 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     });
     if (vis.length === 0) {
       vis.push(-1);
+    } else if (!this.rootLayer.visible) {
+      this.rootLayer.show();
     }
     return vis;
   },
@@ -499,6 +501,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
 dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
   _currentIndent: 0,
   rootLayer: null,
+  toc:null,
   constructor: function(params, srcNodeRef) {
     this.rootLayer = params.rootLayer;
     this.toc = params.toc;
@@ -677,13 +680,14 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
   },
   _refreshLayer: function() {
     var rootLayer = this.rootLayer;
+    var timeout = this.toc.refreshDelay;
     if (this._refreshTimer) {
       window.clearTimeout(this._refreshTimer);
       this._refreshTimer = null;
     }
     this._refreshTimer = window.setTimeout(function() {
       rootLayer.setVisibleLayers(rootLayer.visibleLayers);
-    }, 1000);
+    }, 500);
   },
   _adjustToState: function() {
     this._rootLayerNode._adjustToState();
@@ -698,6 +702,7 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
 dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
   indentSize: 18,
   swatchSize: [30, 30],
+  refreshDelay:500,
   style: 'inline',
   layerInfos: null,
   slider: false,

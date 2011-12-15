@@ -7,7 +7,7 @@
         on iOS devices-->
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
         <title>Google Maps In ArcGIS JavaScript API</title>
-        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.4/js/dojo/dijit/themes/claro/claro.css">
+        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.6/js/dojo/dijit/themes/claro/claro.css">
         <style type="text/css">
             html, body {
                 height: 100%;
@@ -33,24 +33,24 @@
               baseUrl: './',
               modulePaths: {
                 // if use local copy, make sure the path reference is relative to 'baseUrl', e.g.:
-                //'agsjs': '../build/agsjs'
+                'agsjs': '../build/agsjs'
                // use absolute path for online version. Note sometimes googlecode.com can be slow.
-                'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/1.05/build/agsjs'
+                //'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/1.05/build/agsjs'
               }
             };
         </script>
-        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.4">
+        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.6">
         </script>
         
         <script type="text/javascript">
-            dojo.require("dijit.dijit"); 
+            dojo.require("dijit.dijit");
             dojo.require("dijit.form.Button");
             dojo.require("dijit.layout.BorderContainer");
             dojo.require("dijit.layout.ContentPane");
             dojo.require("esri.map");
             
             dojo.require("agsjs.layers.GoogleMapsLayer");
-            var map, googleLayer, esriTopo;
+            var map, googleLayer, esriTopo, dyna;
             var visible = [];
             
             function init() {
@@ -79,11 +79,12 @@
                   v: '3.6' // use a specific version is recommended for production system. 
                 },
                 mapOptions: {
-                  streetViewControl: true // use false if do not want street view. Default is true.
+                  streetViewControl: true // use false if do not want street view. Default is false.
+                  
                 }
               });
               map.addLayer(googleLayer);
-              if (googleLayer.loaded){
+              if (googleLayer.loaded) {
                 buildLayerList();
               } else {
                 dojo.connect(googleLayer, 'onLoad', buildLayerList);
@@ -102,6 +103,10 @@
                 visible: false
               });
               map.addLayer(esriTopo);
+              operationalLayer = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer", {
+                "opacity": 0.5
+              });
+              map.addLayer(operationalLayer);
               
             }
             
@@ -109,7 +114,7 @@
             function changeMap(evt) {
               var name = dojo.trim(dijit.getEnclosingWidget(evt.target).label);
               if (name.indexOf('G-') != -1) {
-                esriTopo.hide();
+                if (esriTopo) esriTopo.hide();
                 googleLayer.show();
                 esri.show(dojo.byId("layer_list"));
                 switch (name) {
@@ -156,7 +161,7 @@
               } else {
                 esri.hide(dojo.byId("layer_list"));
                 googleLayer.hide();
-                esriTopo.show();
+               if (esriTopo)  esriTopo.show();
               }
             }
             
@@ -212,18 +217,22 @@
         <div id="content" dojotype="dijit.layout.BorderContainer" design="headline" gutters="true" style="width: 100%; height: 100%;">
             <div id="header" dojotype="dijit.layout.ContentPane" region="top">
                 <div>
-                    <b>Use Google Maps in ESRI ArcGIS JSAPI</b>
-                     <a style="right:20px;position:absolute" href="../docs/googlemapslayer/examples.html">Documentation</a>
+                    <b>Use Google Maps as Base Map Layer in ESRI ArcGIS JSAPI</b>
+                    <a style="right:20px;position:absolute" href="../docs/googlemapslayer/examples.html">Documentation</a>
                 </div>
+               
                 <ul style="margin:2px">
                     <li>
-                        Click buttons to switch base map between ESRI and Google. Note the "Gray", "Night" and "Random" styles. The "random" will show differently each time clicked. 
+                        Click buttons to switch base map between ESRI and Google. 
+                    </li>
+                    <li>
+                        The "G-Random" button will show a different base map each time clicked. "Gray" and "Night" is fit for different scenarios.
                     </li>
                     <li>
                         Drag pegman icon on top left corner to map to see street view(hold mouse for preview). 
                     </li>
                     <li>
-                        Check layer on/off to customize base map. 
+                        Check layer on/off to customize features to draw on base map. 
                         Note not all sub layer visible at all scales.
                     </li>
                 </ul>
