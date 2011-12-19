@@ -6,8 +6,7 @@
  *  </p>
  */
 // Change log: 
-//2011-12-15: v1.08, oblique issue, update to jsapi2.6, work with esri BasemapGallery
-//2011-11-10: v1.07, delayed loading of API until set as visible
+//2011-12-15: v1.07, update to jsapi2.6, oblique rotation, work with esri BasemapGallery, delayed of loading of API until set as visible
 //2011-10-24: v1.05, working with basemapcontrol, styled options
 //2011-10-18: v1.04, xd built
 //2011-10-17: v1.03, added support for StreetView, Sub layers (Traffic, Point of Interest etc)
@@ -705,10 +704,12 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
       //this._map._isPanGMaps = this._map.isPan;
       //this._map.disablePan();
       dojo.place(this._div, this._topDiv);
+      this._map.disableMapNavigation();
     } else if (t == 0) {
       //this._toggleEsriControl(false);
       //if (this._map._isPanGMaps) this._map.enablePan();
       dojo.place(this._div, this._placeDiv);
+      this._map.enableMapNavigation();
     }
     
   },
