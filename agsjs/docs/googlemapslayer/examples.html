@@ -89,7 +89,7 @@
        map.addLayer(gMapLayer);
         </pre>
             <p>
-                That&#39;s it! You should only need one instance of the layer, then use 
+                You should only need one instance of the layer, then use 
                 <code>
                     setMapTypeId(mapTypeId)
                 </code>
@@ -99,21 +99,57 @@
                 <a href="../../examples/gmapslayer.html">View example </a>
             </p>
         </div>
+       
         <div>
+            <h2>Use with BasemapGallery widget</h2>
+            <p>
+                After the script is loaded, in the initilization code, add <code>googleMapsApi</code> option in the constructor of <code>esri.dijit.BasemapGallery</code>. 
+                 <pre class="prettyprint">
+             
+           // simply add additonal configuration property in existing esri.dijit.BasemapGallery.
+           var basemapControl = new esri.dijit.BasemapGallery({
+             map: map, // required
+             showArcGISBasemaps: true, // must be true or with a defined basemapsGroup to trigger automatical addition.
+             googleMapsApi:{
+               v:3.6,// Google API version. Exact version number is recommended for prd system 
+               client:"&lt;yourGooglePremierClientID&gt;", // premier id if your usage requires it.
+               streetView: &lt;true|false&gt; // optional. whether to show street view control. default is false.
+             }
+           }, &#39;basemapControlDiv&#39;);
+           basemapControl.startup();
+        </pre>
+            </p>
+        
+            <p>
+                To setup BasemapLayer manually using Google Maps, simply set <code>type</code> to one of the three types: <code>GoogleMapsRoad|GoogleMapsSatellite|GoogleMapsHybrid</code>. <pre class="prettyprint">
+        var basemaps = [];
+        var basemapRoad = new esri.dijit.Basemap({
+          layers: [new esri.dijit.BasemapLayer({
+            type: "GoogleMapsRoad"
+          })],
+          id: "gmRoad",
+          title: "Road"
+        });
+        basemaps.push(basemapRoad);
+        </pre> <p>
+                <a href="../../examples/gmapsgallery.html">View example </a>
+            </p>
+        </div> 
+         <div>
             <h2>Street View Control</h2>
             <p>
-                By default, the Street View Control (pegman) is enabled. If you drag the icon and place it on a blue street, street view image will be displayed. If you do not want to have this feature, set <code>streetViewControl:false</code>
+                By default, the Street View Control (pegman) is disabled. If you drag the icon and place it on a blue street, street view image will be displayed. If you want to have this feature, set <code>streetViewControl:true</code>
             </p>
             <pre class="prettyprint">
        var gMapLayer = new agsjs.layers.GoogleMapsLayer({
             visible:false, 
             id:&#39;googlemaps&#39;,
             mapOptions: {
-              streetViewControl: false
+              streetViewControl: true
             }
         });
         </pre>
-        </div>
+        </div> 
         <div>
             <h2>Sub Layers and Features</h2>
             <p>
