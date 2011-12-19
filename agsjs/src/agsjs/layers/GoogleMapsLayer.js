@@ -6,7 +6,7 @@
  *  </p>
  */
 // Change log: 
-//2011-12-15: v1.08, oblique issue, update to jsapi2.6
+//2011-12-15: v1.08, oblique issue, update to jsapi2.6, work with esri BasemapGallery
 //2011-11-10: v1.07, delayed loading of API until set as visible
 //2011-10-24: v1.05, working with basemapcontrol, styled options
 //2011-10-18: v1.04, xd built
@@ -17,6 +17,8 @@
 window.google = window.google || {}; // somehow IE needs this, otherwise complain google.maps namespace;
 /*global dojo esri  agsjs */
 dojo.provide('agsjs.layers.GoogleMapsLayer');
+
+dojo.require('esri.dijit.BasemapGallery');
 
 dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
   /**
@@ -400,7 +402,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
    * @param {Object[]} styles
    */
   setMapStyles: function(styles) {
-    if (this._styleOptions){
+    if (this._styleOptions) {
       // if has _styleOptions, set it null means clear it.
       styles = styles || [];
     }
@@ -540,7 +542,7 @@ dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     if (v) {
       esri.show(this._div);
       //if (!this._svDisabled) {
-        esri.show(this._controlDiv);
+      esri.show(this._controlDiv);
       //}
       this.visible = true;
       if (this._gmap) {
@@ -850,4 +852,211 @@ dojo.mixin(agsjs.layers.GoogleMapsLayer, {
       invert_lightness: 'true'
     }]
   }]
+});
+
+
+// extend Esri gallery
+esri.dijit.BasemapGallery.prototype._original_postMixInProperties = esri.dijit.BasemapGallery.prototype.postMixInProperties;
+esri.dijit.BasemapGallery.prototype._original_startup = esri.dijit.BasemapGallery.prototype.startup;
+
+dojo.extend(esri.dijit.BasemapGallery, {
+  googleMapsApi: null,
+  _googleLayers: [],
+  toggleReference: false,
+  postMixInProperties: function() {
+    if (!this._OnSelectionChangeListenerExt) {
+      this._onSelectionChangeListenerExt = dojo.connect(this, 'onSelectionChange', this, this._onSelectionChangeExt)
+    }
+    if (this.googleMapsApi != undefined && (this.showArcGISBasemaps || this.basemapsGroup)) {
+      this.basemaps.push(new esri.dijit.Basemap({
+        id: 'google_road',
+        layers: [new esri.dijit.BasemapLayer({
+          type: 'GoogleMapsRoad'
+        })],
+        title: "Google Road",
+        thumbnailUrl: dojo.moduleUrl("agsjs.dijit", "images/googleroad.png")
+      }));
+      this.basemaps.push(new esri.dijit.Basemap({
+        id: 'google_satellite',
+        layers: [new esri.dijit.BasemapLayer({
+          type: 'GoogleMapsSatellite'
+        })],
+        title: "Google Satellite",
+        thumbnailUrl: dojo.moduleUrl("agsjs.dijit", "images/googlesatellite.png")
+      }));
+      this.basemaps.push(new esri.dijit.Basemap({
+        id: 'google_hybrid',
+        layers: [new esri.dijit.BasemapLayer({
+          type: 'GoogleMapsHybrid'
+        })],
+        title: "Google Hybrid",
+        thumbnailUrl: dojo.moduleUrl("agsjs.dijit", "images/googlehybrid.png")
+      }));
+      
+    }
+    if (this.loaded) {
+      this._onLoadExt();
+    } else {
+      this._onLoadListenerExt = dojo.connect(this, 'onLoad', this, this._onLoadExt);
+    }
+    if (this._original_postMixInProperties) {
+      this._original_postMixInProperties();
+    }
+  },
+  startup: function() {
+    // user have option of not calling startup for custom UI.
+    // _startupCalled is used to flag if we need refresh UI for toggle reference layer
+    this._startupCalled = true;
+    this._original_startup();
+  },
+  _onLoadExt: function() {
+    //console.log('inside _onLoad ');
+    if (this._onLoadListenerExt) 
+      dojo.disconnect(this._onLoadListenerExt);
+    if (this.toggleReference) {
+      dojo.forEach(this.basemaps, function(basemap) {
+        var layers = basemap.getLayers();
+        if (layers.length) {
+          this._processReferenceLayersExt(basemap);
+        } else {
+          layers.then(dojo.hitch(this, this._processReferenceLayersExt, basemap));
+        }
+      }, this);
+    }
+  },
+  _processReferenceLayersExt: function(basemap) {
+    var layers = basemap.getLayers();
+    var hasRef = false, vis = true;
+    dojo.forEach(layers, function(layer) {
+      if (layer.isReference) {
+        hasRef = true;
+        if (layer.visibility === false) {
+          vis = false;
+        }
+      }
+    });
+    if (hasRef && this.toggleReference) {
+      basemap.title += '<input type="checkbox"  disabled ' + (vis ? 'checked' : '') + '/>';
+      basemap._hasReference = true;
+    } else {
+      basemap._hasReference = false;
+    }
+    
+    var needsRefresh = 0;
+    dojo.forEach(this.basemaps, function(b) {
+      // make sure all basemaps are processed. it is decided by each basemap has a _hasReference property, regardless true or false.
+      // if there is any basemap not processed, should not refresh.
+      // if there are at least one ref layers for that basemap, will refresh.
+      if (b._hasReference == undefined) {
+        needsRefresh -= this.basemaps.length;
+      }
+      if (b._hasReference) {
+        needsRefresh++;
+      }
+    }, this);
+    if (needsRefresh >= 0) {
+      if (needsRefresh > 0 && this._startupCalled) {
+        // if startup is executed before all basemap are processed, need recall it. if not called yet, does not matter.
+        this.startup();
+      }
+      if (this.domNode) {
+        this._onGalleryClickListenerExt = dojo.connect(this.domNode, 'click', this, this._onGalleryClickExt);
+      }
+    }
+  },
+  _onSelectionChangeExt: function() {
+    var selected = this.getSelected();
+    if (selected) {
+      if (this._googleLayers.length > 0) {
+        dojo.forEach(this._googleLayers, function(lay) {
+          this.map.removeLayer(lay);
+        }, this);
+        this._googleLayers.length = 0;
+      }
+      dojo.query('input', this.domNode).forEach(function(m) {
+        m.disabled = true;
+      });
+      var layers = selected.getLayers();
+      dojo.forEach(layers, function(blay) {
+        if (blay.type && blay.type.indexOf("GoogleMaps") > -1) {
+          var mtype = agsjs.layers.GoogleMapsLayer.MAP_TYPE_ROADMAP;
+          if (blay.type == "GoogleMapsSatellite") {
+            mtype = agsjs.layers.GoogleMapsLayer.MAP_TYPE_SATELLITE;
+          } else if (blay.type == "GoogleMapsHybrid") {
+            mtype = agsjs.layers.GoogleMapsLayer.MAP_TYPE_HYBRID;
+          }
+          var opts = {
+            apiOptions: this.googleMapsApi,
+            mapOptions: {
+              mapTypeId: mtype,
+              streetViewControl: this.googleMapsApi.streetView
+            }
+          };
+          var layer = new agsjs.layers.GoogleMapsLayer(opts);
+          this.map.addLayer(layer, 0);
+          this._googleLayers.push(layer);
+        }
+      }, this);
+    }
+    // when the first basemap is selected, UI may already built, but at that time, 
+    // nothing to mark as selected node because first onSelectionChange has not been fired yet.
+    var hasSelectedNode = this._checkSelectedNode();
+    if (!hasSelectedNode && this._startupCalled) {
+      // mark selected basemap in UI.
+      this.startup();
+      // this enables checkbox;
+      this._checkSelectedNode();
+    }
+    
+  },
+  _checkSelectedNode: function() {
+    var hasSelectedNode = false;
+    var layers = this.getSelected().getLayers();
+    dojo.query('.esriBasemapGallerySelectedNode', this.domNode).forEach(function(n) {
+      hasSelectedNode = true;
+      dojo.query('input', n).forEach(function(m) {
+        m.disabled = false;
+        // jsapi fires onSelectionChange before reference layer updates, (should be a bug) so we can not set vis directly.
+        //this._setReferenceVis(m.checked);
+        dojo.forEach(layers, function(blay) {
+          if (blay.isReference) {
+            blay.visibility = m.checked;
+          }
+        }, this);
+        
+      }, this);
+    }, this);
+    return hasSelectedNode;
+  },
+  _onGalleryClickExt: function(evt) {
+    var t = evt.target;
+    if (t.tagName.toLowerCase() == 'input') {
+      this._setReferenceVis(t.checked);
+    } else if (dojo.hasClass(t.parentNode, 'esriBasemapGalleryLabelContainer')) {
+      // this allows basemap switch by clicking on label.
+      t.parentNode.parentNode.firstChild.click();
+    }
+  },
+  _setReferenceVis: function(visible) {
+    //arcgis API does not associate the actual created esri.layers.Layer and esri.dijit.BasemapLayer
+    // so have to use undocumented _basemapGalleryLayerType.
+    dojo.forEach(this.map.layerIds, function(id) {
+      var layer = this.map.getLayer(id);
+      if (layer._basemapGalleryLayerType == "reference") {
+        if (visible) {
+          layer.show();
+        } else {
+          layer.hide();
+        }
+        
+      }
+    }, this);
+  },
+  /**
+   * get array of active google layers. Typically there is only one layer in the array.
+   * @return {GoogleMapsLayer[]}
+   */
+  getGoogleLayers: function() {
+    return this._googleLayers;
+  }
 });
