@@ -85,7 +85,7 @@
               
               basemapGallery.startup();
               dojo.connect(basemapGallery, "onError", function(msg) {
-                console.log(msg)
+                if (console) console.log(msg)
               });
             }
             

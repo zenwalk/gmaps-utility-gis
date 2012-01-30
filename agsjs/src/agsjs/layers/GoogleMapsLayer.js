@@ -857,8 +857,10 @@ dojo.mixin(agsjs.layers.GoogleMapsLayer, {
 
 
 // extend Esri gallery
-esri.dijit.BasemapGallery.prototype._original_postMixInProperties = esri.dijit.BasemapGallery.prototype.postMixInProperties;
-esri.dijit.BasemapGallery.prototype._original_startup = esri.dijit.BasemapGallery.prototype.startup;
+if (esri.dijit.BasemapGallery){
+  esri.dijit.BasemapGallery.prototype._original_postMixInProperties = esri.dijit.BasemapGallery.prototype.postMixInProperties;
+  esri.dijit.BasemapGallery.prototype._original_startup = esri.dijit.BasemapGallery.prototype.startup;
+}
 
 dojo.extend(esri.dijit.BasemapGallery, {
   googleMapsApi: null,
@@ -903,12 +905,17 @@ dojo.extend(esri.dijit.BasemapGallery, {
     if (this._original_postMixInProperties) {
       this._original_postMixInProperties();
     }
+    console.log('dom'+this.domNode);
   },
   startup: function() {
     // user have option of not calling startup for custom UI.
     // _startupCalled is used to flag if we need refresh UI for toggle reference layer
     this._startupCalled = true;
     this._original_startup();
+    // move from _processReferenceLayersExt because domNode may not be available at the time if manual mode.
+    if (!this._onGalleryClickListenerExt){
+      this._onGalleryClickListenerExt = dojo.connect(this.domNode, 'click', this, this._onGalleryClickExt);
+    }
   },
   _onLoadExt: function() {
     //console.log('inside _onLoad ');
@@ -936,6 +943,7 @@ dojo.extend(esri.dijit.BasemapGallery, {
         }
       }
     });
+    
     if (hasRef && this.toggleReference) {
       basemap.title += '<input type="checkbox"  disabled ' + (vis ? 'checked' : '') + '/>';
       basemap._hasReference = true;
@@ -959,9 +967,6 @@ dojo.extend(esri.dijit.BasemapGallery, {
       if (needsRefresh > 0 && this._startupCalled) {
         // if startup is executed before all basemap are processed, need recall it. if not called yet, does not matter.
         this.startup();
-      }
-      if (this.domNode) {
-        this._onGalleryClickListenerExt = dojo.connect(this.domNode, 'click', this, this._onGalleryClickExt);
       }
     }
   },
@@ -1030,6 +1035,7 @@ dojo.extend(esri.dijit.BasemapGallery, {
     return hasSelectedNode;
   },
   _onGalleryClickExt: function(evt) {
+    console.log('_onGalleryClickExt');
     var t = evt.target;
     if (t.tagName.toLowerCase() == 'input') {
       this._setReferenceVis(t.checked);

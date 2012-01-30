@@ -6,6 +6,7 @@
  * @version 1.06
  */
 // change log: 
+// 2011-12-20: refresh method
 // 2011-11-04: v1.06: uniquevalue renderer check on/off using definitions. group layer on/off. change css class name. inline style as default. deprecate standard style
 // 2011-08-11: support for not showing legend or layer list; slider at service level config; removed style background.
 
@@ -127,7 +128,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     dojo.addClass(this.labelNode, 'agsjsTOCRootLayerLabel');
     
     var title = this.rootLayerTOC.info.title;
-    if (title ===''){
+    if (title === '') {
       esri.hide(this.rowNode);
       rootLayer.show();
       this.rootLayerTOC._currentIndent--;
@@ -149,6 +150,10 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
         layoutAlign: 'right'
       });
       this.slider.placeAt(this.sliderNode);
+      dojo.connect(rootLayer, 'onOpacityChange', this, function(op) {
+        var s = this.slider;
+        this.slider.setValue(op * 100);
+      });
     }
     if (!this.rootLayerTOC.info.noLegend) {
       this._createChildrenNodes(rootLayer._tocInfos, 'layer');
@@ -192,7 +197,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
               symbol: layer.renderer.defaultSymbol,
               label: layer.renderer.defaultLabel,
               isDefault: true,
-              value:"*"
+              value: "*"
             }].concat(rends);
           }
           this._createChildrenNodes(rends, 'legend');
@@ -296,8 +301,8 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     
     
     //dojo.forEach(chdn, function(chd) {
-     for (var i=0, n = chdn.length; i < n; i++) {
-       var chd = chdn[i];
+    for (var i = 0, n = chdn.length; i < n; i++) {
+      var chd = chdn[i];
       var params = {
         rootLayerTOC: this.rootLayerTOC,
         rootLayer: this.rootLayer,
@@ -432,7 +437,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
           this.layer._parentLayerInfo.visible = true;
         }
         // if a layer is on, it's service must be on.
-        if (this.layer.visible && !this.rootLayer.visible){
+        if (this.layer.visible && !this.rootLayer.visible) {
           this.rootLayer.show();//.visible = true;
         }
         if (this.layer._subLayerInfos) {
@@ -447,7 +452,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
             info.visible = this.layer.visible;
             
           }, this);
-          this.layer._definitionExpression='';
+          this.layer._definitionExpression = '';
         }
         this.rootLayer.setLayerDefinitions(this._getLayerDefs(), true);
         this.rootLayer.setVisibleLayers(this._getVisibleLayers(), true);
@@ -501,7 +506,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
 dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
   _currentIndent: 0,
   rootLayer: null,
-  toc:null,
+  toc: null,
   constructor: function(params, srcNodeRef) {
     this.rootLayer = params.rootLayer;
     this.toc = params.toc;
@@ -626,7 +631,7 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
             if (layerInfo.renderer) {
               if (layerInfo.renderer.infos) {
                 var legVals = {}; // lookup, key=label, val=legend
-                dojo.forEach(legInfo.legend, function(leg){
+                dojo.forEach(legInfo.legend, function(leg) {
                   legVals[leg.label] = leg;
                 });
                 // note, merge with renderer, not overwriting symbol so we have choice of using legend or draw symbol.
@@ -635,7 +640,7 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
                 }
                 dojo.forEach(layerInfo.renderer.infos, function(info, i) {
                   var leg = legVals[info.label];
-                  if (leg){
+                  if (leg) {
                     dojo.mixin(info, leg);
                   }
                 });
@@ -702,7 +707,7 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
 dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
   indentSize: 18,
   swatchSize: [30, 30],
-  refreshDelay:500,
+  refreshDelay: 500,
   style: 'inline',
   layerInfos: null,
   slider: false,
@@ -741,6 +746,8 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
     this._rootLayerTOCs = [];
     if (!this.layerInfos) {
       this.layerInfos = [];
+      
+      
       for (var i = this.map.layerIds.length - 1; i >= 0; i--) {
         var rootLayer = this.map.getLayer(this.map.layerIds[i]);
         // these properties defined in BasemapControl widget.
@@ -752,6 +759,21 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
         }
         
       }
+      dojo.connect(this.map, 'onLayerAdd', this, function(layer) {
+        this.layerInfos.push({
+          layer: layer
+        });
+        this.refresh();
+      });
+      dojo.connect(this.map, 'onLayerRemove', this, function(layer) {
+        for (var i=0; i < this.layerInfos.length; i++){
+          if (this.layerInfos[i]==layer){
+            this.layerInfos.splice(i,1);
+            break;
+          }
+        }
+        this.refresh();
+      });
     }
   },
   // extension point
@@ -767,7 +789,8 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
     if (createdLayers.length == 0) {
       this._createTOC();
     } else {
-      dojo.connect(this.map, 'onLayersAddResult', this, function(results) {
+      var c = dojo.connect(this.map, 'onLayersAddResult', this, function(results) {
+        dojo.disconnect(c);
         this._createTOC();
       });
       this.map.addLayers(createdLayers);
@@ -787,6 +810,7 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
     return rootLayer;
   },
   _createTOC: function() {
+    dojo.empty(this.domNode);
     for (var i = 0, c = this.layerInfos.length; i < c; i++) {
       // attach a title to rootLayer layer itself
       var rootLayer = this.layerInfos[i].layer;
@@ -798,15 +822,26 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
       this._rootLayerTOCs.push(svcTOC);
       svcTOC.placeAt(this.domNode);
     }
-    this._zoomHandler = dojo.connect(this.map, "onZoomEnd", this, "_adjustToState");
+    if (!this._zoomHandler) {
+      this._zoomHandler = dojo.connect(this.map, "onZoomEnd", this, "_adjustToState");
+    }
+    
   },
   _adjustToState: function() {
     dojo.forEach(this._rootLayerTOCs, function(widget) {
       widget._adjustToState();
     });
   },
+  
+  /**
+   * Refresh the TOC to reflect
+   */
+  refresh: function() {
+    this._createTOC();
+  },
   destroy: function() {
     dojo.disconnect(this._zoomHandler);
+    this._zoomHandler = null;
   }
   
   
