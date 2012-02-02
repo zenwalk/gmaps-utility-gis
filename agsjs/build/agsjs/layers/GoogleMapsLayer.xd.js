@@ -1,4 +1,4 @@
-/** built on 2012-01-30 */ 
+/** built on 2012-02-02 */ 
 dojo._xdResourceLoaded(function(){ return {  
 depends: [["provide", "agsjs.layers.GoogleMapsLayer"] 
 ,['require','esri.dijit.BasemapGallery'] 
