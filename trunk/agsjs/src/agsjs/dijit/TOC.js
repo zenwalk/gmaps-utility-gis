@@ -6,6 +6,7 @@
  * @version 1.06
  */
 // change log: 
+// 2012-02-02: fix IE7&8 problem when there is "all other value"(default symbol) 
 // 2011-12-20: refresh method
 // 2011-11-04: v1.06: uniquevalue renderer check on/off using definitions. group layer on/off. change css class name. inline style as default. deprecate standard style
 // 2011-08-11: support for not showing legend or layer list; slider at service level config; removed style background.
@@ -193,10 +194,14 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
         } else {
           var rends = layer.renderer.infos;
           if (layer.renderer.defaultSymbol) {
+            // 2012-02-02: IE7&8 may crash when there is default symbol to be draw with graphics.
+            // in this case, transfer the default symbol from legend to renderer.
             rends = [{
               symbol: layer.renderer.defaultSymbol,
               label: layer.renderer.defaultLabel,
               isDefault: true,
+              url: layer.renderer.url, // note it is merged from _createRootLayerTOC
+              imageData: layer.renderer.imageData,// note it is merged from _createRootLayerTOC
               value: "*"
             }].concat(rends);
           }
@@ -273,11 +278,14 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     });
     var mySurface = dojox.gfx.createSurface(node, w, h);
     var descriptors = esri.symbol.getShapeDescriptors(symbol);
-    var shape = mySurface.createShape(descriptors.defaultShape).setFill(descriptors.fill).setStroke(descriptors.stroke);
-    shape.applyTransform({
-      dx: w / 2,
-      dy: h / 2
-    });
+    if (descriptors) {
+      var shape = mySurface.createShape(descriptors.defaultShape).setFill(descriptors.fill).setStroke(descriptors.stroke);
+      shape.applyTransform({
+        dx: w / 2,
+        dy: h / 2
+      });
+    }
+    
     return node;
   },
   _getLegendIconUrl: function(legend) {
@@ -766,9 +774,9 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
         this.refresh();
       });
       dojo.connect(this.map, 'onLayerRemove', this, function(layer) {
-        for (var i=0; i < this.layerInfos.length; i++){
-          if (this.layerInfos[i]==layer){
-            this.layerInfos.splice(i,1);
+        for (var i = 0; i < this.layerInfos.length; i++) {
+          if (this.layerInfos[i] == layer) {
+            this.layerInfos.splice(i, 1);
             break;
           }
         }
