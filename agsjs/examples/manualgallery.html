@@ -155,7 +155,7 @@
               basemapGallery.select('GoogleHybrid');
               
               dojo.connect(basemapGallery, "onError", function(error) {
-                console.log(error)
+                if (console) console.log(error)
               });
             }
             
