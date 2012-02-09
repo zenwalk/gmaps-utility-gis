@@ -6,7 +6,7 @@
         <!--The viewport meta tag is used to improve the presentation and behavior of the samples
         on iOS devices-->
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
-        <title>Display Multiple ArcGIS Online Services</title>
+        <title></title>
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.6/js/dojo/dijit/themes/claro/claro.css">
         <style>
             html, body {
@@ -22,7 +22,6 @@
             }
             
             #paneHeader {
-                background: url(images/header.png)repeat-x;
                 color:
                 white;
                 border-bottom: solid
@@ -96,6 +95,29 @@
               var basemaps = [];
               basemaps.push(new esri.dijit.Basemap({
                 layers: [new esri.dijit.BasemapLayer({
+                  type: 'GoogleMapsHybrid'
+                })],
+                title: "Google Hybrid",
+                id:'GoogleHybrid',
+                thumbnailUrl: dojo.moduleUrl("agsjs.dijit", "images/googlehybrid.png")
+              }));
+              basemaps.push(new esri.dijit.Basemap({
+                layers: [new esri.dijit.BasemapLayer({
+                  type: 'GoogleMapsRoad'
+                })],
+                title: "Google Maps",
+                thumbnailUrl: dojo.moduleUrl("agsjs.dijit", "images/googleroad.png")
+              }));
+              basemaps.push(new esri.dijit.Basemap({
+                layers: [new esri.dijit.BasemapLayer({
+                  type: 'GoogleMapsSatellite'
+                })],
+                title: "Google Satellite",
+                thumbnailUrl: dojo.moduleUrl("agsjs.dijit", "images/googlesatellite.png")
+              }));
+               
+              basemaps.push(new esri.dijit.Basemap({
+                layers: [new esri.dijit.BasemapLayer({
                   url: "http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer"
                 })],
                 title: "Esri Street",
@@ -118,27 +140,7 @@
                 title: "Esri Grey with Label"
               }));
               
-              basemaps.push(new esri.dijit.Basemap({
-                layers: [new esri.dijit.BasemapLayer({
-                  type: 'GoogleMapsRoad'
-                })],
-                title: "Google Maps",
-                thumbnailUrl: dojo.moduleUrl("agsjs.dijit", "images/googleroad.png")
-              }));
-              basemaps.push(new esri.dijit.Basemap({
-                layers: [new esri.dijit.BasemapLayer({
-                  type: 'GoogleMapsSatellite'
-                })],
-                title: "Google Satellite",
-                thumbnailUrl: dojo.moduleUrl("agsjs.dijit", "images/googlesatellite.png")
-              }));
-              basemaps.push(new esri.dijit.Basemap({
-                layers: [new esri.dijit.BasemapLayer({
-                  type: 'GoogleMapsHybrid'
-                })],
-                title: "Google Hybrid",
-                thumbnailUrl: dojo.moduleUrl("agsjs.dijit", "images/googlehybrid.png")
-              }));
+              
               
               var basemapGallery = new esri.dijit.BasemapGallery({
                 showArcGISBasemaps: false,
@@ -150,6 +152,7 @@
                 map: map
               }, "basemapGallery");
               basemapGallery.startup();
+              basemapGallery.select('GoogleHybrid');
               
               dojo.connect(basemapGallery, "onError", function(error) {
                 console.log(error)
