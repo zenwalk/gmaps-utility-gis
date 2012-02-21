@@ -247,7 +247,7 @@
       });
     }
     // IE does not like delete window[sid], so create a name space here.
-    window.fusiontips = window.fusiontips||{};
+    window.fusiontips = window.fusiontips || {};
     
     //copied from http://gmaps-samples.googlecode.com/svn/trunk/fusiontables/mouseover.html
     // undocumented unsupported method;
@@ -257,10 +257,12 @@
       //http://www.google.com/fusiontables/api/query?sql=
       var sid = 'query_' + scriptid++;
       script.setAttribute('src', 'http://fusiontables.googleusercontent.com/fusiontables/api/query?sql=' + queryText + '&jsonCallback=fusiontips.' + sid);
+      script.setAttribute('id', 'fusiontips.' + sid);
       window.fusiontips[sid] = function(json) {
-        delete window.fusiontips[sid];
         queryPending = false;
         processFusionJson(json, latlng);
+        delete window.fusiontips[sid];
+        script.parentNode.removeChild(script);
       };
       document.getElementsByTagName('head')[0].appendChild(script);
     }
@@ -318,7 +320,7 @@
           infoWindowHtml: html,
           latLng: latlng,
           row: row
-        }); 
+        });
       }
       currentRow = row;
     }
@@ -328,10 +330,14 @@
    * Disable map tips for the fusion layer.
    */
   google.maps.FusionTablesLayer.prototype.disableMapTips = function() {
-    this.maptipOverlay_.setMap(null);
-    this.maptipOverlay_ = null;
-    google.maps.event.removeListener(this.mousemoveListener_);
-    this.mousemoveListener_ = null;
+    if (this.maptipOverlay_) {
+      this.maptipOverlay_.setMap(null);
+      this.maptipOverlay_ = null;
+    }
+    if (this.mousemoveListener_) {
+      google.maps.event.removeListener(this.mousemoveListener_);
+      this.mousemoveListener_ = null;
+    }
   };
   // cleanup
   var _setMap_ = google.maps.FusionTablesLayer.prototype.setMap;
@@ -343,7 +349,7 @@
     if (map == null) {
       this.disableMapTips();
     }
-    _setMap_.call(this,map);
+    _setMap_.call(this, map);
   };
   
 })();
