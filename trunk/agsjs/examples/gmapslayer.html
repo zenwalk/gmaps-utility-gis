@@ -7,7 +7,7 @@
         on iOS devices-->
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
         <title>Google Maps In ArcGIS JavaScript API</title>
-        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.6/js/dojo/dijit/themes/claro/claro.css">
+        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.0/js/dojo/dijit/themes/claro/claro.css">
         <style type="text/css">
             html, body {
                 height: 100%;
@@ -19,7 +19,7 @@
             body {
                 overflow: hidden;
                 font-family: Helvetica, Arial, sans-serif;
-                font-size:small;
+                font-size: small;
             }
             
             #map {
@@ -28,27 +28,33 @@
             }
         </style>
         <script type="text/javascript">
-            var djConfig = {
-              parseOnLoad: true,
-              baseUrl: './',
-              modulePaths: {
-                // if use local copy, make sure the path reference is relative to 'baseUrl', e.g.:
-                //'agsjs': '../build/agsjs'
-               // use absolute path for online version. Note sometimes googlecode.com can be slow.
-                'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/1.07/build/agsjs'
-              }
-            };
+                        var djConfig = {
+                          parseOnLoad: true,
+                          //baseUrl: './',
+                          //modulePaths: {
+                            // if use local copy, make sure the path reference is relative to 'baseUrl', e.g.:
+                            //'agsjs': '../build/agsjs'
+                           // use absolute path for online version. Note sometimes googlecode.com can be slow.
+                            //'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/1.07/build/agsjs'
+                          //}
+                          //async: false,
+            
+                    packages: [{
+                      "name": "agsjs",
+                      "location": location.pathname.replace(/\/[^/]+$/, "")+'/../build/agsjs'
+                      //'location':'http://localhost/dev/gmaps-utility-gis/svn/trunk/agsjs/build/agsjs'
+                     }]
+                        };
+                    
         </script>
-        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.6">
+        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.0">
         </script>
-        
         <script type="text/javascript">
             dojo.require("dijit.dijit");
             dojo.require("dijit.form.Button");
             dojo.require("dijit.layout.BorderContainer");
             dojo.require("dijit.layout.ContentPane");
             dojo.require("esri.map");
-            
             dojo.require("agsjs.layers.GoogleMapsLayer");
             var map, googleLayer, esriTopo, dyna;
             var visible = [];
@@ -80,7 +86,6 @@
                 },
                 mapOptions: {
                   streetViewControl: true // use false if do not want street view. Default is false.
-                  
                 }
               });
               map.addLayer(googleLayer);
@@ -114,7 +119,8 @@
             function changeMap(evt) {
               var name = dojo.trim(dijit.getEnclosingWidget(evt.target).label);
               if (name.indexOf('G-') != -1) {
-                if (esriTopo) esriTopo.hide();
+                if (esriTopo) 
+                  esriTopo.hide();
                 googleLayer.show();
                 esri.show(dojo.byId("layer_list"));
                 switch (name) {
@@ -161,7 +167,8 @@
               } else {
                 esri.hide(dojo.byId("layer_list"));
                 googleLayer.hide();
-               if (esriTopo)  esriTopo.show();
+                if (esriTopo) 
+                  esriTopo.show();
               }
             }
             
@@ -220,7 +227,6 @@
                     <b>Use Google Maps as Base Map Layer in ESRI ArcGIS JSAPI</b>
                     <a style="right:20px;position:absolute" href="../docs/googlemapslayer/examples.html">Documentation</a>
                 </div>
-               
                 <ul style="margin:2px">
                     <li>
                         Click buttons to switch base map between ESRI and Google. 
@@ -235,7 +241,7 @@
                         Check layer on/off to customize features to draw on base map. 
                         Note not all sub layer visible at all scales.
                     </li>
-                     <li>
+                    <li>
                         Can be used with BasemapGallery. See <a href="gmapsgallery.html">example</a>.
                     </li>
                 </ul>
