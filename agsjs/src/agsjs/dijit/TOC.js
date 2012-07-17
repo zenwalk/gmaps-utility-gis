@@ -261,8 +261,8 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     } else {
       iconNode.src = src;
       if (rendLeg.symbol && rendLeg.symbol.width && rendLeg.symbol.height) {
-        iconNode.width = rendLeg.symbol.width;
-        iconNode.height = rendLeg.symbol.height;
+       // iconNode.width = rendLeg.symbol.width;
+      //  iconNode.height = rendLeg.symbol.height;
       }
     }
     
