@@ -38,15 +38,14 @@
             }
         </style>
         <script type="text/javascript">
-                        var djConfig = {
-                          parseOnLoad: true,
-                          packages: [{
-                            "name": "agsjs",
-                            "location": location.pathname.replace(/\/[^/]+$/, "")+'/../src/agsjs'
-                            //'location':'http://localhost/dev/gmaps-utility-gis/svn/trunk/agsjs/build/agsjs'
-                          }]
-                        };
-                    
+        var djConfig = {
+              parseOnLoad: true,
+              packages: [{
+                "name": "agsjs",
+                "location": location.pathname.replace(/\/[^/]+$/, "")+'/../build/agsjs'
+               // "location":'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/2.0/xbuild/agsjs' // if xdomain
+              }]
+            };
         </script>
         <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.0">
         </script>

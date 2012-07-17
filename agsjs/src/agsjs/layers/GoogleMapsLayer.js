@@ -16,7 +16,7 @@
 //2011-10-17: v1.03, added support for StreetView, Sub layers (Traffic, Point of Interest etc)
 //2011-10-05: fixed issues with Chrome, IE7, IE8
 //2011-08-11: updated for JSAPI 2.4. changed package.
-define("agsjs/layers/GoogleMapsLayer", ["dijit","dojo","dojox","dojo/require!esri/dijit/BasemapGallery"], function(dijit,dojo,dojox){
+//define("agsjs/layers/GoogleMapsLayer", ["dijit","dojo","dojox","dojo/require!esri/dijit/BasemapGallery"], function(dijit,dojo,dojox){
 
 window.google = window.google || {}; // somehow IE needs this, otherwise complain google.maps namespace;
 /*global dojo esri  agsjs */
@@ -900,4 +900,4 @@ dojo.extend(esri.dijit.BasemapGallery, {
     return this._googleLayers;
   }
 });
-});
+
