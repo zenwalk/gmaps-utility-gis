@@ -13,7 +13,7 @@
             <a name="Top"></a>
             <h1><a></a>Google Maps Layer for ArcGIS JavaScript API: Examples</h1>
             <p>
-                <b><a href="reference.html">Class References</a> |  <a href="../../examples/gmapslayer.html">Live Example </a></b>
+                <b><a href="reference.html">Class References</a> | Live Examples:<a href="../../examples/gmapslayer.html"> Add Layer</a> | <a href="../../examples/gmapsgallery.html"> BasemapGallery </a> | <a href="../../examples/manualgallery.html"> Manual Gallery </a></b>
             </p>
         </div>
         <div>
@@ -24,12 +24,13 @@
             </p>
             <p>
                 The typical use is adding Google Maps as reference layer in an application that built on top of ArcGIS Server JavaScript API and dojo framework. 
-                In some cases, Google provides more up-to-date aerial images, and also labels local business, which is not readily available from other resoures.
+             </p>
+            <p>
+                The Google API will be loaded dynamically when the first Google Map is set to visible. This approach will save API load count 
+                for Google Maps Enterprise clients because you do not have to load the API unless you use it.
             </p>
             <p>
-                Please note, there is NO need to load Google API in the header. The Google API will be loaded dynamically when 
-                the first Google Map is set to visible. This approach will save API load count 
-                for Google Maps Enterprise clients because you do not have to load the API unless you use it.
+              This document is for ArcGIS JSAPI 3.0. For older versions, see <a href=http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/>Archives</a>
             </p>
         </div>
         <div>
@@ -46,19 +47,16 @@
             </code>
             folder under your application. 
             In your HTML page, inside the section to define djConfig: (make sure the path to folder agsjs is correct)<pre class="prettyprint">
-             var djConfig = {
+            var djConfig = {
               parseOnLoad: true,
-              baseUrl: './', 
-              modulePaths: {
-                'agsjs': '../path/to/agsjs'
-              }
+              packages: [{
+                "name": "agsjs",
+                "location": 'path to /agsjs'
+               }]
             };</pre>
         </p>
         <p>
-            Then in the require section, add 
-            <code>
-                dojo.require("agsjs.layers.GoogleMapsLayer");
-            </code>
+            Then in the require section:
             <pre class="prettyprint">
              ...
             dojo.require("esri.map");
@@ -71,22 +69,21 @@
             <h2>Add a Google Maps Layer</h2>
             <p>
                 After the script is loaded, you can simply treat Google Maps as other layer in 
-                your application. The constructor takes a few parameters to customize the layer such as API version, mapOptions etc. See reference doc for details. 
+                your application. The constructor takes a few parameters to customize the layer such as API version, mapOptions etc. See <a href=reference.html>reference</a> doc for details. 
             </p>
             <pre class="prettyprint">
-       map = new esri.Map("map", {
-         extent: initExtent,
-         logo: false
-       });
-       ... 
-       var gMapLayer = new agsjs.layers.GoogleMapsLayer({
-            visible:false, 
-            id:&#39;googlemaps&#39;,
-            apiOptions: {
-                v: '3.6'
-           }
-        });
-       map.addLayer(gMapLayer);
+       map = new esri.Map(...);
+       googleLayer = new agsjs.layers.GoogleMapsLayer({
+                //id: 'google', // optional. esri layer id.
+                // apiOptions: { // load google API should be loaded.
+                // v: '3.6' // API version. use a specific version is recommended for production system. 
+                // client: gme-myclientID // for enterprise accounts;
+                // },
+                //mapOptions: {  // options passed to google.maps.Map contrustor
+                // streetViewControl: false // whether to display street view control. Default is true.
+                //}
+              });
+        map.addLayer(googleLayer);
         </pre>
             <p>
                 You should only need one instance of the layer, then use 
@@ -103,23 +100,25 @@
         <div>
             <h2>Use with BasemapGallery widget</h2>
             <p>
-                After the script is loaded, in the initilization code, add <code>googleMapsApi</code> option in the constructor of <code>esri.dijit.BasemapGallery</code>. 
+                After the script is loaded, in the initilization code, add <code>google</code> option in the constructor of <code>esri.dijit.BasemapGallery</code>. 
+                The object <code>google</code> is same as the parameter object for the <code>GoogleMapLayer</code> constructor. 
                  <pre class="prettyprint">
-             
-           // simply add additonal configuration property in existing esri.dijit.BasemapGallery.
-           var basemapControl = new esri.dijit.BasemapGallery({
-             map: map, // required
-             showArcGISBasemaps: true, // must be true or with a defined basemapsGroup to trigger automatical addition.
-             googleMapsApi:{
-               v:3.6,// Google API version. Exact version number is recommended for prd system 
-               client:"&lt;yourGooglePremierClientID&gt;", // premier id if your usage requires it.
-               streetView: &lt;true|false&gt; // optional. whether to show street view control. default is false.
-             }
-           }, &#39;basemapControlDiv&#39;);
-           basemapControl.startup();
+             var basemapGallery = new esri.dijit.BasemapGallery({
+                showArcGISBasemaps: true,
+                toggleReference: true,
+                google: {
+                  apiOptions: {
+                    v: '3.6' // use a specific version is recommended for production system.
+                  }
+                },
+                map: map
+              }, "basemapGallery");
+              basemapGallery.startup();
         </pre>
             </p>
-        
+        <p>
+                <a href="../../examples/gmapsgallery.html">View example </a>
+            </p>
             <p>
                 To setup BasemapLayer manually using Google Maps, simply set <code>type</code> to one of the three types: <code>GoogleMapsRoad|GoogleMapsSatellite|GoogleMapsHybrid</code>. <pre class="prettyprint">
         var basemaps = [];
@@ -132,32 +131,22 @@
         });
         basemaps.push(basemapRoad);
         </pre> <p>
-                <a href="../../examples/gmapsgallery.html">View example </a>
+                <a href="../../examples/manualgallery.html">View example </a>
             </p>
         </div> 
          <div>
             <h2>Street View Control</h2>
             <p>
-                By default, the Street View Control (pegman) is disabled. If you drag the icon and place it on a blue street, street view image will be displayed. If you want to have this feature, set <code>streetViewControl:true</code>
+                By default, the Street View Control (pegman) is enabled. If you drag the icon and place it on a blue street, street view image will be displayed. If you want to disable this feature, set <code>streetViewControl:false</code> in the <code>mapOptions</code>
             </p>
             <pre class="prettyprint">
-       var gMapLayer = new agsjs.layers.GoogleMapsLayer({
-            visible:false, 
-            id:&#39;googlemaps&#39;,
+       var googleLayer = new agsjs.layers.GoogleMapsLayer({
             mapOptions: {
-              streetViewControl: true
+              streetViewControl: false
             }
         });
         </pre>
         </div> 
-        <div>
-            <h2>Sub Layers and Features</h2>
-            <p>
-              To simulate ArcGIS layers, the <code>layerInfos</code> property and <code>setVisibileLayer(ids)</code> make it possible to customize 
-              Google maps, sort of "dynamic tiled layer". Currently, traffic, bicyling, and some high level features such as adminitrative, road, transit etc can be turned on/off. 
-              See <a href="../../examples/gmapslayer.html">example</a> for how to use it.
-            </p>
-        </div>
         <div>
             <h2>Hue, Saturation Styles</h2>
             <p>

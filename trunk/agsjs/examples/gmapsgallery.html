@@ -7,7 +7,7 @@
         on iOS devices-->
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
         <title></title>
-        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.6/js/dojo/dijit/themes/claro/claro.css">
+        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.0/js/dojo/dijit/themes/claro/claro.css">
         <style type="text/css">
             html, body {
                 height: 100%;
@@ -15,27 +15,22 @@
                 margin: 0;
                 padding: 0;
             }
-            
-            #map {
-                padding: 0;
-            }
+           
         </style>
         <script type="text/javascript">
             var djConfig = {
               parseOnLoad: true,
-              baseUrl: './',
-              modulePaths: {
-                // if use local copy, make sure the path reference is relative to 'baseUrl', e.g.:
-                //'agsjs': '../build/agsjs'
-                // use absolute path for online version. Note sometimes googlecode.com can be slow.
-                'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/1.07/build/agsjs'
-              }
+              packages: [{
+                "name": "agsjs",
+                "location": location.pathname.replace(/\/[^/]+$/, "")+'/../src/agsjs'
+                //'location':'http://localhost/dev/gmaps-utility-gis/svn/trunk/agsjs/build/agsjs'
+              }]
             };
         </script>
-        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.6">
+        <!--script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.0"-->
+        <script type="text/javascript" src="http://localhost/arcgis_js_api/library/3.0/jsapi/">
         </script>
         <script type="text/javascript">
-            dojo.require("dijit.dijit"); // optimize: load dijit layer
             dojo.require("dijit.layout.BorderContainer");
             dojo.require("dijit.layout.ContentPane");
             dojo.require("esri.map");
@@ -62,28 +57,22 @@
               });
               
               createBasemapGallery();
-              dojo.connect(map, 'onLoad', map, function() {
-                // console.log(map.getLevel());
-              });
-              //resize the map when the browser resizes
-              dojo.connect(dijit.byId('map'), 'resize', map, map.resize);
-              
             }
             
             function createBasemapGallery() {
               //add the basemap gallery, in this case we'll display maps from ArcGIS.com including bing maps
-              
               var basemapGallery = new esri.dijit.BasemapGallery({
                 showArcGISBasemaps: true,
-                //bingMapsKey: 'Ah29HpXlpKwqVbjHzm6mlwMwgw69CYjaMIiW_YOdfTEMFvMr5SNiltLpYAcIocsi',
                 toggleReference: true,
-                googleMapsApi: {
-                  v: '3.6' // use a specific version is recommended for production system.
+                google: {
+                  apiOptions: {
+                    v: '3.6' // use a specific version is recommended for production system.
+                  }
                 },
                 map: map
               }, "basemapGallery");
-              
               basemapGallery.startup();
+              
               dojo.connect(basemapGallery, "onError", function(msg) {
                 if (console) console.log(msg)
               });
