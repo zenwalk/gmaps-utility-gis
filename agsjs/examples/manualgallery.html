@@ -7,7 +7,7 @@
         on iOS devices-->
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
         <title></title>
-        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.6/js/dojo/dijit/themes/claro/claro.css">
+        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.0/js/dojo/dijit/themes/claro/claro.css">
         <style>
             html, body {
                 height: 98%;
@@ -22,20 +22,13 @@
             }
             
             #paneHeader {
-                color:
-                white;
-                border-bottom: solid
-                1px #B5BCC7;
+                border-bottom: solid 1px #B5BCC7;
                 text-align: center;
-                height:
-                30px;
-                margin:
-                0;
+                height: 30px;
+                margin: 0;
                 overflow: hidden;
-                font-size:
-                16px;
-                padding:
-                8px 5px;
+                font-size: 16px;
+                padding: 8px 5px;
             }
             
             #rightPane {
@@ -45,17 +38,18 @@
             }
         </style>
         <script type="text/javascript">
-            var djConfig = {
-              parseOnLoad: true,
-              baseUrl: './',
-              modulePaths: {
-                'agsjs': '../build/agsjs'//'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/1.07/build/agsjs'
-              }
-            };
+                        var djConfig = {
+                          parseOnLoad: true,
+                          packages: [{
+                            "name": "agsjs",
+                            "location": location.pathname.replace(/\/[^/]+$/, "")+'/../src/agsjs'
+                            //'location':'http://localhost/dev/gmaps-utility-gis/svn/trunk/agsjs/build/agsjs'
+                          }]
+                        };
+                    
         </script>
-        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.6">
+        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.0">
         </script>
-        
         <script type="text/javascript">
             dojo.require("esri.map");
             dojo.require("dijit.form.Button");
@@ -82,12 +76,6 @@
                 extent: initExtent
               });
               createBasemapGallery();
-              
-              
-              dojo.connect(map, 'onLoad', function(theMap) {
-                //resize the map when the browser resizes
-                dojo.connect(dijit.byId('map'), 'resize', map, map.resize);
-              });
             }
             
             function createBasemapGallery() {
@@ -95,17 +83,10 @@
               var basemaps = [];
               basemaps.push(new esri.dijit.Basemap({
                 layers: [new esri.dijit.BasemapLayer({
-                  type: 'GoogleMapsHybrid'
-                })],
-                title: "Google Hybrid",
-                id:'GoogleHybrid',
-                thumbnailUrl: dojo.moduleUrl("agsjs.dijit", "images/googlehybrid.png")
-              }));
-              basemaps.push(new esri.dijit.Basemap({
-                layers: [new esri.dijit.BasemapLayer({
                   type: 'GoogleMapsRoad'
                 })],
-                title: "Google Maps",
+                title: "Google Road",
+                id: 'GoogleRoad',
                 thumbnailUrl: dojo.moduleUrl("agsjs.dijit", "images/googleroad.png")
               }));
               basemaps.push(new esri.dijit.Basemap({
@@ -113,53 +94,45 @@
                   type: 'GoogleMapsSatellite'
                 })],
                 title: "Google Satellite",
+                id: 'GoogleSatellite',
                 thumbnailUrl: dojo.moduleUrl("agsjs.dijit", "images/googlesatellite.png")
               }));
-               
+              basemaps.push(new esri.dijit.Basemap({
+                layers: [new esri.dijit.BasemapLayer({
+                  type: 'GoogleMapsHybrid'
+                })],
+                title: "Google Hybrid",
+                id: 'GoogleHybrid',
+                thumbnailUrl: dojo.moduleUrl("agsjs.dijit", "images/googlehybrid.png")
+              }));
               basemaps.push(new esri.dijit.Basemap({
                 layers: [new esri.dijit.BasemapLayer({
                   url: "http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer"
                 })],
                 title: "Esri Street",
-                thumbnailUrl: "http://www.arcgis.com/sharing/content/items/b165c3df453e4be6b5ac4fdb241effbe/info/thumbnail/delorme_base_map.jpg"
+                thumbnailUrl: "http://www.arcgis.com/sharing/rest/content/items/d8855ee4d3d74413babfb0f41203b168/info/thumbnail/tempstreets.jpg"
               }));
               basemaps.push(new esri.dijit.Basemap({
                 layers: [new esri.dijit.BasemapLayer({
                   url: "http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"
                 })],
-                title: "Esri Topo"
+                title: "Esri Topo",
+                thumbnailUrl: "http://www.arcgis.com/sharing/rest/content/items/6e03e8c26aad4b9c92a87c1063ddb0e3/info/thumbnail/temptopographic.jpg"
               }));
-              basemaps.push(new esri.dijit.Basemap({
-                layers: [new esri.dijit.BasemapLayer({
-                  url: "http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer"
-                 }), new esri.dijit.BasemapLayer({
-                  url: "http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer"
-                 //url: "http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/WEB/Label/MapServer",
-                 ,isReference:true
-               })],
-                title: "Esri Grey with Label"
-              }));
-              
-              
               
               var basemapGallery = new esri.dijit.BasemapGallery({
                 showArcGISBasemaps: false,
-                toggleReference:true,
                 basemaps: basemaps,
-                googleMapsApi: {
-                  v: 3.6
-                },
+                google: {
+                  apiOptions:{ // google api options.
+                    v: 3.6,
+                  }
+                 },
                 map: map
               }, "basemapGallery");
               basemapGallery.startup();
-              basemapGallery.select('GoogleHybrid');
-              
-              dojo.connect(basemapGallery, "onError", function(error) {
-                if (console) console.log(error)
-              });
+              basemapGallery.select('GoogleRoad');
             }
-            
-            
             dojo.addOnLoad(init);
         </script>
     </head>
