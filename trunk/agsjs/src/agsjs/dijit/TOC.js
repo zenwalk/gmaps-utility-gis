@@ -588,7 +588,7 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
     });
   },
   _processLegendError: function(err) {
-    console.log(err);
+    //console.log(err);
     this._createRootLayerTOC();
   },
   _processLegendInfo: function(json) {
