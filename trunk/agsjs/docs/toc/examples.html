@@ -81,21 +81,21 @@
             underneath the agsjs folder, should have file named TOC.js and a sub folder css with file TOC.css. as in <img src="files.png"/>In your HTML page, inside the section to define djConfig: (make sure the path to folder agsjs is correct)<pre class="prettyprint">
              var djConfig = {
               parseOnLoad: true,
-              baseUrl: './', 
-              modulePaths: {
-                'agsjs': '../path/to/agsjs'
-              }
+              packages: [{
+                "name": "agsjs",
+                "location": location.pathname.replace(/\/[^/]+$/, "")+'/path/to/agsjs'
+              }]
+            };
             };</pre>
         </p>
         <p>
-            Then in the require section, add 
-            <code>
-                dojo.require("agsjs.dijit.TOC");
-            </code>
+            Then in the require section:
+            
             <pre class="prettyprint">
              ...
             dojo.require("esri.map");
             ...
+            dojo.require("dojo.fx");// needed since jsapi3.0
             dojo.require("agsjs.dijit.TOC");
               </pre>
         </p>
