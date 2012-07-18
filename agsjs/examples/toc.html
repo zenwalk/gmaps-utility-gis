@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9" />
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
         <title>TOC</title>
-        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.4/js/dojo/dijit/themes/claro/claro.css">
+        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.0/js/dojo/dijit/themes/claro/claro.css">
         <style>
             html, body {
                 height: 98%;
@@ -21,35 +21,32 @@
                 width: 280px;
                 overflow: auto
             }
-            
-            
-            
             /* this line hide layers when out of scale for the inline TOC */
             #scaleDiv .agsTOCOutOfScale {
                 display: none;
             }
         </style>
         <script type="text/javascript">
-            var djConfig = {
+             var djConfig = {
               parseOnLoad: true,
-              baseUrl: './',
-              modulePaths: {
-                // if use local copy, make sure the path reference is relative to 'baseUrl', e.g.:
-                // 'agsjs': '../build/agsjs'
-                'agsjs': 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/1.06/build/agsjs'
-              }
+              packages: [{
+                "name": "agsjs",
+                "location": location.pathname.replace(/\/[^/]+$/, "")+'/../build/agsjs'
+              }]
             };
         </script>
-        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.4">
+        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.0">
         </script>
         <script type="text/javascript">
-            dojo.require("dijit.dijit");
+            //
+            //dojo.require("dijit.dijit");
             dojo.require("dijit.layout.BorderContainer");
             dojo.require("dijit.layout.ContentPane");
             // uncomment if want dojo widget style checkbox
             //dojo.require('dijit.form.CheckBox');
             dojo.require("esri.map");
             dojo.require("dijit.layout.AccordionContainer");
+            dojo.require("dojo.fx");// needed if use jsapi 3.0
             dojo.require("agsjs.dijit.TOC");
         </script>
         <script type="text/javascript">
@@ -83,7 +80,7 @@
               });
              
               dojo.connect(map, 'onLayersAddResult', function(results) {
-              
+              console.log('creating..');
                 var toc = new agsjs.dijit.TOC({
                   map: map,
                   layerInfos: [{
