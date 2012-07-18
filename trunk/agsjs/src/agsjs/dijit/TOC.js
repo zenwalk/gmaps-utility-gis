@@ -15,10 +15,10 @@
 // reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
 
 dojo.provide('agsjs.dijit.TOC');
+dojo.require("dojo.fx");
 dojo.require('dijit._Widget');
 dojo.require('dijit._Templated');
 dojo.require('dijit.form.Slider');
-dojo.require("dojo.fx");
 
 (function() {
   var link = dojo.create("link", {
@@ -851,6 +851,5 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
     dojo.disconnect(this._zoomHandler);
     this._zoomHandler = null;
   }
-  
   
 });

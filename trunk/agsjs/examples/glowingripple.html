@@ -7,17 +7,17 @@
         on iOS devices-->
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
         <title></title>
-        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/2.5/js/dojo/dijit/themes/claro/claro.css">
+        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.0/js/dojo/dijit/themes/claro/claro.css">
         <script type="text/javascript">
             var djConfig = {
               parseOnLoad: true,
-              baseUrl: './',
-              modulePaths: {
-                'agsjs': '../src/agsjs'
-              }
+              packages: [{
+                "name": "agsjs",
+                "location": location.pathname.replace(/\/[^/]+$/, "")+'/../build/agsjs'
+              }]
             };
         </script>
-        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.5">
+        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.0">
         </script>
         <script type="text/javascript">
             dojo.require("esri.map");
