@@ -20,8 +20,9 @@
             var djConfig = {
               parseOnLoad: true,
               packages: [{
+                async: false,
                 "name": "agsjs",
-                "location": location.pathname.replace(/\/[^/]+$/, "")+'/../src/agsjs'
+                "location": location.pathname.replace(/\/[^/]+$/, "")+'/../build/agsjs'
                 //"location":'http://gmaps-utility-gis.googlecode.com/svn/trunk/agsjs/xbuild/agsjs' // if xdomain
               }]
             };
@@ -35,7 +36,7 @@
             dojo.require("dijit.layout.ContentPane");
             dojo.require("esri.map");
             dojo.require("agsjs.layers.GoogleMapsLayer");
-            
+              
             var map, googleLayer;
             
             function init() {
@@ -64,6 +65,7 @@
               map.addLayer(googleLayer);
             }
             dojo.addOnLoad(init);
+            
         </script>
     </head>
     <body class="claro">
