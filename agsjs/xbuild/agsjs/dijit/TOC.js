@@ -1,4 +1,4 @@
-/*built on 2012-07-19 14:48:45.30*/ 
+/*built on 2012-07-19 14:58:25.66*/ 
 define('agsjs/dijit/TOC',['dojo','dijit','dojox' ,'dojo/require!dojo/fx'], function(dojo,dijit,dojox){ 
 dojo.provide("agsjs.dijit.TOC");dojo.require("dojo.fx");dojo.require("dijit._Widget");dojo.require("dijit._Templated");dojo.require("dijit.form.Slider");(function(){var a=dojo.create("link",{type:"text/css",rel:"stylesheet",href:dojo.moduleUrl("agsjs.dijit","css/TOC.css")});dojo.doc.getElementsByTagName("head")[0].appendChild(a)})();
 dojo.declare("agsjs.dijit._TOCNode",[dijit._Widget,dijit._Templated],{templateString:'<div class="agsjsTOCNode"><div data-dojo-attach-point="rowNode" data-dojo-attach-event="onclick:_onClick"><span data-dojo-attach-point="contentNode" class="agsjsTOCContent"><span data-dojo-attach-point="checkContainerNode"></span><img src="${_blankGif}" alt="" data-dojo-attach-point="iconNode" /><span data-dojo-attach-point="labelNode"></span></span></div><div data-dojo-attach-point="containerNode" style="display: none;"> </div></div>',rootLayer:null,
