@@ -18,16 +18,10 @@
 //2011-10-05: fixed issues with Chrome, IE7, IE8
 //2011-08-11: updated for JSAPI 2.4. changed package.
 
-define("agsjs/layers/GoogleMapsLayer", ["dojo", "dijit", "dojox", "dojo/require!esri/dijit/BasemapGallery"], function(dojo, dijit, dojox) {
+//define("agsjs/layers/GoogleMapsLayer", ["dojo", "dijit", "dojox", "dojo/require","esri/dijit/BasemapGallery"], function(dojo, dijit, dojox) {
 
-  //define('agsjs/layers/GoogleMapsLayer-*loadInit',{
-  //names:["dojo","dijit","dojox"],
-  //def:function(dojo,dijit,dojox){dojo.provide("agsjs.layers.GoogleMapsLayer");
-  //}});
-  //define(["dojo","dijit","dojox","dojo/loadInit!agsjs/layers/GoogleMapsLayer-*loadInit"], function(dojo,dijit,dojox){
-  
   /*global dojo esri  agsjs */
-  //dojo.require('esri.dijit.BasemapGallery');
+  dojo.require('esri.dijit.BasemapGallery');
   dojo.provide('agsjs.layers.GoogleMapsLayer');
   dojo.declare("agsjs.layers.GoogleMapsLayer", esri.layers.Layer, {
     /**
@@ -907,7 +901,7 @@ define("agsjs/layers/GoogleMapsLayer", ["dojo", "dijit", "dojox", "dojo/require!
       }
     });
   });
-});
+//});
 
 
 
