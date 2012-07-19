@@ -42,7 +42,8 @@
               parseOnLoad: true,
               packages: [{
                 "name": "agsjs",
-                "location": location.pathname.replace(/\/[^/]+$/, "")+'/../build/agsjs'
+                // "location": location.pathname.replace(/\/[^/]+$/, "")+'/../build/agsjs'
+               "location": 'http://gmaps-utility-gis.googlecode.com/svn/trunk/agsjs/build/agsjs'
               }]
             };
         </script>
@@ -53,7 +54,7 @@
             dojo.require("dijit.form.Button");
             dojo.require("dijit.layout.BorderContainer");
             dojo.require("dijit.layout.ContentPane");
-            dojo.require("esri.dijit.BasemapGallery");
+            //dojo.require("esri.dijit.BasemapGallery");
             dojo.require("esri.arcgis.utils");
             dojo.require("agsjs.layers.GoogleMapsLayer");
             
