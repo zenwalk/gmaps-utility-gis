@@ -1,4 +1,4 @@
-/*built on 2012-07-19 14:48:49.96*/ 
+/*built on 2012-07-19 14:58:30.39*/ 
 define('agsjs/dijit/GlowingRipple',['dojo','dijit','dojox' ], function(dojo,dijit,dojox){ 
 dojo.provide("agsjs.dijit.GlowingRipple");
 dojo.declare("agsjs.dijit.GlowingRipple",null,{_graphic:null,_intervalId:null,map:null,maxSize:48,minSize:16,color:[0,100,0,0.25],interval:100,outlineWidth:4,stepSize:4,constructor:function(a){a=a||{};if(!a.map)throw new Error("no map defined in params");dojo.mixin(this,a);this.alphaStep=this.maxSize==this.minSize?0:(1-this.color[3])/((this.maxSize-this.minSize)/this.stepSize)},show:function(a){a||this.hide();this._intervalId&&clearInterval(this._intervalId);var b=this.minSize,c=1;this._intervalId=
