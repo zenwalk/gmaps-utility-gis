@@ -6,6 +6,10 @@
  * @version 1.06
  */
 // change log: 
+//
+// 2012-07-23: sync and honor setVisibleLayers.
+// 2012-07-19: xdomain build
+// 2012-07-18: upgrade to JSAPI v3.0
 // 2012-02-02: fix IE7&8 problem when there is "all other value"(default symbol) 
 // 2011-12-20: refresh method
 // 2011-11-04: v1.06: uniquevalue renderer check on/off using definitions. group layer on/off. change css class name. inline style as default. deprecate standard style
@@ -178,6 +182,14 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     } else {
       dojo.addClass(this.rowNode, 'agsjsTOCLayer');
       dojo.addClass(this.labelNode, 'agsjsTOCLayerLabel');
+      //2012-07-21: if setVisibility is called before this widget is built, we want to use the actual visibility instead of the layerInfo.
+      if (this.rootLayer.visibleLayers){
+        if (dojo.indexOf(this.rootLayer.visibleLayers, layer.id)==-1){
+          layer.visible = false;
+        } else {
+          layer.visible = true;
+        }
+      }
       if (this.rootLayer.tileInfo) {
         // can not check on/off for tiled
         // dojo.destroy(this.checkNode);
@@ -355,7 +367,7 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
   _adjustToState: function() {
     if (this.checkNode) {
       var checked = this.legend ? this.legend.visible : this.layer ? this.layer.visible : this.rootLayer ? this.rootLayer.visible : false;
-      if (this.checkNode.set) {
+       if (this.checkNode.set) {
         this.checkNode.set('checked', checked);
       } else {
         this.checkNode.checked = checked;
@@ -373,10 +385,8 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
       if (this.checkNode) {
         if (this.checkNode.set) {
           this.checkNode.set('disabled', outScale);
-          
         } else {
           this.checkNode.disabled = outScale;
-          
         }
       }
     }
@@ -688,7 +698,7 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
     
     this._visHandler = dojo.connect(layer, "onVisibilityChange", this, "_adjustToState");
     // this will make sure all TOC linked to a Map synchronized.
-    this._visLayerHandler = dojo.connect(layer, "setVisibleLayers", this, "_adjustToState");
+    this._visLayerHandler = dojo.connect(layer, "setVisibleLayers", this, "_onSetVisibleLayers");
     this._adjustToState();
   },
   _refreshLayer: function() {
@@ -701,6 +711,20 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
     this._refreshTimer = window.setTimeout(function() {
       rootLayer.setVisibleLayers(rootLayer.visibleLayers);
     }, 500);
+  },
+  _onSetVisibleLayers: function(visLayers, doNotRefresh){
+    // 2012-07-23:
+    // set the actual individual layerInfo's visibility after service's setVisibility call.
+     if (!doNotRefresh) {
+       dojo.forEach(this.rootLayer.layerInfos, function(layerInfo) {
+         if (dojo.indexOf(visLayers, layerInfo.id) != -1) {
+           layerInfo.visible = true;
+         } else if (!layerInfo._subLayerInfos){
+           layerInfo.visible = false;
+         }
+       });
+       this._adjustToState();
+     }
   },
   _adjustToState: function() {
     this._rootLayerNode._adjustToState();
@@ -804,17 +828,19 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
       this.map.addLayers(createdLayers);
     }
     
+    
+  },
+  onLoad: function(){
+    
   },
   _createRootLayer: function(lay) {
     var rootLayer = null;
     var type = lay.type || 'ArcGISDynamic';
     switch (type) {
-    
     case 'ArcGISDynamic':
       rootLayer = new esri.layers.ArcGISDynamicMapServiceLayer(lay.url, lay);
       break;
     }
-    
     return rootLayer;
   },
   _createTOC: function() {
