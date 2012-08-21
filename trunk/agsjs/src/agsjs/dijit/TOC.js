@@ -1,12 +1,13 @@
 /**
  * @name Table of Contents (TOC) widget for ArcGIS Server JavaScript API
- * @author: Nianwei Liu (nianwei at gmail dot com)
+ * @author: Nianwei Liu 
  * @fileoverview
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
  * @version 1.06
  */
 // change log: 
-//
+// 2012-08-21: fix dojo.fx load that caused IE has to refresh to see TOC.
+// 2012-07-26: add ready so it works with compact built (missing dijit._Widget, dijit._Templated).
 // 2012-07-23: sync and honor setVisibleLayers.
 // 2012-07-19: xdomain build
 // 2012-07-18: upgrade to JSAPI v3.0
@@ -19,7 +20,7 @@
 // reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
 
 dojo.provide('agsjs.dijit.TOC');
-dojo.require("dojo.fx");
+dojo.require("dojo.fx.Toggler");
 dojo.require('dijit._Widget');
 dojo.require('dijit._Templated');
 dojo.require('dijit.form.Slider');
@@ -37,6 +38,9 @@ dojo.require('dijit.form.Slider');
  * _TOCNode is a node, with 3 possible types: layer(service)|layer|legend
  * @private
  */
+dojo.ready(function(){
+  
+
 dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
   //templateString: dojo.cache('agsjs.dijit', 'templates/tocNode.html'),
   templateString: '<div class="agsjsTOCNode">' +
@@ -55,9 +59,11 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
   _childTOCNodes: [],
   constructor: function(params, srcNodeRef) {
     dojo.mixin(this, params);
+  
   },
   // extension point. called automatically after widget DOM ready.
   postCreate: function() {
+    
     dojo.style(this.rowNode, 'paddingLeft', '' + this.rootLayerTOC.toc.indentSize * this.rootLayerTOC._currentIndent + 'px');
     // using the availability of certain property to decide what kind of node to create
     this.data = this.legend || this.layer || this.rootLayer;
@@ -71,13 +77,15 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
     } else if (this.rootLayer) {
       this._createRootLayerNode(this.rootLayer);
     }
-    if (this.containerNode) {
+    
+    if (this.containerNode && dojo.fx.Toggler) {
       this.toggler = new dojo.fx.Toggler({
         node: this.containerNode,
         showFunc: dojo.fx.wipeIn,
         hideFunc: dojo.fx.wipeOut
       })
     }
+   
     
     if (!this._noCheckNode) {
       var chk;
@@ -97,9 +105,11 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
       this.checkNode = chk;
     }
     
+   
     
     var show = this.data.visible;
     // if it is a group layer and no child layer is visible, then collapse
+    
     if (this.data._subLayerInfos) {
       var noneVisible = true;
       dojo.every(this.data._subLayerInfos, function(info) {
@@ -361,6 +371,8 @@ dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
         } else {
           this.toggler.hide();
         }
+      } else {
+        esri.toggle(this.containerNode);
       }
     }
   },
@@ -536,6 +548,7 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
   },
   // retrieve sublayer/legend data
   _getLayerInfos: function() {
+    
     if ((this.rootLayer instanceof (esri.layers.ArcGISDynamicMapServiceLayer) ||
     this.rootLayer instanceof (esri.layers.ArcGISTiledMapServiceLayer))) {
       if (this.info.title === undefined) {
@@ -547,12 +560,14 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
       this.info.noLayers = true;
     }
     if (!this.rootLayer.url || this.info.noLegend || this.info.noLayers) {
+      
       this._createRootLayerTOC();
     } else {
       // note: renderer info only has simple symbols. If the map layer has complex symbol,
       // the image returned from /legend is better than create from renderer.
       // however, /legend does not have field/value information.
       if (this.info.mode == 'legend') {
+        
         this._getLegendInfo();
       } else if (this.info.mode == 'layers') {
         this._getLayersInfo();
@@ -564,6 +579,7 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
     }
   },
   _getLegendInfo: function() {
+     
     var url = '';
     if (this.rootLayer.version >= 10.01) {
       url = this.rootLayer.url + '/legend';
@@ -602,20 +618,24 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
     this._createRootLayerTOC();
   },
   _processLegendInfo: function(json) {
+        
     this.rootLayer._legendResponse = json;
     if (this.info.mode == 'legend' || this.rootLayer._layersResponse) {
       this._createRootLayerTOC();
     }
   },
   _processLayersInfo: function(json) {
+   
     this.rootLayer._layersResponse = json;
     if (this.info.mode == 'layers' || this.rootLayer._legendResponse) {
       this._createRootLayerTOC();
     }
   },
   _createRootLayerTOC: function() {
+    
     var layer = this.rootLayer;
     if (!layer._tocInfos) {
+    
       // create a lookup map, key=layerId, value=LayerInfo
       // generally id = index, this is to assure we find the right layer by ID
       // note: not all layers have an entry in legend response.
@@ -627,6 +647,7 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
       });
       // attach renderer info to layerInfo
       if (layer._layersResponse) {
+        
         dojo.forEach(layer._layersResponse.layers, function(layInfo) {
           var layerInfo = layerLookup['' + layInfo.id];
           if (layerInfo) {
@@ -641,6 +662,7 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
       
       // attached legend Info to layer info
       if (layer._legendResponse) {
+        
         dojo.forEach(layer._legendResponse.layers, function(legInfo) {
           var layerInfo = layerLookup['' + legInfo.layerId];
           if (layerInfo && legInfo.legend) {
@@ -689,13 +711,17 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
         }
       });
       layer._tocInfos = tocInfos;
+      
+   
     }
-    this._rootLayerNode = new agsjs.dijit._TOCNode({
+    // sometimes IE may fail next step
+      this._rootLayerNode = new agsjs.dijit._TOCNode({
       rootLayerTOC: this,
       rootLayer: layer
     });
-    this._rootLayerNode.placeAt(this.domNode);
     
+    
+    this._rootLayerNode.placeAt(this.domNode);
     this._visHandler = dojo.connect(layer, "onVisibilityChange", this, "_adjustToState");
     // this will make sure all TOC linked to a Map synchronized.
     this._visLayerHandler = dojo.connect(layer, "setVisibleLayers", this, "_onSetVisibleLayers");
@@ -853,8 +879,12 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
         info: this.layerInfos[i],
         toc: this
       });
+      
+    
       this._rootLayerTOCs.push(svcTOC);
       svcTOC.placeAt(this.domNode);
+      
+     
     }
     if (!this._zoomHandler) {
       this._zoomHandler = dojo.connect(this.map, "onZoomEnd", this, "_adjustToState");
@@ -878,4 +908,5 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
     this._zoomHandler = null;
   }
   
+});
 });

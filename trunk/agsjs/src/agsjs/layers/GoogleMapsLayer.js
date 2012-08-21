@@ -1,6 +1,6 @@
 /**
  * @name Google Maps Layer for ArcGIS Server JavaScript API
- * @author: Nianwei Liu (nianwei at gmail dot com)
+ * @author: Nianwei Liu 
  * @fileoverview
  * <p>Use Google Maps in application built on ESRI ArcGIS Server JavaScript API.
  *  </p>
