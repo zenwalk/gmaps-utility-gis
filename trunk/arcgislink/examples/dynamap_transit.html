@@ -29,7 +29,7 @@
   var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer';
   //var url = 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Population_World/MapServer';
   var cpc = new gmaps.ags.CopyrightControl(map);
-  var dynamap = new gmaps.ags.MapOverlay(url, { opacity: 0.3 });
+  var dynamap = new gmaps.ags.MapOverlay(url);//, { opacity: 0.3 });
   dynamap.setMap(map);
  var transitLayer = new google.maps.TransitLayer();
         transitLayer.setMap(map);
