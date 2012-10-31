@@ -15,13 +15,16 @@
                 margin: 0;
                 padding: 0;
             }
+            #toc {
+              width:240px;
+            }
         </style>
         <script type="text/javascript">
            var djConfig = {
               parseOnLoad: true,
               packages: [{
                 "name": "agsjs",
-                "location": location.pathname.replace(/\/[^/]+$/, "")+'/../build/agsjs'
+                "location": location.pathname.replace(/\/[^/]+$/, "")+'/../src/agsjs'
                //"location": 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/2.02/xbuild/agsjs' // for xdomain load
               }]
             };
@@ -39,29 +42,76 @@
             var map, googleLayer;
             
             function init() {
-              var initExtent = new esri.geometry.Extent({
+              /*{
                 "xmin": -9031493,
                 "ymin": 4170327,
                 "xmax": -8962700,
                 "ymax": 4216189,
                 "spatialReference": {
                   "wkid": 102100
+                }*/
+              var initExtent = esri.geometry.geographicToWebMercator(new esri.geometry.Extent({
+                "xmin": -74.1,
+                "ymin": 40.6,
+                "xmax": -73.9,
+                "ymax": 40.8,
+                "spatialReference": {
+                  "wkid": 4326
                 }
-              });
+              }));
               map = new esri.Map("map", {
                 extent: initExtent
               });
               googleLayer = new agsjs.layers.GoogleMapsLayer({
                 //id: 'google', // optional. esri layer id.
-                // apiOptions: { // load google API should be loaded.
+                 apiOptions: { // load google API should be loaded.
                 // v: '3.6' // API version. use a specific version is recommended for production system. 
                 // client: gme-myclientID // for enterprise accounts;
-                // },
+                 libraries:'weather,panoramio'
+                 }//,
                 //mapOptions: {  // options passed to google.maps.Map contrustor
                 // streetViewControl: false // whether to display street view control. Default is true.
                 //}
               });
               map.addLayer(googleLayer);
+              dojo.connect(googleLayer, 'onLoad', initTOC);
+              
+              
+            }
+            function initTOC(){
+              var toc = '<input type="checkbox" onclick="toggle(\'Traffic\',this.checked)">Traffic<br>';
+              toc+='<input type="checkbox" onclick="toggle(\'Transit\',this.checked)">Transit<br>';
+              toc+='<input type="checkbox" onclick="toggle(\'Bicycling\',this.checked)">Bicycling<br>';
+              // make sure libraries are included in the bootstrap
+              toc+='<input type="checkbox" onclick="toggle(\'weather.Weather\',this.checked)">Weather<br>';
+              toc+='<input type="checkbox" onclick="toggle(\'weather.Cloud\',this.checked)">Cloud<br>';
+              toc+='<input type="checkbox" onclick="toggle(\'panoramio.Panoramio\',this.checked)">Panoramio<br>';
+             
+              dojo.byId('toc').innerHTML = toc;
+            }
+            
+            var glOverlays={};// layers inside google maps, key is name, value is 
+            function toggle(name, vis){
+              var gmap = vis? googleLayer.getGoogleMapInstance():null;
+              switch (name){
+                // assuming the name follows nameing convention of **Layer in google api
+                case 'Special':
+                   // in case 
+                  break;
+                 default:
+                 var glay = glOverlays[name];
+                 if (glay){
+                   glay.setMap(gmap);
+                 } else {
+                   var clz = eval('google.maps.'+name+'Layer');
+                   glay = new clz();
+                   glay.setMap(gmap);
+                   glOverlays[name]= glay;
+                 }
+                  break;
+                  
+              }
+              
             }
             dojo.addOnLoad(init);
             
@@ -85,6 +135,8 @@
                     
                 </ul>
             </div>
+            <div id="toc" dojotype="dijit.layout.ContentPane" region="left">
+              </div>
            <div id="map" dojotype="dijit.layout.ContentPane" region="center">
                 <div id="buttons" style="position:absolute; right:25px; top:20px; z-Index:999;">
                     <button dojoType="dijit.form.Button" onClick="googleLayer.setMapTypeId(agsjs.layers.GoogleMapsLayer.MAP_TYPE_ROADMAP);googleLayer.setMapStyles(null);">

@@ -3,7 +3,6 @@
  * @author: Nianwei Liu 
  * @fileoverview
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
- * @version 1.06
  */
 // change log: 
 // 2012-08-21: fix dojo.fx load that caused IE has to refresh to see TOC.
@@ -581,6 +580,7 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
   _getLegendInfo: function() {
      
     var url = '';
+    alert(this.rootLayer.version);
     if (this.rootLayer.version >= 10.01) {
       url = this.rootLayer.url + '/legend';
     } else {
@@ -879,12 +879,8 @@ dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
         info: this.layerInfos[i],
         toc: this
       });
-      
-    
       this._rootLayerTOCs.push(svcTOC);
       svcTOC.placeAt(this.domNode);
-      
-     
     }
     if (!this._zoomHandler) {
       this._zoomHandler = dojo.connect(this.map, "onZoomEnd", this, "_adjustToState");

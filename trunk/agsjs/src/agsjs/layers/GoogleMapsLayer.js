@@ -196,7 +196,7 @@
     },
     // override parent class abstract method
     /**********************
-     * @see http://help.arcgis.com/EN/webapi/javascript/arcgis/demos/exp/javascript/RasterLayer.js
+     * @see http://help.arcgis.com/en/webapi/javascript/arcgis/samples/exp_rasterlayer/javascript/RasterLayer.js
      * Internal Properties
      *
      * _map
@@ -263,7 +263,6 @@
     },
     _unsetMap: function(map, layersDiv) {
       // see _setMap. Undocumented method, but probably should be public.
-      // console.log('unsetmap');
       dojo.forEach(this._connects, dojo.disconnect, dojo);
       if (this._streetView) {
         this._streetView.setVisible(false);
@@ -283,7 +282,7 @@
       if (this._topDiv) 
         this._topDiv.parentNode.removeChild(this._topDiv);
       dojo.destroy(this._topDiv);
-      //this._element = this._gmapDiv = this._controlDiv = null;
+      this._element = this._gmapDiv = this._controlDiv = null;
     },
     
     // delayed init and Api loading.
@@ -323,7 +322,7 @@
         this._mvHandle = dojo.connect(this._map, 'onMouseMove', dojo.hitch(this, this._moveControls));
         this._gmapTypeChangeHandle = google.maps.event.addListener(this._gmap, 'maptypeid_changed', dojo.hitch(this, this._mapTypeChangeHandler));
         this._gmapTiltChangeHandle = google.maps.event.addListener(this._gmap, 'tilt_changed', dojo.hitch(this, this._mapTiltChangeHandler));
-        
+        this.onLoad();
       } else if (agsjs.onGMapsApiLoad) {
         // did another instance already started loading agsjs API but not done?
         // this should be very very rare because one instance of this layer would be sufficient with setMapTypeId.
@@ -645,6 +644,15 @@
      */
     onStreetViewVisibilityChange: function(vis) {
       // attach events
+    },
+     /**
+     * Fired when Street View visibility changed.
+     * @name GoogleMapsLayer#onStreetViewVisibilityChange
+     * @param {boolean} visibility
+     * @event
+     */
+    onLoad: function(){
+      
     },
     _esriPointToLatLng: function(pt) {
       var ll = esri.geometry.webMercatorToGeographic(pt);
