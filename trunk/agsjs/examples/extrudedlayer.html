@@ -15,31 +15,35 @@
                 margin: 0;
                 height: 100%;
             }
+            .esriAttribution {
+             white-space:normal; 
+            }
         </style>
         <script type="text/javascript">
        var djConfig = {
             parseOnLoad: true,
             packages: [{
               "name": "agsjs",
-             // "location": location.pathname.replace(/\/[^/]+$/, "")+'/../build/agsjs'
-             //"location": 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/2.04/xbuild/agsjs' // for xdomain load
-             "location": 'http://gmaps-utility-gis.googlecode.com/svn/trunk/agsjs/xbuild/agsjs' // for xdomain load
-            }]
+              "location": location.pathname.replace(/\/[^/]+$/, "")+'/../build/agsjs'
+             //"location": 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/2.05/xbuild/agsjs' // for xdomain load
+             }]
          };
                                 
                     
         </script>
        
-        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.2">
+        <!--script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.2">
+        </script-->
+        <script type="text/javascript" src="/arcgis_js_api/library/3.2/jsapi/init.js">
         </script>
-        <!-- script type="text/javascript" src="../src/agsjs/osm/OSMBuildings-debug.js">
+        <script type="text/javascript" src="../src/agsjs/osm/OSMBuildings-debug.js">
         </script>
         <script type="text/javascript" src="../src/agsjs/layers/ExtrudedFeatureLayer.js">
-        </script -->
+        </script>
         <script type="text/javascript">
         
         dojo.require("esri.map");
-        dojo.require("agsjs.layers.ExtrudedFeatureLayer");
+        //dojo.require("agsjs.layers.ExtrudedFeatureLayer");
         
         var map, efLayer;
         
@@ -58,10 +62,8 @@
           });
           //Add the world street map layer to the map. View the ArcGIS Online site for services http://arcgisonline/home/search.html?t=content&f=typekeywords:service    
           var basemap = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer");
+          //var basemap = new esri.layers.ArcGISTiledMapServiceLayer("http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/WEB/BaseMap/MapServer");
           map.addLayer(basemap);
-        
-
-          
           dojo.connect(map, 'onLoad', function(theMap) {
             map.setLevel(18);
             var buildings = new agsjs.layers.ExtrudedFeatureLayer('http://maps.ci.charlotte.nc.us/ArcGIS/rest/services/SS/UptownBuildings/MapServer/0', {
@@ -75,6 +77,7 @@
    // object with color, roofColor (#ffcc00' 'rgb(255,200,200)' 'rgba(255,200,200,0.9)), strokeRoofs (boolean)
 
             });
+            console.log('maploaded?'+ map.loaded);
             map.addLayer(buildings);
              //resize the map when the browser resizes
             dojo.connect(window, 'resize', map, map.resize);
