@@ -32,9 +32,7 @@ dojo.addOnLoad(function() {
     _task: null,
     _oids: null, //track current objectids to mark new/old for animation fade in
     _featureExt: null,//current feature extent, 1.5 map extent
-    _minScale: 0,//minimal visible scale
-    _maxScale: 0,
-    /**
+   /**
    * @name ExtrudedFeatureLayerOptions
    * @class This is an object literal that specify the options for each ExtrudedFeatureLayer.
    * @property {string} heightAttribute required. name of the attribute for height;
@@ -65,7 +63,6 @@ dojo.addOnLoad(function() {
       this._heightScaleRatio = opts.heightScaleRatio || 1;
       this._extentScaleRatio = opts.extentScaleRatio || 1.5;
       this._defaultHeight = opts.defaultHeight || 0;
-      
       this._style = opts.style;
       // Deal with feature collection
       if (dojo.isObject(url) && url.featureSet) {
@@ -111,12 +108,16 @@ dojo.addOnLoad(function() {
     //esri.layers.Layer.method
     _setMap: function(map, container, ind, lod) {
       this._map = map;
+      
       var element = dojo.create("div", {
         width: map.width + "px",
         height: map.height + "px",
         style: "position: absolute; left: 0px; top: 0px;"
       }, container);
       this._osmb = new OSMBuildings();
+      // allow attribution widget to add copyright text
+      this.suspended = false;
+      this.copyright=OSMBuildings.ATTRIBUTION+","+this.copyrightText;
       
       this._element = element;
       this._canvas = this._osmb.createCanvas(element);
@@ -129,6 +130,8 @@ dojo.addOnLoad(function() {
       this._tileInfo = map.getLayer(map.layerIds[0]).tileInfo;
       this._osmb.setZoom(map.getLevel()); // ! assume basemap is tiled.
       this._setOrigin();
+      
+      
       //
       this._loadData();
       // Event connections
@@ -151,9 +154,10 @@ dojo.addOnLoad(function() {
       this._element = null;
     },
     _initLayer: function(json) {
-      this._minScale = json.minScale || 0;
-      this._maxScale = json.maxScale || 0;
-      
+      //dojo.mixin(this, json);
+      this.setMinScale(json.minScale || 0);
+      this.setMaxScale (json.maxScale || 0);
+      this.copyrightText = json.copyrightText;
       dojo.some(json.fields, function(field, i) {
         if (field.type == 'esriFieldTypeOID') {
           this._oidField = field.name;
@@ -196,10 +200,13 @@ dojo.addOnLoad(function() {
       this._osmb.setCamOffset(0, 0);
       
       if (levelChange) {
+         var attr = this._map.attribution;
+         
         this._osmb.onZoomEnd({
           zoom: this._map.getLevel()
         });
-        if (this._minScale == 0 || this._map.getScale() < this._minScale) {
+        
+        if (this.isVisibleAtScale(this._map.getScale())) {
           this._loadData();
         } else {
           // clear canvas. Current OSMB does not handle null or {} as no feature.
