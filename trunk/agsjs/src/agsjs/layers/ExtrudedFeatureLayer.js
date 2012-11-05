@@ -32,6 +32,7 @@ dojo.addOnLoad(function() {
     _task: null,
     _oids: null, //track current objectids to mark new/old for animation fade in
     _featureExt: null,//current feature extent, 1.5 map extent
+    _suspendOnPan: false,//whether to suspend drawing during map panning. default is false. set to true if performance is not optimal (non-Chrome browsers);
    /**
    * @name ExtrudedFeatureLayerOptions
    * @class This is an object literal that specify the options for each ExtrudedFeatureLayer.
@@ -169,13 +170,14 @@ dojo.addOnLoad(function() {
       this.loaded = true;
       this.onLoad(this);
     },
-    _setOrigin: function() {
+    _setOrigin: function(dx, dy) {
       var resolution = this._tileInfo.lods[this._map.getLevel()].resolution; //map.getScale()/12/96/3.28084; //inch_pre_ft/px_per_in/ft_per_mt; 
       var topLeft = this._map.toMap(new esri.geometry.Point(0, 0));
       var x = Math.round((topLeft.x - this._tileInfo.origin.x) / resolution);
       var y = Math.round((this._tileInfo.origin.y - topLeft.y) / resolution);
-      this._osmb.setOrigin(x, y);
+      this._osmb.setOrigin(x+(dx||0), y+(dy||0));
       this._osmb.setSize(this._map.width, this._map.height);
+      
     },
     _onResize: function(extent, width, height) {
       if (this._osmb) {
@@ -184,12 +186,16 @@ dojo.addOnLoad(function() {
       };
     },
     _onPan: function(extent, delta) {
-      dojo.style(this._canvas, {
+      if (this._suspendOnPan){
+       dojo.style(this._canvas, {
         left: delta.x + "px",
         top: delta.y + "px"
-      });
-      this._osmb.setCamOffset(-delta.x, -delta.y);
-      this._osmb.render();
+       });
+       //this._osmb.setCamOffset(-delta.x, -delta.y);
+      } else {
+        this._setOrigin(-delta.x, -delta.y);
+        this._osmb.render();
+      }
     },
     _onExtentChange: function(extent, delta, levelChange, lod) {
       dojo.style(this._canvas, {
@@ -198,7 +204,6 @@ dojo.addOnLoad(function() {
       });
       this._setOrigin();
       this._osmb.setCamOffset(0, 0);
-      
       if (levelChange) {
          var attr = this._map.attribution;
          
