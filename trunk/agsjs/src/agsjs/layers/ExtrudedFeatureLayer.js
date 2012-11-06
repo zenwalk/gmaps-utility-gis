@@ -205,8 +205,6 @@ dojo.addOnLoad(function() {
       this._setOrigin();
       this._osmb.setCamOffset(0, 0);
       if (levelChange) {
-         var attr = this._map.attribution;
-         
         this._osmb.onZoomEnd({
           zoom: this._map.getLevel()
         });
@@ -237,6 +235,7 @@ dojo.addOnLoad(function() {
       this._oids = this._oids ||{};
       for (var i = 0; i < features.length; i++) {
         var f = features[i];
+        
         var oid = f.attributes[this._oidField];
         var gj = {
           "type": "Feature",
@@ -249,9 +248,32 @@ dojo.addOnLoad(function() {
             'isNew': !this._oids[oid]
           }
         }
+        // find out the y coords range for sorting
+        var minY = maxY = f.geometry.rings[0][0][1];
+        for (var j = 0; j < f.geometry.rings.length;  j++){
+          for (var k = 0; k < f.geometry.rings[j].length; k++){
+            minY = Math.min(minY,f.geometry.rings[j][k][1] );
+            maxY = Math.max(maxY,f.geometry.rings[j][k][1] );
+          }
+        }
+        gj.minY = minY;
+        gj.maxY = maxY;
         jfs[i] = gj;
         oids[oid] = f;
       }
+      // sort features by height and y coord desc for potential drawing improvement
+      jfs.sort(function (a, b){
+       // if polygon a is completely north of b then put a first.
+       // otherwise put the taller one first.
+       // this ensures north/taller poly draw first
+       if (a.maxY < b.minY){
+          return 1;
+        } else if (a.minY > b.maxY){
+          return -1;
+        } else {
+          return b.properties.height - a.properties.height
+        }
+      });
       this._oids = oids;
       this._osmb.geoJSON({
         "type": "FeatureCollection",
