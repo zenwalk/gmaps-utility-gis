@@ -580,7 +580,6 @@ dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
   _getLegendInfo: function() {
      
     var url = '';
-    alert(this.rootLayer.version);
     if (this.rootLayer.version >= 10.01) {
       url = this.rootLayer.url + '/legend';
     } else {

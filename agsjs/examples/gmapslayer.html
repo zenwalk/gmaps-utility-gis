@@ -42,15 +42,17 @@
             var map, googleLayer;
             
             function init() {
-              /*{
-                "xmin": -9031493,
-                "ymin": 4170327,
-                "xmax": -8962700,
-                "ymax": 4216189,
-                "spatialReference": {
-                  "wkid": 102100
-                }*/
-              var initExtent = esri.geometry.geographicToWebMercator(new esri.geometry.Extent({
+              
+               var initExtent = new esri.geometry.Extent({
+                 "xmin": -9031493,
+                 "ymin": 4170327,
+                 "xmax": -8962700,
+                 "ymax": 4216189,
+                 "spatialReference": {
+                   "wkid": 102100
+                 }
+               });
+              /*var initExtent = esri.geometry.geographicToWebMercator(new esri.geometry.Extent({
                 "xmin": -74.1,
                 "ymin": 40.6,
                 "xmax": -73.9,
@@ -58,7 +60,7 @@
                 "spatialReference": {
                   "wkid": 4326
                 }
-              }));
+              }));*/
               map = new esri.Map("map", {
                 extent: initExtent
               });
@@ -80,12 +82,12 @@
             }
             function initTOC(){
               var toc = '<input type="checkbox" onclick="toggle(\'Traffic\',this.checked)">Traffic<br>';
-              toc+='<input type="checkbox" onclick="toggle(\'Transit\',this.checked)">Transit<br>';
-              toc+='<input type="checkbox" onclick="toggle(\'Bicycling\',this.checked)">Bicycling<br>';
+              toc+='<input type="checkbox" onclick="toggle(\'Transit\',this.checked)">Transit(certain areas only)<br>';
+              toc+='<input type="checkbox" onclick="toggle(\'Bicycling\',this.checked)">Bicycling(certain areas only)<br>';
               // make sure libraries are included in the bootstrap
-              toc+='<input type="checkbox" onclick="toggle(\'weather.Weather\',this.checked)">Weather<br>';
-              toc+='<input type="checkbox" onclick="toggle(\'weather.Cloud\',this.checked)">Cloud<br>';
-              toc+='<input type="checkbox" onclick="toggle(\'panoramio.Panoramio\',this.checked)">Panoramio<br>';
+              toc+='<input type="checkbox" onclick="toggle(\'weather.Weather\',this.checked)">Weather(certain areas only)<br>';
+             // toc+='<input type="checkbox" onclick="toggle(\'weather.Cloud\',this.checked)">Cloud<br>';
+             // toc+='<input type="checkbox" onclick="toggle(\'panoramio.Panoramio\',this.checked)">Panoramio<br>';
              
               dojo.byId('toc').innerHTML = toc;
             }
