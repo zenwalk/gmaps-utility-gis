@@ -3587,7 +3587,6 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     if (!bnds) {
       return;
     }
-    
     var params = this.exportOptions_;
     params.bounds = bnds;
     var sr = WEB_MERCATOR;
@@ -3701,8 +3700,8 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
   ImageOverlay.prototype = new G.OverlayView();
   ImageOverlay.prototype.onAdd = function() {
     var div = document.createElement('DIV');
-    div.style.border = "solid 2px red";//none";
-   // div.style.borderWidth = "0px";
+    div.style.border = "none";
+    div.style.borderWidth = "0px";
     div.style.position = "absolute";
     var s = this.map_.getDiv();
     div.style.width = s.offsetWidth + 'px';
@@ -3736,10 +3735,8 @@ Layer.prototype.queryRelatedRecords = function(qparams, callback, errback) {
     var div = this.div_;
     div.style.left = sw.x + 'px';
     div.style.top = ne.y + 'px';
-    
-    
-   // div.style.width = (ne.x - sw.x) + 'px';
-   // div.style.height = (sw.y - ne.y) + 'px';
+    //div.style.width = (ne.x - sw.x) + 'px';
+    //div.style.height = (sw.y - ne.y) + 'px';
   };
   ImageOverlay.prototype.onRemove = function() {
     this.div_.parentNode.removeChild(this.div_);
