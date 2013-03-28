@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+        <meta charset="utf-8">
+        <title>Max Tabbed Info Window </title>
+        <style>
+            html, body {
+                height: 90%;
+                margin: 0;
+                padding: 0;
+            }
+            
+           
+            #map_canvas {height:
+                    750px;
+            }
+            
+        </style>
+        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false">
+        </script>
+        <script src="../src/maxtabinfo.js">
+        </script>
+        <script>
+                  var infowindow, map, marker;
+                  function initialize() {
+                    var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
+                    var mapOptions = {
+                      zoom: 4,
+                      center: myLatlng,
+                      mapTypeId: google.maps.MapTypeId.ROADMAP
+                    }
+            
+                     map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+            
+                     infowindow = new MaxTabInfo({
+                      content: 'min map info',
+                      summary: 'summary map info:',
+                      tabs: [{
+                        label: 'map tab0',
+                        content: 'map content0'
+                      }, {
+                        label: 'map tab1',
+                        content: 'map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1map content1'
+                      }, {
+                        label: 'map tab2',
+                        content: 'map content2'
+                      }, {
+                        label: 'map tab3',
+                        content: 'map content3'
+                      }]
+                    });
+                    
+                     marker = new google.maps.Marker({
+                        position: myLatlng,
+                        map: map,
+                        title: 'Uluru (Ayers Rock)'
+                    });
+                    google.maps.event.addListener(marker, 'click', function() {
+                      infowindow.open(map,marker);
+                    });
+                  }
+            
+                
+        </script>
+    </head>
+    <body onload="initialize()">
+        <div id="map_canvas">
+        </div>
+        <button onclick="infowindow.maximize()">Max</button><button onclick="infowindow.minimize()">Min</button>
+    </body>
+</html>
