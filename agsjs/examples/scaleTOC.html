@@ -76,7 +76,8 @@
               });
               
               dojo.connect(map, 'onLayersAddResult', function(results) {
-                var toc = new agsjs.dijit.TOC({
+                map.setLevel(12);
+		var toc = new agsjs.dijit.TOC({
                   map: map,
                   layerInfos: [{
                     layer: scaleLayer,
@@ -84,10 +85,12 @@
                   }]
                 }, 'tocDiv');
                 toc.startup();
-                
+               
                 
               });
               map.addLayers([scaleLayer]);
+	      
+
               dojo.connect(scaleLayer, "onLoad", function() {
                 // store the list of visible layers for comparison later
                 scaleLayer.existingVisibleLayers = scaleLayer.visibleLayers;
