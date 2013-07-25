@@ -18,12 +18,12 @@
 
 /*global dojo esri*/
 // reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
-
-dojo.provide('agsjs.dijit.TOC');
-dojo.require("dojo.fx.Toggler");
-dojo.require('dijit._Widget');
-dojo.require('dijit._Templated');
-dojo.require('dijit.form.Slider');
+define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Templated','dojo/fx/Toggler','dijit/form/Slider'], function(declare, _Widget,_Templated){
+///dojo.provide('agsjs.dijit.TOC');
+///dojo.require("dojo.fx.Toggler");
+///dojo.require('dijit._Widget');
+///dojo.require('dijit._Templated');
+///dojo.require('dijit.form.Slider');
 
 (function(){
   var link = dojo.create("link", {
@@ -34,13 +34,14 @@ dojo.require('dijit.form.Slider');
   dojo.doc.getElementsByTagName("head")[0].appendChild(link);
 }());
 
-dojo.ready(function(){
+///dojo.ready(function(){
 
   /**
    * _TOCNode is a node, with 3 possible types: root layer|serviceLayer|legend
    * @private
    */
-  dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
+ /// dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
+ var _TOCNode = declare([_Widget, _Templated],{
     //templateString: dojo.cache('agsjs.dijit', 'templates/tocNode.html'),
     templateString: '<div class="agsjsTOCNode">' +
     '<div data-dojo-attach-point="rowNode" data-dojo-attach-event="onclick:_onClick">' +
@@ -324,7 +325,8 @@ dojo.ready(function(){
         };
         params[type] = chd;
         params.data = chd;
-        var node = new agsjs.dijit._TOCNode(params);
+        //var node = new agsjs.dijit._TOCNode(params);
+		var node = new _TOCNode(params);
         node.placeAt(this.containerNode);
         c.push(node);
       }
@@ -444,7 +446,8 @@ dojo.ready(function(){
     /*, 2013-07-23 no longer support checkbox legend */
   });
   
-  dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
+ /// dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
+ var _RootLayerTOC = declare([_Widget], {
     _currentIndent: 0,
     rootLayer: null,
     tocWidget: null,
@@ -552,7 +555,8 @@ dojo.ready(function(){
     _createRootLayerTOC: function(){
     
       // sometimes IE may fail next step
-      this._rootLayerNode = new agsjs.dijit._TOCNode({
+      ///this._rootLayerNode = new agsjs.dijit._TOCNode({
+	  this._rootLayerNode = new _TOCNode({
         rootLayerTOC: this,
         rootLayer: this.rootLayer
       });
@@ -604,7 +608,8 @@ dojo.ready(function(){
     }
   });
   
-  dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
+ // dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
+  var TOC = declare("agsjs.dijit.TOC", [_Widget],{
     indentSize: 18,
     swatchSize: [30, 30],
     refreshDelay: 500,
@@ -658,7 +663,8 @@ dojo.ready(function(){
       for (var i = 0, c = this.layerInfos.length; i < c; i++) {
         // attach a title to rootLayer layer itself
         var info = this.layerInfos[i];
-        var rootLayerTOC = new agsjs.dijit._RootLayerTOC({
+        ///var rootLayerTOC = new agsjs.dijit._RootLayerTOC({
+		var rootLayerTOC = new _RootLayerTOC({
           config: info,
           tocWidget: this
         });
@@ -702,4 +708,7 @@ dojo.ready(function(){
       this._checkLoadHandler = null;
     }
   });
+  return TOC;
+  
+///});
 });
