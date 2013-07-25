@@ -59,8 +59,8 @@
                     .agsjsTOCRootLayerLabel,
                     .agsjsTOCGroupLayer,
                     .agsjsTOCGroupLayerLabel,
-                    .agsjsTOCLayer,
-                    .agsjsTOCLayerLabel,
+                    .agsjsTOCServiceLayer,
+                    .agsjsTOCServiceLayerLabel,
                     .agsjsTOCLegendLabel
                 </code></pre>
             </p>
@@ -84,7 +84,6 @@
               packages: [{
                 "name": "agsjs",
                 "location": location.pathname.replace(/\/[^/]+$/, "")+'/path/to/agsjs'
-                //"location": 'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/2.01/xbuild/agsjs' // for xdomain load
               }]
             };
             };</pre>
@@ -107,53 +106,28 @@
                 After the script is loaded, in the initilization code, <pre class="prettyprint">
            dojo.connect(map, 'onLayersAddResult', function(results) {
                 var toc = new agsjs.dijit.TOC({
-                  map: map
-                }, 'tocDiv');
-                toc.startup();
+                    map: map,
+                    layerInfos: [{
+                      layer: featLayer1,
+                      title: "FeatureLayer1"
+                    }, {
+                      layer: dynaLayer1,
+                      title: "DynamicMapServiceLayer1"
+                    }, {
+                      layer: dynaLayer2,
+                      title: "DynamicMapServiceLayer2",
+                      collapsed: true, // whether this root layer should be collapsed initially, default false.
+                      slider: true // whether to display a transparency slider.
+                    }]
+                  }, 'tocDiv');
+                  toc.startup();
             ..
             }
         </pre>
             </p>
         </div>
                 
-            <div>
-            <h2>Add a Transparancy Slider</h2>
-            <p>
-               To add a slider for each service layer for adjusting transparancy. Set '<code>slider:true</code>' 
-               in the correct entry in the <code>layerInfos</code> property of constructor: <pre class="prettyprint">
-               var toc = new agsjs.dijit.TOC({
-                  map: map,
-                  layerInfos: [{
-                    layer: operational,
-                    title: "Operational Layers",
-                    slider: true
-                  },...]
-                }, 'tocDiv');
-            ..
-            }
-        </pre>
-            </p>
-        </div>
-        <div>
-            <h2>TOC without Legend</h2>
-            <p>
-               In some cases, such as base map, you may not want legend or layer list. Set <code>noLegend:true</code>in the correct entry in the <code>layerInfos</code> property of constructor: <pre class="prettyprint">
-               var toc = new agsjs.dijit.TOC({
-                  map: map,
-                  layerInfos: [{
-                    layer: operational,
-                    title: "Operational Layers"
-                  },{
-                    layer: basemap,
-                    title:'Base Map',
-                    noLegend: true
-                  }]
-                }, 'tocDiv');
-            ..
-            }
-        </pre>
-            </p>
-        </div>
+           
         <div>
             <h2>Hide Layers that are out of scale</h2>
             <p>

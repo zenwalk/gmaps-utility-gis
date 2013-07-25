@@ -19,10 +19,7 @@
         <div>
             <h2><a name="About"></a>About</h2>
             <p>
-                This script lets you add ArcGIS Server feature layer with extruded 3D effects using values from an attribute field. It uses the <a target='_blank' href='http://osmbuildings.org'>Open Street Map Buildings</a> library. The primary use is for visualization. However it could be used in combination with <code>esri.layers.FeatureLayer</code> to access unline attribute data.
-                It takes the REST end point URL of a feature layer inside a map service, and use one of the attribute as height value. 
-                The rendering machanism is canvas, so it only works in newer browsers. It honors scale threshold set in the map service. 
-             </p>
+This script lets you add ArcGIS Server feature layer with extruded 3D effects using values from an attribute field. It uses the Open Street Map Buildings library. The primary use is for visualization, but it could be used in combination with esri.layers.FeatureLayer to access underline attribute data. It takes the REST end point URL of a feature layer inside a map service, and use one of the attribute as height value. The rendering mechanism is canvas, so it only works in newer browsers (Chrome works best). It honors scale threshold set in the map service.             </p>
         </div>
         <div>
             <h2><a name="HowTo"></a>Include Scripts</h2>
@@ -60,11 +57,7 @@
         <div>
             <h2>Add Layer</h2>
             <p>
-                After the script is loaded, you can simply add a feature layer in 
-                your application, after the map's load event is fired.
-                note, currently it only works with a tiled base map in web mercator coordinate system.
-                
-                The constructor takes a few parameters to customize the behavior. See <a href=reference.html>reference</a> doc for details. 
+               After the script is loaded, you can simply add a feature layer in your application in the map's load event handler. Currently it only works with a tiled base map in web Mercator coordinate system. The constructor can take a few parameters to customize the behavior. See <a href=reference.html>reference</a> doc for details. 
             </p>
             <pre class="prettyprint">
          dojo.connect(map, 'onLoad', function(theMap) {
