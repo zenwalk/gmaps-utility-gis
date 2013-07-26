@@ -1,8 +1,8 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9" />
+        <!--meta http-equiv="X-UA-Compatible" content="IE=7,IE=9" /-->
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
         <title>TOC</title>
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dijit/themes/claro/claro.css">
@@ -28,33 +28,34 @@
             }
         </style>
         <script type="text/javascript">
-          var djConfig = {
-            parseOnLoad: true,
-            packages: [{
-              "name": "agsjs",
-              "location": location.pathname.replace(/\/[^/]+$/, '') + '/../src/agsjs' // use /build in production system
-            }]
-          };
+                                  var djConfig = {
+                                    parseOnLoad: true,
+                                    packages: [{
+                                      "name": "agsjs",
+                                      "location": location.pathname.replace(/\/[^/]+$/, '') + '/../src/agsjs' // use /build in production system
+                                    }]
+                                  };
+                                            
+                                
                     
         </script>
         <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.5">
         </script>
         <script type="text/javascript">
             
-			dojo.require("dijit.layout.BorderContainer");
-			dojo.require("dijit.layout.ContentPane");
+            dojo.require("dijit.layout.BorderContainer");
+            dojo.require("dijit.layout.ContentPane");
             // uncomment if want dojo widget style checkbox
             //dojo.require('dijit.form.CheckBox');
             dojo.require("esri.map");
             dojo.require("esri.layers.FeatureLayer");
             dojo.require("dojo.fx");// needed if use jsapi 3.0
             dojo.require("agsjs.dijit.TOC");
-			
         </script>
         <script type="text/javascript">
             var map, toc, dynaLayer1, dynaLayer2, featLayer1;
             function init(){
-			
+            
               var initialExtent = new esri.geometry.Extent({
                 xmin: -9549126.170705408,
                 ymin: 4612089.574063576,
@@ -74,40 +75,39 @@
               dynaLayer1 = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer", {
                 opacity: 0.8
               });
-              dynaLayer2 = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer", {
-                opacity: 0.8
-              });
+              
               featLayer1 = new esri.layers.FeatureLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1", {
                 mode: esri.layers.FeatureLayer.MODE_SNAPSHOT,
                 outFields: ["POP07_SQMI"]//,
               });
               featLayer1.setDefinitionExpression("STCOFIPS='21111'"); //Louisville, KY
-              
-			  dojo.connect(map, 'onLayersAddResult', function(results){
-                // This is an example to overwrite the default visibility of service.
+              var h = dojo.connect(map, 'onLayersAddResult', function(results){
+                // overwrite the default visibility of service.
                 // TOC will honor the overwritten value.
                 dynaLayer1.setVisibleLayers([2, 5, 8, 11]);
-                toc = new agsjs.dijit.TOC({
-                  map: map,
-                  layerInfos: [{
-                    layer: featLayer1,
-                    title: "FeatureLayer1"
-                  }, {
-                    layer: dynaLayer1,
-                    title: "DynamicMapServiceLayer1"
-                  }, {
-                    layer: dynaLayer2,
-                    title: "DynamicMapServiceLayer2",
-                    collapsed: true, // whether this root layer should be collapsed initially, default false.
-                    slider: true // whether to display a transparency slider.
-                  }]
-                }, 'tocDiv');
-                toc.startup();
+                try {
+                  toc = new agsjs.dijit.TOC({
+                    map: map,
+                    layerInfos: [{
+                      layer: featLayer1,
+                      title: "FeatureLayer1"
+                    }, {
+                      layer: dynaLayer1,
+                      title: "DynamicMapServiceLayer1",
+                      // collapsed: false, // whether this root layer should be collapsed initially, default false.
+                      //slider: false // whether to display a transparency slider.
+                    }]
+                  }, 'tocDiv');
+                  toc.startup();
+                  dojo.disconnect(h);
+                } catch (e) {
+                  alert(e);
+                }
               });
               
-              map.addLayers([dynaLayer2, dynaLayer1, featLayer1]);
-			  
-			  
+              map.addLayers([dynaLayer1, featLayer1]);
+              
+              
               //resize the map when the browser resizes - view the 'Resizing and repositioning the map' section in
               //the following help topic for more details http://help.esri.com/EN/webapi/javascript/arcgis/help/jshelp_start.htm#jshelp/inside_guidelines.htm      
               var resizeTimer;
@@ -123,7 +123,7 @@
               
             }
             
-            function changeFeatureLayerRenderer(){
+            function testChangeFeatureLayerRenderer(){
               //based on http://help.arcgis.com/EN/webapi/javascript/arcgis/jssamples/renderer_class_breaks.html
               var symbol = new esri.symbol.SimpleFillSymbol();
               symbol.setColor(new dojo.Color([150, 150, 150, 0.5]));
@@ -137,6 +137,30 @@
               featLayer1.redraw();
               toc.refresh();
             }
+            
+            function testSetVisibleLayersProgrammtically(){
+              dynaLayer1.setVisibleLayers([8, 17, 18, 19, 20])
+            }
+            
+            function testInsertNewLayer(){
+              if (dynaLayer2 == null) {
+                dynaLayer2 = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer", {
+                  opacity: 0.8
+                });
+                var h = dojo.connect(map, 'onLayerAddResult', function(result){
+                  toc.layerInfos.splice(1, 0, {
+                    layer: dynaLayer2,
+                    title: "DynamicMapServiceLayer2",
+                    // collapsed: true, // whether this root layer should be collapsed initially, default false.
+                    slider: true // whether to display a transparency slider.
+                  });
+                  toc.refresh();
+                  dojo.disconnect(h);
+                });
+                map.addLayer(dynaLayer2);
+              }
+            }
+            
             dojo.ready(init);
         </script>
     </head>
@@ -144,15 +168,10 @@
         <div id="content" data-dojo-type="dijit.layout.BorderContainer" design="headline" gutters="true" style="width: 100%; height: 100%; margin: 0;">
             <div id="header" data-dojo-type="dijit.layout.ContentPane" region="top">
                 <div>
-                    <b>Table Of Content (TOC/Legend) Widget</b>  <a href='toc.html'>Classic Style </a> | <a href='toc_amd.html'>AMD style</a>
+                    <b>Table Of Content (TOC/Legend) Widget</b>
+                    <a href='toc.html'>Classic Style </a>
+                    | <a href='toc_amd.html'>AMD style</a>
                     <div style="right:20px;position: absolute">
-					
-                        <button onclick="changeFeatureLayerRenderer()">
-                            ChangeFeatureRenderer
-                        </button>
-                        <button onclick="dynaLayer1.setVisibleLayers([8,17,18,19,20])">
-                            SetVisibleLayersProgrammtically
-                        </button>
                         <a href="../docs/toc/examples.html">Documentation</a>
                     </div>
                 </div>
@@ -161,10 +180,24 @@
                         Click check box in TOC to turn on/off layers. When click on groups, all sublayers will be turned on/off.
                     </li>
                     <li>
-                        Click on ChangeFeatureRenderer, notice TOC refreshed to reflect the new renderer. 
+                        Click 
+                        <button onclick="testChangeFeatureLayerRenderer()">
+                            ChangeFeatureRenderer
+                        </button>, notice TOC refreshed to reflect the new renderer of FeatureLayer. 
                     </li>
                     <li>
-                        Click on SetVisibleLayers to programmtically turn layer on/off, notice TOC automatically sync with model.
+                        Click 
+                        <button onclick="testSetVisibleLayersProgrammtically()">
+                            SetVisibleLayersProgrammtically
+                        </button>
+                        to programmtically turn layer on/off, notice TOC automatically sync with model(no refresh needed).
+                    </li>
+                    <li>
+                        Click 
+                        <button onclick="testInsertNewLayer()">
+                            InsertNewLayer
+                        </button>
+                        to programmtically insert a layer then refresh TOC.
                     </li>
                 </ul>
             </div>

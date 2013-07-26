@@ -18,7 +18,7 @@
 
 /*global dojo esri*/
 // reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
-define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Templated','dojo/fx/Toggler','dijit/form/Slider'], function(declare, _Widget,_Templated){
+define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Templated','dojox/gfx','dojo/fx/Toggler','dijit/form/Slider'], function(declare, _Widget,_Templated, gfx){
 ///dojo.provide('agsjs.dijit.TOC');
 ///dojo.require("dojo.fx.Toggler");
 ///dojo.require('dijit._Widget');
@@ -259,9 +259,33 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       var src = this._getLegendIconUrl(rendLeg);
       if (!src) {//} || this.rootLayerTOC.info.mode == 'layers') {
         if (rendLeg.symbol) {
-          var sym = this._createSymbol(rendLeg.symbol);
-          dojo.place(sym, iconNode, 'replace');
-          tocNode.iconNode = sym;
+          var w = this.rootLayerTOC.tocWidget.swatchSize[0];
+          var h = this.rootLayerTOC.tocWidget.swatchSize[1];
+          if (rendLeg.symbol.width && rendLeg.symbol.height) {
+            w = rendLeg.symbol.width;
+            h = rendLeg.symbol.height;
+          }
+          var node = dojo.create('span', {});
+          dojo.style(node, {
+            'width': w + 'px',
+            'height': h + 'px',
+            'display': 'inline-block'
+          });
+          dojo.place(node, iconNode, 'replace');
+          tocNode.iconNode = node;
+          var descriptors = esri.symbol.getShapeDescriptors(rendLeg.symbol);
+          var mySurface = gfx.createSurface(node, w, h);//dojox.
+          if (descriptors) {
+            if (dojo.isIE) {
+			// 2013076: see	http://mail.dojotoolkit.org/pipermail/dojo-interest/2009-December/041404.html
+              window.setTimeout(dojo.hitch(this, '_createSymbol', mySurface, descriptors, w, h), 500);
+            } else {
+              this._createSymbol(mySurface, descriptors, w, h);
+            }
+          }
+        } else {
+          if (console) 
+            console.log('no symbol in renderer');
         }
       } else {
         iconNode.src = src;
@@ -271,25 +295,19 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         }
       }
     },
-    _createSymbol: function(symbol){
-      var w = this.rootLayerTOC.tocWidget.swatchSize[0], h = this.rootLayerTOC.tocWidget.swatchSize[1];
-      if (symbol.width && symbol.height) {
-        w = symbol.width;
-        h = symbol.height;
+    _createSymbol: function(mySurface, descriptors, w, h){
+      var shape = mySurface.createShape(descriptors.defaultShape);
+      if (descriptors.fill) {
+        shape.setFill(descriptors.fill);
       }
-      var node = dojo.create('span', {
-        style: "width:" + w + ";height:" + h
+      if (descriptors.stroke) {
+        shape.setStroke(descriptors.stroke);
+      }
+      shape.applyTransform({
+        dx: w / 2,
+        dy: h / 2
       });
-      var mySurface = dojox.gfx.createSurface(node, w, h);
-      var descriptors = esri.symbol.getShapeDescriptors(symbol);
-      if (descriptors) {
-        var shape = mySurface.createShape(descriptors.defaultShape).setFill(descriptors.fill).setStroke(descriptors.stroke);
-        shape.applyTransform({
-          dx: w / 2,
-          dy: h / 2
-        });
-      }
-      return node;
+	 
     },
     _getLegendIconUrl: function(legend){
       var src = legend.url;
@@ -356,6 +374,11 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         } else {
           esri.toggle(this.containerNode);
         }
+		// remember it's state for refresh
+		
+		if(this.rootLayer && !this.serviceLayer && !this.legend){
+			this.rootLayerTOC.config.collapsed = dojo.hasClass(this.iconNode, 'dijitTreeExpandoClosed');
+		}
       }
     },
     // change UI according to the state of map layers. 
@@ -618,7 +641,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
     /**
      * @name TOCLayerInfo
      * @class This is an object literal that specify the options for each map rootLayer layer.
-     * @property {Layer} layer: ArcGIS Server layer.
+     * @property {Layer} [layer] ArcGIS Server layer.
      * @property {string} [title] title. optional. If not specified, rootLayer name is used.
      * @property {Boolean} [slider] whether to show slider for each rootLayer to adjust transparency. default is false.
      * @property {Boolean} [noLegend] whether to skip the legend, and only display layers. default is false.
