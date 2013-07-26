@@ -18,7 +18,7 @@
 
 /*global dojo esri*/
 // reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
-define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Templated','dojox/gfx','dojo/fx/Toggler','dijit/form/Slider'], function(declare, _Widget,_Templated, gfx){
+define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Templated','dojox/gfx','dojo/fx/Toggler','dijit/form/Slider'], function(declare, _Widget,_Templated, gfx, Toggler){
 ///dojo.provide('agsjs.dijit.TOC');
 ///dojo.require("dojo.fx.Toggler");
 ///dojo.require('dijit._Widget');
@@ -77,9 +77,9 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       } else if (this.rootLayer) {
         this._createRootLayerNode(this.rootLayer);
       }
-      if (this.containerNode && dojo.fx.Toggler) {
+      if (this.containerNode && Toggler) {// dojo.fx.
         // if containerNode was not removed, it means this is some sort of group.
-        this.toggler = new dojo.fx.Toggler({
+        this.toggler = new Toggler({ //dojo.fx.
           node: this.containerNode,
           showFunc: dojo.fx.wipeIn,
           hideFunc: dojo.fx.wipeOut
@@ -365,20 +365,24 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           dojo.toggleClass(this.iconNode, 'dijitTreeExpandoClosed');
           dojo.toggleClass(this.iconNode, 'dijitTreeExpandoOpened');
         }
-        if (this.toggler) {
-          if (dojo.hasClass(this.iconNode, 'dijitTreeExpandoOpened')) {
+        if (dojo.hasClass(this.iconNode, 'dijitTreeExpandoOpened')) {
+          if (this.toggler) {
             this.toggler.show();
           } else {
-            this.toggler.hide();
+            esri.show(this.containerNode);
           }
         } else {
-          esri.toggle(this.containerNode);
+          if (this.toggler) {
+            this.toggler.hide();
+          } else {
+            esri.hide(this.containerNode);
+          }
         }
-		// remember it's state for refresh
-		
-		if(this.rootLayer && !this.serviceLayer && !this.legend){
-			this.rootLayerTOC.config.collapsed = dojo.hasClass(this.iconNode, 'dijitTreeExpandoClosed');
-		}
+        // remember it's state for refresh
+        
+        if (this.rootLayer && !this.serviceLayer && !this.legend) {
+          this.rootLayerTOC.config.collapsed = dojo.hasClass(this.iconNode, 'dijitTreeExpandoClosed');
+        }
       }
     },
     // change UI according to the state of map layers. 
