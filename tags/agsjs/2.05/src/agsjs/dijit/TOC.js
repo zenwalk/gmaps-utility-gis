@@ -168,7 +168,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           if (r.infos) {
             //UniqueValueRenderer |ClassBreaksRenderer
             var legs = r.infos;
-            if (r.defaultSymbol) {
+            if (r.defaultSymbol && legs.length > 0 && legs[0].label != '[all other values]') {
               // insert at top
               legs.unshift({
                 label: '[all other values]',
