@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -29,14 +29,22 @@
         </style>
         <script type="text/javascript">
             var djConfig = {
-                                    parseOnLoad: false,
-                                    packages: [{
-                                      "name": "agsjs",
-                                     //"location": location.pathname.replace(/\/[^/]+$/, '') + '/../src/agsjs' // use /build in production system
-                                     "location": "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/2.05/build/agsjs"
-									}]
-                                  };
-         </script>
+              parseOnLoad: false,
+              packages: [{
+                "name": "agsjs",
+                //if you want to host on your own server, download from
+                //http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/
+                // and put in folders then use path like: 
+                //"location": location.pathname.replace(/\/[^/]+$/, '') + '/../src/agsjs' 
+                // use /src/ for debug and /build/ for production.
+                // you can also use online version using the following location, 
+                // however please noted googlecode.com is not a true CDN and is not fast and may not be available.
+                // also, it is recommended to use a particular version from /tags/agsjs/<version>/
+                // in a production app to avoid unexpected results.
+                "location": "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs/"
+              }]
+            };
+        </script>
         <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.5">
         </script>
         <script type="text/javascript">
@@ -44,9 +52,8 @@
             
             require(["dojo/_base/connect", "dojo/parser", "agsjs/dijit/TOC", "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "esri/map", "esri/layers/FeatureLayer", "dojo/fx", "dojo/domReady!"], function(connect, parser, TOC){
             
-              /// function init(){
               // call the parser to create the dijit layout dijits
-              parser.parse();
+              parser.parse(); // note djConfig.parseOnLoad = false;
               var initialExtent = new esri.geometry.Extent({
                 xmin: -9549126.170705408,
                 ymin: 4612089.574063576,
