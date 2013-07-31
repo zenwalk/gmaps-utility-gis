@@ -2,7 +2,6 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <!--meta http-equiv="X-UA-Compatible" content="IE=7,IE=9" /-->
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
         <title>TOC</title>
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dijit/themes/claro/claro.css">
@@ -23,8 +22,8 @@
             }
             
             /* this line hide layers when out of scale for the inline TOC */
-            #scaleDiv .agsjsTOCOutOfScale {
-                display: none;
+             .agsjsTOCOutOfScale {
+            /*    display: none; */
             }
         </style>
         <script type="text/javascript">
@@ -45,8 +44,7 @@
               }]
             };
         </script>
-        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.5">
-        </script>
+        <script src="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/"></script>
         <script type="text/javascript">
             
             dojo.require("dijit.layout.BorderContainer");
@@ -99,7 +97,7 @@
                       title: "FeatureLayer1"
                     }, {
                       layer: dynaLayer1,
-                      title: "DynamicMapServiceLayer1",
+                      title: "DynamicMapServiceLayer1"
                       // collapsed: false, // whether this root layer should be collapsed initially, default false.
                       //slider: false // whether to display a transparency slider.
                     }]
