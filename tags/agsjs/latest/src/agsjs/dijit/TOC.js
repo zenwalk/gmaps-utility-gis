@@ -5,6 +5,7 @@
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
  */
 // change log: 
+// 2013-08-01: multiple level of grouping
 // 2013-07-24: FeatureLayer, JSAPI3.5, removed a few functionalities: uniqueValueRenderer generated checkboxes; dynamically created layer from TOC config.
 // 2012-08-21: fix dojo.fx load that caused IE has to refresh to see TOC.
 // 2012-07-26: add ready so it works with compact built (missing dijit._Widget, dijit._Templated).
@@ -421,13 +422,21 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
     },
     _onClick: function(evt){
       var t = evt.target;
+	  var lay; 
       if (t == this.checkNode || dijit.getEnclosingWidget(t) == this.checkNode) {
         // 2013-07-23: remove this most complex checkable legend functionality to simplify the widget
         if (this.serviceLayer) {
           this.serviceLayer.visible = this.checkNode && this.checkNode.checked;
           // if a sublayer is checked on, force it's group layer to be on. 
-          if (this.serviceLayer._parentLayerInfo && !this.serviceLayer._parentLayerInfo.visible) {
-            this.serviceLayer._parentLayerInfo.visible = true;
+          // 2013-08-01 handler multiple level of groups
+          if (this.serviceLayer.visible) {
+            lay = this.serviceLayer;
+            while (lay._parentLayerInfo) {
+              if (!lay._parentLayerInfo.visible) {
+                lay._parentLayerInfo.visible = true;
+              }
+              lay = lay._parentLayerInfo;
+            }
           }
           // if a layer is on, it's service must be on.
           if (this.serviceLayer.visible && !this.rootLayer.visible) {
@@ -435,9 +444,8 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           }
           if (this.serviceLayer._subLayerInfos) {
             // this is a group layer;
-            dojo.forEach(this.serviceLayer._subLayerInfos, function(info){
-              info.visible = this.serviceLayer.visible;
-            }, this);
+			// 2013-08-01 handler multiple level of groups
+			this._setSubLayerVisibilitiesFromGroup(this.serviceLayer);
           }
           /* 2013-07-23: do not deal with checkbox legend any more.*/
           this.rootLayer.setVisibleLayers(this._getVisibleLayers(), true);
@@ -453,6 +461,16 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         this._toggleContainer();
       }
     },
+	_setSubLayerVisibilitiesFromGroup: function(lay){
+		if (lay._subLayerInfos && lay._subLayerInfos.length > 0 ){
+			dojo.forEach(lay._subLayerInfos, function(info){
+              info.visible = lay.visible;
+			  if (info._subLayerInfos && info._subLayerInfos.length > 0){
+			  	this._setSubLayerVisibilitiesFromGroup(info);
+			  }
+            }, this);
+		}
+	},
     _getVisibleLayers: function(){
       var vis = [];
       dojo.forEach(this.rootLayer.layerInfos, function(layerInfo){
