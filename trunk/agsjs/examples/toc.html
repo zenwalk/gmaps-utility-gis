@@ -40,7 +40,8 @@
                 // however please noted googlecode.com is not a true CDN and is not fast and may not be available.
                 // also, it is recommended to use a particular version from /tags/agsjs/<version>/
                 // in a production app to avoid unexpected results.
-                "location": "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs"
+                //"location": "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs"
+				"location": location.pathname.replace(/\/[^/]+$/, '') + '/../src/agsjs' 
               }]
             };
         </script>
@@ -97,12 +98,17 @@
                       title: "FeatureLayer1"
                     }, {
                       layer: dynaLayer1,
-                      title: "DynamicMapServiceLayer1"
+                      title: "DynamicMapServiceLayer1",
+					  excludes: [1,7] // exclude the layer within map service from displaying in TOC
                       // collapsed: false, // whether this root layer should be collapsed initially, default false.
                       //slider: false // whether to display a transparency slider.
                     }]
                   }, 'tocDiv');
                   toc.startup();
+				  dojo.connect(toc, 'onLoad', function(){
+				  	if (console) console.log('TOC loaded');
+					dojo.byId("CollapseGroupProgramatically").disabled=false;
+				  });
                   dojo.disconnect(h);
                 } catch (e) {
                   alert(e);
@@ -142,7 +148,7 @@
               toc.refresh();
             }
             
-            function testSetVisibleLayersProgrammtically(){
+            function testSetVisibleLayersProgramatically(){
               dynaLayer1.setVisibleLayers([8, 17, 18, 19, 20])
             }
             
@@ -164,6 +170,15 @@
                 map.addLayer(dynaLayer2);
               }
             }
+			
+			function testCollapseGroupProgramatically(){
+				// 0 is the layerId of group "Public Safety"
+				var layerNode = toc.findNode(dynaLayer1, 0);
+					if (layerNode){
+						// if want hide certain layer, use: esri.hide(layerNode.domNode);
+						layerNode.collapse();
+					}
+			}
             
             dojo.ready(init);
         </script>
@@ -191,10 +206,17 @@
                     </li>
                     <li>
                         Click 
-                        <button onclick="testSetVisibleLayersProgrammtically()">
-                            SetVisibleLayersProgrammtically
+                        <button onclick="testSetVisibleLayersProgramatically()">
+                            SetVisibleLayersProgramatically
                         </button>
-                        to programmtically turn layer on/off, notice TOC automatically sync with model(no refresh needed).
+                        to programatically turn layer on/off, notice TOC automatically sync with model(no refresh needed).
+                    </li>
+					 <li>
+                        Click 
+                        <button id="CollapseGroupProgramatically" disabled="disabled" onclick="testCollapseGroupProgramatically()">
+                            CollapseGroupProgramatically
+                        </button>
+                        to programatically find node for a group layer in a service, then collapse it.
                     </li>
                     <li>
                         Click 
