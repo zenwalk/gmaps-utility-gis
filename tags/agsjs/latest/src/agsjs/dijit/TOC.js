@@ -35,8 +35,6 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
   dojo.doc.getElementsByTagName("head")[0].appendChild(link);
 }());
 
-///dojo.ready(function(){
-
   /**
    * _TOCNode is a node, with 3 possible types: root layer|serviceLayer|legend
    * @private
@@ -162,7 +160,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       }
       if (!this.rootLayerTOC.config.noLegend) {
         if (rootLayer._tocInfos) {
-          this._createChildrenNodes(rootLayer._tocInfos, 'serviceLayer');
+          this._createChildrenNodes( rootLayer._tocInfos, 'serviceLayer');
         } else if (rootLayer.renderer) {
           // for feature layers
           var r = rootLayer.renderer;
@@ -207,14 +205,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       } else {
         dojo.addClass(this.rowNode, 'agsjsTOCServiceLayer');
         dojo.addClass(this.labelNode, 'agsjsTOCServiceLayerLabel');
-        //2012-07-21: if setVisibility is called before this widget is built, we want to use the actual visibility instead of the layerInfo.
-        if (this.rootLayer.visibleLayers) {
-          if (dojo.indexOf(this.rootLayer.visibleLayers, serviceLayer.id) == -1) {
-            serviceLayer.visible = false;
-          } else {
-            serviceLayer.visible = true;
-          }
-        }
+       
         if (this.rootLayer.tileInfo) {
           // can not check on/off for tiled
           this._noCheckNode = true;
@@ -345,6 +336,11 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         params[type] = chd;
         params.data = chd;
         //var node = new agsjs.dijit._TOCNode(params);
+		if (type == "serviceLayer" && this.rootLayerTOC.config.excludes){
+		  if (dojo.indexOf(this.rootLayerTOC.config.excludes, chd.id) != -1) {
+		  	continue;
+          }
+		}
 		var node = new _TOCNode(params);
         node.placeAt(this.containerNode);
         c.push(node);
@@ -386,6 +382,12 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         }
       }
     },
+	expand: function(){
+		this._toggleContainer(true);
+	},
+	collapse: function(){
+		this._toggleContainer(false);
+	},
     // change UI according to the state of map layers. 
     _adjustToState: function(){
       if (this.checkNode) {
@@ -488,7 +490,19 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       }
       return vis;
     }
-    /*, 2013-07-23 no longer support checkbox legend */
+    , _findNode: function(layerId){
+      if (this.serviceLayer && this.serviceLayer.id == layerId) {
+        return this;
+      }
+      if (this._childTOCNodes.length > 0) {
+        var n = null;
+        for (var i = 0, c = this._childTOCNodes.length; i < c; i++) {
+           n = this._childTOCNodes[i]._findNode(layerId);
+           if (n) return n;
+        }
+      }
+      return null;
+	}
   });
   
  /// dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
@@ -565,6 +579,14 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           layerLookup['' + layerInfo.id] = layerInfo;
           // used for later reference.
           layerInfo.visible = layerInfo.defaultVisibility;
+		  // 2013-08-01: move check existing vis here to support excluded layers.
+          if (layer.visibleLayers && !layerInfo.subLayerIds) {
+            if (dojo.indexOf(layer.visibleLayers, layerInfo.id) == -1) {
+              layerInfo.visible = false;
+            } else {
+              layerInfo.visible = true;
+            }
+          }
         });
         // attached legend Info to layer info
         if (json.layers) {
@@ -586,6 +608,8 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
             layerInfo._subLayerInfos = subLayerInfos;
           }
         });
+		 //2012-07-21: if setVisibility is called before this widget is built, we want to use the actual visibility instead of the layerInfo.
+        
         //finalize the tree structure in _tocInfos, skipping all sublayers because they were nested already.
         var tocInfos = [];
         dojo.forEach(layer.layerInfos, function(layerInfo){
@@ -615,6 +639,9 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       this._loaded = true;
       this.onLoad();
     },
+	/**
+	 * @event
+	 */
     onLoad: function(){
     
     },
@@ -713,9 +740,9 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           config: info,
           tocWidget: this
         });
-        this._rootLayerTOCs.push(rootLayerTOC);
-        rootLayerTOC.placeAt(this.domNode);
+		this._rootLayerTOCs.push(rootLayerTOC);
         this._checkLoadHandler = dojo.connect(rootLayerTOC, 'onLoad', this, '_checkLoad');
+        rootLayerTOC.placeAt(this.domNode);
         this._checkLoad();
       }
       if (!this._zoomHandler) {
@@ -751,9 +778,25 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       this._zoomHandler = null;
       dojo.disconnect(this._checkLoadHandler);
       this._checkLoadHandler = null;
-    }
+    },
+	findNode: function(layer, layerId){
+		var w;
+		dojo.every(this._rootLayerTOCs, function(widget){
+			if(widget.rootLayer == layer){
+				w = widget;
+				return false;
+			}
+			return true;
+		});
+		if (layerId !== null && layerId !== undefined && w.rootLayer instanceof (esri.layers.ArcGISDynamicMapServiceLayer)) {
+        	return w._rootLayerNode._findNode(layerId);
+		} else if (w){
+			return w._rootLayerNode;
+		}
+		return null;
+		
+	}
   });
   return TOC;
-  
-///});
+
 });
