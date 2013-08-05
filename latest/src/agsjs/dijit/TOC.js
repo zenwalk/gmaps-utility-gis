@@ -122,6 +122,9 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         dojo.addClass(this.iconNode, 'dijitTreeExpando');
         dojo.addClass(this.iconNode, showChildren ? 'dijitTreeExpandoOpened' : 'dijitTreeExpandoClosed');
       }
+	  if (this.iconNode){
+	  	dojo.addClass(this.iconNode, 'agsjsTOCIcon');
+	  }
       if (this.containerNode) {
         dojo.style(this.containerNode, 'display', showChildren ? 'block' : 'none');
       }

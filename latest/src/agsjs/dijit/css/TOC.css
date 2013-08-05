@@ -12,7 +12,9 @@
     opacity: 0.5;
 }
 
-
+.agsjsTOCIcon {
+  vertical-align:bottom
+}
 
 .agsjsTOCRootLayer {
 }
