@@ -6,7 +6,8 @@
         <title>TOC</title>
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dijit/themes/claro/claro.css">
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/esri/css/esri.css" />
-        <style>
+        <link rel="stylesheet" type="text/css" href="../src/agsjs/css/agsjs.css" />
+		<style>
             html, body {
                 height: 98%;
                 width: 98%;
@@ -28,23 +29,23 @@
 
         </style>
         <script type="text/javascript">
-                        var djConfig = {
-                          parseOnLoad: true,
-                          packages: [{
-                            "name": "agsjs",
-                            //if you want to host on your own server, download from
-                            //http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/
-                            // and put in folders then use path like: 
-                            //"location": location.pathname.replace(/\/[^/]+$/, '') + '/../src/agsjs' 
-                            // use /src/ for debug and /build/ for production.
-                            // you can also use online version using the following location, 
-                            // however please noted googlecode.com is not a true CDN and is not fast and may not be available.
-                            // also, it is recommended to use a particular version from /tags/agsjs/<version>/
-                            // in a production app to avoid unexpected results.
-                            //"location": "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs"
-            				"location": location.pathname.replace(/\/[^/]+$/, '') + '/../src/agsjs' 
-                          }]
-                        };
+        var djConfig = {
+          parseOnLoad: true,
+          packages: [{   
+		    "name": "agsjs",
+            //if you want to host on your own server, download from
+            //http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/
+            // and put in folders then use path like: 
+            //"location": location.pathname.replace(/\/[^/]+$/, '') + '/../src/agsjs' 
+            // use /src/ for debug and /build/ for production.
+            // you can also use online version using the following location, 
+            // however please noted googlecode.com is not a true CDN and is not fast and may not be available.
+            // also, it is recommended to use a particular version from /tags/agsjs/<version>/
+            // in a production app to avoid unexpected results.
+            //"location": "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs"
+            "location": location.pathname.replace(/\/[^/]+$/, '') + '/../src/agsjs' 
+          }]
+        };
                     
         </script>
         <script src="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/">
@@ -102,7 +103,7 @@
                     }, {
                       layer: dynaLayer1,
                       title: "DynamicMapServiceLayer1"
-                      // collapsed: false, // whether this root layer should be collapsed initially, default false.
+                      //collapsed: false, // whether this root layer should be collapsed initially, default false.
                       //slider: false // whether to display a transparency slider.
                     }]
                   }, 'tocDiv');
@@ -165,7 +166,8 @@
                     layer: dynaLayer2,
                     title: "DynamicMapServiceLayer2",
                     // collapsed: true, // whether this root layer should be collapsed initially, default false.
-                    slider: true // whether to display a transparency slider.
+                    slider: true, // whether to display a transparency slider. default false.
+                    autoToggle: false //whether to automatically collapse when turned off, and expand when turn on for groups layers. default true. 
                   });
                   toc.refresh();
                   dojo.disconnect(h);
