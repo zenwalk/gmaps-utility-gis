@@ -18,13 +18,6 @@
 // 2011-08-11: support for not showing legend or layer list; slider at service level config; removed style background.
 
 /*global dojo esri*/
-// reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
-define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Templated','dojox/gfx','dojo/fx/Toggler','dijit/form/Slider'], function(declare, _Widget,_Templated, gfx, Toggler){
-///dojo.provide('agsjs.dijit.TOC');
-///dojo.require("dojo.fx.Toggler");
-///dojo.require('dijit._Widget');
-///dojo.require('dijit._Templated');
-///dojo.require('dijit.form.Slider');
 
 (function(){
   var link = dojo.create("link", {
@@ -34,6 +27,16 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
   });
   dojo.doc.getElementsByTagName("head")[0].appendChild(link);
 }());
+// reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
+
+define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Templated','dojox/gfx','dojo/fx/Toggler','dijit/form/Slider'], function(declare, _Widget,_Templated, gfx, Toggler){
+///dojo.provide('agsjs.dijit.TOC');
+///dojo.require("dojo.fx.Toggler");
+///dojo.require('dijit._Widget');
+///dojo.require('dijit._Templated');
+///dojo.require('dijit.form.Slider');
+
+
 
   /**
    * _TOCNode is a node, with 3 possible types: root layer|serviceLayer|legend
