@@ -5,7 +5,7 @@
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
  */
 // change log: 
-// 2013-08-05: nested groups fix, findTOCNode, onLoad event, 
+// 2013-08-05: nested groups fix, findTOCNode, onLoad event, css change to a new folder and in sample, added autoToggle option
 // 2013-07-24: FeatureLayer, JSAPI3.5, removed a few functionalities: uniqueValueRenderer generated checkboxes; dynamically created layer from TOC config.
 // 2012-08-21: fix dojo.fx load that caused IE has to refresh to see TOC.
 // 2012-07-26: add ready so it works with compact built (missing dijit._Widget, dijit._Templated).
@@ -18,7 +18,9 @@
 // 2011-08-11: support for not showing legend or layer list; slider at service level config; removed style background.
 
 /*global dojo esri*/
+
 // reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
+
 define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Templated','dojox/gfx','dojo/fx/Toggler','dijit/form/Slider'], function(declare, _Widget,_Templated, gfx, Toggler){
 ///dojo.provide('agsjs.dijit.TOC');
 ///dojo.require("dojo.fx.Toggler");
@@ -26,6 +28,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
 ///dojo.require('dijit._Templated');
 ///dojo.require('dijit.form.Slider');
 
+/* for AMD load css directly.
 (function(){
   var link = dojo.create("link", {
     type: "text/css",
@@ -33,7 +36,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
     href: dojo.moduleUrl("agsjs.dijit", "css/TOC.css")
   });
   dojo.doc.getElementsByTagName("head")[0].appendChild(link);
-}());
+}());*/
 
   /**
    * _TOCNode is a node, with 3 possible types: root layer|serviceLayer|legend
@@ -473,8 +476,10 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           this.rootLayer.setVisibility(this.checkNode && this.checkNode.checked);
         }
         // automatically expand/collapse?
-        this._toggleContainer(this.checkNode && this.checkNode.checked);
-        this.rootLayerTOC._adjustToState();
+		if (this.rootLayerTOC.config.autoToggle !== false){
+			this._toggleContainer(this.checkNode && this.checkNode.checked);
+        }
+		this.rootLayerTOC._adjustToState();
         
       } else if (t == this.iconNode) {
         this._toggleContainer();
