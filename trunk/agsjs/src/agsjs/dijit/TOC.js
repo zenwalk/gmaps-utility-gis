@@ -5,7 +5,7 @@
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
  */
 // change log: 
-// 2013-08-01: multiple level of grouping
+// 2013-08-05: nested groups fix, findTOCNode, onLoad event, 
 // 2013-07-24: FeatureLayer, JSAPI3.5, removed a few functionalities: uniqueValueRenderer generated checkboxes; dynamically created layer from TOC config.
 // 2012-08-21: fix dojo.fx load that caused IE has to refresh to see TOC.
 // 2012-07-26: add ready so it works with compact built (missing dijit._Widget, dijit._Templated).
