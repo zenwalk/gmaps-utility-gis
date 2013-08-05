@@ -5,7 +5,7 @@
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
  */
 // change log: 
-// 2013-08-01: multiple level of grouping
+// 2013-08-05: nested groups fix, findTOCNode, onLoad event, 
 // 2013-07-24: FeatureLayer, JSAPI3.5, removed a few functionalities: uniqueValueRenderer generated checkboxes; dynamically created layer from TOC config.
 // 2012-08-21: fix dojo.fx load that caused IE has to refresh to see TOC.
 // 2012-07-26: add ready so it works with compact built (missing dijit._Widget, dijit._Templated).
@@ -125,6 +125,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       if (this.containerNode) {
         dojo.style(this.containerNode, 'display', showChildren ? 'block' : 'none');
       }
+	  this.domNode.id = 'TOCNode_'+this.rootLayer.id + (this.serviceLayer?'_'+this.serviceLayer.id:'')+(this.legend?'_'+this.legend.id:'');
     },
     // root level node, layers directly under esri.Map
     _createRootLayerNode: function(rootLayer){
@@ -205,13 +206,12 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       } else {
         dojo.addClass(this.rowNode, 'agsjsTOCServiceLayer');
         dojo.addClass(this.labelNode, 'agsjsTOCServiceLayerLabel');
-       
         if (this.rootLayer.tileInfo) {
           // can not check on/off for tiled
           this._noCheckNode = true;
         }
         if (serviceLayer._legends && !this.rootLayerTOC.config.noLegend) {
-          if (serviceLayer._legends.length == 1) {// 2013-07-23: only support inline style. this.rootLayerTOC.toc.style == 'inline' && 
+		  if (serviceLayer._legends.length == 1) { 
             this.iconNode.src = this._getLegendIconUrl(serviceLayer._legends[0]);
             dojo.destroy(this.containerNode);
             this.containerNode = null;
@@ -225,7 +225,6 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           this.containerNode = null;
         }
       }
-      //this.rootLayerTOC._layerWidgets.push(this);
     },
     /*
      a legend data normally have: {description,label,symbol,value}
@@ -241,7 +240,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           label = rendLeg.value;
         }
         if (rendLeg.maxValue !== undefined) {
-          label = '' + rendLeg.minValue + ' - ' + rendLeg.maxValue;
+         label = '' + rendLeg.minValue + ' - ' + rendLeg.maxValue;
         }
       }
       this.labelNode.appendChild(document.createTextNode(label));
@@ -336,10 +335,8 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         params[type] = chd;
         params.data = chd;
         //var node = new agsjs.dijit._TOCNode(params);
-		if (type == "serviceLayer" && this.rootLayerTOC.config.excludes){
-		  if (dojo.indexOf(this.rootLayerTOC.config.excludes, chd.id) != -1) {
-		  	continue;
-          }
+		if (type=='legend'){
+			chd.id = 'legend'+i;
 		}
 		var node = new _TOCNode(params);
         node.placeAt(this.containerNode);
@@ -376,17 +373,34 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           }
         }
         // remember it's state for refresh
-        
         if (this.rootLayer && !this.serviceLayer && !this.legend) {
           this.rootLayerTOC.config.collapsed = dojo.hasClass(this.iconNode, 'dijitTreeExpandoClosed');
         }
       }
     },
+	/**
+	 * Expand the node's children if applicable
+	 */
 	expand: function(){
 		this._toggleContainer(true);
 	},
+	/**
+	 * collapse the node's children if applicable
+	 */
 	collapse: function(){
 		this._toggleContainer(false);
+	},
+	/**
+	 * Show the TOC Node
+	 */
+	show: function(){
+		esri.show(this.domNode);
+	},
+	/** Hide TOC node
+	 * 
+	 */
+	hide: function(){
+		esri.hide(this.domNode);
 	},
     // change UI according to the state of map layers. 
     _adjustToState: function(){
@@ -490,14 +504,14 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       }
       return vis;
     }
-    , _findNode: function(layerId){
+    , _findTOCNode: function(layerId){
       if (this.serviceLayer && this.serviceLayer.id == layerId) {
         return this;
       }
       if (this._childTOCNodes.length > 0) {
         var n = null;
         for (var i = 0, c = this._childTOCNodes.length; i < c; i++) {
-           n = this._childTOCNodes[i]._findNode(layerId);
+           n = this._childTOCNodes[i]._findTOCNode(layerId);
            if (n) return n;
         }
       }
@@ -579,8 +593,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           layerLookup['' + layerInfo.id] = layerInfo;
           // used for later reference.
           layerInfo.visible = layerInfo.defaultVisibility;
-		  // 2013-08-01: move check existing vis here to support excluded layers.
-          if (layer.visibleLayers && !layerInfo.subLayerIds) {
+		  if (layer.visibleLayers && !layerInfo.subLayerIds) {
             if (dojo.indexOf(layer.visibleLayers, layerInfo.id) == -1) {
               layerInfo.visible = false;
             } else {
@@ -779,7 +792,13 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       dojo.disconnect(this._checkLoadHandler);
       this._checkLoadHandler = null;
     },
-	findNode: function(layer, layerId){
+	/**
+	 * Find the TOC Node based on root layer and optional serviceLayer ID. 
+	 * @param {Object} layer root Layer of a map
+	 * @param {Object} serviceLayerId id of a ArcGIS Map Service Layer
+	 * @return {TOCNode} TOC node, it has public methods: collapse, expand, show, hide
+	 */
+	findTOCNode: function(layer, serviceLayerId){
 		var w;
 		dojo.every(this._rootLayerTOCs, function(widget){
 			if(widget.rootLayer == layer){
@@ -788,13 +807,12 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
 			}
 			return true;
 		});
-		if (layerId !== null && layerId !== undefined && w.rootLayer instanceof (esri.layers.ArcGISDynamicMapServiceLayer)) {
-        	return w._rootLayerNode._findNode(layerId);
+		if (serviceLayerId !== null && serviceLayerId !== undefined && w.rootLayer instanceof (esri.layers.ArcGISDynamicMapServiceLayer)) {
+        	return w._rootLayerNode._findTOCNode(serviceLayerId);
 		} else if (w){
 			return w._rootLayerNode;
 		}
 		return null;
-		
 	}
   });
   return TOC;
