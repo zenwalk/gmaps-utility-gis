@@ -7,7 +7,7 @@
         <title>TOC</title>
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dijit/themes/claro/claro.css">
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/esri/css/esri.css" />
-        <link rel="stylesheet" type="text/css" href="http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs/dijit/css/TOC.css" />
+        <link rel="stylesheet" type="text/css" href="http://gmaps-utility-gis.googlecode.com/svn/trunk/agsjs/build/agsjs/css/agsjs.css" />
 		<style>
             html, body {
                 height: 98%;
@@ -43,7 +43,7 @@
                 // also, it is recommended to use a particular version from /tags/agsjs/<version>/
                 // in a production app to avoid unexpected results.
                 //"location": "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs"
-             "location": "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs"
+             "location": "http://gmaps-utility-gis.googlecode.com/svn/trunk/agsjs/build/agsjs"
               
 			  }]
             };
@@ -158,8 +158,9 @@
                     layer: dynaLayer2,
                     title: "DynamicMapServiceLayer2",
                     // collapsed: true, // whether this root layer should be collapsed initially, default false.
-                    slider: true // whether to display a transparency slider.
-                  });
+                    slider: true, // whether to display a transparency slider.
+                    autoToggle: false //whether to automatically collapse when turned off, and expand when turn on for groups layers. default true. 
+                   });
                   toc.refresh();
                   dojo.disconnect(h);
                 });
