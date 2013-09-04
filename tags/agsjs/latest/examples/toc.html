@@ -64,7 +64,7 @@
             dojo.require("agsjs.dijit.TOC");
         </script>
         <script type="text/javascript">
-            var map, toc, dynaLayer1, dynaLayer2, featLayer1;
+            var map, toc, basemap, dynaLayer1, dynaLayer2, featLayer1;
             function init(){
             
               var initialExtent = new esri.geometry.Extent({
@@ -80,7 +80,7 @@
                 extent: initialExtent
               });
               
-              var basemap = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer");
+              basemap = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer");
               map.addLayer(basemap);
               
               dynaLayer1 = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer", {

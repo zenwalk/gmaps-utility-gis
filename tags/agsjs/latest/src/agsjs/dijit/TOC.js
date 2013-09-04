@@ -5,6 +5,7 @@
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
  */
 // change log: 
+// 2013-09-05: Treat root FeatureLayer same as a layer inside a map service, i.e. move the symbol inline if there is only one symbol.
 // 2013-08-05: nested groups fix, findTOCNode, onLoad event, css change to a new folder and in sample, added autoToggle option
 // 2013-07-24: FeatureLayer, JSAPI3.5, removed a few functionalities: uniqueValueRenderer generated checkboxes; dynamically created layer from TOC config.
 // 2012-08-21: fix dojo.fx load that caused IE has to refresh to see TOC.
@@ -138,12 +139,23 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       dojo.addClass(this.rowNode, 'agsjsTOCRootLayer');
       dojo.addClass(this.labelNode, 'agsjsTOCRootLayerLabel');
       var title = this.rootLayerTOC.config.title;
+	  // if it is '' then it means we do not title to be shown, i.e. not indent.
       if (title === '') {
         // we do not want to show the first level, typically in the case of a single map service
         esri.hide(this.rowNode);
         rootLayer.show();
         this.rootLayerTOC._currentIndent--;
-      }
+      } else if (title === undefined){
+	  	// no title is set, try to find default
+	  	if (rootLayer.name){
+			// this is a featureLayer
+			title = rootLayer.name;
+		} else {
+			var start = rootLayer.url.toLowerCase().indexOf('/rest/services/');
+          	var end = rootLayer.url.toLowerCase().indexOf('/mapserver', start);
+          	title = rootLayer.url.substring(start + 15, end);
+		}
+	  }
       rootLayer.collapsed = this.rootLayerTOC.config.collapsed;
       if (this.rootLayerTOC.config.slider) {
         this.sliderNode = dojo.create('div', {
@@ -188,7 +200,10 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
             anode.innerHTML = af;
             this._createChildrenNodes(legs, 'legend');
           } else {
-            this._createChildrenNodes([rootLayer.renderer], 'legend');
+            //this._createChildrenNodes([rootLayer.renderer], 'legend');
+			this._setIconNode(rootLayer.renderer, this.iconNode, this);
+			dojo.destroy(this.containerNode);
+            this.containerNode = null;
           }
           
         } else {
@@ -254,7 +269,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
     // set url or replace node
     _setIconNode: function(rendLeg, iconNode, tocNode){
       var src = this._getLegendIconUrl(rendLeg);
-      if (!src) {//} || this.rootLayerTOC.info.mode == 'layers') {
+      if (!src) {
         if (rendLeg.symbol) {
           var w = this.rootLayerTOC.tocWidget.swatchSize[0];
           var h = this.rootLayerTOC.tocWidget.swatchSize[1];
@@ -547,12 +562,6 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
     postCreate: function(){
       if ((this.rootLayer instanceof (esri.layers.ArcGISDynamicMapServiceLayer) ||
       this.rootLayer instanceof (esri.layers.ArcGISTiledMapServiceLayer))) {
-        // if it is '' then it means we do not title to be shown, i.e. not indent.
-        if (this.config.title === undefined) {
-          var start = this.rootLayer.url.toLowerCase().indexOf('/rest/services/');
-          var end = this.rootLayer.url.toLowerCase().indexOf('/mapserver', start);
-          this.config.title = this.rootLayer.url.substring(start + 15, end);
-        }
         if (this._legendResponse) {
           this._createRootLayerTOC();
         } else {
