@@ -4,6 +4,7 @@
  * @fileoverview This library allows MapTip and fires mouseover/mouseout event for FusionTableLayers.
  * It uses mouse cursor tracking and pause delay to trigger FusionTableQuery.
  * It is not true mouseover event, but should suit most use cases.
+ * v1: updated to use Fusion Tables API v1, requires authentication - Lawrence Ross 9/16/2013
  *
  */
 (function() {
@@ -142,6 +143,7 @@
    * @property {number} [delay] optional. milliseconds mouse pause before send a server query. default 500.
    * @property {number} [tolerance] required. tolerance in pixel around mouse. default is 6.
    * @property {Object} [style] optional. the css style of map tip.
+   * @property {String} [key] required.  key to use in requests using the Fusion Tables API v1.0 
    */
   /**
    * @name google.maps.FusionTablesLayer
@@ -256,7 +258,12 @@
       // Note that a simplified geometry and the NAME column are being requested
       //http://www.google.com/fusiontables/api/query?sql=
       var sid = 'query_' + scriptid++;
-      script.setAttribute('src', 'http://fusiontables.googleusercontent.com/fusiontables/api/query?sql=' + queryText + '&jsonCallback=fusiontips.' + sid);
+      var queryString = 'https://www.googleapis.com/fusiontables/v1/query?sql=' + queryText;
+      if (typeof opts.key != "undefined") { 
+        queryString += '&key=' + opts.key;
+      }
+      queryString += '&callback=fusiontips.' + sid;
+      script.setAttribute('src', queryString);
       script.setAttribute('id', 'fusiontips.' + sid);
       window.fusiontips[sid] = function(json) {
         queryPending = false;
@@ -267,26 +274,34 @@
       document.getElementsByTagName('head')[0].appendChild(script);
     }
     
-    function processFusionJson(json, latlng) {
+    function processFusionJson(data, latlng) {
       //{table:{cols:[col1,col2], rows:[[val11,val12],[val21,val22]]}};
-      var data = json.table;
       html = "";
       var row = null;
-      if (data) {
+      if (data.rows && data.columns) {
         var numRows = data.rows.length;
-        var numCols = data.cols.length;
+        var numCols = data.columns.length;
         if (numRows > 0) {
           row = {};
           for (i = 0; i < numCols; i++) {
             html += data.rows[0][i] + "<br/>";
             var cell = {
-              columnName: data.cols[i],
+              columnName: data.columns[i],
               value: data.rows[0][i]
             };
-            row[data.cols[i]] = cell;
+            row[data.columns[i]] = cell;
           }
         }
         
+      } else if (data.error) {
+          if (console) {
+            var errorString = "error, code="+data.error.code;
+            if (data.error.errors.length > 0) {
+                errorString += " message="+data.error.errors[0].message;
+                errorString += " reason="+data.error.errors[0].reason;
+            }
+            console.log(errorString);
+          }
       } else {
         if (console) 
           console.log('no data');

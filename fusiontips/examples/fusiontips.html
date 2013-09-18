@@ -13,10 +13,12 @@ License can be found here: http://code.google.com/apis/ajaxsearch/faq/#license
             body {
                 font-family: Arial, sans-serif;
             }
-            
+            body, html {
+                width: 100%;
+            }
             #map_canvas {
                 height: 500px;
-                width: 100% px;
+                width: 100%;
             }
         </style>
         <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false">
@@ -30,7 +32,11 @@ License can be found here: http://code.google.com/apis/ajaxsearch/faq/#license
         <script type="text/javascript" src="../src/fusiontips.js">
         </script>
         <script type="text/javascript" id="script">
-            
+        // authentication required, either API key or OAuth 2.0 token
+        // replace with a key valid for your domain 
+        var apiConsoleKey = "AIzaSyAfravxKsLG5RItI93Dyh3Nya8Dg7vfYsk"; // valid for gmaps-utility-gis.googlecode.com domain only.
+        // var apiConsoleKey = "AIzaSyCxitB5jQcw7weQdg9MqBRfxr6mj81wT7I"; // valid for geocodezip.com
+
             var map, layer;
             
             function loadPoint() {
@@ -38,7 +44,8 @@ License can be found here: http://code.google.com/apis/ajaxsearch/faq/#license
                 layer.setMap(null);
                 google.maps.event.clearInstanceListeners(layer);
               }
-              var tableid = 297050;
+              // original numeric ID 297050; Fusion Tables API v1.0 requires encrypted IDs.
+              var tableid =  '15UY2pgiz8sRkq37p2TaJd64U7M_2HDVqHT3Quw'; 
               layer = new google.maps.FusionTablesLayer({
                 query: {
                   select: 'Address',
@@ -47,6 +54,8 @@ License can be found here: http://code.google.com/apis/ajaxsearch/faq/#license
                 map: map
               });
               layer.enableMapTips({
+                // authentication required, either API key or OAuth 2.0 token
+                key:apiConsoleKey, // replace with a key valid for your domain.
                 select: "'Store Name','Address'", // list of columns to query, typially need only one column.
                 from: tableid, // fusion table name
                 geometryColumn: 'Address', // geometry column name
@@ -66,7 +75,8 @@ License can be found here: http://code.google.com/apis/ajaxsearch/faq/#license
                 layer.setMap(null);
                 google.maps.event.clearInstanceListeners(layer);
               }
-              var tableid = 296374;
+              // original numeric ID 296374; Fusion Tables API v1.0 requires encrypted IDs.
+              var tableid = '1xo_sVz4108NNejzUCGp_2nJIoOltKi467LYbHg'; 
               layer = new google.maps.FusionTablesLayer({
                 query: {
                   select: 'geometry',
@@ -75,6 +85,8 @@ License can be found here: http://code.google.com/apis/ajaxsearch/faq/#license
                 map: map
               });
               layer.enableMapTips({
+                // authentication required, either API key or OAuth 2.0 token
+                key:apiConsoleKey, // replace with a key valid for your domain.
                 select: "description", // list of columns to query, typially need only one column.
                 from: tableid, // fusion table name
                 geometryColumn: 'geometry', // geometry column name
@@ -93,7 +105,8 @@ License can be found here: http://code.google.com/apis/ajaxsearch/faq/#license
                 google.maps.event.clearInstanceListeners(layer);
                 
               }
-              var tableid = 1670859;
+              // original numeric ID 1670859; Fusion Tables API v1.0 requires encrypted IDs.
+              var tableid = '18Vjqv451aikVXxlnGKhVEIJ0y4l18ZQ86eReE68'; 
               layer = new google.maps.FusionTablesLayer({
                 query: {
                   select: 'geometry_simplified',
@@ -102,6 +115,8 @@ License can be found here: http://code.google.com/apis/ajaxsearch/faq/#license
                 map: map
               });
               layer.enableMapTips({
+                // authentication required, either API key or OAuth 2.0 token
+                key:apiConsoleKey, // replace with a key valid for your domain.
                 select: "'NAME'", // list of columns to query, typially need only one column.
                 from: tableid, // fusion table name
                 geometryColumn: 'geometry_simplified', // geometry column name
@@ -146,17 +161,17 @@ License can be found here: http://code.google.com/apis/ajaxsearch/faq/#license
     <body onload="initialize();">
         <div>
             Move mouse over a fusion table feature and pause a while 
-            (configurable, default < 0.5 sec), a map tip will display. (<a href="../docs/examples.html">documentation</a>)
+            (configurable, default &lt; 0.5 sec), a map tip will display. (<a href="../docs/examples.html">documentation</a>)
         </div>
         <div>
             Select an sample fusion table: 
-            <input type="radio" name="ft" checked onclick="loadPoint()">Point
-            <input type='radio' name="ft" onclick="loadLine()">Line
-            <input type='radio' name="ft" onclick="loadPoly()">Polygon
+            <input type='radio' name='ft' checked onclick='loadPoint()'>Point
+            <input type='radio' name='ft' onclick='loadLine()'>Line
+            <input type='radio' name='ft' onclick='loadPoly()'>Polygon
         </div>
-        <div id="map_canvas">
+        <div id='map_canvas'>
         </div>
-        <div id="info">
+        <div id='info'>
         </div>
     </body>
 </html>
