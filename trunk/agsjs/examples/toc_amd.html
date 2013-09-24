@@ -5,9 +5,9 @@
         <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9" />
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
         <title>TOC</title>
-        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dijit/themes/claro/claro.css">
-        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/esri/css/esri.css" />
-        <link rel="stylesheet" type="text/css" href="http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs/css/agsjs.css" />
+        <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.6/js/dojo/dijit/themes/claro/claro.css">
+        <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.6/js/esri/css/esri.css" />
+		<link rel="stylesheet" type="text/css" href="http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs/css/agsjs.css" />
 		<style>
             html, body {
                 height: 98%;
@@ -49,16 +49,35 @@
               }]
             };
         </script>
-         <script src="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/">
-        </script>
+        <script src="//js.arcgis.com/3.6/"></script>
         <script type="text/javascript">
             var map, toc, dynaLayer1, dynaLayer2, featLayer1;
             
-            require(["dojo/_base/connect", "dojo/parser", "agsjs/dijit/TOC", "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "esri/map", "esri/layers/FeatureLayer", "dojo/fx", "dojo/domReady!"], function(connect, parser, TOC){
+            require([
+			"dojo/_base/connect", 
+			"dojo/parser", 
+			"agsjs/dijit/TOC", 
+			"esri/map",
+			"esri/geometry/Extent", 
+			"esri/layers/FeatureLayer", 
+			"esri/layers/ArcGISTiledMapServiceLayer",
+			"esri/layers/ArcGISDynamicMapServiceLayer",
+			"dijit/layout/BorderContainer", 
+			"dijit/layout/ContentPane",
+			"dojo/fx", 
+			"dojo/domReady!"], function(
+			connect, 
+			parser, 
+			TOC, 
+			Map, 
+			Extent,
+			FeatureLayer, 
+			ArcGISTiledMapServiceLayer, 
+			ArcGISDynamicMapServiceLayer){
             
               // call the parser to create the dijit layout dijits
               parser.parse(); // note djConfig.parseOnLoad = false;
-              var initialExtent = new esri.geometry.Extent({
+              var initialExtent = new Extent({
                 xmin: -9549126.170705408,
                 ymin: 4612089.574063576,
                 xmax: -9542304.165930964,
@@ -67,19 +86,19 @@
                   "wkid": 102100
                 }
               });
-              map = new esri.Map("map", {
+              map = new Map("map", {
                 extent: initialExtent
               });
               
-              var basemap = new esri.layers.ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer");
+              var basemap = new ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer");
               map.addLayer(basemap);
               
-              dynaLayer1 = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer", {
+              dynaLayer1 = new ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer", {
                 opacity: 0.8
               });
               
-              featLayer1 = new esri.layers.FeatureLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1", {
-                mode: esri.layers.FeatureLayer.MODE_SNAPSHOT,
+              featLayer1 = new FeatureLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1", {
+                mode: FeatureLayer.MODE_SNAPSHOT,
                 outFields: ["POP07_SQMI"]//,
               });
               featLayer1.setDefinitionExpression("STCOFIPS='21111'"); //Louisville, KY
@@ -88,7 +107,7 @@
                 // TOC will honor the overwritten value.
                 dynaLayer1.setVisibleLayers([2, 5, 8, 11]);
                 try {
-                  toc = new agsjs.dijit.TOC({
+                  toc = new TOC({
                     map: map,
                     layerInfos: [{
                       layer: featLayer1,
@@ -104,7 +123,10 @@
                   dojo.connect(toc, 'onLoad', function(){
                     if (console) 
                       console.log('TOC loaded');
-                    dojo.byId("FindNodeByLayer").disabled = false;
+                    dojo.byId("ChangeFeatureRenderer").disabled = false;
+					dojo.byId("SetVisibleLayersProgramatically").disabled = false;
+					dojo.byId("FindNodeByLayer").disabled = false;
+					dojo.byId("InsertNewLayer").disabled = false;
                   });
                   dojo.disconnect(h);
                 } catch (e) {
@@ -196,13 +218,13 @@
                     </li>
                     <li>
                         Click 
-                        <button onclick="testChangeFeatureLayerRenderer()">
+                        <button id="ChangeFeatureRenderer" disabled="disabled" onclick="testChangeFeatureLayerRenderer()">
                             ChangeFeatureRenderer
                         </button>, notice TOC refreshed to reflect the new renderer of FeatureLayer. 
                     </li>
                     <li>
                         Click 
-                        <button onclick="testSetVisibleLayersProgramatically()">
+                        <button id="SetVisibleLayersProgramatically" disabled="disabled" onclick="testSetVisibleLayersProgramatically()">
                             SetVisibleLayersProgramatically
                         </button>
                         to programatically turn layer on/off, notice TOC automatically sync with model(no refresh needed).
@@ -216,7 +238,7 @@
                     </li>
                     <li>
                         Click 
-                        <button onclick="testInsertNewLayer()">
+                        <button id="InsertNewLayer" disabled="disabled" onclick="testInsertNewLayer()">
                             InsertNewLayer
                         </button>
                         to programmtically insert a layer then refresh TOC.
