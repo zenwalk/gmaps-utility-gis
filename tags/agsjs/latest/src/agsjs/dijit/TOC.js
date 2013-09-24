@@ -5,6 +5,7 @@
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
  */
 // change log: 
+// 2013-09-23: Secure service support: Integrated Windows, Token, or via Proxy (IWA or Token); listen to rootLayer onLoad if not already loaded.
 // 2013-09-05: Treat root FeatureLayer same as a layer inside a map service, i.e. move the symbol inline if there is only one symbol.
 // 2013-08-05: nested groups fix, findTOCNode, onLoad event, css change to a new folder and in sample, added autoToggle option
 // 2013-07-24: FeatureLayer, JSAPI3.5, removed a few functionalities: uniqueValueRenderer generated checkboxes; dynamically created layer from TOC config.
@@ -332,6 +333,11 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
             // resolve relative url
             src = this.rootLayer.url + '/' + this.serviceLayer.id + '/images/' + src;
           }
+		  if (this.rootLayer.credential && this.rootLayer.credential.token ){
+		  	src = src + "?token=" + this.rootLayer.credential.token;
+		  } else if (esri.config.defaults.io.alwaysUseProxy){
+		  	src = esri.config.defaults.io.proxyUrl+ "?"+src;
+		  }
         }
       }
       return src;
@@ -655,19 +661,24 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
     
       // sometimes IE may fail next step
       ///this._rootLayerNode = new agsjs.dijit._TOCNode({
-	  this._rootLayerNode = new _TOCNode({
-        rootLayerTOC: this,
-        rootLayer: this.rootLayer
-      });
-      this._rootLayerNode.placeAt(this.domNode);
-      this._visHandler = dojo.connect(this.rootLayer, "onVisibilityChange", this, "_adjustToState");
-      // this will make sure all TOC linked to a Map synchronized.
-      if (this.rootLayer instanceof (esri.layers.ArcGISDynamicMapServiceLayer)) {
-        this._visLayerHandler = dojo.connect(this.rootLayer, "setVisibleLayers", this, "_onSetVisibleLayers");
-      }
-      this._adjustToState();
-      this._loaded = true;
-      this.onLoad();
+	  if (this.rootLayer.loaded){
+		this._rootLayerNode = new _TOCNode({
+	      rootLayerTOC: this,
+	      rootLayer: this.rootLayer
+	    });
+	    this._rootLayerNode.placeAt(this.domNode);
+	    this._visHandler = dojo.connect(this.rootLayer, "onVisibilityChange", this, "_adjustToState");
+	    // this will make sure all TOC linked to a Map synchronized.
+	    if (this.rootLayer instanceof (esri.layers.ArcGISDynamicMapServiceLayer)) {
+	      this._visLayerHandler = dojo.connect(this.rootLayer, "setVisibleLayers", this, "_onSetVisibleLayers");
+	    }
+	    this._adjustToState();
+	    this._loaded = true;
+	    this.onLoad();
+	  } else {
+	  	dojo.connect(this.rootLayer, 'onLoad', dojo.hitch(this._createRootLayerTOC, this));
+	  }
+	  
     },
 	/**
 	 * @event
