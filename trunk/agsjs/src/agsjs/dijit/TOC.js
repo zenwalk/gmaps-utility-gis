@@ -23,7 +23,7 @@
 
 // reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
 
-define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Templated','dojox/gfx','dojo/fx/Toggler','dijit/form/Slider'], function(declare, _Widget,_Templated, gfx, Toggler){
+define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Templated','dojo/Evented','dojox/gfx','dojo/fx/Toggler','dijit/form/Slider'], function(declare, _Widget,_Templated, Evented, gfx, Toggler){
 ///dojo.provide('agsjs.dijit.TOC');
 ///dojo.require("dojo.fx.Toggler");
 ///dojo.require('dijit._Widget');
@@ -722,7 +722,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
   });
   
  // dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
-  var TOC = declare("agsjs.dijit.TOC", [_Widget],{
+  var TOC = declare("agsjs.dijit.TOC", [_Widget, Evented],{
     indentSize: 18,
     swatchSize: [30, 30],
     refreshDelay: 500,
@@ -801,6 +801,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       });
       if (loaded) {
         this.onLoad();
+		this.emit('load');
       }
     },
     _adjustToState: function(){
