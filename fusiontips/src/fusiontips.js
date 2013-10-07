@@ -17,15 +17,20 @@
     this.div_ = null;
     this.cursorNode = null;
     this.style_ = opts.style || {};
+    this.className = opts.className || '';
   }
   FusionTipOverlay.prototype = new google.maps.OverlayView();
   FusionTipOverlay.prototype.onAdd = function() {
     var div = document.createElement('DIV');
-    div.style.border = "1px solid black";
-    div.style.position = "absolute";
-    div.style.whiteSpace = "nowrap";
-    div.style.backgroundColor = "#ffffcc";
-    div.style.fontSize = 'x-small';
+    if (this.className) {
+      div.className = this.className;
+    } else {
+      div.style.border = "1px solid black";
+      div.style.position = "absolute";
+      div.style.whiteSpace = "nowrap";
+      div.style.backgroundColor = "#ffffcc";
+      div.style.fontSize = 'x-small';
+    }
     if (this.style_) {
       for (var x in this.style_) {
         if (this.style_.hasOwnProperty(x)) {
@@ -158,7 +163,7 @@
   google.maps.FusionTablesLayer.prototype.enableMapTips = function(opts) {
     opts = opts || {};
     
-    var maptip = new FusionTipOverlay(null, null);
+    var maptip = new FusionTipOverlay(opts);
     var me = this;
     var currentLatLng = null;
     var currentCursor = null;
