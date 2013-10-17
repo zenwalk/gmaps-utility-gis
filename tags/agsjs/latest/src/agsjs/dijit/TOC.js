@@ -5,8 +5,9 @@
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
  */
 // change log: 
+// 2013-10-17: TOC.on('load') event style, clean up src and sample AMD style, JSAPI 3.7.
 // 2013-09-23: Secure service support: Integrated Windows, Token, or via Proxy (IWA or Token); listen to rootLayer onLoad if not already loaded.
-// 2013-09-05: Treat root FeatureLayer same as a layer inside a map service, i.e. move the symbol inline if there is only one symbol.
+// 2013-09-05: JSAPI 3.6. Treat root FeatureLayer same as a layer inside a map service, i.e. move the symbol inline if there is only one symbol.
 // 2013-08-05: nested groups fix, findTOCNode, onLoad event, css change to a new folder and in sample, added autoToggle option
 // 2013-07-24: FeatureLayer, JSAPI3.5, removed a few functionalities: uniqueValueRenderer generated checkboxes; dynamically created layer from TOC config.
 // 2012-08-21: fix dojo.fx load that caused IE has to refresh to see TOC.
@@ -23,30 +24,54 @@
 
 // reference: http://dojotoolkit.org/reference-guide/quickstart/writingWidgets.html
 
-define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Templated','dojox/gfx','dojo/fx/Toggler','dijit/form/Slider'], function(declare, _Widget,_Templated, gfx, Toggler){
-///dojo.provide('agsjs.dijit.TOC');
-///dojo.require("dojo.fx.Toggler");
-///dojo.require('dijit._Widget');
-///dojo.require('dijit._Templated');
-///dojo.require('dijit.form.Slider');
-
-/* for AMD load css directly.
-(function(){
-  var link = dojo.create("link", {
-    type: "text/css",
-    rel: "stylesheet",
-    href: dojo.moduleUrl("agsjs.dijit", "css/TOC.css")
-  });
-  dojo.doc.getElementsByTagName("head")[0].appendChild(link);
-}());*/
+define("agsjs/dijit/TOC", 
+['dojo/_base/declare',
+"dojo/has",
+"dojo/aspect",
+"dojo/_base/lang",
+"dojo/_base/array",
+"dojo/dom-construct",
+"dojo/dom-class",
+"dojo/dom-style",
+"dojo/dom-attr",
+ 'dijit/_Widget',
+ 'dijit/_Templated',
+ 'dojo/Evented',
+ 'dojox/gfx',
+ 'dojo/fx',
+ 'dojo/fx/Toggler',
+ "esri/symbols/jsonUtils",
+ "esri/geometry/scaleUtils",
+ "esri/config",
+ "esri/layers/ArcGISDynamicMapServiceLayer",
+ "esri/layers/ArcGISTiledMapServiceLayer",
+ "dojo/_base/sniff"], function(
+  declare, 
+  has,
+  aspect,
+  lang,
+  array,
+  domConstruct,
+  domClass,
+  domStyle,
+  domAttr,
+  _Widget,
+  _Templated,
+  Evented,
+  gfx,
+  coreFx, 
+  Toggler,
+  jsonUtils,
+  scaleUtils,
+  esriConfig,
+  ArcGISDynamicMapServiceLayer,
+  ArcGISTiledMapServiceLayer){
 
   /**
    * _TOCNode is a node, with 3 possible types: root layer|serviceLayer|legend
    * @private
    */
- /// dojo.declare("agsjs.dijit._TOCNode", [dijit._Widget, dijit._Templated], {
- var _TOCNode = declare([_Widget, _Templated],{
-    //templateString: dojo.cache('agsjs.dijit', 'templates/tocNode.html'),
+  var _TOCNode = declare([_Widget, _Templated],{
     templateString: '<div class="agsjsTOCNode">' +
     '<div data-dojo-attach-point="rowNode" data-dojo-attach-event="onclick:_onClick">' +
     '<span data-dojo-attach-point="contentNode" class="agsjsTOCContent">' +
@@ -65,11 +90,11 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
     data: null, // could be one of rootLayer, serviceLayer, or legend
     _childTOCNodes: [],
     constructor: function(params, srcNodeRef){
-      dojo.mixin(this, params);
+      lang.mixin(this, params);
     },
     // extension point. called automatically after widget DOM ready.
     postCreate: function(){
-      dojo.style(this.rowNode, 'paddingLeft', '' + this.rootLayerTOC.tocWidget.indentSize * this.rootLayerTOC._currentIndent + 'px');
+      domStyle.set(this.rowNode, 'paddingLeft', '' + this.rootLayerTOC.tocWidget.indentSize * this.rootLayerTOC._currentIndent + 'px');
       // using the availability of certain property to decide what kind of node to create.
       // priority is legend/serviceLayer/rootLayer
       this.data = this.legend || this.serviceLayer || this.rootLayer;
@@ -81,17 +106,21 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       } else if (this.rootLayer) {
         this._createRootLayerNode(this.rootLayer);
       }
-      if (this.containerNode && Toggler) {// dojo.fx.
+      if (this.containerNode && Toggler) {
         // if containerNode was not removed, it means this is some sort of group.
-        this.toggler = new Toggler({ //dojo.fx.
+        this.toggler = new Toggler({
           node: this.containerNode,
-          showFunc: dojo.fx.wipeIn,
-          hideFunc: dojo.fx.wipeOut
+          showFunc: coreFx.wipeIn,
+          hideFunc: coreFx.wipeOut
         })
       }
       if (!this._noCheckNode) {
         // typically _noCheckNode means it is a tiledlayer, or legend item that should not have a checkbox
         var chk;
+		//2013-10-17: do not want to load dijit form in this widget, 
+		//but seems no good way to check if it is already been loaded by external code
+		// using AMD style without rely on classic dijit namespace.
+		// maybe will require TOC constructor explicitly set if want to plain HTML checkbox or dijit.form.CheckBox
         if (dijit.form && dijit.form.CheckBox) {
           chk = new dijit.form.CheckBox({ // looks a bug in dijit. image not renderered until mouse over. bug was closed but still exist.
             // use attr('checked', true) not working either.
@@ -100,7 +129,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           chk.placeAt(this.checkContainerNode);
           chk.startup();
         } else {
-          chk = dojo.create('input', {
+          chk = domConstruct.create('input', {
             type: 'checkbox',
             checked: this.data.visible
           }, this.checkContainerNode);
@@ -111,7 +140,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       // if it is a group layer and no child layer is visible, then collapse
       if (this.data._subLayerInfos) {
         var noneVisible = true;
-        dojo.every(this.data._subLayerInfos, function(info){
+        array.every(this.data._subLayerInfos, function(info){
           if (info.visible) {
             noneVisible = false;
             return false;
@@ -124,21 +153,21 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       if (this.data.collapsed) 
         showChildren = false;
       if (this.iconNode && this.iconNode.src == this.blank) {
-        dojo.addClass(this.iconNode, 'dijitTreeExpando');
-        dojo.addClass(this.iconNode, showChildren ? 'dijitTreeExpandoOpened' : 'dijitTreeExpandoClosed');
+        domClass.add(this.iconNode, 'dijitTreeExpando');
+        domClass.add(this.iconNode, showChildren ? 'dijitTreeExpandoOpened' : 'dijitTreeExpandoClosed');
       }
 	  if (this.iconNode){
-	  	dojo.addClass(this.iconNode, 'agsjsTOCIcon');
+	  	domClass.add(this.iconNode, 'agsjsTOCIcon');
 	  }
       if (this.containerNode) {
-        dojo.style(this.containerNode, 'display', showChildren ? 'block' : 'none');
+        domStyle.set(this.containerNode, 'display', showChildren ? 'block' : 'none');
       }
 	  this.domNode.id = 'TOCNode_'+this.rootLayer.id + (this.serviceLayer?'_'+this.serviceLayer.id:'')+(this.legend?'_'+this.legend.id:'');
     },
     // root level node, layers directly under esri.Map
     _createRootLayerNode: function(rootLayer){
-      dojo.addClass(this.rowNode, 'agsjsTOCRootLayer');
-      dojo.addClass(this.labelNode, 'agsjsTOCRootLayerLabel');
+      domClass.add(this.rowNode, 'agsjsTOCRootLayer');
+      domClass.add(this.labelNode, 'agsjsTOCRootLayerLabel');
       var title = this.rootLayerTOC.config.title;
 	  // if it is '' then it means we do not title to be shown, i.e. not indent.
       if (title === '') {
@@ -159,24 +188,31 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
 	  }
       rootLayer.collapsed = this.rootLayerTOC.config.collapsed;
       if (this.rootLayerTOC.config.slider) {
-        this.sliderNode = dojo.create('div', {
+        this.sliderNode = domConstruct.create('div', {
           'class': 'agsjsTOCSlider'
         }, this.rowNode, 'last');//
-        this.slider = new dijit.form.HorizontalSlider({
-          showButtons: false,
-          value: rootLayer.opacity * 100,
-          intermediateChanges: true,
-          //style: "width:100%;padding:0 20px 0 20px",
-          tooltip: 'adjust transparency',
-          onChange: function(value){
-            rootLayer.setOpacity(value / 100);
-          },
-          layoutAlign: 'right'
-        });
-        this.slider.placeAt(this.sliderNode);
-        dojo.connect(rootLayer, 'onOpacityChange', this, function(op){
-          this.slider.setValue(op * 100);
-        });
+        var me = this;
+        require(["dijit/form/HorizontalSlider", "dojo/domReady!"], function(HorizontalSlider){
+					me.slider = new HorizontalSlider({
+						showButtons: false,
+						value: rootLayer.opacity * 100,
+						intermediateChanges: true,
+						//style: "width:100%;padding:0 20px 0 20px",
+						tooltip: 'adjust transparency',
+						onChange: function(value){
+							rootLayer.setOpacity(value / 100);
+						},
+						layoutAlign: 'right'
+					});
+					me.slider.placeAt(me.sliderNode);
+					
+					// the new on method lost context compare to the old-good connect.
+					//dojo .connect(rootLayer, 'onOpacityChange', this, function(op){
+					rootLayer.on('opacity-change', function(evt){
+						me.slider.setValue(evt.opacity * 100);
+					});
+				}
+		);
       }
       if (!this.rootLayerTOC.config.noLegend) {
         if (rootLayer._tocInfos) {
@@ -196,38 +232,39 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
             }
             var af = r.attributeField + (r.normalizationField ? '/' + r.normalizationField : '');
             af += (r.attributeField2 ? '/' + r.attributeField2 : '') + (r.attributeField3 ? '/' + r.attributeField3 : '');
-            var anode = dojo.create('div', {}, this.containerNode);
-            dojo.style(anode, 'paddingLeft', '' + this.rootLayerTOC.tocWidget.indentSize * (this.rootLayerTOC._currentIndent + 2) + 'px');
+            var anode = domConstruct.create('div', {}, this.containerNode);
+            domStyle.set(anode, 'paddingLeft', '' + this.rootLayerTOC.tocWidget.indentSize * (this.rootLayerTOC._currentIndent + 2) + 'px');
             anode.innerHTML = af;
             this._createChildrenNodes(legs, 'legend');
           } else {
             //this._createChildrenNodes([rootLayer.renderer], 'legend');
 			this._setIconNode(rootLayer.renderer, this.iconNode, this);
-			dojo.destroy(this.containerNode);
+			domConstruct.destroy(this.containerNode);
             this.containerNode = null;
           }
           
         } else {
-          dojo.style(this.iconNode, 'visibility', 'hidden');
+          domStyle.set(this.iconNode, 'visibility', 'hidden');
         }
       } else {
         // no legend means no need for plus/minus sign
-        dojo.style(this.iconNode, 'visibility', 'hidden');
+        domStyle.set(this.iconNode, 'visibility', 'hidden');
       }
       this.labelNode.innerHTML = title;
-      dojo.attr(this.rowNode, 'title', title);
+      //dojo .attr(this.rowNode, 'title', title);
+	  domAttr.set(this.rowNode, 'title', title);
     },
     // a layer inside a map service.
     _createServiceLayerNode: function(serviceLayer){
       // layer: layerInfo with nested subLayerInfos
       this.labelNode.innerHTML = serviceLayer.name;
       if (serviceLayer._subLayerInfos) {// group layer
-        dojo.addClass(this.rowNode, 'agsjsTOCGroupLayer');
-        dojo.addClass(this.labelNode, 'agsjsTOCGroupLayerLabel');
+        domClass.add(this.rowNode, 'agsjsTOCGroupLayer');
+        domClass.add(this.labelNode, 'agsjsTOCGroupLayerLabel');
         this._createChildrenNodes(serviceLayer._subLayerInfos, 'serviceLayer');
       } else {
-        dojo.addClass(this.rowNode, 'agsjsTOCServiceLayer');
-        dojo.addClass(this.labelNode, 'agsjsTOCServiceLayerLabel');
+        domClass.add(this.rowNode, 'agsjsTOCServiceLayer');
+        domClass.add(this.labelNode, 'agsjsTOCServiceLayerLabel');
         if (this.rootLayer.tileInfo) {
           // can not check on/off for tiled
           this._noCheckNode = true;
@@ -235,15 +272,15 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         if (serviceLayer._legends && !this.rootLayerTOC.config.noLegend) {
 		  if (serviceLayer._legends.length == 1) { 
             this.iconNode.src = this._getLegendIconUrl(serviceLayer._legends[0]);
-            dojo.destroy(this.containerNode);
+            domConstruct.destroy(this.containerNode);
             this.containerNode = null;
           } else {
             this._createChildrenNodes(serviceLayer._legends, 'legend');
           }
         } else {
-          dojo.destroy(this.iconNode);
+          domConstruct.destroy(this.iconNode);
           this.iconNode = null;
-          dojo.destroy(this.containerNode);
+          domConstruct.destroy(this.containerNode);
           this.containerNode = null;
         }
       }
@@ -253,8 +290,8 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
      */
     _createLegendNode: function(rendLeg){
       this._noCheckNode = true;
-      dojo.destroy(this.containerNode);
-      dojo.addClass(this.labelNode, 'agsjsTOCLegendLabel');
+      domConstruct.destroy(this.containerNode);
+      domClass.add(this.labelNode, 'agsjsTOCLegendLabel');
       this._setIconNode(rendLeg, this.iconNode, this);
       var label = rendLeg.label;
       if (rendLeg.label === undefined) {
@@ -278,20 +315,21 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
             w = rendLeg.symbol.width;
             h = rendLeg.symbol.height;
           }
-          var node = dojo.create('span', {});
-          dojo.style(node, {
+          var node = domConstruct.create('span', {});
+          domStyle.set(node, {
             'width': w + 'px',
             'height': h + 'px',
             'display': 'inline-block'
           });
-          dojo.place(node, iconNode, 'replace');
+          domConstruct.place(node, iconNode, 'replace');
           tocNode.iconNode = node;
-          var descriptors = esri.symbol.getShapeDescriptors(rendLeg.symbol);
+          var descriptors = jsonUtils.getShapeDescriptors(rendLeg.symbol);
           var mySurface = gfx.createSurface(node, w, h);//dojox.
           if (descriptors) {
-            if (dojo.isIE) {
+            //if (dojo .isIE) {
+			if (has('ie')){
 			// 2013076: see	http://mail.dojotoolkit.org/pipermail/dojo-interest/2009-December/041404.html
-              window.setTimeout(dojo.hitch(this, '_createSymbol', mySurface, descriptors, w, h), 500);
+              window.setTimeout(lang.hitch(this, '_createSymbol', mySurface, descriptors, w, h), 500);
             } else {
               this._createSymbol(mySurface, descriptors, w, h);
             }
@@ -326,7 +364,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       var src = legend.url;
       // in some cases NULL value may cause #legend != #of renderer entry.
       if (src != null && src.indexOf('data') == -1) {
-        if (!dojo.isIE && legend.imageData && legend.imageData.length > 0) {
+        if (!has('ie') && legend.imageData && legend.imageData.length > 0) {
           src = "data:image/png;base64," + legend.imageData;
         } else {
           if (src.indexOf('http') !== 0) {
@@ -335,8 +373,8 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           }
 		  if (this.rootLayer.credential && this.rootLayer.credential.token ){
 		  	src = src + "?token=" + this.rootLayer.credential.token;
-		  } else if (esri.config.defaults.io.alwaysUseProxy){
-		  	src = esri.config.defaults.io.proxyUrl+ "?"+src;
+		  } else if (esriConfig.defaults.io.alwaysUseProxy){
+		  	src = esriConfig.defaults.io.proxyUrl+ "?"+src;
 		  }
         }
       }
@@ -350,7 +388,6 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
     _createChildrenNodes: function(chdn, type){
       this.rootLayerTOC._currentIndent++;
       var c = [];
-      //dojo.forEach(chdn, function(chd) {
       for (var i = 0, n = chdn.length; i < n; i++) {
         var chd = chdn[i];
         var params = {
@@ -372,21 +409,21 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       this._childTOCNodes = c; // for refreshTOC use recursively.
       this.rootLayerTOC._currentIndent--;
     },
-    _toggleContainer: function(on){
-      if (dojo.hasClass(this.iconNode, 'dijitTreeExpandoClosed') ||
-      dojo.hasClass(this.iconNode, 'dijitTreeExpandoOpened')) {
+    _toggleContainer: function(o){
+      if (domClass.contains(this.iconNode, 'dijitTreeExpandoClosed') ||
+      domClass.contains(this.iconNode, 'dijitTreeExpandoOpened')) {
         // make sure its not clicked on legend swatch
-        if (on) {
-          dojo.removeClass(this.iconNode, 'dijitTreeExpandoClosed');
-          dojo.addClass(this.iconNode, 'dijitTreeExpandoOpened');
-        } else if (on === false) {
-          dojo.removeClass(this.iconNode, 'dijitTreeExpandoOpened');
-          dojo.addClass(this.iconNode, 'dijitTreeExpandoClosed');
+        if (o) {
+          domClass.remove(this.iconNode, 'dijitTreeExpandoClosed');
+          domClass.add(this.iconNode, 'dijitTreeExpandoOpened');
+        } else if (o === false) {
+          domClass.remove(this.iconNode, 'dijitTreeExpandoOpened');
+          domClass.add(this.iconNode, 'dijitTreeExpandoClosed');
         } else {
-          dojo.toggleClass(this.iconNode, 'dijitTreeExpandoClosed');
-          dojo.toggleClass(this.iconNode, 'dijitTreeExpandoOpened');
+          domClass.toggle(this.iconNode, 'dijitTreeExpandoClosed');
+          domClass.toggle(this.iconNode, 'dijitTreeExpandoOpened');
         }
-        if (dojo.hasClass(this.iconNode, 'dijitTreeExpandoOpened')) {
+        if (domClass.contains(this.iconNode, 'dijitTreeExpandoOpened')) {
           if (this.toggler) {
             this.toggler.show();
           } else {
@@ -401,7 +438,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         }
         // remember it's state for refresh
         if (this.rootLayer && !this.serviceLayer && !this.legend) {
-          this.rootLayerTOC.config.collapsed = dojo.hasClass(this.iconNode, 'dijitTreeExpandoClosed');
+          this.rootLayerTOC.config.collapsed = domClass.contains(this.iconNode, 'dijitTreeExpandoClosed');
         }
       }
     },
@@ -434,7 +471,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       if (this.checkNode) {
         var checked = this.legend ? this.legend.visible : this.serviceLayer ? this.serviceLayer.visible : this.rootLayer ? this.rootLayer.visible : false;
         if (this.checkNode.set) {
-          //checkNode is a dojo.forms.CheckBox
+          //checkNode is a dojo .forms.CheckBox
           this.checkNode.set('checked', checked);
         } else {
           // checkNode is a simple HTML element.
@@ -442,12 +479,12 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         }
       }
       if (this.serviceLayer) {
-        var scale = esri.geometry.getScale(this.rootLayerTOC.tocWidget.map);
+        var scale = scaleUtils.getScale(this.rootLayerTOC.tocWidget.map);//esri.geometry
         var outScale = (this.serviceLayer.maxScale != 0 && scale < this.serviceLayer.maxScale) || (this.serviceLayer.minScale != 0 && scale > this.serviceLayer.minScale);
         if (outScale) {
-          dojo.addClass(this.domNode, 'agsjsTOCOutOfScale');
+          domClass.add(this.domNode, 'agsjsTOCOutOfScale');
         } else {
-          dojo.removeClass(this.domNode, 'agsjsTOCOutOfScale');
+          domClass.remove(this.domNode, 'agsjsTOCOutOfScale');
         }
         if (this.checkNode) {
           if (this.checkNode.set) {
@@ -458,7 +495,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         }
       }
       if (this._childTOCNodes.length > 0) {
-        dojo.forEach(this._childTOCNodes, function(child){
+        array.forEach(this._childTOCNodes, function(child){
           child._adjustToState();
         });
       }
@@ -508,7 +545,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
     },
 	_setSubLayerVisibilitiesFromGroup: function(lay){
 		if (lay._subLayerInfos && lay._subLayerInfos.length > 0 ){
-			dojo.forEach(lay._subLayerInfos, function(info){
+			array.forEach(lay._subLayerInfos, function(info){
               info.visible = lay.visible;
 			  if (info._subLayerInfos && info._subLayerInfos.length > 0){
 			  	this._setSubLayerVisibilitiesFromGroup(info);
@@ -518,7 +555,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
 	},
     _getVisibleLayers: function(){
       var vis = [];
-      dojo.forEach(this.rootLayer.layerInfos, function(layerInfo){
+      array.forEach(this.rootLayer.layerInfos, function(layerInfo){
         if (layerInfo.subLayerIds) {
           // if a group layer is set to vis, all sub layer will be drawn regardless it's sublayer status
           return;
@@ -548,7 +585,6 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
 	}
   });
   
- /// dojo.declare('agsjs.dijit._RootLayerTOC', [dijit._Widget], {
  var _RootLayerTOC = declare([_Widget], {
     _currentIndent: 0,
     rootLayer: null,
@@ -566,8 +602,8 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
     },
     // extenstion point called by framework
     postCreate: function(){
-      if ((this.rootLayer instanceof (esri.layers.ArcGISDynamicMapServiceLayer) ||
-      this.rootLayer instanceof (esri.layers.ArcGISTiledMapServiceLayer))) {
+      if ((this.rootLayer instanceof (ArcGISDynamicMapServiceLayer) ||
+      this.rootLayer instanceof (ArcGISTiledMapServiceLayer))) {
         if (this._legendResponse) {
           this._createRootLayerTOC();
         } else {
@@ -596,8 +632,8 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         },
         callbackParamName: 'callback',
         handleAs: 'json',
-        load: dojo.hitch(this, this._processLegendInfo),
-        error: dojo.hitch(this, this._processLegendError)
+        load: lang.hitch(this, this._processLegendInfo),
+        error: lang.hitch(this, this._processLegendError)
       });
       
     },
@@ -612,12 +648,12 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         // generally id = index, this is to assure we find the right layer by ID
         // note: not all layers have an entry in legend response.
         var layerLookup = {};
-        dojo.forEach(layer.layerInfos, function(layerInfo){
+        array.forEach(layer.layerInfos, function(layerInfo){
           layerLookup['' + layerInfo.id] = layerInfo;
           // used for later reference.
           layerInfo.visible = layerInfo.defaultVisibility;
 		  if (layer.visibleLayers && !layerInfo.subLayerIds) {
-            if (dojo.indexOf(layer.visibleLayers, layerInfo.id) == -1) {
+            if (array.indexOf(layer.visibleLayers, layerInfo.id) == -1) {
               layerInfo.visible = false;
             } else {
               layerInfo.visible = true;
@@ -626,7 +662,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         });
         // attached legend Info to layer info
         if (json.layers) {
-          dojo.forEach(json.layers, function(legInfo){
+          array.forEach(json.layers, function(legInfo){
             var layerInfo = layerLookup['' + legInfo.layerId];
             if (layerInfo && legInfo.legend) {
               layerInfo._legends = legInfo.legend;
@@ -634,10 +670,10 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           });
         }
         // nest layer Infos
-        dojo.forEach(layer.layerInfos, function(layerInfo){
+        array.forEach(layer.layerInfos, function(layerInfo){
           if (layerInfo.subLayerIds) {
             var subLayerInfos = [];
-            dojo.forEach(layerInfo.subLayerIds, function(id, i){
+            array.forEach(layerInfo.subLayerIds, function(id, i){
               subLayerInfos[i] = layerLookup[id];
               subLayerInfos[i]._parentLayerInfo = layerInfo;
             });
@@ -648,7 +684,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         
         //finalize the tree structure in _tocInfos, skipping all sublayers because they were nested already.
         var tocInfos = [];
-        dojo.forEach(layer.layerInfos, function(layerInfo){
+        array.forEach(layer.layerInfos, function(layerInfo){
           if (layerInfo.parentLayerId == -1) {
             tocInfos.push(layerInfo);
           }
@@ -667,16 +703,20 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
 	      rootLayer: this.rootLayer
 	    });
 	    this._rootLayerNode.placeAt(this.domNode);
-	    this._visHandler = dojo.connect(this.rootLayer, "onVisibilityChange", this, "_adjustToState");
+	    //this._visHandler = dojo .connect(this.rootLayer, "onVisibilityChange", this, "_adjustToState");
+	    this._visHandler = this.rootLayer.on("visibility-change", lang.hitch(this, this._adjustToState));
 	    // this will make sure all TOC linked to a Map synchronized.
-	    if (this.rootLayer instanceof (esri.layers.ArcGISDynamicMapServiceLayer)) {
-	      this._visLayerHandler = dojo.connect(this.rootLayer, "setVisibleLayers", this, "_onSetVisibleLayers");
+	    if (this.rootLayer instanceof (ArcGISDynamicMapServiceLayer)) {
+	     // this._visLayerHandler = dojo .connect(this.rootLayer, "setVisibleLayers", this, "_onSetVisibleLayers");
+	     // 2013-10-17: in AMD aspect is used to replace connect to regular method, use recieveArgs=true to avoid argument shift and hitch to keep scope.
+		 this._visLayerHandler = aspect.after(this.rootLayer, "setVisibleLayers", lang.hitch(this, this._onSetVisibleLayers), true);
 	    }
 	    this._adjustToState();
 	    this._loaded = true;
 	    this.onLoad();
 	  } else {
-	  	dojo.connect(this.rootLayer, 'onLoad', dojo.hitch(this._createRootLayerTOC, this));
+	  	//dojo .connect(this.rootLayer, 'onLoad', dojo .hitch(this, this._createRootLayerTOC));
+		this.rootLayer.on('load', lang.hitch(this, this._createRootLayerTOC));
 	  }
 	  
     },
@@ -697,12 +737,12 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         rootLayer.setVisibleLayers(rootLayer.visibleLayers);
       }, timeout);
     },
-    _onSetVisibleLayers: function(visLayers, doNotRefresh){
+	 _onSetVisibleLayers: function(visLayers, doNotRefresh){
       // 2012-07-23:
       // set the actual individual layerInfo's visibility after service's setVisibility call.
       if (!doNotRefresh) {
-        dojo.forEach(this.rootLayer.layerInfos, function(layerInfo){
-          if (dojo.indexOf(visLayers, layerInfo.id) != -1) {
+        array.forEach(this.rootLayer.layerInfos, function(layerInfo){
+          if (array.indexOf(visLayers, layerInfo.id) != -1) {
             layerInfo.visible = true;
           } else if (!layerInfo._subLayerInfos) {
             layerInfo.visible = false;
@@ -715,14 +755,19 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       this._rootLayerNode._adjustToState();
     },
     destroy: function(){
-      dojo.disconnect(this._visHandler);
-      if (this._visLayerHandler) 
-        dojo.disconnect(this._visLayerHandler);
+      if (this._visHandler) {
+        this._visHandler.remove();
+        this._visHandler = null;
+      }
+      if (this._visLayerHandler) {
+        this._visLayerHandler.remove();
+        this._visLayerHandler = null;
+      }
+      
     }
   });
   
- // dojo.declare("agsjs.dijit.TOC", [dijit._Widget], {
-  var TOC = declare("agsjs.dijit.TOC", [_Widget],{
+  var TOC = declare("agsjs.dijit.TOC", [_Widget, Evented],{
     indentSize: 18,
     swatchSize: [30, 30],
     refreshDelay: 500,
@@ -759,7 +804,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
         throw new Error('no map defined in params for TOC');
       }
       this.layerInfos = params.layerInfos;
-      dojo.mixin(this, params);
+      lang.mixin(this, params);
     },
     // extension point
     postCreate: function(){
@@ -771,7 +816,7 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
     onLoad: function(){
     },
     _createTOC: function(){
-      dojo.empty(this.domNode);
+      domConstruct.empty(this.domNode);
       this._rootLayerTOCs = [];
       for (var i = 0, c = this.layerInfos.length; i < c; i++) {
         // attach a title to rootLayer layer itself
@@ -782,17 +827,17 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
           tocWidget: this
         });
 		this._rootLayerTOCs.push(rootLayerTOC);
-        this._checkLoadHandler = dojo.connect(rootLayerTOC, 'onLoad', this, '_checkLoad');
+        this._checkLoadHandler = rootLayerTOC.on('load', lang.hitch(this, '_checkLoad'));//dojo .connect(rootLayerTOC, 'onLoad', this, '_checkLoad');
         rootLayerTOC.placeAt(this.domNode);
         this._checkLoad();
       }
       if (!this._zoomHandler) {
-        this._zoomHandler = dojo.connect(this.map, "onZoomEnd", this, "_adjustToState");
+        this._zoomHandler = this.map.on('zoom-end', lang.hitch(this, "_adjustToState"));
       }
     },
     _checkLoad: function(){
       var loaded = true;
-      dojo.every(this._rootLayerTOCs, function(widget){
+      array.every(this._rootLayerTOCs, function(widget){
         if (!widget._loaded) {
           loaded = false;
           return false;
@@ -801,10 +846,11 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       });
       if (loaded) {
         this.onLoad();
+		this.emit('load');
       }
     },
     _adjustToState: function(){
-      dojo.forEach(this._rootLayerTOCs, function(widget){
+      array.forEach(this._rootLayerTOCs, function(widget){
         widget._adjustToState();
       });
     },
@@ -815,9 +861,9 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
       this._createTOC();
     },
     destroy: function(){
-      dojo.disconnect(this._zoomHandler);
+      this._zoomHandler.remove();
       this._zoomHandler = null;
-      dojo.disconnect(this._checkLoadHandler);
+      this._checkLoadHandler.remove();
       this._checkLoadHandler = null;
     },
 	/**
@@ -828,14 +874,14 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare','dijit/_Widget','dijit/_Template
 	 */
 	findTOCNode: function(layer, serviceLayerId){
 		var w;
-		dojo.every(this._rootLayerTOCs, function(widget){
+		array.every(this._rootLayerTOCs, function(widget){
 			if(widget.rootLayer == layer){
 				w = widget;
 				return false;
 			}
 			return true;
 		});
-		if (serviceLayerId !== null && serviceLayerId !== undefined && w.rootLayer instanceof (esri.layers.ArcGISDynamicMapServiceLayer)) {
+		if (serviceLayerId !== null && serviceLayerId !== undefined && w.rootLayer instanceof (ArcGISDynamicMapServiceLayer)) {
         	return w._rootLayerNode._findTOCNode(serviceLayerId);
 		} else if (w){
 			return w._rootLayerNode;
