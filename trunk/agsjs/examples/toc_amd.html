@@ -7,8 +7,8 @@
         <title>TOC</title>
         <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.7/js/dojo/dijit/themes/claro/claro.css">
         <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.7/js/esri/css/esri.css" />
-		<link rel="stylesheet" type="text/css" href="http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs/css/agsjs.css" />
-		<style>
+        <link rel="stylesheet" type="text/css" href="../src/agsjs/css/agsjs.css" />
+        <style>
             html, body {
                 height: 98%;
                 width: 98%;
@@ -25,89 +25,75 @@
             
             /* this line hide layers when out of scale for the inline TOC */
             .agsjsTOCOutOfScale {
-            /*  display: none;*/
+                /*  display: none;*/
             }
         </style>
         <script type="text/javascript">
-        	// helpful for understanding dojoConfig.packages vs. dojoConfig.paths:
-      // http://www.sitepen.com/blog/2013/06/20/dojo-faq-what-is-the-difference-packages-vs-paths-vs-aliases/
-      var dojoConfig = { 
-        paths: {
-          //if you want to host on your own server, download from
-                //http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/
-                // and put in folders then use path like: 
-                agsjs: location.pathname.replace(/\/[^/]+$/, '') + '/../src/agsjs' 
-                // use /src/ for debug and /build/ for production.
-                // you can also use online version using the following location, 
-                // however please noted googlecode.com is not a true CDN and is not fast and may not be available.
-                // also, it is recommended to use a particular version from /tags/agsjs/<version>/
-                // in a production app to avoid unexpected results.
-                //"agsjs": "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/2.06/build/agsjs"
-			    //"agsjs": "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs"
-			    //"agsjs": "http://gmaps-utility-gis.googlecode.com/svn/trunk/agsjs/build/agsjs"
-                //agsjs: "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs"
-        }
-      };
-           
+                    	// helpful for understanding dojoConfig.packages vs. dojoConfig.paths:
+                  // http://www.sitepen.com/blog/2013/06/20/dojo-faq-what-is-the-difference-packages-vs-paths-vs-aliases/
+                  var dojoConfig = { 
+                    paths: {
+                      //if you want to host on your own server, download and put in folders then use path like: 
+                            agsjs: location.pathname.replace(/\/[^/]+$/, '') + '/../src/agsjs' 
+                            // use /src/ for debug and /build/ for production.
+                            // you can also use online version using the following location, 
+                            // however please noted googlecode.com is not a true CDN and is not fast and may not be available.
+                            // also, it is recommended to use a particular version from /tags/agsjs/<version>/
+                            // in a production app to avoid unexpected results.
+                            //"agsjs": "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/2.06/build/agsjs"
+            			    //"agsjs": "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs"
+            			    //"agsjs": "http://gmaps-utility-gis.googlecode.com/svn/trunk/agsjs/build/agsjs"
+                            //agsjs: "http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/build/agsjs"
+                    }
+                  };
+                       
+                    
         </script>
-        <script src="//js.arcgis.com/3.7/"></script>
+        <script src="//js.arcgis.com/3.7/">
+        </script>
         <script type="text/javascript">
             var map, toc, dynaLayer1, dynaLayer2, featLayer1;
             
-            require([
-			"dojo/_base/connect", 
-			"dojo/parser", 
-			"agsjs/dijit/TOC", 
-			"esri/map",
-			"esri/geometry/Extent", 
-			"esri/layers/FeatureLayer", 
-			"esri/layers/ArcGISTiledMapServiceLayer",
-			"esri/layers/ArcGISDynamicMapServiceLayer",
-			"dijit/layout/BorderContainer", 
-			"dijit/layout/ContentPane",
-			"dojo/fx", 
-			"dojo/domReady!"], function(
-			connect, 
-			parser, 
-			TOC, 
-			Map, 
-			Extent,
-			FeatureLayer, 
-			ArcGISTiledMapServiceLayer, 
-			ArcGISDynamicMapServiceLayer){
+            require(["dojo/_base/connect",
+			 "dojo/dom", "dojo/parser","dojo/on", "dojo/_base/Color",
+			 "esri/map",
+			 "esri/geometry/Extent", 
+			 "esri/layers/FeatureLayer",
+			 "esri/layers/ArcGISTiledMapServiceLayer", 
+			 "esri/layers/ArcGISDynamicMapServiceLayer",
+			 "esri/symbols/SimpleFillSymbol",
+			 "esri/renderers/ClassBreaksRenderer",
+			 "agsjs/dijit/TOC", 
+			 "dijit/layout/BorderContainer", 
+			 "dijit/layout/ContentPane", 
+			 "dojo/fx", "dojo/domReady!"], function(connect,  dom, parser, on,Color,
+			 Map, Extent, FeatureLayer, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, 
+			 SimpleFillSymbol,ClassBreaksRenderer,
+			 TOC){
             
               // call the parser to create the dijit layout dijits
               parser.parse(); // note djConfig.parseOnLoad = false;
-              var initialExtent = new Extent({
-                xmin: -9549126.170705408,
-                ymin: 4612089.574063576,
-                xmax: -9542304.165930964,
-                ymax: 4617851.015070564,
-                "spatialReference": {
-                  "wkid": 102100
-                }
-              });
+             
               map = new Map("map", {
-                extent: initialExtent
+                basemap: "topo",
+                center: [-85.75, 38.25],
+                zoom: 13
               });
               
-              var basemap = new ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer");
-              map.addLayer(basemap);
-              
-              dynaLayer1 = new ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer", {
+			  dynaLayer1 = new ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer", {
                 opacity: 0.8
               });
-              
               featLayer1 = new FeatureLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1", {
                 mode: FeatureLayer.MODE_SNAPSHOT,
-                outFields: ["POP07_SQMI"]//,
+                outFields: ["POP07_SQMI"]
               });
               featLayer1.setDefinitionExpression("STCOFIPS='21111'"); //Louisville, KY
-              var h = map.on('layers-add-result', function(results){
+             
+			  map.on('layers-add-result', function(evt){
                 // overwrite the default visibility of service.
                 // TOC will honor the overwritten value.
                 dynaLayer1.setVisibleLayers([2, 5, 8, 11]);
-                try {
+                //try {
                   toc = new TOC({
                     map: map,
                     layerInfos: [{
@@ -116,90 +102,82 @@
                     }, {
                       layer: dynaLayer1,
                       title: "DynamicMapServiceLayer1"
-                      // collapsed: false, // whether this root layer should be collapsed initially, default false.
+                      //collapsed: false, // whether this root layer should be collapsed initially, default false.
                       //slider: false // whether to display a transparency slider.
                     }]
                   }, 'tocDiv');
                   toc.startup();
-                  var h = toc.on('load', function(){
+                  toc.on('load', function(){
                     if (console) 
                       console.log('TOC loaded');
-                    dojo.byId("ChangeFeatureRenderer").disabled = false;
-					dojo.byId("SetVisibleLayersProgramatically").disabled = false;
-					dojo.byId("FindNodeByLayer").disabled = false;
-					dojo.byId("InsertNewLayer").disabled = false;
+                    dom.byId("ChangeFeatureRenderer").disabled = false;
+                    dom.byId("SetVisibleLayersProgramatically").disabled = false;
+                    dom.byId("FindNodeByLayer").disabled = false;
+                    dom.byId("InsertNewLayer").disabled = false;
                   });
-                 
-                } catch (e) {
-                  alert(e);
+                //} catch (e) {  alert(e); }
+              });
+              map.addLayers([dynaLayer1, featLayer1]);
+			  
+              on(dom.byId("ChangeFeatureRenderer"), 'click', function(evt){
+                //based on http://help.arcgis.com/EN/webapi/javascript/arcgis/jssamples/renderer_class_breaks.html
+                var symbol = new SimpleFillSymbol();
+                symbol.setColor(new Color([150, 150, 150, 0.5]));
+                var renderer = new ClassBreaksRenderer(symbol, "POP07_SQMI");
+                renderer.addBreak(0, 25, new SimpleFillSymbol().setColor(new Color([56, 168, 0, 0.5])));
+                renderer.addBreak(25, 75, new SimpleFillSymbol().setColor(new Color([139, 209, 0, 0.5])));
+                renderer.addBreak(75, 175, new SimpleFillSymbol().setColor(new Color([255, 255, 0, 0.5])));
+                renderer.addBreak(175, 400, new SimpleFillSymbol().setColor(new Color([255, 128, 0, 0.5])));
+                renderer.addBreak(400, Infinity, new SimpleFillSymbol().setColor(new Color([255, 0, 0, 0.5])));
+                featLayer1.setRenderer(renderer);
+                featLayer1.redraw();
+                toc.refresh();
+              });
+			  
+			  on(dom.byId("SetVisibleLayersProgramatically"),'click', function(evt){
+			  	dynaLayer1.setVisibleLayers([8, 17, 18, 19, 20]);
+			  });
+			  
+              on(dom.byId("FindNodeByLayer"), 'click', function(evt){
+                // 0 is the layerId of group "Public Safety"
+                toc.findTOCNode(dynaLayer1, 0).collapse();
+                // 	12 is the id of layer "Damage Assessment"
+                toc.findTOCNode(dynaLayer1, 12).hide();
+              });
+			  
+              on(dom.byId("InsertNewLayer"), 'click', function(evt){
+                if (dynaLayer2 == null) {
+                  dynaLayer2 = new ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer", {
+                    opacity: 0.8
+                  });
+                  var h = map.on('layer-add-result', function(evt){
+                    toc.layerInfos.splice(1, 0, {
+                      layer: dynaLayer2,
+                      title: "DynamicMapServiceLayer2",
+                      // collapsed: true, // whether this root layer should be collapsed initially, default false.
+                      slider: true, // whether to display a transparency slider.
+                      autoToggle: false //whether to automatically collapse when turned off, and expand when turn on for groups layers. default true. 
+                    });
+                    toc.refresh();
+                    h.remove();
+					dom.byId("SetOpacity").disabled=false;
+                  });
+                  map.addLayer(dynaLayer2);
+				  
                 }
               });
-              
-              map.addLayers([dynaLayer1, featLayer1]);
-              
-              
-              //resize the map when the browser resizes - view the 'Resizing and repositioning the map' section in
-              //the following help topic for more details http://help.esri.com/EN/webapi/javascript/arcgis/help/jshelp_start.htm#jshelp/inside_guidelines.htm      
-              var resizeTimer;
-              map.on('load', function(theMap){
-                dojo.connect(dijit.byId('map'), 'resize', function(){ //resize the map if the div is resized
-                  clearTimeout(resizeTimer);
-                  resizeTimer = setTimeout(function(){
-                    map.resize();
-                    map.reposition();
-                  }, 500);
-                });
+              on(dom.byId("SetOpacity"), 'click', function(evt){
+                if (dynaLayer2 != null) {
+                  dynaLayer2.setOpacity(0.2);
+                }
               });
-              
-            }
-            );
-            function testChangeFeatureLayerRenderer(){
-              //based on http://help.arcgis.com/EN/webapi/javascript/arcgis/jssamples/renderer_class_breaks.html
-              var symbol = new esri.symbol.SimpleFillSymbol();
-              symbol.setColor(new dojo.Color([150, 150, 150, 0.5]));
-              var renderer = new esri.renderer.ClassBreaksRenderer(symbol, "POP07_SQMI");
-              renderer.addBreak(0, 25, new esri.symbol.SimpleFillSymbol().setColor(new dojo.Color([56, 168, 0, 0.5])));
-              renderer.addBreak(25, 75, new esri.symbol.SimpleFillSymbol().setColor(new dojo.Color([139, 209, 0, 0.5])));
-              renderer.addBreak(75, 175, new esri.symbol.SimpleFillSymbol().setColor(new dojo.Color([255, 255, 0, 0.5])));
-              renderer.addBreak(175, 400, new esri.symbol.SimpleFillSymbol().setColor(new dojo.Color([255, 128, 0, 0.5])));
-              renderer.addBreak(400, Infinity, new esri.symbol.SimpleFillSymbol().setColor(new dojo.Color([255, 0, 0, 0.5])));
-              featLayer1.setRenderer(renderer);
-              featLayer1.redraw();
-              toc.refresh();
-            }
+            });
+			 
+			
+          
+           
             
-            function testSetVisibleLayersProgramatically(){
-              dynaLayer1.setVisibleLayers([8, 17, 18, 19, 20])
-            }
             
-            function testInsertNewLayer(){
-              if (dynaLayer2 == null) {
-                dynaLayer2 = new esri.layers.ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer", {
-                  opacity: 0.8
-                });
-                var h = dojo.connect(map, 'onLayerAddResult', function(result){
-                  toc.layerInfos.splice(1, 0, {
-                    layer: dynaLayer2,
-                    title: "DynamicMapServiceLayer2",
-                    // collapsed: true, // whether this root layer should be collapsed initially, default false.
-                    slider: true, // whether to display a transparency slider.
-                    autoToggle: false //whether to automatically collapse when turned off, and expand when turn on for groups layers. default true. 
-                   });
-                  toc.refresh();
-                  dojo.disconnect(h);
-                });
-                map.addLayer(dynaLayer2);
-              }
-            }
-            
-            function testFindNodeByLayer(){
-              // 0 is the layerId of group "Public Safety"
-              toc.findTOCNode(dynaLayer1, 0).collapse();
-              // 	12 is the id of layer "Damage Assessment"
-              toc.findTOCNode(dynaLayer1, 12).hide();
-            }
-            
-         
         </script>
     </head>
     <body class="claro">
@@ -207,8 +185,8 @@
             <div id="header" data-dojo-type="dijit/layout/ContentPane" region="top">
                 <div>
                     <b>Table Of Content (TOC/Legend) Widget</b>
-                    <a href='toc.html'>Classic Style </a>
-                    | <a href='toc_amd.html'>AMD style</a>
+                    <a href='toc_classic.html'>Classic Style </a>
+                    | <a href='toc.html'>AMD style</a>
                     <div style="right:20px;position: absolute">
                         <a href="../docs/toc/examples.html">Documentation</a>
                     </div>
@@ -219,30 +197,37 @@
                     </li>
                     <li>
                         Click 
-                        <button id="ChangeFeatureRenderer" disabled="disabled" onclick="testChangeFeatureLayerRenderer()">
+                        <button id="ChangeFeatureRenderer" disabled="disabled">
                             ChangeFeatureRenderer
                         </button>, notice TOC refreshed to reflect the new renderer of FeatureLayer. 
                     </li>
                     <li>
                         Click 
-                        <button id="SetVisibleLayersProgramatically" disabled="disabled" onclick="testSetVisibleLayersProgramatically()">
+                        <button id="SetVisibleLayersProgramatically" disabled="disabled"">
                             SetVisibleLayersProgramatically
                         </button>
                         to programatically turn layer on/off, notice TOC automatically sync with model(no refresh needed).
                     </li>
                     <li>
                         Click 
-                        <button id="FindNodeByLayer" disabled="disabled" onclick="testFindNodeByLayer()">
+                        <button id="FindNodeByLayer" disabled="disabled">
                             FindNodeByLayer
                         </button>
                         to programatically find node for layer inside a map service, then either hide (layer id=12,"Damage Assessment") or collapse (layer id=0,"Public Safety") it.
                     </li>
                     <li>
                         Click 
-                        <button id="InsertNewLayer" disabled="disabled" onclick="testInsertNewLayer()">
+                        <button id="InsertNewLayer" disabled="disabled">
                             InsertNewLayer
                         </button>
                         to programmtically insert a layer then refresh TOC.
+                    </li>
+					<li>
+                        Click 
+                        <button id="SetOpacity" disabled="disabled">
+                            SetOpacityProgramitically
+                        </button>
+                        to programmtically set transparency of a layer with slider enabled.
                     </li>
                 </ul>
             </div>
@@ -255,4 +240,3 @@
         </div>
     </body>
 </html>
-
