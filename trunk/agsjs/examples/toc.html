@@ -106,6 +106,18 @@
                     dom.byId("FindNodeByLayer").disabled = false;
                     dom.byId("InsertNewLayer").disabled = false;
                   });
+				  //2014-04-04: added event
+				  toc.on('toc-node-checked', function(evt){
+				  	if (console) {
+						console.log("TOCNodeChecked, rootLayer:"
+						+(evt.rootLayer?evt.rootLayer.id:'NULL')
+						+", serviceLayer:"+(evt.serviceLayer?evt.serviceLayer.id:'NULL')
+						+ " Checked:"+evt.checked);
+						if (evt.checked && evt.rootLayer && evt.serviceLayer){
+							// evt.rootLayer.setVisibleLayers([evt.serviceLayer.id])
+						}
+					}
+				  });
                 //} catch (e) {  alert(e); }
               });
               map.addLayers([dynaLayer1, featLayer1]);
