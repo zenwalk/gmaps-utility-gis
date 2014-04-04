@@ -5,6 +5,7 @@
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
  */
 // change log: 
+// 2014-04-04: fire event 'toc-node-checked' (classic onTOCNodeChecked) on click on check box. {rootLayer,serviceLayer, checked}
 // 2013-10-17: TOC.on('load') event style, clean up src and sample AMD style, JSAPI 3.7.
 // 2013-09-23: Secure service support: Integrated Windows, Token, or via Proxy (IWA or Token); listen to rootLayer onLoad if not already loaded.
 // 2013-09-05: JSAPI 3.6. Treat root FeatureLayer same as a layer inside a map service, i.e. move the symbol inline if there is only one symbol.
@@ -533,6 +534,17 @@ define("agsjs/dijit/TOC",
         } else if (this.rootLayer) {
           this.rootLayer.setVisibility(this.checkNode && this.checkNode.checked);
         }
+		// 2014-04-04: emit event with infomation about the root layer, service layer, and on/off
+		/**
+		 * @event
+		 */
+		this.rootLayerTOC.tocWidget.emit('toc-node-checked', {
+			rootLayer:this.rootLayer,
+			serviceLayer: this.serviceLayer,
+			checked: this.checkNode.checked
+		});
+		// classic style.
+		this.rootLayerTOC.tocWidget.onTOCNodeChecked(this.rootLayer, this.serviceLayer, this.checkNode.checked);
         // automatically expand/collapse?
 		if (this.rootLayerTOC.config.autoToggle !== false){
 			this._toggleContainer(this.checkNode && this.checkNode.checked);
@@ -724,8 +736,8 @@ define("agsjs/dijit/TOC",
 	 * @event
 	 */
     onLoad: function(){
-    
     },
+	
     _refreshLayer: function(){
       var rootLayer = this.rootLayer;
       var timeout = this.tocWidget.refreshDelay;
@@ -781,6 +793,7 @@ define("agsjs/dijit/TOC",
      * @property {Boolean} [slider] whether to show slider for each rootLayer to adjust transparency. default is false.
      * @property {Boolean} [noLegend] whether to skip the legend, and only display layers. default is false.
      * @property {Boolean} [collapsed] whether to collapsed the rootLayer layer at beginning. default is false, which means expand if visible, collapse if not.
+     * @property {Boolean} [suppressGroup] whether to supress the automatic action regarding groups: sync parent/child layer status.
      *
      */
     /**
@@ -790,6 +803,7 @@ define("agsjs/dijit/TOC",
      * @property {Object[]} [layerInfos] a subset of layers in the map to show in TOC. each object is a {@link TOCLayerInfo}
      * @property {Number} [indentSize] indent size of tree nodes. default to 18.
      */
+	
     /** 
      * Create a Table Of Contents (TOC)
      * @name TOC
@@ -804,6 +818,8 @@ define("agsjs/dijit/TOC",
         throw new Error('no map defined in params for TOC');
       }
       this.layerInfos = params.layerInfos;
+	  this.indentSize = params.indentSize || 18;
+	  
       lang.mixin(this, params);
     },
     // extension point
@@ -815,6 +831,12 @@ define("agsjs/dijit/TOC",
      */
     onLoad: function(){
     },
+	/**@event
+	 * 
+	 */
+	onTOCNodeChecked: function(rootLayer, serviceLayer, checked){
+		
+	},
     _createTOC: function(){
       domConstruct.empty(this.domNode);
       this._rootLayerTOCs = [];

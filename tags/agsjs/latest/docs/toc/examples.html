@@ -13,7 +13,7 @@
             <a name="Top"></a>
             <h1><a></a>Table of Contents(TOC) Widget for ArcGIS JavaScript API: Examples</h1>
             <p>
-                <b><a href="reference.html">Class References</a> | <a href="../../examples/toc.html">Live Example </a></b>
+                <b><a href="../../examples/toc.html">Live Example </a></b>
             </p>
         </div>
         <div>
@@ -87,14 +87,12 @@
  &lt;link rel="stylesheet" type="text/css" href="../src/agsjs/css/agsjs.css" />
 				</pre>
 			<p>	Then inside the section to define djConfig: (make sure the path to folder agsjs is correct)<pre class="prettyprint">
-             var djConfig = {
-              parseOnLoad: true,
-              packages: [{
-                "name": "agsjs",
-                "location": location.pathname.replace(/\/[^/]+$/, "")+'/path/to/agsjs'
-              }]
-            };
-            };</pre>
+             var dojoConfig = { 
+                    paths: {
+                      //if you want to host on your own server, download and put in folders then use path like: 
+                            agsjs: location.pathname.replace(/\/[^/]+$/, '') + '/../src/agsjs' 
+                        }
+                  };</pre>
 			
 				
         </p>
@@ -102,11 +100,23 @@
             Then in the require section:
             
             <pre class="prettyprint">
-             ...
-            dojo.require("esri.map");
-            ...
-            dojo.require("dojo.fx");// needed since jsapi3.0
-            dojo.require("agsjs.dijit.TOC");
+             require(["dojo/_base/connect",
+			 "dojo/dom", "dojo/parser","dojo/on", "dojo/_base/Color",
+			 "esri/map",
+			 "esri/geometry/Extent", 
+			 "esri/layers/FeatureLayer",
+			 "esri/layers/ArcGISTiledMapServiceLayer", 
+			 "esri/layers/ArcGISDynamicMapServiceLayer",
+			 "esri/symbols/SimpleFillSymbol",
+			 "esri/renderers/ClassBreaksRenderer",
+			 "agsjs/dijit/TOC", 
+			 "dijit/layout/BorderContainer", 
+			 "dijit/layout/ContentPane", 
+			 "dojo/fx", "dojo/domReady!"], function(connect,  dom, parser, on,Color,
+			 Map, Extent, FeatureLayer, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, 
+			 SimpleFillSymbol,ClassBreaksRenderer,
+			 TOC){
+          
               </pre>
         </p>
         </div>
@@ -114,8 +124,12 @@
             <h2>Add a TOC widget</h2>
             <p>
                 After the script is loaded, in the initilization code, <pre class="prettyprint">
-           dojo.connect(map, 'onLayersAddResult', function(results) {
-                var toc = new agsjs.dijit.TOC({
+           map.on('layers-add-result', function(evt){
+                // overwrite the default visibility of service.
+                // TOC will honor the overwritten value.
+                dynaLayer1.setVisibleLayers([2, 5, 8, 11]);
+                //try {
+                  toc = new TOC({
                     map: map,
                     layerInfos: [{
                       layer: featLayer1,
@@ -123,11 +137,8 @@
                     }, {
                       layer: dynaLayer1,
                       title: "DynamicMapServiceLayer1"
-                    }, {
-                      layer: dynaLayer2,
-                      title: "DynamicMapServiceLayer2",
-                      collapsed: true, // whether this root layer should be collapsed initially, default false.
-                      slider: true // whether to display a transparency slider.
+                      //collapsed: false, // whether this root layer should be collapsed initially, default false.
+                      //slider: false // whether to display a transparency slider.
                     }]
                   }, 'tocDiv');
                   toc.startup();
@@ -149,6 +160,29 @@
         </pre>
             </p>
         </div>
+		 <div>
+            <h2>Events</h2>
+            <p>
+              TOC widget fire the following events:
+			  <code>load</code>, <code>toc-node-checked({rootLayer,serviceLayer,checked})</code>.
+			   <pre class="prettyprint">
+           toc.on('load', function(){
+                 if (console) 
+                    console.log('TOC loaded');
+           });
+		  toc.on('toc-node-checked', function(evt){
+			  if (console) {
+						console.log("TOCNodeChecked, rootLayer:"
+						+(evt.rootLayer?evt.rootLayer.id:'NULL')
+						+", serviceLayer:"+(evt.serviceLayer?evt.serviceLayer.id:'NULL')
+						+ " Checked:"+evt.checked);
+				}
+		 });
+            
+        </pre>
+            </p>
+        </div>
+		
         <p>
             That&#39;s it! <a href="../../examples/toc.html">View example </a>. 
         </p>

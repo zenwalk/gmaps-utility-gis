@@ -118,6 +118,15 @@
 					dojo.byId("FindNodeByLayer").disabled = false;
 					dojo.byId("InsertNewLayer").disabled = false;
                   });
+				  dojo.connect(toc, 'onTOCNodeChecked', function(rootLayer,serviceLayer, checked){
+				  if (console) {
+						console.log("TOCNodeChecked, rootLayer:"
+						+(rootLayer?rootLayer.id:'NULL')
+						+", serviceLayer:"+(serviceLayer?serviceLayer.id:'NULL')
+						+ " Checked:"+checked);
+						
+					}
+				  });
                   dojo.disconnect(h);
                 } catch (e) {
                   alert(e);
