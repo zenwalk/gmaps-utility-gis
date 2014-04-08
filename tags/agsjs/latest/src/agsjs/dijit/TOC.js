@@ -5,6 +5,7 @@
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
  */
 // change log: 
+// 2014-04-08: in sample: js API 3.8, added handle node check event
 // 2014-04-04: fire event 'toc-node-checked' (classic onTOCNodeChecked) on click on check box. {rootLayer,serviceLayer, checked}
 // 2013-10-17: TOC.on('load') event style, clean up src and sample AMD style, JSAPI 3.7.
 // 2013-09-23: Secure service support: Integrated Windows, Token, or via Proxy (IWA or Token); listen to rootLayer onLoad if not already loaded.
@@ -359,7 +360,6 @@ define("agsjs/dijit/TOC",
         dx: w / 2,
         dy: h / 2
       });
-	 
     },
     _getLegendIconUrl: function(legend){
       var src = legend.url;
@@ -477,6 +477,10 @@ define("agsjs/dijit/TOC",
         } else {
           // checkNode is a simple HTML element.
           this.checkNode.checked = checked;
+        }
+		// 2014-04-08: automatically expand/collapse?
+		if (this.rootLayerTOC.config.autoToggle !== false){
+			this._toggleContainer(this.checkNode && this.checkNode.checked);
         }
       }
       if (this.serviceLayer) {
@@ -835,9 +839,9 @@ define("agsjs/dijit/TOC",
 	 * 
 	 */
 	onTOCNodeChecked: function(rootLayer, serviceLayer, checked){
-		
 	},
-    _createTOC: function(){
+	
+	_createTOC: function(){
       domConstruct.empty(this.domNode);
       this._rootLayerTOCs = [];
       for (var i = 0, c = this.layerInfos.length; i < c; i++) {

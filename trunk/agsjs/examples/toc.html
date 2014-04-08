@@ -5,8 +5,8 @@
         <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9" />
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
         <title>TOC</title>
-        <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.7/js/dojo/dijit/themes/claro/claro.css">
-        <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.7/js/esri/css/esri.css" />
+        <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.8/js/dojo/dijit/themes/claro/claro.css">
+        <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.8/js/esri/css/esri.css" />
         <link rel="stylesheet" type="text/css" href="../src/agsjs/css/agsjs.css" />
         <style>
             html, body {
@@ -40,7 +40,7 @@
                        
                     
         </script>
-        <script src="//js.arcgis.com/3.7/">
+        <script src="//js.arcgis.com/3.8/">
         </script>
         <script type="text/javascript">
             var map, toc, dynaLayer1, dynaLayer2, featLayer1;
@@ -54,7 +54,7 @@
 			 "esri/layers/ArcGISDynamicMapServiceLayer",
 			 "esri/symbols/SimpleFillSymbol",
 			 "esri/renderers/ClassBreaksRenderer",
-			 "agsjs/dijit/TOC", 
+			 "agsjs/dijit/TOC",
 			 "dijit/layout/BorderContainer", 
 			 "dijit/layout/ContentPane", 
 			 "dojo/fx", "dojo/domReady!"], function(connect,  dom, parser, on,Color,
@@ -105,19 +105,10 @@
                     dom.byId("SetVisibleLayersProgramatically").disabled = false;
                     dom.byId("FindNodeByLayer").disabled = false;
                     dom.byId("InsertNewLayer").disabled = false;
+					dom.byId("HandleNodeCheckEvent").disabled = false;
+					
                   });
-				  //2014-04-04: added event
-				  toc.on('toc-node-checked', function(evt){
-				  	if (console) {
-						console.log("TOCNodeChecked, rootLayer:"
-						+(evt.rootLayer?evt.rootLayer.id:'NULL')
-						+", serviceLayer:"+(evt.serviceLayer?evt.serviceLayer.id:'NULL')
-						+ " Checked:"+evt.checked);
-						if (evt.checked && evt.rootLayer && evt.serviceLayer){
-							// evt.rootLayer.setVisibleLayers([evt.serviceLayer.id])
-						}
-					}
-				  });
+				  
                 //} catch (e) {  alert(e); }
               });
               map.addLayers([dynaLayer1, featLayer1]);
@@ -174,13 +165,22 @@
                   dynaLayer2.setOpacity(0.2);
                 }
               });
+			  on(dom.byId("HandleNodeCheckEvent"), 'click', function(evt){
+				  toc.on('toc-node-checked', function(evt){
+				  	// when check on one layer, turn off everything else on the public safety service.
+					if (evt.checked && evt.rootLayer && evt.serviceLayer && evt.rootLayer == dynaLayer1){
+					  evt.rootLayer.setVisibleLayers([evt.serviceLayer.id])
+					}
+					if (console) {
+						console.log("TOCNodeChecked, rootLayer:"
+						+(evt.rootLayer?evt.rootLayer.id:'NULL')
+						+", serviceLayer:"+(evt.serviceLayer?evt.serviceLayer.id:'NULL')
+						+ " Checked:"+evt.checked);
+					}
+				  });
+			  });
+			  // end of example actions
             });
-			 
-			
-          
-           
-            
-            
         </script>
     </head>
     <body class="claro">
@@ -202,14 +202,14 @@
                         Click 
                         <button id="ChangeFeatureRenderer" disabled="disabled">
                             ChangeFeatureRenderer
-                        </button>, notice TOC refreshed to reflect the new renderer of FeatureLayer. 
+                        </button>, notice in "FeatureLayer1", TOC refreshed to reflect the new renderer of FeatureLayer. 
                     </li>
                     <li>
                         Click 
                         <button id="SetVisibleLayersProgramatically" disabled="disabled"">
                             SetVisibleLayersProgramatically
                         </button>
-                        to programatically turn layer on/off, notice TOC automatically sync with model(no refresh needed).
+                        to programatically turn layer on/off (Set DynaLayer1 [8, 17, 18, 19, 20] on), notice TOC automatically sync with model(no refresh needed).
                     </li>
                     <li>
                         Click 
@@ -223,14 +223,21 @@
                         <button id="InsertNewLayer" disabled="disabled">
                             InsertNewLayer
                         </button>
-                        to programmtically insert a layer then refresh TOC.
+                        to programmtically insert a layer (DynamicMapServiceLayer2, Census) then refresh TOC.
                     </li>
 					<li>
                         Click 
                         <button id="SetOpacity" disabled="disabled">
                             SetOpacityProgramitically
                         </button>
-                        to programmtically set transparency of a layer with slider enabled.
+                        to programmtically set transparency of a newly added layer to 0.2 with slider enabled (after click "InsertNewLayer").
+                    </li>
+					<li>
+                        Click 
+                        <button id="HandleNodeCheckEvent" disabled="disabled">
+                            HandleNodeCheckEvent
+                        </button>
+                        Handle Check Event to allow only one layer visible in "public saftety" service. When a layer is checked on, all other layers are off.
                     </li>
                 </ul>
             </div>
