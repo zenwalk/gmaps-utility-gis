@@ -5,8 +5,8 @@
         <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9" />
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
         <title>TOC</title>
-        <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.8/js/dojo/dijit/themes/claro/claro.css">
-        <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.8/js/esri/css/esri.css" />
+        <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.9/js/dojo/dijit/themes/claro/claro.css">
+        <link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.9/js/esri/css/esri.css" />
         <link rel="stylesheet" type="text/css" href="../src/agsjs/css/agsjs.css" />
         <style>
             html, body {
@@ -40,7 +40,7 @@
                        
                     
         </script>
-        <script src="//js.arcgis.com/3.8/">
+        <script src="//js.arcgis.com/3.9/">
         </script>
         <script type="text/javascript">
             var map, toc, dynaLayer1, dynaLayer2, featLayer1;
@@ -140,11 +140,16 @@
               });
 			  
               on(dom.byId("InsertNewLayer"), 'click', function(evt){
-                if (dynaLayer2 == null) {
-                  dynaLayer2 = new ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer", {
+			    if (dynaLayer2 !=null){
+					map.removeLayer (dynaLayer2);
+					toc.layerInfos.splice(1, 1);// remove it.
+					dynaLayer2 = null;
+				}
+                dynaLayer2 = new ArcGISDynamicMapServiceLayer(dom.byId("NewLayerURL").value, {
                     opacity: 0.8
-                  });
-                  var h = map.on('layer-add-result', function(evt){
+                });
+                 //var h = map.on('layer-add-result', function(evt){
+				var h = dynaLayer2.on('load', function(evt){
                     toc.layerInfos.splice(1, 0, {
                       layer: dynaLayer2,
                       title: "DynamicMapServiceLayer2",
@@ -155,10 +160,13 @@
                     toc.refresh();
                     h.remove();
 					dom.byId("SetOpacity").disabled=false;
-                  });
+					if (dynaLayer2.initialExtent){
+						map.setExtent(dynaLayer2.initialExtent);
+					}
+			      });
                   map.addLayer(dynaLayer2);
 				  
-                }
+                
               });
               on(dom.byId("SetOpacity"), 'click', function(evt){
                 if (dynaLayer2 != null) {
@@ -223,7 +231,7 @@
                         <button id="InsertNewLayer" disabled="disabled">
                             InsertNewLayer
                         </button>
-                        to programmtically insert a layer (DynamicMapServiceLayer2, Census) then refresh TOC.
+                        to programmtically insert a layer (<input id="NewLayerURL" size="110" value="http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer"/>) then refresh TOC.
                     </li>
 					<li>
                         Click 
