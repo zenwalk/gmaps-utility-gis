@@ -5,6 +5,7 @@
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
  */
 // change log: 
+// 2014-09-24: handle uniquevaluerender's attributeField as function not string.
 // 2014-09-02: added support of scale dependency for feature layer.
 // 2014-04-08: in sample: js API 3.8, added handle node check event
 // 2014-04-04: fire event 'toc-node-checked' (classic onTOCNodeChecked) on click on check box. {rootLayer,serviceLayer, checked}
@@ -191,9 +192,12 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare', "dojo/has", "dojo/aspect", "doj
                 symbol: r.defaultSymbol
               })
             }
-            var af = r.attributeField + (r.normalizationField ? '/' + r.normalizationField : '');
-            af += (r.attributeField2 ? '/' + r.attributeField2 : '') + (r.attributeField3 ? '/' + r.attributeField3 : '');
-            var anode = domConstruct.create('div', {}, this.containerNode);
+            var af = "";
+			if (typeof r.attributeField == "string"){
+				af = r.attributeField + (r.normalizationField ? '/' + r.normalizationField : '');
+            	af += (r.attributeField2 ? '/' + r.attributeField2 : '') + (r.attributeField3 ? '/' + r.attributeField3 : '');
+           	}  
+			var anode = domConstruct.create('div', {}, this.containerNode);
             domStyle.set(anode, 'paddingLeft', '' + this.rootLayerTOC.tocWidget.indentSize * (this.rootLayerTOC._currentIndent + 2) + 'px');
             anode.innerHTML = af;
             this._createChildrenNodes(legs, 'legend');
@@ -447,10 +451,10 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare', "dojo/has", "dojo/aspect", "doj
       var outScale = false;
       if (this.serviceLayer) {
         outScale = (this.serviceLayer.maxScale != 0 && scale < this.serviceLayer.maxScale) || (this.serviceLayer.minScale != 0 && scale > this.serviceLayer.minScale);
-      } else if (this.rootLayer.renderer)  {
-	  	// this is a feature layer
-		outScale = (this.rootLayer.maxScale != 0 && scale < this.rootLayer.maxScale) || (this.rootLayer.minScale != 0 && scale > this.rootLayer.minScale);
- 	  }
+      } else if (this.rootLayer.renderer) {
+        // this is a feature layer
+        outScale = (this.rootLayer.maxScale != 0 && scale < this.rootLayer.maxScale) || (this.rootLayer.minScale != 0 && scale > this.rootLayer.minScale);
+      }
       if (outScale) {
         domClass.add(this.domNode, 'agsjsTOCOutOfScale');
       } else {
