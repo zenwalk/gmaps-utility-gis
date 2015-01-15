@@ -5,6 +5,7 @@
  * <p>A TOC (Table of Contents) widget for ESRI ArcGIS Server JavaScript API. The namespace is <code>agsjs</code></p>
  */
 // change log: 
+// 2015-01-15: Handle Esri REST API bug: annotation layer's sublayer; JS API workaround: invoked both load and error call back in same request.
 // 2014-09-24: handle uniquevaluerender's attributeField as function not string.
 // 2014-09-02: added support of scale dependency for feature layer.
 // 2014-04-08: in sample: js API 3.8, added handle node check event
@@ -223,7 +224,9 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare', "dojo/has", "dojo/aspect", "doj
     _createServiceLayerNode: function(serviceLayer){
       // layer: layerInfo with nested subLayerInfos
       this.labelNode.innerHTML = serviceLayer.name;
-      if (serviceLayer._subLayerInfos) {// group layer
+		// 2015-01-15: workaround: ESRI rest API incorrectly returns empty array for annotation layer, which confuses with empty group layer. 
+       // was told arcgis.com's TOC also suffered this problem. REST API should fix it. 
+      if (serviceLayer._subLayerInfos && serviceLayer._subLayerInfos.length>0) {// group layer
         domClass.add(this.rowNode, 'agsjsTOCGroupLayer');
         domClass.add(this.labelNode, 'agsjsTOCGroupLayerLabel');
         this._createChildrenNodes(serviceLayer._subLayerInfos, 'serviceLayer');
@@ -624,7 +627,10 @@ define("agsjs/dijit/TOC", ['dojo/_base/declare', "dojo/has", "dojo/aspect", "doj
       
     },
     _processLegendError: function(err){
-      this._createRootLayerTOC();
+	  // 2015-01-01: workaround: In some cases ESRI JSAPI will call load and error handler in same request, resulted in double entry in TOC.
+      // This change surpress one.  JS API should fix to make sure either load or error is called but not both.
+	  if (console) console.log("esri.request error callback. Is this error legit?");
+      if (!this._legendResponse) this._createRootLayerTOC();
     },
     _processLegendInfo: function(json){
       this._legendResponse = json;
